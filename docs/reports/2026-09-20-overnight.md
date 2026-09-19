@@ -1,7 +1,14 @@
 # Overnight run — 2026-09-20
 
-Unattended session. **No EC2 instance was launched.** Verified 0 running in both `us-east-1` and
-`ap-south-1` at start and at finish.
+Unattended session, in two parts.
+
+**Session 1** ran with **no EC2 instance at all** — the 111.9 GB staged itself server-side inside
+S3. **Session 2** launched quantification after the owner confirmed a small instance was
+acceptable. Instance count was verified before, during and after every step.
+
+Read this document top to bottom: session 1 below, session 2 from "Session 2" onward. Where the
+two disagree, session 2 is later and wins — in particular, session 1's "needs you present" and
+"needs your decision" lists were largely resolved in session 2 and are marked where they were.
 
 ---
 
@@ -89,15 +96,15 @@ what this project's own conventions say to distrust.
 
 ---
 
-## Ready to run, needs you present
+## Ready to run, needs you present  *(both done in session 2)*
 
-**Quantification.** 117 RNA-Seq runs across five organisms. This is the step that needs an
+**Quantification.** — DONE, running on `i-088fe14f1c19eec92`. Original note kept for the record: 117 RNA-Seq runs across five organisms. This is the step that needs an
 instance, and I deliberately left it: unattended it has too many first-run failure modes
 (toolchain install, five indexes, per-organism reference selection). When launched it will be
 self-terminating — `terminate-on-shutdown` plus a hard internal timeout — so it cannot run away.
 Estimated ≤ $10.
 
-**Literature discovery.** The API key works (verified; 147 SRA, 1,027 PubMed isobutanol). Not run
+**Literature discovery.** — DONE, 5,164 publications. Original note: The API key works (verified; 147 SRA, 1,027 PubMed isobutanol). Not run
 yet because the modules were being rewritten under me for most of the session. It is a single
 command now.
 
@@ -105,11 +112,14 @@ command now.
 
 ## Needs your decision
 
-1. **The ethanol cap conflicts with E5.** E5's outer bound is 642 publications against a
+1. **RESOLVED in session 2 — sub-budget accepted.** E5 45 / E6 25 / E1 25 / E2 20 / E3 20 /
+   E4 15 = 150, recorded in `docs/reference/ETHANOL_REFERENCE_SLOTS.md`. Original text:
+   **The ethanol cap conflicts with E5.** E5's outer bound is 642 publications against a
    ~150-publication total cap. A review agent proposed splitting it E5 50 / E1 30 / E2 25 /
    E3 25 / E4 20 — and that was before E6 existed, so it needs a seventh share. Without an agreed
    sub-budget, E5 consumes the cap and E1–E4 arrive empty.
-2. **Ethanol Red is scaffold-level only** (N50 189 kb). Accept that structural variants and
+2. **RESOLVED in session 2 — accepted as proxy, limitation acknowledged.** Original text:
+   **Ethanol Red is scaffold-level only** (N50 189 kb). Accept that structural variants and
    subtelomeres are not callable from it — which is where industrial adaptations are often
    reported (unverified) — or treat it as a stated proxy and plan to sequence your own strain.
 3. **Eight *F. graminearum* runs** are flagged `relevance_uncertain` as a likely keyword false
