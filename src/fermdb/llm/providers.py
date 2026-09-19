@@ -106,6 +106,11 @@ PROVIDER_NAMES: Final[tuple[str, ...]] = ("ollama", "mock", "agent-sdk", "api")
 DEFAULT_PROVIDER: Final[str] = DEFAULT_LLM_PROVIDER
 DEFAULT_BASE_URL: Final[str] = DEFAULT_LLM_BASE_URL
 DEFAULT_TIMEOUT_S: Final[float] = DEFAULT_LLM_TIMEOUT_S
+# Before changing a default here, read docs/reference/MODEL_ROUTING.md section 7b: the
+# local backend silently returns an EMPTY STRING for some model/`format` combinations
+# rather than erroring, and an empty extraction is indistinguishable from a paper with
+# nothing in it. The measured compatibility table lives there, not in this module, so
+# that no model name is written outside the table below.
 DEFAULT_MODELS: Final[Mapping[str, str]] = DEFAULT_LLM_MODELS
 DEFAULT_OPTIONS: Final[Mapping[str, Any]] = DEFAULT_LLM_OPTIONS
 

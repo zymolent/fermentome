@@ -236,6 +236,44 @@ Mechanics:
   `unverified` until a curator checks it — §5 rule 2 is about the derivation of confidence, and
   tier is not part of it.
 
+## 7b. Measured local-backend compatibility, 2026-09-20
+
+Run against Ollama 0.33.3 on this workstation. **Read this before changing a model default.**
+
+| model | `format` | result |
+|---|---|---|
+| `qwen2.5:7b-instruct` | `json` | works, ~2.4 s |
+| **`qwen3.6:27b`** | `json` **or** JSON schema | **EMPTY STRING** |
+| **`qwen3.6:27b`** | none | works, ~6.7 s |
+| `gpt-oss:20b` | `json` | HTTP 500 |
+| `gemma4:31b` | `json` | works, ~43 s — too slow for bulk extraction |
+
+**The empty string is the dangerous result.** It is not an error, and it is indistinguishable
+from *"the model found no facts in this paper."* The extraction harness was written assuming
+schema-constrained decoding works; on this machine that combination yields nothing, so a whole
+corpus would have extracted to almost nothing while looking merely thin — the exact
+false-negative failure §7 warns is invisible to review.
+
+**Working configuration:** triage on `qwen2.5:7b-instruct` *with* `format`; extraction on
+`qwen3.6:27b` *without* `format`, parsing the JSON object out of the response and leaving
+`validate.py` as the safety layer — which is where the design puts it anyway.
+
+### Spans must be recorded against canonical text
+
+Validated end to end on `avalos2013.pdf`: the model returned a genuinely verbatim sentence, and
+exact-offset verification **rejected** it — PDF extraction had broken the sentence across lines,
+so the raw text held newlines where the quote held spaces.
+
+The fix is not to loosen the comparison. `verify_span`'s strictness argument is correct: an
+approximate match accepts a quote the model adjusted, and an adjusted quote is not evidence.
+Instead `canonical_source_text()` collapses whitespace **once, at ingestion**, and every span is
+recorded against that canonical form — so both sides share one form and the comparison stays
+exact. Verifying a canonical-text span against raw text is a bug, and looks like a hallucination.
+
+With that in place the chain works on real input: extraction returned *"Compartmentalization of
+the Ehrlich pathway into mitochondria increased isobutanol production by 260%"*, the span
+resolved, and a fabricated control quote was rejected.
+
 ## 8. Cost shape
 
 Round 1 was 3 top-tier, 3 Sonnet, 1 Haiku across 7 agents for ~982k subagent tokens. Applying §4

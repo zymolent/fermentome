@@ -463,6 +463,25 @@ class SpanVerdict:
         return bool(self.found_at)
 
 
+def canonical_source_text(raw: str) -> str:
+    """Collapse whitespace so a quote copied from a PDF can match the extracted text exactly.
+
+    Why this exists rather than a fuzzy comparison in :func:`verify_span`: PDF extraction inserts
+    line breaks mid-sentence, so a model copying a sentence it can see produces a string whose
+    *characters* are right and whose *whitespace* is not. Measured on a real paper, an
+    exact-offset check rejected a genuinely verbatim quote for that reason alone.
+
+    The strictness argument in :func:`verify_span` is correct and is deliberately not weakened:
+    accepting an approximate match would accept a quote the model adjusted. The resolution is to
+    canonicalise the **source** once, at ingestion, and record every span against that canonical
+    text -- so both sides share one form and the comparison stays exact.
+
+    Callers must store the canonical text as the span's source of record. Verifying a span taken
+    from canonical text against the raw text is a bug, and will usually look like a hallucination.
+    """
+    return " ".join(raw.split())
+
+
 def verify_span(source_text: str, span: Span, *, max_alternatives: int = 3) -> SpanVerdict:
     """Re-check that ``span.quote`` occurs in ``source_text`` at exactly ``[start, end)``.
 

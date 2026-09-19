@@ -1357,3 +1357,33 @@ def test_the_whole_path_accepts_a_truthful_extraction(units: Any, yields: Any) -
     assert accepted[0]["value"] == 22.6
     assert accepted[0]["confidence"] == "unverified"  # not the 'high' the model asked for
     assert accepted[0]["zone"] == "I"
+
+
+def test_canonical_source_text_makes_a_pdf_quote_verifiable() -> None:
+    """A verbatim quote from a PDF fails exact matching on raw text, and must not.
+
+    Measured on avalos2013.pdf: the model returned a genuinely verbatim sentence, but PDF
+    extraction had broken it across lines, so the raw text contained a newline where the quote
+    had a space. Canonicalising the source -- not loosening the comparison -- is the fix.
+    """
+    from fermdb.llm.validate import Span, canonical_source_text, verify_span
+
+    raw = (
+        "Compartmentalization of the Ehrlich pathway into\nmitochondria "
+        "increased isobutanol\nproduction by 260%."
+    )
+    quote = (
+        "Compartmentalization of the Ehrlich pathway into mitochondria "
+        "increased isobutanol production by 260%"
+    )
+
+    assert quote not in raw, "precondition: the raw PDF text does not contain the quote verbatim"
+
+    source = canonical_source_text(raw)
+    start = source.find(quote)
+    assert start >= 0, "canonical text must contain the quote"
+    assert verify_span(source, Span(quote=quote, char_start=start, char_end=start + len(quote))).ok
+
+    # Strictness is unchanged: a fabricated quote is still rejected against canonical text.
+    fake = "isobutanol production reached 99.9 g/L in shake flasks"
+    assert verify_span(source, Span(quote=fake, char_start=0, char_end=len(fake))).ok is False
