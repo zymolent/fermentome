@@ -1,0 +1,281 @@
+# fermdb functional annotation sources
+#
+# One entry per external database `src/fermdb/annotate/` imports from. Read this file's rows
+# alongside the package docstring (src/fermdb/annotate/__init__.py) before writing an importer:
+# THE KEY DESIGN POINT is that for every organism in DUET_TARGET.md/ISOBUTANOL_PROGRAM.md's
+# roster, function -- GO term, pathway/KO/EC membership, protein domain, cofactor specificity,
+# subcellular location, transporter family, complex membership, TF target, phenotype -- is already
+# curated at the sources below, better than this atlas could compute it from sequence alone. This
+# file is therefore an IMPORT registry, not a compute plan; `gene_annotation.source`
+# (src/fermdb/db/schema.sql, "functional annotation") is a closed set naming exactly the `id`
+# values below, kept in sync by tests/test_annotate.py.
+#
+# organisms
+#   Slugs, not a controlled vocabulary table (this file is metadata about sources, not gene-level
+#   facts): the DUET_TARGET.md / ISOBUTANOL_PROGRAM.md roster is `saccharomyces_cerevisiae`,
+#   `escherichia_coli`, `zymomonas_mobilis`, `lactococcus_cremoris`, `corynebacterium_glutamicum`,
+#   `bacillus_subtilis`. `broad` means the source is organism-agnostic (UniProt/KEGG/InterPro/
+#   TCDB/Complex Portal cover essentially any sequenced organism); a source scoped narrower than
+#   that says so explicitly (SGD and YEASTRACT are yeast-only by construction).
+#
+# redistributable
+#   Recorded HONESTLY per docs/reference/CONVENTIONS.md "Curation" (never write high confidence,
+#   or a favourable licence read, from memory): KEGG restricts bulk redistribution of its
+#   pathway/KO/EC data outside academic browser use, and TCDB and YEASTRACT+ state no clear
+#   redistribution terms at all -- all three are marked `false` here, which means importers for
+#   them (src/fermdb/annotate/importers.py) store the external identifier and a resolvable link
+#   only, never a copied-out pathway map, reaction list, or bulk export. `false` is the
+#   conservative default for anything this session could not verify a permissive licence for.
+#
+# confidence
+#   This file's own rows are unverified in the same sense data/omics/dataset_families.yaml's are:
+#   read from general/background knowledge of each database's public documentation and licence
+#   pages, NOT re-checked against a live fetch in this session (unverified). A future session that
+#   re-reads each source's current terms and confirms them in place should raise the affected
+#   row's confidence to 'high' and say so in its evidence string, exactly the way
+#   src/fermdb/omics/sra.py's live writes do.
+
+version: 1
+measured_on: "2026-09-20"
+
+sources:
+  - id: sgd_go
+    name: SGD Gene Ontology annotations
+    organisms: [saccharomyces_cerevisiae]
+    covers: go_term
+    url_pattern: "https://www.yeastgenome.org/backend/locus/{systematic_name}/go_details"
+    license: >-
+      SGD's stated data use policy is free reuse with attribution (unverified exact current
+      wording; SGD is NHGRI-funded public data). GO annotation *content* itself additionally
+      carries the GO Consortium's own CC BY 4.0 (see uniprot_goa below, same underlying data
+      model).
+    redistributable: true
+    update_cadence: "SGD's own release cadence, reported as roughly weekly (unverified)"
+    notes: >-
+      THE yeast GO authority (docs/annotate module docstring): curated by SGD biocurators
+      directly from the *S. cerevisiae* literature, not inferred. `annotation_type` in SGD's
+      response is the GO evidence code (IDA, IMP, IEA, ...); carry it through to
+      `gene_annotation.evidence_code` uncollapsed -- src/fermdb/annotate/sources.py's
+      `go_evidence_category`/`recommended_confidence_for_go_evidence` is the mapping onto this
+      project's confidence vocabulary (IDA-class codes are direct experimental evidence and rate
+      higher than IEA-class electronic/computational ones). The exact JSON field names above
+      (`goid`, `go_term`, `go_aspect`, `annotation_type`) are this session's best-effort reading
+      of SGD's REST API shape from background knowledge, not a captured live response
+      (unverified) -- tests/fixtures/annotate/sgd_go_ilv3.json is a hand-built fixture matching
+      this session's best understanding, not a real recorded response, and importers.py's parser
+      is written defensively (unknown/renamed fields are skipped, never guessed).
+    evidence: >-
+      https://www.yeastgenome.org (SGD) documentation and general knowledge of its REST API and
+      data policy, read from memory in this session; not fetched live (unverified).
+    confidence: unverified
+
+  - id: uniprot_goa
+    name: UniProt-GOA (Gene Ontology Annotation) for bacteria
+    organisms: [escherichia_coli, zymomonas_mobilis, lactococcus_cremoris,
+                corynebacterium_glutamicum, bacillus_subtilis, broad]
+    covers: go_term
+    url_pattern: "https://www.ebi.ac.uk/QuickGO/services/annotation/search?geneProductId={uniprot_accession}"
+    license: >-
+      GO Consortium annotation data is released under CC BY 4.0 (unverified exact current
+      wording, but this is the long-standing, publicly stated GOC licence).
+    redistributable: true
+    update_cadence: "GOA releases roughly every 4-8 weeks (unverified)"
+    notes: >-
+      The bacterial-side twin of sgd_go: same GO term/evidence-code model, same
+      `gene_annotation.evidence_code` carry-through requirement, different curator (UniProt-GOA
+      rather than SGD) and a different id space (UniProt accession, not an SGD systematic name).
+      QuickGO's REST API is used here because it fronts UniProt-GOA uniformly across every
+      organism in the bacterial roster rather than requiring a per-organism endpoint; exact
+      response field names are again an unverified background-knowledge reading, not a captured
+      response.
+    evidence: >-
+      https://www.ebi.ac.uk/QuickGO (EBI) documentation and general knowledge of GOA's data model
+      and licence, read from memory in this session; not fetched live (unverified).
+    confidence: unverified
+
+  - id: kegg
+    name: KEGG (pathway maps, KO orthology, EC numbers)
+    organisms: [broad]
+    covers: pathway_ko_ec
+    url_pattern: "https://rest.kegg.org/get/{kegg_id}"
+    license: >-
+      KEGG is free to browse/query for academic use, but Kanehisa Laboratories' stated terms
+      restrict bulk redistribution or incorporation of KEGG data into another database or
+      software product without a commercial FTP licence (unverified exact current wording, but
+      this restriction is long-standing and well known in the field).
+    redistributable: false
+    update_cadence: "KEGG releases roughly monthly (unverified)"
+    notes: >-
+      REDISTRIBUTABLE: FALSE IS LOAD-BEARING. src/fermdb/annotate/importers.py's KEGG importer
+      stores only the KO id (e.g. K01687), the EC number(s) it names, the pathway map id(s) it
+      belongs to (e.g. map00290), and a short NAME/DEFINITION-derived label -- never a copied-out
+      reaction list, a KGML pathway map, or bulk flat-file dump. `gene_annotation.reaction_id`/
+      `pathway_id` are populated ONLY when the EC/pathway map already resolves to a row this
+      atlas independently curates in its own `reaction`/`pathway` tables (ISOBUTANOL_PROGRAM.md's
+      hand-modelled route) -- KEGG is never the source of those internal rows' content, only a
+      cross-reference onto them. `rest.kegg.org/get/<id>` returns KEGG's flat-file text format,
+      not JSON; importers.py parses it directly rather than through the JSON Transport method.
+    evidence: >-
+      https://www.kegg.jp and https://www.genome.jp/kegg/rest/ (KEGG REST API) documentation and
+      general knowledge of KEGG's licence terms, read from memory in this session; not fetched
+      live (unverified).
+    confidence: unverified
+
+  - id: pfam
+    name: Pfam protein domain families
+    organisms: [broad]
+    covers: protein_domain
+    url_pattern: "https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/{uniprot_accession}"
+    license: >-
+      EMBL-EBI's open data policy; Pfam entries and domain assignments are freely redistributable
+      (unverified exact current licence statement, but EBI's stated default for its own resources
+      is CC0/public-domain-equivalent).
+    redistributable: true
+    update_cadence: "Pfam releases are infrequent since folding into InterPro (unverified cadence)"
+    notes: >-
+      Pfam curation and hosting moved under the InterPro umbrella at EMBL-EBI (publicly announced
+      restructuring, ~2022-2023); Pfam accessions (PFxxxxx) and identifiers remain stable and are
+      served through InterPro's own API, which is why this entry's url_pattern already points at
+      interpro.api rather than a standalone Pfam service (unverified exact current routing).
+      Parsed here through the same generic term-list shape `interpro`/`tcdb`/`complex_portal`/
+      `sgd_phenotype` use (src/fermdb/annotate/importers.py's `parse_generic_term_list`), because
+      the response shape ("a list of (id, label) objects attached to a protein") is the same
+      across all four; a production integration should still confirm each source's exact field
+      names against a live response before this leaves `unverified`.
+    evidence: >-
+      https://www.ebi.ac.uk/interpro (InterPro/Pfam) documentation, general knowledge of the
+      Pfam/InterPro merger and EBI's open-data licence, read from memory; not fetched live
+      (unverified).
+    confidence: unverified
+
+  - id: interpro
+    name: InterPro integrated protein family/domain/site signatures
+    organisms: [broad]
+    covers: protein_domain
+    url_pattern: "https://www.ebi.ac.uk/interpro/api/entry/interpro/protein/uniprot/{uniprot_accession}"
+    license: >-
+      EMBL-EBI's open data policy; InterPro entries are freely redistributable (unverified exact
+      current licence statement).
+    redistributable: true
+    update_cadence: "InterPro releases roughly every 8 weeks (unverified)"
+    notes: >-
+      The integrated superset Pfam (and PROSITE, PRINTS, SMART, ...) sit inside; prefer this over
+      a member database directly when only "does this protein have a domain that matters" is
+      needed rather than "specifically a Pfam hit". Same generic term-list shape as pfam above.
+    evidence: >-
+      https://www.ebi.ac.uk/interpro documentation and general knowledge of its data model and
+      licence, read from memory; not fetched live (unverified).
+    confidence: unverified
+
+  - id: uniprot
+    name: UniProtKB (cofactor specificity, subcellular location, functional description)
+    organisms: [broad]
+    covers: cofactor_and_localization
+    url_pattern: "https://rest.uniprot.org/uniprotkb/{uniprot_accession}.json"
+    license: "CC BY 4.0 (UniProt Consortium's stated licence; unverified exact current wording)"
+    redistributable: true
+    update_cadence: "UniProtKB releases roughly every 8 weeks (unverified)"
+    notes: >-
+      THE cofactor-specificity and subcellular-location authority this atlas needs for the
+      redox-mismatch and mitochondrial-targeting questions in docs/design/DUET_TARGET.md sections
+      2 and 7 (Ilv5 NADPH vs the Ehrlich ADH step's NADH, POS5's role) -- but only for WHAT the
+      literature/database already says the cofactor or location is, never for whether a specific
+      presequence targets a specific protein to the matrix (that is the mitochondrial-targeting
+      predictor stub in src/fermdb/annotate/__init__.py, deliberately NOT built from this or any
+      other import in this task). Parsed from UniProtKB's `comments` array
+      (`commentType == 'COFACTOR'` / `'SUBCELLULAR LOCATION'`); exact JSON shape is this session's
+      background-knowledge reading of the current UniProt REST API, not a captured response
+      (unverified).
+    evidence: >-
+      https://www.uniprot.org and https://www.uniprot.org/help/api (REST API) documentation,
+      general knowledge of its data model and licence, read from memory; not fetched live
+      (unverified).
+    confidence: unverified
+
+  - id: tcdb
+    name: Transporter Classification Database (TCDB)
+    organisms: [broad]
+    covers: transporter_family
+    url_pattern: "https://www.tcdb.org/search/result.php?tc={tc_number}"
+    license: >-
+      TCDB states the database is free for academic use; this session found no clearly stated
+      bulk-redistribution terms (unverified) and treats that absence conservatively rather than
+      assuming permission.
+    redistributable: false
+    update_cadence: "unverified; TCDB is a smaller, less frequently-versioned resource"
+    notes: >-
+      The efflux/tolerance side of the atlas's competing-reaction set (`PDR5`, `SNQ2`, `YOR1`,
+      `PTK2`, `PMA1` in docs/design/DUET_TARGET.md section 3) is exactly what TC family
+      assignment (e.g. ABC transporters under TC 3.A.1.-.-) documents. No clean JSON REST API is
+      publicly documented for TCDB the way UniProt/KEGG/InterPro have one (unverified) -- the
+      importer treats a TCDB lookup as returning the same generic (id, label) shape as
+      pfam/interpro/complex_portal/sgd_phenotype and stores identifier + link only, per
+      redistributable: false above.
+    evidence: >-
+      https://www.tcdb.org documentation and general knowledge of its licence terms, read from
+      memory; not fetched live (unverified).
+    confidence: unverified
+
+  - id: complex_portal
+    name: EBI Complex Portal (curated macromolecular complexes)
+    organisms: [broad]
+    covers: protein_complex
+    url_pattern: "https://www.ebi.ac.uk/intact/complex-ws/complex/{complex_id}"
+    license: "EMBL-EBI open data policy; freely redistributable (unverified exact current wording)"
+    redistributable: true
+    update_cadence: "unverified"
+    notes: >-
+      Relevant wherever a pathway step is a hetero-oligomer rather than a single gene product --
+      `ILV2`+`ILV6` (acetolactate synthase catalytic + regulatory subunit) is exactly this shape,
+      and Complex Portal is where "these two gene products form one functional unit" is a curated
+      fact rather than something this atlas would otherwise have to infer from co-expression.
+      Same generic term-list shape as pfam/interpro/tcdb/sgd_phenotype.
+    evidence: >-
+      https://www.ebi.ac.uk/complexportal documentation and general knowledge of its data model
+      and licence, read from memory; not fetched live (unverified).
+    confidence: unverified
+
+  - id: yeastract
+    name: YEASTRACT+ (yeast transcription factor / target gene associations)
+    organisms: [saccharomyces_cerevisiae]
+    covers: transcription_factor_target
+    url_pattern: "https://yeastract-plus.org/"
+    license: >-
+      YEASTRACT+ has historically required free registration for full query access and this
+      session found no clearly stated bulk-redistribution licence (unverified) -- treated
+      conservatively, the same way tcdb is above.
+    redistributable: false
+    update_cadence: "unverified"
+    notes: >-
+      YEAST TFs ONLY, per this build's explicit scope -- there is no bacterial equivalent entry
+      in this file, and importers.py must not be extended to call this source for a bacterial
+      gene_group. Relevant to docs/design/DUET_TARGET.md section 3's `SPT15` (gTME) global
+      regulation entry and to glucose-repressed "carbon-programmed switching" promoter choice
+      (section 5.2): YEASTRACT is where "which TF regulates this promoter" is curated. Access
+      model (registration, possible API changes) is unverified as of this session and should be
+      re-confirmed live before this importer is relied on; url_pattern above names the site root
+      rather than a query endpoint for that reason.
+    evidence: >-
+      https://yeastract-plus.org general knowledge of its scope and access model, read from
+      memory; not fetched live (unverified).
+    confidence: unverified
+
+  - id: sgd_phenotype
+    name: SGD curated phenotypes
+    organisms: [saccharomyces_cerevisiae]
+    covers: phenotype
+    url_pattern: "https://www.yeastgenome.org/backend/locus/{systematic_name}/phenotype_details"
+    license: >-
+      Same SGD data use policy as sgd_go above (unverified exact current wording).
+    redistributable: true
+    update_cadence: "SGD's own release cadence (unverified)"
+    notes: >-
+      Null and negative results matter here as much as positive ones
+      (docs/reference/CONVENTIONS.md "Evidence": "Null and negative results are stored with the
+      same status as positive ones") -- an `ilv3Δ` phenotype row is exactly the kind of fact this
+      source carries that GO term annotation does not. Same generic term-list shape as
+      pfam/interpro/tcdb/complex_portal for the purposes of this build's importer.
+    evidence: >-
+      https://www.yeastgenome.org (SGD) documentation, read from memory; not fetched live
+      (unverified).
+    confidence: unverified

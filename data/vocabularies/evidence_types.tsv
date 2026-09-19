@@ -1,0 +1,45 @@
+# evidence_types.tsv — Axis 1 of the two-axis evidence model (PLAN.md J.3): the KIND of
+# observation an `evidence_item` records. This is orthogonal to Axis 2 ("support": how many
+# independent publications/groups/organisms/condition classes agree), which is not a fixed
+# vocabulary and is not listed here.
+#
+# `assertion.level` (L1-L5) is a DERIVED view computed from these evidence types plus support
+# (PLAN.md J.3) — it is never stored or hand-assigned. `required_fields` is the set enforced by a
+# CHECK constraint on the `evidence_item` row of that type (PLAN.md J.3): "a row that lies about
+# what kind of evidence it is cannot be written." The `ai_inference` row is the one that matters
+# most: it is structurally prevented from carrying a `measurement_id`, so a model's guess can never
+# be mistaken for a measured fact downstream.
+#
+# `eco_mapping` (Evidence and Conclusion Ontology code) is left NULL (empty) throughout: PLAN.md
+# J.3 says mapping to ECO is recorded per evidence item so the atlas can export into the wider
+# ecosystem, but does not name specific ECO codes, and this curator is not confident enough in a
+# from-memory ECO code to assert one here — left NULL (never recorded) rather than guessed, per
+# docs/reference/CONVENTIONS.md "Identifiers" (an unresolved identifier is never mapped to the
+# nearest plausible match).
+#
+# Columns:
+#   evidence_type      the closed vocabulary value (PLAN.md J.1 `evidence[]` / J.3 Axis 1)
+#   meaning            one-line description of the observation kind
+#   required_fields    pipe-separated fields a row of this type must carry (PLAN.md J.3), enforced
+#                      by CHECK constraint at the schema layer, not by this vocabulary file itself
+#   forbidden_fields   fields a row of this type must NOT carry, or 'NA' if none are singled out
+#   eco_mapping        Evidence and Conclusion Ontology code, or empty (NULL) — not yet assigned
+#   evidence, confidence   per docs/reference/CONVENTIONS.md "Curation"
+#
+# Evidence-honesty pass (this revision, following the compartments.tsv D1 rewrite): every row
+# below that was 'high' solely on the strength of citing another fermdb file (PLAN.md,
+# docs/reference/CONVENTIONS.md, a source module, or another vocabulary TSV) has been changed to
+# 'unverified' -- citing an internal document is citing memory with an extra hop, not an
+# independent check. A row stays 'high' only when its evidence names something actually checked
+# outside the repo in this session (e.g. a ChEBI lookup via web search). The confidence vocabulary
+# is closed and has four values everywhere ('unverified', 'low', 'medium', 'high'; D2);
+# 'unverified' means asserted but never checked against a source, distinct from 'low' (checked,
+# weak).
+evidence_type	meaning	required_fields	forbidden_fields	eco_mapping	evidence	confidence
+direct_perturbation	The gene/pathway was changed and the product/phenotype measured against a proper control.	strain_id|control_strain_id_or_control_condition_id|measurement_id|direction	NA		PLAN.md J.3 (Axis 1 table and the per-type required-fields table)	unverified
+direct_biochemical	Enzyme assay, in vitro reconstitution, isotope tracing, or flux measurement.	assay_method|measurement_id	NA		PLAN.md J.3	unverified
+correlative_omics	Differential expression, proteomics, or co-expression — an association, not a perturbation.	contrast_id_or_analysis_result_id|effect_size|p_adjusted	NA		PLAN.md J.3	unverified
+comparative_genomic	A variant or gene's presence associated across strains.	variant_or_gene_set|strain_set|statistic	NA		PLAN.md J.3	unverified
+computational_model	FBA, kinetic model, structure or sequence prediction — no wet-lab observation.	model_id|model_version|processing_run_id	NA		PLAN.md J.3	unverified
+literature_assertion	Stated in a paper without primary data shown (e.g. a review or introduction sentence).	publication_id|span	NA		PLAN.md J.3	unverified
+ai_inference	Produced by a model within this system, not by an experiment.	model|model_version|prompt_version|review_state	measurement_id		PLAN.md J.3: "an AI inference is structurally prevented from masquerading as a measurement." This row is the reason the vocabulary exists as data: any loader must reject an ai_inference row that carries a measurement_id.	unverified

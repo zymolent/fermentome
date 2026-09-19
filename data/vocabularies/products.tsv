@@ -1,0 +1,54 @@
+# products.tsv -- controlled vocabulary of fermentation products tracked by fermdb.
+#
+# One row per product. `tier` is a stored property that drives acquisition policy in code
+# (PLAN.md B.1) -- it is read by code, never re-implemented as an `if product == ...` branch
+# (docs/reference/CONVENTIONS.md, "Code"). Tiers, per PLAN.md B.1:
+#   primary   -- isobutanol. Comprehensive across all hosts and data types.
+#   reference -- ethanol. Bounded, capped, admitted only against a stated B.3 criterion.
+#   adjacent  -- captured only when measured alongside isobutanol in the same experiment
+#               (co-reported Ehrlich-pathway higher alcohols; PLAN.md B.1).
+#   reserved  -- rows with no data yet. They exist to prove the schema is product-generic
+#               (PLAN.md section U) and must never be silently populated from a guess.
+#
+# D5: theoretical mass/molar yields moved OUT of this file and into
+# data/vocabularies/theoretical_yields.tsv, keyed by (product_id, substrate). Glucose was
+# previously an unnamed assumption baked into this file's column names
+# (`glucose_mw_g_mol`, and implicitly every `theoretical_yield_*` column); it is now a named
+# `substrate` value in theoretical_yields.tsv instead, so a future non-glucose substrate is a new
+# row there, not a schema change here.
+#
+# Columns:
+#   tier                        primary | reference | adjacent | reserved
+#   id                          internal CURIE, YAA:PRODUCT:<slug> (docs/reference/CONVENTIONS.md
+#                               "Identifiers") -- this is the join key theoretical_yields.tsv uses
+#   name                        common name used elsewhere in the atlas
+#   chebi_id                    external identifier, Bioregistry `chebi:` prefix form
+#   formula                     molecular formula (neutral species used for mass-yield purposes;
+#                               see evidence when the row's chebi_id is the conjugate acid/base
+#                               of what "product" commonly names)
+#   carbon_number               carbon atoms per formula
+#   canonical_unit              the unit this atlas reports the product's titer/production in
+#   product_mw_g_mol            molar mass of this product (an intrinsic property of the product,
+#                               unlike a yield, which is a property of a (product, substrate) pair
+#                               and so now lives in theoretical_yields.tsv)
+#
+# Every row carries 'evidence' (free text naming the source) and 'confidence'
+# (docs/reference/CONVENTIONS.md, "Curation"). The confidence vocabulary is closed and has four
+# values everywhere ('unverified', 'low', 'medium', 'high'; D2). Confidence is never 'high' from
+# memory alone, and never 'high' when the evidence is only another fermdb file (PLAN.md, another
+# vocabulary TSV, or a source module) rather than something checked outside the repo -- that is
+# citing memory with an extra hop (see compartments.tsv). Where a chebi id/formula/molar mass was
+# actually looked up against ChEBI in this session, that check is named and confidence is 'high';
+# everything else recalled from PLAN.md or general chemistry knowledge is capped at 'medium' or
+# marked 'unverified'.
+tier	id	name	chebi_id	formula	carbon_number	canonical_unit	product_mw_g_mol	evidence	confidence
+primary	YAA:PRODUCT:isobutanol	isobutanol	chebi:46645	C4H10O	4	g/L	74.12	chebi:46645 (isobutanol, 2-methylpropan-1-ol), formula C4H10O and MW 74.12 g/mol verified against ebi.ac.uk/chebi via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5.)	high
+reference	YAA:PRODUCT:ethanol	ethanol	chebi:16236	C2H6O	2	g/L	46.07	chebi:16236 (ethanol), formula C2H6O and MW 46.069 g/mol (rounded to 46.07 here) verified against ebi.ac.uk/chebi via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5.)	high
+adjacent	YAA:PRODUCT:3-methyl-1-butanol	isoamyl alcohol (3-methyl-1-butanol)	chebi:15837	C5H12O	5	g/L	88.15	PLAN.md B.1 names this adjacent-tier product (co-reported Ehrlich-pathway higher alcohol); chebi:15837 (isoamylol / 3-methylbutan-1-ol) verified against ebi.ac.uk/chebi via web search 2026-09-19; product_mw_g_mol computed from standard atomic weights, not read from a source (unverified). (Theoretical yield from glucose moved to theoretical_yields.tsv per D5 -- see that file for why it is 'unknown'.)	medium
+adjacent	YAA:PRODUCT:2-methyl-1-butanol	2-methyl-1-butanol	chebi:48945	C5H12O	5	g/L	88.15	PLAN.md B.1 names this adjacent-tier product; chebi:48945 (2-methylbutan-1-ol) verified against ebi.ac.uk/chebi via web search 2026-09-19; product_mw_g_mol computed from standard atomic weights, not read from a source (unverified). (Theoretical yield from glucose moved to theoretical_yields.tsv per D5 -- see that file for why it is 'unknown'.)	medium
+adjacent	YAA:PRODUCT:n-butanol	n-butanol (1-butanol)	chebi:28885	C4H10O	4	g/L	74.12	PLAN.md B.1 names this adjacent-tier product; chebi:28885 (butan-1-ol) verified against ebi.ac.uk/chebi via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5; n-butanol's 0.411 g/g mass-balance-upper-bound derivation by isomer analogy to isobutanol, and its caveats, now live there.)	medium
+adjacent	YAA:PRODUCT:1-propanol	1-propanol	chebi:28831	C3H8O	3	g/L	60.10	PLAN.md B.1 names this adjacent-tier product; chebi:28831 (propan-1-ol) verified against ebi.ac.uk/chebi via web search 2026-09-19; product_mw_g_mol computed from standard atomic weights, not read from a source (unverified). (Theoretical yield from glucose moved to theoretical_yields.tsv per D5 -- see that file for why it is 'unknown'.)	medium
+reserved	YAA:PRODUCT:2-3-butanediol	2,3-butanediol	chebi:62064	C4H10O2	4	g/L	90.12	PLAN.md B.1 lists this reserved-tier product (proves the schema is product-generic, PLAN.md section U; no data expected yet). chebi:62064 (butane-2,3-diol, unspecified stereochemistry) and MW 90.122 g/mol verified via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5.)	medium
+reserved	YAA:PRODUCT:lactate	lactate	chebi:28358	C3H6O3	3	g/L	90.08	PLAN.md B.1 lists this reserved-tier product. chebi:28358 (rac-lactic acid, the neutral acid; ChEBI's conjugate-base entry for "lactate" is chebi:24996 -- the neutral acid is used here so formula/MW match standard g/g yield reporting) and formula/MW (C3H6O3, 90.078 g/mol) verified via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5.)	medium
+reserved	YAA:PRODUCT:succinate	succinate	chebi:15741	C4H6O4	4	g/L	118.09	PLAN.md B.1 lists this reserved-tier product. chebi:15741 (succinic acid, the neutral acid; "succinate" the anion is chebi:30031) and formula/MW (C4H6O4, 118.088 g/mol) verified via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5 -- see that file for why it is 'unknown'.)	medium
+reserved	YAA:PRODUCT:itaconate	itaconate	chebi:30838	C5H6O4	5	g/L	130.10	PLAN.md B.1 lists this reserved-tier product. chebi:30838 (itaconic acid, the neutral acid; "itaconate" the anion is chebi:17240) and formula/MW (C5H6O4, 130.099 g/mol) verified via web search 2026-09-19. (Theoretical yield from glucose moved to theoretical_yields.tsv per D5 -- see that file for why it is 'unknown'.)	medium

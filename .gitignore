@@ -15,15 +15,22 @@ build/
 .ruff_cache/
 .mypy_cache/
 
-# Virtual environments
+# Virtual environments. NOT env/ -- that is this project's committed config tier
+# (env/paths.yaml). See CONVENTIONS.md 'Paths and configuration'.
 .venv/
 venv/
-env/
 
-# Project-specific
+# Project-specific. Machine-local config and secrets only -- never the curated
+# repo tier (data/vocabularies, data/benchmarks, data/literature, ...), which is
+# reviewed as diffs and must be tracked.
 env/paths.local.yaml
-data/
+env/secrets.local.env
+# Derived artifacts, if any stray into the repo. Real derived data lives under
+# data_dir, outside the tree.
 *.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.parquet
 *.sqlite3
 *.db
 

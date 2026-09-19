@@ -1,0 +1,62 @@
+# compartments.tsv -- controlled vocabulary of subcellular compartments, the genome(s) that can
+# encode a protein found there, and the NCBI genetic code table each of those genomes translates
+# by.
+#
+# D1 correction (src/fermdb/genetic_code.py docstring; docs/reference/CONVENTIONS.md "Genetic code
+# and compartment"): the genetic code follows the *encoding genome*, not the destination
+# compartment. A nuclear-encoded gene is translated on cytosolic ribosomes under NCBI table 1 no
+# matter where its product ends up -- a presequence-targeted mitochondrial-matrix construct needs
+# NO recoding. Only genes physically carried on mtDNA use table 3. This file used to key
+# genetic_code_table directly off compartment (a `COMPARTMENT_TABLE` dict that has been removed
+# from src/fermdb/genetic_code.py) and, in doing so, wrongly told a mitochondrial_ims construct to
+# use table 3 at 'high' confidence. It is rewritten here to mirror the corrected model exactly:
+# `COMPARTMENT_ENCODING_GENOMES` (compartment -> tuple of genomes) plus `ENCODING_GENOME_TABLE`
+# (genome -> NCBI table id).
+#
+# This file MUST agree exactly with `COMPARTMENT_ENCODING_GENOMES` in `src/fermdb/genetic_code.py`
+# -- that module is the executable source of truth for compartment -> encoding genome(s), and this
+# file is its data-tier mirror so that other tables (e.g. a `part` or `pathway_configuration` row
+# naming a compartment) can be validated by CHECK/foreign-key against a vocabulary instead of a
+# code import. tests/test_vocabularies.py asserts this file and COMPARTMENT_ENCODING_GENOMES match
+# key-for-key, value-for-value, and that each row's genetic_code_tables is exactly what
+# ENCODING_GENOME_TABLE implies for its encoding_genomes. Do not add, remove or renumber a row here
+# without changing genetic_code.py first -- this file is generated to agree with code, not the
+# other way around (docs/reference/CONVENTIONS.md: "If code disagrees with this file, the code is
+# wrong" does not apply to this one pair; here the code is upstream because it carries the tested
+# NCBI table logic, and this file is downstream of it).
+#
+# Columns:
+#   compartment          the compartment name, exactly as COMPARTMENT_ENCODING_GENOMES keys it
+#   encoding_genomes      pipe-separated tuple of genomes that can encode a protein found in this
+#                         compartment, in the same order as COMPARTMENT_ENCODING_GENOMES (nuclear
+#                         first where both apply). More than one genome means
+#                         table_for_compartment() raises AmbiguousCompartmentError unless an
+#                         explicit encoding_genome is given.
+#   genetic_code_tables   pipe-separated NCBI translation table ids, parallel to encoding_genomes
+#                         (= ENCODING_GENOME_TABLE[genome] for each genome in encoding_genomes)
+#   table_names           pipe-separated human-readable NCBI table names, parallel to the above
+#   description           why this compartment is served by these genome(s)
+#   evidence, confidence  per docs/reference/CONVENTIONS.md "Curation"
+#
+# Evidence honesty (D2 follow-on): the previous version of this file cited
+# src/fermdb/genetic_code.py itself as evidence at 'high' confidence -- but that module's
+# compartment/genome mapping was written from background knowledge, not read off an external
+# source in this session, so citing it as evidence was citing memory with an extra hop (and, for
+# mitochondrial_ims, citing a mapping that was simply wrong: it previously claimed table 3).
+# Evidence below instead names the real checkable external source -- NCBI's Genetic Codes page
+# (transl_table 1 "Standard" and transl_table 3 "Yeast Mitochondrial Code") -- and confidence is
+# 'unverified' throughout: naming the right source is not the same as a curator having actually
+# checked this file's claims against it in this session. The four-value confidence vocabulary
+# ('unverified', 'low', 'medium', 'high') is closed per docs/reference/CONVENTIONS.md "Curation";
+# 'unverified' means asserted but never checked against a source, distinct from 'low' (checked,
+# weak).
+compartment	encoding_genomes	genetic_code_tables	table_names	description	evidence	confidence
+cytosol	nuclear	1	Standard	Nuclear-encoded gene, translated on cytosolic ribosomes.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+nucleus	nuclear	1	Standard	Nuclear-encoded gene; translation still happens on cytosolic ribosomes, so it is filed under the standard code.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+endoplasmic_reticulum	nuclear	1	Standard	Reached by post-translational/co-translational import of a cytosolically-translated (standard-code) protein; no local translation with a different code.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+peroxisome	nuclear	1	Standard	Reached by post-translational import (PTS1/PTS2) of a cytosolically-translated protein.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+vacuole	nuclear	1	Standard	Reached by post-translational trafficking of a cytosolically-translated protein.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+extracellular	nuclear	1	Standard	Secreted; translated on cytosolic (or ER-associated) ribosomes under the standard code before export.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+mitochondrial_ims	nuclear	1	Standard	Intermembrane-space proteins in S. cerevisiae are nuclear-encoded (imported via the presequence/TIM-TOM or MIA disulfide-relay pathway) and translated on cytosolic ribosomes; there is no known mtDNA-encoded soluble IMS resident. CORRECTED from a prior version of this file, which wrongly listed table 3 at 'high' confidence for this compartment -- see D1.	NCBI Genetic Codes, transl_table 1 "Standard Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session -- a curator should confirm no mtDNA-encoded IMS protein exists before raising confidence	unverified
+mitochondrial_matrix	nuclear|mitochondrial	1|3	Standard|Yeast Mitochondrial	Holds proteins from BOTH genomes: nuclear-encoded matrix enzymes (e.g. Ilv2/Ilv5/Ilv3) are translated on cytosolic ribosomes under table 1 and imported via a presequence -- no recoding needed for a presequence-targeted construct. Genes physically carried on mtDNA (e.g. respiratory-chain subunits) are transcribed and translated in the matrix itself under table 3, the Yeast Mitochondrial Code, which differs from the standard code at six codons (most dangerously, CUN reads as threonine, not leucine). table_for_compartment() raises AmbiguousCompartmentError here unless encoding_genome is given.	NCBI Genetic Codes, transl_table 1 "Standard Code" and transl_table 3 "Yeast Mitochondrial Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified
+mitochondrial_inner_membrane	nuclear|mitochondrial	1|3	Standard|Yeast Mitochondrial	Holds proteins from both genomes, the same as the matrix: nuclear-encoded inner-membrane proteins are imported after cytosolic translation under table 1, while mtDNA-encoded inner-membrane subunits (e.g. Cox1/Cox2/Cox3, Atp6/Atp8/Atp9, Cytb) are translated in the matrix under table 3. Added in this revision (D1) alongside mitochondrial_matrix, which the previous version of this file did not distinguish from it.	NCBI Genetic Codes, transl_table 1 "Standard Code" and transl_table 3 "Yeast Mitochondrial Code"; mirrors src/fermdb/genetic_code.py::COMPARTMENT_ENCODING_GENOMES, not independently checked against the NCBI page in this session	unverified

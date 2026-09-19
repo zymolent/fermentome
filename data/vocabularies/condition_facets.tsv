@@ -1,0 +1,88 @@
+# condition_facets.tsv — controlled vocabulary of the facets that make up `condition_context`
+# (PLAN.md C.5), the entity that "decides whether cross-study integration is possible at all."
+# One row per facet field (not per facet group), so a loader can validate a parsed condition
+# record field-by-field against this table.
+#
+# Binding rules carried from PLAN.md C.5 / docs/reference/CONVENTIONS.md "Conditions":
+#   * `condition_context` is immutable and deduplicated by `context_hash` over its RECORDED
+#     facets only.
+#   * "Every facet has an as_reported shadow field" — the `as_reported_shadow` column below is
+#     'true' for every facet without exception; a facet that is enum/parsed (Zone H) always keeps
+#     the string the paper used (Zone R) beside it.
+#   * NULL = never recorded by the source; 'NA' = recorded as genuinely not applicable (e.g. `ph`
+#     for an aeration_class that makes pH moot is still NULL unless the paper explicitly says "not
+#     controlled" style NA — most facets will be NULL, not NA, when a paper is silent); 'unknown'
+#     = recorded but not resolvable to one of `allowed_values`. This file constrains what
+#     `allowed_values` a Zone H parse may resolve an enum facet to; it does not force a value.
+#
+# Columns:
+#   facet_group        the PLAN.md C.5 table's row grouping (Carbon, Nitrogen & medium, Oxygen,
+#                      Mode, Physical, Scale, Inoculum, Stressor, Sampling)
+#   field              the field name, dotted for a struct member (e.g. stressor.compound)
+#   type               enum | numeric | free_text | bool | struct | reference — this curator's
+#                      classification of the field, not a PLAN.md-stated type annotation
+#   allowed_values     pipe-separated closed values for an enum field, or 'NA' for a non-enum
+#                      field, or 'unknown' where PLAN.md names the field but not its value set
+#                      (this curator declines to invent one)
+#   unit_hint          expected unit for a numeric field, or 'NA'
+#   as_reported_shadow always 'true' per PLAN.md C.5
+#   description        plain-language meaning
+#   evidence, confidence   per docs/reference/CONVENTIONS.md "Curation"
+#
+# Evidence-honesty pass (this revision, following the compartments.tsv D1 rewrite): every row
+# below that was 'high' solely on the strength of citing another fermdb file (PLAN.md,
+# docs/reference/CONVENTIONS.md, a source module, or another vocabulary TSV) has been changed to
+# 'unverified' -- citing an internal document is citing memory with an extra hop, not an
+# independent check. A row stays 'high' only when its evidence names something actually checked
+# outside the repo in this session (e.g. a ChEBI lookup via web search). The confidence vocabulary
+# is closed and has four values everywhere ('unverified', 'low', 'medium', 'high'; D2);
+# 'unverified' means asserted but never checked against a source, distinct from 'low' (checked,
+# weak).
+#
+# storage_location (new column, this revision): whether a loader must write this facet's parsed
+# value as a first-class column on `condition_context`, or as a (context_id, facet) row in the
+# overflow table `condition_context_facet` (src/fermdb/db/schema.sql). Two loaders guessing
+# differently here would write the same facet to two different places and silently break
+# `context_hash` dedup (identical conditions would stop sharing one row). Derived directly from
+# schema.sql's actual `condition_context` column list (tests/test_vocabularies.py cross-checks
+# this file against it), not from PLAN.md or memory, so this column's correctness does not depend
+# on the confidence rating in the row it sits in. Six first-class facets (vessel_type,
+# working_volume_l, dilution_rate, time_h, scale_class, growth_phase) have their *parsed* value as
+# a first-class column but their `_as_reported` shadow (when the source's wording matters) still
+# lives in `condition_context_facet`, per schema.sql's comment on `condition_context`; this column
+# reports where the value itself lives, not the shadow.
+facet_group	field	type	allowed_values	unit_hint	as_reported_shadow	storage_location	description	evidence	confidence
+Carbon	carbon_sources	struct	NA	NA	true	condition_context_facet	Array of {compound, concentration, unit} — every carbon source present, not just the dominant one.	PLAN.md C.5 facet table (Carbon row)	unverified
+Carbon	total_sugar_g_l	numeric	NA	g/L	true	condition_context	Total sugar concentration, summed across carbon_sources where the source states it.	PLAN.md C.5 facet table (Carbon row)	unverified
+Carbon	feedstock_class	enum	defined|molasses|hydrolysate|starch|other	NA	true	condition_context	The class of feedstock the carbon source(s) come from.	PLAN.md C.5 facet table (Carbon row: enum values quoted verbatim)	unverified
+Carbon	hydrolysate_inhibitors	struct	NA	NA	true	condition_context_facet	Array of {compound, concentration} — inhibitory compounds present when feedstock_class is hydrolysate (e.g. furfural, acetate, HMF).	PLAN.md C.5 facet table (Carbon row)	unverified
+Nitrogen & medium	medium_name	free_text	NA	NA	true	condition_context	The medium's name as the paper gives it (e.g. "YPD", "Verduyn medium").	PLAN.md C.5 facet table (Nitrogen & medium row)	unverified
+Nitrogen & medium	medium_class	enum	defined|complex|industrial	NA	true	condition_context	The class of medium used.	PLAN.md C.5 facet table (Nitrogen & medium row: enum values quoted verbatim)	unverified
+Nitrogen & medium	nitrogen_source	free_text	NA	NA	true	condition_context	The nitrogen source as the paper states it (e.g. ammonium sulfate, urea, yeast extract).	PLAN.md C.5 facet table (Nitrogen & medium row)	unverified
+Nitrogen & medium	supplements	struct	NA	NA	true	condition_context_facet	Array of named medium supplements beyond the base carbon/nitrogen sources (e.g. vitamins, trace elements added above a defined baseline).	PLAN.md C.5 facet table (Nitrogen & medium row)	unverified
+Oxygen	aeration_class	enum	anaerobic|microaerobic|oxygen_limited|aerobic	NA	true	condition_context	The aeration regime.	PLAN.md C.5 facet table (Oxygen row: enum values quoted verbatim)	unverified
+Oxygen	vvm	numeric	NA	vvm (volume air per volume liquid per minute)	true	condition_context	Aeration rate.	PLAN.md C.5 facet table (Oxygen row)	unverified
+Oxygen	agitation_rpm	numeric	NA	rpm	true	condition_context_facet	Shaking/stirring speed.	PLAN.md C.5 facet table (Oxygen row)	unverified
+Oxygen	dissolved_oxygen_pct	numeric	NA	% of air saturation	true	condition_context	Dissolved oxygen level, as percent of saturation.	PLAN.md C.5 facet table (Oxygen row)	unverified
+Oxygen	otr	numeric	NA	mmol O2 / (L*h)	true	condition_context_facet	Oxygen transfer rate.	PLAN.md C.5 facet table (Oxygen row)	unverified
+Mode	mode	enum	batch|fed_batch|continuous|repeated_batch|SSF|SHF|CBP|immobilized	NA	true	condition_context	The fermentation mode.	PLAN.md C.5 facet table (Mode row: enum values quoted verbatim)	unverified
+Mode	dilution_rate	numeric	NA	h^-1	true	condition_context	Dilution rate, meaningful for continuous/chemostat mode.	PLAN.md C.5 facet table (Mode row)	unverified
+Mode	feed_profile	free_text	NA	NA	true	condition_context_facet	How feed was added over time for fed_batch/continuous modes, as the paper describes it.	PLAN.md C.5 facet table (Mode row)	unverified
+Physical	temperature_c	numeric	NA	degrees C	true	condition_context	Culture temperature.	PLAN.md C.5 facet table (Physical row)	unverified
+Physical	ph	numeric	NA	pH units	true	condition_context	Culture pH.	PLAN.md C.5 facet table (Physical row)	unverified
+Physical	ph_controlled	bool	true|false	NA	true	condition_context	Whether pH was actively controlled (e.g. by titration) versus left to drift.	PLAN.md C.5 facet table (Physical row)	unverified
+Physical	osmolarity	numeric	NA	Osm/L (or as reported)	true	condition_context_facet	Medium osmolarity/osmotic pressure.	PLAN.md C.5 facet table (Physical row)	unverified
+Physical	pressure	numeric	NA	as reported (e.g. atm, bar, psi)	true	condition_context_facet	Vessel pressure, where relevant (e.g. some continuous or CBP setups).	PLAN.md C.5 facet table (Physical row)	unverified
+Scale	vessel_type	enum	shake_flask|serum_bottle|microplate|bioreactor	NA	true	condition_context	The vessel type used.	PLAN.md C.5 facet table (Scale row: enum values quoted verbatim)	unverified
+Scale	working_volume_l	numeric	NA	L	true	condition_context	Working (liquid) volume of the culture.	PLAN.md C.5 facet table (Scale row)	unverified
+Scale	scale_class	enum	unknown	NA	true	condition_context	PLAN.md C.5 names this field but does not give its value set. Left 'unknown' in allowed_values rather than invented (e.g. lab/bench/pilot/industrial would be a plausible guess, but is not stated) — a curator should fix the enum before loaders validate against it.	PLAN.md C.5 facet table (Scale row) names the field only; allowed_values are not given in PLAN.md and are not guessed here (unverified: no allowed_values source)	medium
+Inoculum	inoculum_od	numeric	NA	OD600 (see units.tsv OD600 caveat)	true	condition_context_facet	Inoculum size expressed as optical density.	PLAN.md C.5 facet table (Inoculum row)	unverified
+Inoculum	inoculum_g_l	numeric	NA	g DCW/L	true	condition_context_facet	Inoculum size expressed as dry cell weight concentration.	PLAN.md C.5 facet table (Inoculum row)	unverified
+Inoculum	preculture_condition_id	reference	NA	NA	true	condition_context_facet	Reference to another condition_context row describing how the preculture/seed culture was grown.	PLAN.md C.5 facet table (Inoculum row)	unverified
+Stressor	stressor.compound	free_text	NA	NA	true	condition_context_facet	The stressor applied (a chemical name, or a physical stress named as text), as the paper states it.	PLAN.md C.5 facet table (Stressor row)	unverified
+Stressor	stressor.concentration	numeric	NA	as reported (see units.tsv for the product-specific %v/v<->g/L conversions)	true	condition_context_facet	The stressor's concentration/intensity.	PLAN.md C.5 facet table (Stressor row)	unverified
+Stressor	stressor.exposure_type	enum	shock|adaptation|chronic	NA	true	condition_context_facet	How the stressor was applied over time.	PLAN.md C.5 facet table (Stressor row: enum values quoted verbatim)	unverified
+Stressor	stressor.duration	numeric	NA	h (or as reported)	true	condition_context_facet	How long the stressor was applied.	PLAN.md C.5 facet table (Stressor row)	unverified
+Sampling	time_h	numeric	NA	h	true	condition_context	Time of sampling relative to the experiment's stated zero point.	PLAN.md C.5 facet table (Sampling row)	unverified
+Sampling	growth_phase	enum	unknown	NA	true	condition_context	PLAN.md C.5 names this field but does not give its value set. Left 'unknown' in allowed_values rather than invented (e.g. lag/exponential/stationary/death would be a plausible guess, but is not stated) — a curator should fix the enum before loaders validate against it.	PLAN.md C.5 facet table (Sampling row) names the field only; allowed_values are not given in PLAN.md and are not guessed here (unverified: no allowed_values source)	medium
+Sampling	sampling_basis	free_text	NA	NA	true	condition_context_facet	How the sample was taken/what it represents, as the paper describes it (e.g. "whole broth", "supernatant only").	PLAN.md C.5 facet table (Sampling row)	unverified

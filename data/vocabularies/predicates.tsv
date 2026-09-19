@@ -1,0 +1,42 @@
+# predicates.tsv — the closed, versioned predicate vocabulary for `assertion.predicate`
+# (PLAN.md J.1, J.2). "Closed because an open predicate vocabulary makes the knowledge graph
+# unqueryable within a year; versioned because it will need to grow" (PLAN.md J.2). This file IS
+# that vocabulary's version 1 (the "Initial set" named in PLAN.md J.2); adding a predicate later
+# is a new row plus a version bump recorded in this file's own history, never a free-text value
+# slipped into an `assertion.predicate` column.
+#
+# biolink_mapping / ro_mapping (Biolink Model predicate / Relation Ontology term): PLAN.md J.2
+# says the vocabulary is "mapped to Biolink and RO where an equivalent exists" but does not name
+# the specific mapped terms. This curator does not have a checked mapping for any of the 17
+# predicates and is not confident enough in a from-memory Biolink/RO CURIE to assert one --
+# guessing a specific ontology term id here would be exactly the "mapped to the nearest plausible
+# match" error docs/reference/CONVENTIONS.md "Identifiers" forbids for external identifiers. Both
+# columns are left NULL (empty) throughout, for a curator to fill in with a checked mapping.
+#
+# Columns:
+#   predicate            the closed vocabulary value (PLAN.md J.2)
+#   description          plain-language meaning
+#   subject_type_hint    the PLAN.md J.1 `subject` reference type(s) this predicate is typically
+#                        used with (gene_group | strain | reaction | pathway | modification | ...)
+#   object_type_hint     the typical `object` reference type or literal-with-units kind
+#   biolink_mapping      Biolink Model predicate CURIE, or empty (NULL) — not yet assigned
+#   ro_mapping           Relation Ontology term CURIE, or empty (NULL) — not yet assigned
+#   evidence, confidence   per docs/reference/CONVENTIONS.md "Curation"
+predicate	description	subject_type_hint	object_type_hint	biolink_mapping	ro_mapping	evidence	confidence
+affects_production_of	The subject changes the production (titer) of the object product, direction unspecified by the predicate itself (see assertion.direction).	gene_group | modification | strain	product			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+affects_tolerance_to	The subject changes tolerance to the object stressor (a product, chemical, or physical stress).	gene_group | modification | strain	product | stressor			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+affects_yield_of	The subject changes the yield (product per substrate, PLAN.md C.6 basis-qualified) of the object product.	gene_group | modification | strain	product			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+catalyzes	The subject (an enzyme/gene product) catalyzes the object reaction.	gene_group | part	reaction			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+transports	The subject (a transporter gene product) moves the object (a metabolite) across a membrane.	gene_group | part	metabolite			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+regulates	The subject affects the expression or activity of the object, mechanism unspecified (see more specific predicates such as is_expressed_under for condition-level claims).	gene_group	gene_group | pathway			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+is_expressed_under	The subject gene is expressed under the object condition_context.	gene_group	condition_context			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+is_differentially_expressed_in	The subject gene is differentially expressed in the object contrast (PLAN.md J.3 correlative_omics evidence type is the typical support for this predicate).	gene_group	contrast			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+co_expressed_with	The subject gene's expression correlates with the object gene's expression across a set of conditions/samples.	gene_group	gene_group			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+is_bottleneck_for	The subject (a gene, enzyme, or pathway step) is reported as rate-limiting for the object pathway or product.	gene_group | reaction | pathway	pathway | product			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+competes_with	The subject pathway/reaction competes with the object pathway/reaction for a shared precursor, cofactor, or enzyme (e.g. the pyruvate-node competition named in PLAN.md B.3).	reaction | pathway	reaction | pathway			PLAN.md J.2 predicate list; description is this curator's plain-language gloss, informed by PLAN.md B.3's pyruvate-node competition example (unverified)	medium
+is_required_for	The subject is necessary for the object outcome (loss of the subject abolishes or prevents the object).	gene_group | modification	product | pathway | phenotype			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+confers_resistance_to	The subject confers resistance/tolerance to the object stressor, typically used for a specific, discrete resistance claim rather than the graded affects_tolerance_to.	gene_group | modification | strain	stressor			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+is_localized_to	The subject gene product is localized to the object compartment (see compartments.tsv).	gene_group | part	compartment			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+has_variant_associated_with	The subject gene/locus carries a variant associated with the object phenotype (PLAN.md J.3 comparative_genomic evidence type is the typical support for this predicate).	gene_group	phenotype			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+improves_when_modified_by	The subject product/phenotype improves when the object modification is made — the inverse framing of affects_production_of/affects_yield_of, used when the modification is the more natural object of the sentence.	product | phenotype	modification			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium
+interacts_with	A general physical or genetic interaction between the subject and object that does not fit a more specific predicate above.	gene_group | part	gene_group | part			PLAN.md J.2 predicate list; description is this curator's plain-language gloss (unverified)	medium

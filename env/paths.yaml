@@ -1,0 +1,81 @@
+# fermdb path configuration — every location fermdb touches, with its default.
+#
+# See docs/reference/CONVENTIONS.md ("Paths and configuration") and PLAN.md N.2 ("Path layout")
+# for the rules this file follows. Summary:
+#
+#   * Three tiers, given by the top-level keys below: repo / derived / source.
+#       repo    committed, curated, small        — never auto-created
+#       derived rebuildable                       — the ONLY tier fermdb ever creates on its own
+#       source  read-only, never written to       — never auto-created
+#   * Every key here is also an environment variable: FERMDB_<KEY, upper-cased>. The environment
+#     always wins over this file, and this file wins over the built-in fallback in paths.py that
+#     is used only if no paths.yaml can be found at all.
+#   * A value can interpolate another key with ${other_key}, plus ${HOME} and a leading ~ for the
+#     user's home directory. ${repo_root}, ${data_dir} and ${source_root} are the three roots the
+#     rest of the keys build on.
+#   * A value is a directory by default. Give it as {path: ..., kind: file} when it names a file
+#     (db_file below is the only one today).
+#   * Accepts both Windows (D:/x) and POSIX/WSL (/mnt/d/x) spellings; translated to whichever the
+#     running platform needs by the one translation function in paths.py.
+#
+# env/paths.local.yaml, if present, overrides individual keys here and is gitignored — it is
+# where a person's own machine-specific paths (a real data_dir, a real source_root) belong.
+# Nothing under this file needs to change for that; it stays the shared, portable default.
+#
+# --- what is deliberately NOT in this file ---------------------------------------------------
+#
+# Settings that are not paths. Every key below is resolved into a pathlib.Path, so a provider
+# name or a model id cannot live here — it would come back as a directory. They live in
+# src/fermdb/config.py (LLM_SETTINGS), follow the same rules as the keys below (a documented
+# default, an environment variable that wins over it, reported by `fermdb config`), and are:
+#
+#   FERMDB_LLM_PROVIDER                  ollama | mock | agent-sdk | api      (default: mock)
+#   FERMDB_LLM_BASE_URL                  the Ollama endpoint
+#   FERMDB_LLM_MODEL_TRIAGE / _EXTRACTION / _VISION      local models, full ids
+#   FERMDB_LLM_ESCALATION_PROVIDER       agent-sdk | mock | api        (default: agent-sdk)
+#   FERMDB_LLM_ESCALATION_MODEL          the §7a escalation model, a full id, never an alias
+#   FERMDB_LLM_ESCALATION_MAX_DOCUMENTS  the budget cap; past it documents queue as
+#                                        'escalation_pending' rather than silently keeping the
+#                                        local result (docs/reference/MODEL_ROUTING.md §7a)
+#   FERMDB_LLM_CLAUDE_CLI_PATH           empty uses the CLI bundled with the Agent SDK
+#
+# `agent-sdk` is the Claude Agent SDK, which authenticates the way the Claude Code CLI does:
+# CLAUDE_CODE_OAUTH_TOKEN, from `claude setup-token` — a subscription login, not a metered API
+# key. `api` (the Anthropic API client) is a stub that raises and points here. This mirrors
+# claude_provider in D:/project/genome-db/env/paths.yaml, which solved the same problem first.
+#
+# Credentials never go in a configuration file, this one included. Put them in
+# env/secrets.local.env, which is gitignored.
+
+repo:
+  # repo_root anchors every repo-tier (committed, curated) path below.
+  repo_root: "."
+
+  vocabularies_dir: "${repo_root}/data/vocabularies"
+  benchmarks_dir: "${repo_root}/data/benchmarks"
+  strains_dir: "${repo_root}/data/strains"
+  pathways_dir: "${repo_root}/data/pathways"
+  panels_dir: "${repo_root}/data/panels"
+  comparability_dir: "${repo_root}/data/comparability"
+  literature_dir: "${repo_root}/data/literature"
+
+derived:
+  # data_dir anchors every derived-tier (rebuildable) path below. Deliberately outside repo_root
+  # by default so a clean checkout never confuses a rebuildable byproduct with curated input.
+  data_dir: "~/fermdb-data"
+
+  db_file:
+    path: "${data_dir}/fermdb.sqlite3"
+    kind: file
+  matrices_dir: "${data_dir}/matrices"
+  quant_dir: "${data_dir}/quant"
+  genomes_dir: "${data_dir}/genomes"
+  index_dir: "${data_dir}/index"
+  exports_dir: "${data_dir}/exports"
+
+source:
+  # source_root anchors every source-tier (read-only, never written to) path below.
+  source_root: "~/fermdb-source"
+
+  downloads_dir: "${source_root}/downloads"
+  fastq_dir: "${source_root}/fastq"

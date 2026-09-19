@@ -1,0 +1,36 @@
+# modification_types.tsv — controlled vocabulary for `modification.type` (PLAN.md I.4), the
+# engineering-atlas enum of genetic-change kinds. Closed vocabulary: a new kind of change is added
+# here first, not invented ad hoc in a loader or a curation TSV.
+#
+# `intent` (increase_flux | remove_competition | improve_cofactor_balance | improve_tolerance |
+# improve_transport | reduce_byproduct | other, PLAN.md I.4) is a separate field on `modification`
+# and is not this file's vocabulary — it is not enumerated with definitions in PLAN.md and is not
+# reproduced here to avoid asserting glosses PLAN.md does not give.
+#
+# Columns:
+#   modification_type   the closed vocabulary value (PLAN.md I.4 `modification.type`)
+#   description          one-line plain-language definition
+#   evidence, confidence   per docs/reference/CONVENTIONS.md "Curation"
+#
+# The vocabulary values themselves are read directly from PLAN.md I.4 (confidence: high, for the
+# existence and spelling of each value). The one-line descriptions are this curator's plain-
+# language gloss of standard strain-engineering usage, not quoted from a definitions source, so
+# every description is marked (unverified) and confidence is capped at medium for that reason —
+# never 'high' from memory (docs/reference/CONVENTIONS.md "Curation").
+modification_type	description	evidence	confidence
+knockout	Complete removal or disruption of a gene so it produces no functional product. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+knockdown	Partial reduction of a gene's expression or activity, short of full knockout. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+overexpression	Increased expression of a gene beyond its native level, typically via a stronger promoter or higher copy number. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+promoter_replacement	The native promoter of a gene is swapped for a different one, changing expression level or regulation without necessarily changing copy number. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+terminator_replacement	The native transcriptional terminator of a gene is swapped for a different one. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+heterologous_expression	A gene from a different organism is introduced and expressed in the host. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+copy_number_change	The number of gene copies is changed (e.g. via plasmid copy number or genomic integration count) without necessarily changing the promoter. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+codon_optimization	A coding sequence is recoded to a different (synonymous) codon usage, e.g. for the host's tRNA pool, without changing the encoded protein. (unverified: standard usage) Note: this is distinct from the table-1/table-3 dual-safe recoding in src/fermdb/recode.py, which recodes for genetic-code portability rather than expression-level codon usage.	PLAN.md I.4 modification.type enum	medium
+protein_engineering	A change to the amino acid sequence of the encoded protein itself (point mutation, domain swap, etc.), as distinct from a change to its expression. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+localization_change	The subcellular targeting of a protein is changed, e.g. by adding, removing or swapping a targeting sequence, without changing the protein's catalytic sequence. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+cofactor_switch	The cofactor specificity of an enzyme is changed (e.g. NADH- to NADPH-preferring), typically by protein engineering aimed specifically at redox balance. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+crispr_edit	A genome edit made using a CRISPR-based system, recorded as its own category because the method itself (rather than the resulting change type) is what several source papers report. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+adaptive_evolution	A change fixed by laboratory evolution under selective pressure rather than by a designed, targeted edit. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+genome_shuffling	Genome-scale recombination between strain variants (e.g. protoplast fusion / genome shuffling) used to combine or select for improved traits, rather than a single targeted edit. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+mutagenesis	An untargeted or semi-targeted mutation introduced by a mutagen or error-prone process, as distinct from a designed, sequence-specific edit. (unverified: standard usage)	PLAN.md I.4 modification.type enum	medium
+other	A genetic change that does not fit any of the above categories. Never a substitute for adding a new category when a pattern recurs.	PLAN.md I.4 modification.type enum	medium

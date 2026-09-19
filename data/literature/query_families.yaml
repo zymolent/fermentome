@@ -1,0 +1,253 @@
+# fermdb literature corpus definition (PLAN.md H.2 "Corpus construction", H.3 "Relevance ranking
+# and inclusion", R.2 "Relevance pipeline"). Repo-tier, curated, Zone R: this file is the recorded
+# input `screening_record.zone = 'H'` is reconstructible from (docs/reference/CONVENTIONS.md).
+#
+# Each family is one NCBI E-utilities query (or, for an ethanol-tier family, several targeted
+# sub-queries, one per B.3 admission criterion). `src/fermdb/literature/discovery.py` runs a
+# family and `src/fermdb/literature/queries.py::load_query_families` parses/validates this file.
+#
+# expected_count
+#   Measured 2026-09-19/2026-09-20 (harness-supplied) as the baseline `fermdb literature status`
+#   compares a fresh esearch `count` against, so drift becomes visible over time. IMPORTANT: the
+#   exact boolean query strings below are THIS implementation's construction, written to match each
+#   family's name/description/scope -- they were not handed to this session as literal search
+#   strings, only as (family name, expected_count) pairs. They have NOT been re-run against the
+#   live NCBI service in this offline environment to confirm they reproduce the recorded count
+#   exactly (unverified). `fermdb literature status` reports live hit_count vs expected_count on
+#   the next run with network access, so any mismatch -- whether from term drift or from these
+#   terms not being the original ones -- is visible rather than silently assumed away.
+#
+# mtdna_scope
+#   The project owner's explicit instruction (harness "comments (1)") is that mtDNA-related
+#   literature coverage must include THREE things:
+#     (a) engineering_general  -- yeast mtDNA genetic engineering on its own terms: transformation,
+#                                  markers, allotopic expression, mitoTALEN/mitoZFN/base editing,
+#                                  translational activators, rho0/petite genetics
+#                                  (MITOCHONDRIAL_PROGRAM.md section 3)
+#     (b) isobutanol_x_mtdna   -- isobutanol crossed with mitochondrial genome engineering
+#     (c) ethanol_x_mtdna      -- ethanol crossed with mitochondrial genetics
+#   Every family tagged with one of these three values is part of that required coverage; a
+#   family with mtdna_scope omitted (null) has no mitochondrial angle and is not part of it.
+#   `QueryFamilies.by_mtdna_scope()` is how a reviewer (or a test) checks all three are present.
+#
+# product_tier / default_disposition
+#   R.2's asymmetric policy: isobutanol is `include_unless_excluded` (broad, recall-oriented;
+#   review burden is on the exclusions); ethanol is `exclude_unless_admitted` (targeted queries
+#   against the four B.3 criteria only; review burden is on the admissions). The bounded
+#   mitochondrial-genetics corpus (MITOCHONDRIAL_PROGRAM.md section 3) is filed under the
+#   isobutanol tier rather than invented as a third tier: it exists to answer whether mtDNA
+#   engineering is a viable STRATEGY FOR ISOBUTANOL (docs/design/MITOCHONDRIAL_PROGRAM.md section
+#   5), not as an ethanol admission question, and PLAN.md B.3 names only two tiers. This is an
+#   editorial classification call by this implementation, not a fact recalled from a source --
+#   flagged here for the reviewer to confirm or override.
+
+version: 1
+measured_on: "2026-09-19/2026-09-20"
+
+description: >-
+  fermdb corpus definition: one row per NCBI E-utilities query family. See the file header above
+  for expected_count, mtdna_scope and product_tier/default_disposition conventions.
+
+families:
+  # --------------------------------------------------------------------- isobutanol (primary tier)
+
+  - name: isobutanol_all
+    db: pubmed
+    product_tier: isobutanol
+    default_disposition: include_unless_excluded
+    expected_count: 1027
+    mtdna_scope: null
+    description: >-
+      Broadest isobutanol sweep: every organism, every context. The recall-oriented top of the
+      isobutanol family tree (PLAN.md H.2); isobutanol_production/isobutanol_yeast/
+      isobutanol_mitochondria below are progressively narrower views of the same literature, not
+      disjoint sets, so dedupe by DOI/PMID across families is expected to do real work here.
+    term: >-
+      isobutanol[tiab] OR "isobutyl alcohol"[tiab] OR "iso-butanol"[tiab] OR
+      "2-methyl-1-propanol"[tiab] OR "2-methylpropan-1-ol"[tiab]
+
+  - name: isobutanol_production
+    db: pubmed
+    product_tier: isobutanol
+    default_disposition: include_unless_excluded
+    expected_count: 768
+    mtdna_scope: null
+    description: isobutanol_all narrowed to production/biosynthesis/metabolic-engineering context.
+    term: >-
+      (isobutanol[tiab] OR "isobutyl alcohol"[tiab] OR "2-methyl-1-propanol"[tiab]) AND
+      (production[tiab] OR biosynthesis[tiab] OR fermentation[tiab] OR titer[tiab] OR
+       yield[tiab] OR "metabolic engineering"[tiab] OR biofuel[tiab] OR biosynthetic[tiab])
+
+  - name: isobutanol_yeast
+    db: pubmed
+    product_tier: isobutanol
+    default_disposition: include_unless_excluded
+    expected_count: 251
+    mtdna_scope: null
+    description: isobutanol_all narrowed to yeast/Saccharomyces hosts specifically.
+    term: >-
+      (isobutanol[tiab] OR "isobutyl alcohol"[tiab] OR "2-methyl-1-propanol"[tiab]) AND
+      (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab] OR Saccharomyces[tiab] OR
+       "S. cerevisiae"[tiab])
+
+  - name: isobutanol_mitochondria
+    db: pubmed
+    product_tier: isobutanol
+    default_disposition: include_unless_excluded
+    expected_count: 33
+    mtdna_scope: isobutanol_x_mtdna
+    notes: >-
+      Tiny and central (harness instruction: "read completely"). This is criterion (b) of the
+      mtDNA-scope requirement -- isobutanol crossed with mitochondrial genome engineering -- and
+      is exactly the corpus MITOCHONDRIAL_PROGRAM.md section 5 reasons from (matrix
+      co-localization, strategy C vs E, mtDNA-encoded Ehrlich pathway).
+    description: >-
+      isobutanol crossed with mitochondrial compartmentalization/mtDNA, covering both compartment
+      strategy C (nuclear-encoded, matrix-targeted Ehrlich enzymes) and strategy E (mtDNA-encoded).
+    term: >-
+      (isobutanol[tiab] OR "isobutyl alcohol"[tiab] OR "2-methyl-1-propanol"[tiab]) AND
+      (mitochondri*[tiab] OR mtDNA[tiab] OR "mitochondrial genome"[tiab] OR
+       "mitochondrial targeting"[tiab] OR "mitochondrial matrix"[tiab])
+
+  # -------------------------------------------------------- yeast mtDNA engineering (general, (a))
+
+  - name: mtdna_engineering_yeast
+    db: pubmed
+    product_tier: isobutanol
+    default_disposition: include_unless_excluded
+    expected_count: 823
+    mtdna_scope: engineering_general
+    notes: >-
+      Criterion (a) of the mtDNA-scope requirement. Filed under the isobutanol tier: this is the
+      bounded mitochondrial-genetics corpus of MITOCHONDRIAL_PROGRAM.md section 3, which exists to
+      support the isobutanol program's strategy-E feasibility question, not an ethanol admission
+      question.
+    description: >-
+      Genetic engineering OF yeast mtDNA on its own terms: transformation, marker systems,
+      allotopic expression, mitoTALEN/mitoZFN/base editing, translational activators. Deliberately
+      not restricted to any product, per the harness instruction that this coverage must be broad.
+    term: >-
+      (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab] OR "S. cerevisiae"[tiab]) AND
+      ("mitochondrial DNA"[tiab] OR mtDNA[tiab] OR "mitochondrial genome"[tiab]) AND
+      (transformation[tiab] OR "genetic engineering"[tiab] OR "genome editing"[tiab] OR
+       "allotopic expression"[tiab] OR mitoTALEN[tiab] OR mitoZFN[tiab] OR "base editing"[tiab] OR
+       "base editor"[tiab] OR "translational activator"[tiab] OR biolistic[tiab] OR
+       transformant*[tiab] OR "marker gene"[tiab])
+
+  - name: mtdna_methods_yeast
+    db: pubmed
+    product_tier: isobutanol
+    default_disposition: include_unless_excluded
+    expected_count: 919
+    mtdna_scope: engineering_general
+    notes: >-
+      biolistic/cytoduction/rho0/petite (harness instruction). Overlaps mtdna_engineering_yeast by
+      design -- the two are different views into the same literature (methods vs. engineering
+      outcomes) and dedupe by DOI/PMID across families handles the overlap, exactly as for the
+      isobutanol_* family tree above.
+    description: >-
+      The methods layer of yeast mitochondrial genetics: how mtDNA is manipulated and how
+      petite/rho0/rho- states arise and are used, independent of any specific engineering goal.
+    term: >-
+      (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab] OR "S. cerevisiae"[tiab]) AND
+      (biolistic[tiab] OR "particle bombardment"[tiab] OR cytoduction[tiab] OR "rho0"[tiab] OR
+       "rho zero"[tiab] OR "rho-zero"[tiab] OR "petite mutant"[tiab] OR "petite mutation"[tiab] OR
+       "petite colony"[tiab] OR heteroplasmy[tiab] OR homoplasmy[tiab] OR
+       "mitochondrial genome"[tiab] OR "mtDNA transformation"[tiab])
+
+  # ------------------------------------------------------------- ethanol (reference tier, capped)
+
+  - name: ethanol_mitochondria_yeast
+    db: pubmed
+    product_tier: ethanol
+    default_disposition: exclude_unless_admitted
+    expected_count: 642
+    mtdna_scope: ethanol_x_mtdna
+    notes: >-
+      Criterion (c) of the mtDNA-scope requirement. This family is NOT one of B.3's four named
+      criteria on its own -- it exists because the project owner explicitly asked for
+      ethanol-x-mtDNA coverage regardless of the B.3 admission test. Every hit still enters
+      screening as an ethanol-tier record (exclude_unless_admitted), but it now runs as an E5
+      sub-query rather than a bare term, so its hits carry an admission criterion instead of
+      defaulting to 'excluded'. E5 (mitochondrial redox shuttle) is why this literature is
+      load-bearing rather than background -- see docs/design/DUET_TARGET.md section 5.1. A curator
+      still confirms each admission; the criterion tag makes the paper reviewable, not admitted.
+    description: >-
+      Ethanol production/physiology crossed with mitochondrial genetics or petite/rho0 status in
+      yeast -- e.g. the long-known link between respiratory deficiency and fermentative capacity.
+    sub_queries:
+      - criterion: E5
+        label: ethanol_x_mtdna
+        term: >-
+          (ethanol[tiab]) AND
+          (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab] OR "S. cerevisiae"[tiab])
+          AND (mitochondri*[tiab] OR mtDNA[tiab] OR "mitochondrial genome"[tiab] OR petite[tiab]
+               OR "rho0"[tiab] OR "rho zero"[tiab] OR "respiratory deficient"[tiab] OR
+               "respiratory deficiency"[tiab])
+
+  - name: ethanol_scerevisiae_prod_ferm_tol
+    db: pubmed
+    product_tier: ethanol
+    default_disposition: exclude_unless_admitted
+    expected_count: 6072
+    mtdna_scope: null
+    capped: true
+    notes: >-
+      R.2 is explicit that ethanol discovery runs "targeted queries against the four B.3 criteria
+      only", not the broad ethanol+yeast sweep (tens of thousands of records per PLAN.md H.2).
+      expected_count 6072 is the harness-recorded measurement for this capped layer; it is treated
+      here as the union across the four sub-queries below (their individual counts were not
+      separately supplied and this file does not invent them). A hit retrieved through one of
+      these four sub-queries carries that criterion as an admission CANDIDATE
+      (triage_state='needs_full_text') -- discovery.py never marks an ethanol record 'included' on
+      a keyword match alone; only a curator (or a later classifier) confirming the criterion from
+      the actual text can do that (PLAN.md B.3: "admitted only if it answers a question the
+      isobutanol program asks").
+    description: >-
+      The bounded ethanol reference layer (PLAN.md B.3), one targeted sub-query per admission
+      criterion, and nothing broader.
+    sub_queries:
+      - criterion: E1
+        label: competing_sink
+        term: >-
+          (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab]) AND
+          (PDC1[tiab] OR PDC5[tiab] OR PDC6[tiab] OR "pyruvate decarboxylase"[tiab]) AND
+          (deletion[tiab] OR knockout[tiab] OR "pdc-negative"[tiab] OR "pdc minus"[tiab] OR
+           "C2 auxotroph"[tiab] OR "glucose tolerant"[tiab] OR "glucose-tolerant"[tiab])
+      - criterion: E2
+        label: performance_ceiling
+        term: >-
+          (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab]) AND ethanol[tiab] AND
+          (industrial[tiab] OR "very high gravity"[tiab] OR "high gravity"[tiab] OR
+           "high-gravity"[tiab]) AND (titer[tiab] OR yield[tiab] OR productivity[tiab])
+      - criterion: E3
+        label: wild_type_baseline
+        term: >-
+          (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab]) AND ethanol[tiab] AND
+          ("wild type"[tiab] OR "wild-type"[tiab] OR "CEN.PK"[tiab] OR "S288C"[tiab] OR
+           BY4741[tiab] OR BY4742[tiab]) AND (fermentation[tiab] OR chemostat[tiab] OR
+           "carbon balance"[tiab])
+      - criterion: E4
+        label: transferable_mechanism
+        term: >-
+          (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab]) AND ethanol[tiab] AND
+          (tolerance[tiab] OR "stress response"[tiab] OR "membrane composition"[tiab] OR
+           "heat shock"[tiab]) AND (isobutanol[tiab] OR "higher alcohol"[tiab] OR
+           "solvent tolerance"[tiab] OR "alcohol tolerance"[tiab])
+
+      # -------------------------------------------------------------------------------------
+      # E5 added 2026-09-20 from docs/design/DUET_TARGET.md. The reviewer correctly flagged that
+      # ethanol_mitochondria_yeast had no admission criterion, so every hit would default to
+      # 'excluded' despite the owner asking for the coverage. DUET supplies the missing reason:
+      # ethanol is NOT only the competing sink to be deleted (E1). In the target architecture it
+      # is the REDOX CARRIER -- it diffuses into the matrix, Adh3 oxidises it there, and the
+      # resulting matrix NADH drives the Ehrlich ADH step directly and, via the Pos5 NADH kinase,
+      # supplies the NADPH that Ilv5 needs. So this literature is load-bearing, not background.
+      - criterion: E5
+        label: mitochondrial_redox_shuttle
+        term: >-
+          (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab]) AND
+          (ADH3[tiab] OR "mitochondrial alcohol dehydrogenase"[tiab] OR
+           "ethanol-acetaldehyde shuttle"[tiab] OR "ethanol acetaldehyde shuttle"[tiab] OR
+           POS5[tiab] OR "NADH kinase"[tiab] OR "mitochondrial NADPH"[tiab] OR
+           "mitochondrial redox"[tiab] OR "redox shuttle"[tiab])

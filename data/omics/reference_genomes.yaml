@@ -1,0 +1,264 @@
+# fermdb reference genome catalog
+#
+# One entry per reference genome the isobutanol SRA corpus needs, so that "transcriptomic data is
+# based on which genome" can be answered PER RUN, not once for the whole atlas. The corpus spans
+# five organisms (docs/reference/DATA_VOLUME.md section 2; measured 2026-09-19/20):
+#
+#   S. cerevisiae (plain)         56 RNA-Seq   -> species_exact, strain unknown
+#   S. cerevisiae S288C           48 RNA-Seq   -> strain_matched (anchor)
+#   E. coli K-12 MG1655           20 (mixed strategies)
+#   Zymomonas mobilis ZM4         11 (mostly Tn-Seq -- NOT yeast, see sra_isobutanol notes)
+#   Lactococcus cremoris            5 RNA-Seq
+#   Fusarium graminearum            8 RNA-Seq   -> relevance_uncertain, see that entry
+#
+# `src/fermdb/omics/references.py:select_reference` reads this file (via `load_reference_genomes`)
+# to choose `sra_run.reference_assembly` / `reference_match_quality` per run, off `sra_run.organism`
+# (runinfo's `ScientificName` -- the field PLAN.md F.3 says is reliable, unlike strain). Never guess
+# a strain (docs/reference/CONVENTIONS.md "Missing values" / PLAN.md S.3): a plain "Saccharomyces
+# cerevisiae" run is `species_exact` against the S288C anchor, never silently treated as any named
+# strain it happens to share a species with.
+#
+# CEN.PK113-7D and Ethanol Red are carried IN PARALLEL as two separate, non-default comparator
+# entries (per this build task) so that a future curator can compare the isobutanol/ethanol corpus
+# against both a physiology standard and an industrial proxy without either one being "the"
+# reference -- S288C R64 remains the sole species-level default and the `gene_group` coordinate
+# system (PLAN.md C.3, E.1); CEN.PK and Ethanol Red only apply where a run's own organism string
+# names that exact strain (`reference_match_quality: strain_matched`).
+#
+# Curation conventions (docs/reference/CONVENTIONS.md "Curation"): every entry carries `evidence`
+# and `confidence` from the closed set (unverified/low/medium/high). Facts marked "(unverified)" are
+# this session's background biological/domain knowledge, not something fetched from a live source in
+# this session, per this build task's instruction to mark such claims explicitly.
+
+version: 1
+zone: R
+measured_on: "2026-09-20"
+
+references:
+  # --- the anchor -------------------------------------------------------------------------------
+  - id: s288c_r64
+    organism: "Saccharomyces cerevisiae S288C"
+    taxid: 559292
+    accession: GCF_000146045.2
+    assembly_level: Chromosome
+    n50_bp: null  # finished, gapless chromosome-level assembly: N50 is not a meaningful metric here
+    role: >-
+      Host chassis anchor -- the gene_group coordinate system every other reference in this catalog
+      is compared against (PLAN.md C.3 "the single most important decision", E.1). The only entry
+      in this catalog whose bytes are already fetched and stored (src/fermdb/omics/references.py
+      fetch_nuclear_reference / fetch_mitochondrial_reference -> reference_sequence table), because
+      it is also the mitochondrial translation-table-3 reference DUET's mitochondrial-genetics
+      background depends on (docs/design/DUET_TARGET.md).
+    is_species_default: true
+    fetched: true
+    structural_caveats: null
+    strain_match_names: ["Saccharomyces cerevisiae S288C"]
+    species_match_names: ["Saccharomyces cerevisiae"]
+    proxy_for: []
+    relevance_uncertain: false
+    relevance_note: null
+    evidence: >-
+      NCBI Datasets API (api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000146045.2), and
+      NCBI Nucleotide esummary (db=nuccore, id=NC_001224.1), both verified live on 2026-09-19 per
+      src/fermdb/omics/references.py's ASSEMBLY_ACCESSION/MITOCHONDRIAL_ACCESSION docstrings:
+      assembly R64, 16 nuclear chromosomes totaling 12,071,326 bp; mitochondrial genome 85,779 bp.
+      Strain taxid 559292 verified live via NCBI Taxonomy esearch on 2026-09-20.
+    confidence: high
+
+  # --- the two parallel S. cerevisiae comparators, per this build task ------------------------
+  - id: cenpk113_7d
+    organism: "Saccharomyces cerevisiae CEN.PK113-7D"
+    taxid: 4932  # species-level: NCBI has not registered a distinct strain taxid for this assembly
+    accession: GCA_002571405.2
+    assembly_level: Chromosome
+    n50_bp: 912802  # scaffold N50 per NCBI Datasets API; assembly_level is Chromosome, not gapless
+    role: >-
+      Physiology comparator -- the metabolic-engineering and physiology standard, with the
+      best-characterized quantitative fermentation data of any S. cerevisiae strain (PLAN.md B.4).
+      docs/design/DUET_TARGET.md 5.3 is explicit that CEN.PK is a *comparator* for quantitative
+      physiology, not DUET's chassis (DUET uses an undisclosed industrial polyploid strain the
+      owner already holds).
+    is_species_default: false
+    fetched: false
+    structural_caveats: null
+    # No run in the corpus is yet labelled with this exact strain string (the 56 plain "S.
+    # cerevisiae" runs have strain UNKNOWN, not CEN.PK -- PLAN.md F.3); kept for the run this
+    # matches the moment BioSample or the paper resolves one to it, per this catalog's own
+    # never-guess rule.
+    strain_match_names: ["Saccharomyces cerevisiae CEN.PK113-7D"]
+    species_match_names: []  # deliberately NOT species-default: a plain "S. cerevisiae" run must
+                              # resolve to the S288C anchor, never silently to CEN.PK
+    proxy_for: []
+    relevance_uncertain: false
+    relevance_note: null
+    evidence: >-
+      NCBI Datasets API (api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCA_002571405.2),
+      verified live 2026-09-20: assembly ASM257140v2, assembly_level Chromosome, submitter Delft
+      University of Technology, scaffold_n50 912,802 bp, contig_n50 806,478 bp, total sequence
+      length 11,991,277 bp. Matches this build task's harness-supplied figure ("N50 913kb") to
+      within rounding.
+    confidence: high
+
+  - id: ethanol_red
+    organism: "Saccharomyces cerevisiae Ethanol Red"
+    taxid: 4932  # species-level: NCBI has not registered a distinct strain taxid for this assembly
+    accession: GCA_029255905.1
+    assembly_level: Scaffold
+    n50_bp: 188573  # scaffold N50 per NCBI Datasets API
+    role: >-
+      Industrial proxy -- a public bioethanol production strain (Fermentis/Lesaffre) standing in
+      for industrial fermentation performance, because DUET's own chassis is an undisclosed
+      industrial polyploid strain the owner already holds (docs/design/DUET_TARGET.md 5.3) and is
+      not on NCBI. PLAN.md B.4 names Ethanol Red alongside PE-2/JAY270 and CAT-1 as the named
+      industrial comparator shortlist; this is the one with a public NCBI assembly.
+    is_species_default: false
+    fetched: false
+    structural_caveats: >-
+      Scaffold-level assembly (N50 ~189 kb, far short of chromosome-scale): structural variants
+      (large indels, translocations, copy-number changes, aneuploidy) and subtelomeric regions are
+      NOT reliably resolved from this assembly. Only point-level SNP/short-indel calls against a
+      scaffold should be trusted; any claim about Ethanol Red's structural genome must be flagged
+      unverified until a chromosome-level assembly exists. Do not compare structural-variant calls
+      made against Ethanol Red with the same calls made against the chromosome-level CEN.PK or
+      S288C assemblies without accounting for this resolution gap.
+    strain_match_names:
+      ["Saccharomyces cerevisiae Ethanol Red", "Saccharomyces cerevisiae Ethanol Red (Fermentis)"]
+    species_match_names: []  # deliberately NOT species-default, same reasoning as CEN.PK above
+    proxy_for: []
+    relevance_uncertain: false
+    relevance_note: null
+    evidence: >-
+      NCBI Datasets API (api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCA_029255905.1),
+      verified live 2026-09-20: assembly ASM2925590v1, assembly_level Scaffold, submitter Padova
+      University, scaffold_n50 188,573 bp, contig_n50 147,945 bp, total sequence length 11,524,943
+      bp. Matches this build task's harness-supplied figure ("N50 189kb") to within rounding.
+    confidence: high
+
+  # --- bacterial isobutanol production hosts in the corpus (small, 2-5 Mb: item 5) -------------
+  - id: ecoli_k12_mg1655
+    organism: "Escherichia coli str. K-12 substr. MG1655"
+    taxid: 511145
+    accession: GCF_000005845.2
+    assembly_level: Complete Genome
+    n50_bp: 4641652  # single circular chromosome; N50 equals total chromosome length
+    role: >-
+      Isobutanol production host -- the chassis of the Atsumi/Liao-lineage engineered 2-keto acid
+      pathway that established microbial isobutanol production (unverified: general background
+      knowledge of the isobutanol-production literature, not fetched in this session), and the
+      corpus's bacterial physiology/pathway comparator against the yeast-centric parts catalog
+      (PLAN.md G.6, B.4).
+    is_species_default: true
+    fetched: false
+    structural_caveats: null
+    strain_match_names: ["Escherichia coli str. K-12 substr. MG1655"]
+    species_match_names: ["Escherichia coli"]
+    proxy_for: []
+    relevance_uncertain: false
+    relevance_note: null
+    evidence: >-
+      NCBI Datasets API (genome/accession/GCF_000005845.2) and NCBI Nucleotide esummary (db=nuccore,
+      id=NC_000913.3), verified live 2026-09-20: assembly ASM584v2, assembly_level Complete Genome,
+      chromosome NC_000913.3 (4,641,652 bp, circular), taxid 511145, NCBI genetic code table 11
+      (Bacterial, Archaeal and Plant Plastid Code) -- NOT table 1 or 3; relevant if this atlas ever
+      computes codon-level translations for E. coli genes the way genetic_code.py does for yeast.
+    confidence: high
+
+  - id: zymomonas_mobilis_zm4
+    organism: "Zymomonas mobilis subsp. mobilis ZM4 = ATCC 31821"
+    taxid: 264203
+    accession: GCF_000007105.1
+    assembly_level: Complete Genome
+    n50_bp: 2056363
+    role: >-
+      Isobutanol production host -- a native ethanologen re-purposed for isobutanol via
+      heterologous 2-keto acid pathway expression (unverified: general background knowledge, not
+      fetched this session). Also the organism behind this corpus's 11 Tn-Seq runs: per this build
+      task's measured facts, those Tn-Seq runs are Zymomonas perturbation data (PLAN.md J.3 L1/L2
+      evidence), NOT yeast, and must not be miscounted as yeast Tn-Seq.
+    is_species_default: true
+    fetched: false
+    structural_caveats: >-
+      GCF_000007105.1 (ASM710v1) reports only the primary chromosome in its NCBI sequence report
+      (total_count: 1). ZM4 is reported in the literature to carry native plasmids (unverified: not
+      queried this session, since only the chromosome was needed to catalog this reference); confirm
+      plasmid content against a sequence_reports call before treating this assembly as ZM4's
+      complete replicon set.
+    strain_match_names: ["Zymomonas mobilis subsp. mobilis ZM4 = ATCC 31821"]
+    species_match_names: ["Zymomonas mobilis"]
+    proxy_for: []
+    relevance_uncertain: false
+    relevance_note: null
+    evidence: >-
+      NCBI Datasets API (genome/accession/GCF_000007105.1) and NCBI Nucleotide esummary (db=nuccore,
+      id=NC_006526.2), verified live 2026-09-20: assembly ASM710v1, assembly_level Complete Genome,
+      chromosome NC_006526.2 (2,056,363 bp), taxid 264203 (matches the exact TaxID SRA runinfo
+      reports for this corpus's Tn-Seq runs -- see tests/fixtures/omics/sra_runinfo_isobutanol_
+      sample.csv), NCBI genetic code table 11.
+    confidence: high
+
+  - id: lactococcus_cremoris_kw2
+    organism: "Lactococcus cremoris subsp. cremoris KW2"
+    taxid: 1295826  # strain-level; species taxid is 1359 (what plain-"Lactococcus cremoris" runs report)
+    accession: GCF_000468955.1
+    assembly_level: Complete Genome
+    n50_bp: 2427048
+    role: >-
+      Isobutanol production host -- a dairy lactic-acid bacterium studied for isobutanol production
+      via engineered branched-chain-amino-acid pathway flux (unverified: general background
+      knowledge, not fetched this session). NCBI's own designated RefSeq reference genome for the
+      species (refseq_category: "reference genome"), so used here as the species default even
+      though no corpus run yet names this exact strain.
+    is_species_default: true
+    fetched: false
+    structural_caveats: null
+    strain_match_names: ["Lactococcus cremoris subsp. cremoris KW2"]
+    species_match_names: ["Lactococcus cremoris"]
+    proxy_for: []
+    relevance_uncertain: false
+    relevance_note: null
+    evidence: >-
+      NCBI Datasets API (genome/taxon/1359/dataset_report?filters.reference_only=true and
+      genome/accession/GCF_000468955.1/sequence_reports), verified live 2026-09-20: assembly
+      ASM46895v1, refseq_category "reference genome", assembly_level Complete Genome, chromosome
+      NC_022369.1 (2,427,048 bp), organism taxid 1295826 (species taxid 1359, the value SRA runinfo
+      reports for this corpus's 5 plain "Lactococcus cremoris" runs -- see tests/fixtures/omics/
+      sra_runinfo_isobutanol_sample.csv), NCBI genetic code table 11.
+    confidence: high
+
+  # --- flagged for curator review, not fetched (item 4) -----------------------------------------
+  - id: fusarium_graminearum_ph1
+    organism: "Fusarium graminearum PH-1"
+    taxid: 229533  # strain-level; species taxid is 5518
+    accession: GCF_000240135.3
+    assembly_level: Chromosome
+    n50_bp: 5350016  # scaffold N50 per NCBI Datasets API
+    role: >-
+      NOT catalogued as an isobutanol production host. Recorded only because "Fusarium graminearum"
+      resolves to a real, well-characterized RefSeq reference genome, for reference-selection
+      completeness and curator review -- not because this atlas asserts a role for it in the
+      isobutanol production program. See relevance_note.
+    is_species_default: true  # selection still resolves a reference IF a curator confirms relevance
+    fetched: false            # and this build task's binding instruction is: do not fetch on spec
+    structural_caveats: null
+    strain_match_names: ["Fusarium graminearum PH-1"]
+    species_match_names: ["Fusarium graminearum"]
+    proxy_for: []
+    relevance_uncertain: true
+    relevance_note: >-
+      8 RNA-Seq runs in the isobutanol SRA corpus (docs/reference/DATA_VOLUME.md section 2) resolve
+      to this organism. Fusarium graminearum is a filamentous plant pathogen (wheat/barley head
+      blight) with no established role in isobutanol production (unverified: this session's own
+      domain judgement, not an NCBI-sourced fact) -- these runs are plausibly a false-positive
+      keyword hit (e.g. "isobutanol" appearing in an unrelated volatile-organic-compound or
+      metabolomics context) rather than genuine isobutanol-production work. Per this build task's
+      binding instruction, this atlas does NOT fetch the Fusarium graminearum genome on spec --
+      src/fermdb/omics/references.py:is_relevance_uncertain flags these runs' sra_run.
+      relevance_uncertain = 1 for a human curator to confirm or reject before any further
+      investment (genome fetch, quantification, or inclusion in the isobutanol corpus proper).
+    evidence: >-
+      NCBI Datasets API (genome/taxon/5518/dataset_report?filters.reference_only=true), verified
+      live 2026-09-20: GCF_000240135.3, strain PH-1, taxid 229533 (species taxid 5518, verified live
+      via NCBI Taxonomy esearch), assembly_level Chromosome, refseq_category "reference genome",
+      total sequence length 36,458,046 bp, scaffold_n50 5,350,016 bp. The assembly facts above are
+      NCBI-verified; the relevance judgement in relevance_note is not and is marked accordingly.
+    confidence: high

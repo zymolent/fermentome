@@ -1,0 +1,60 @@
+# units.tsv — controlled vocabulary of units, unit conversions, and yield bases used across
+# fermdb's measurement tables (PLAN.md C.6 `measurement.unit_as_reported` / `unit_si`, and
+# `basis`).
+#
+# docs/reference/CONVENTIONS.md "Units and quantities" is binding here:
+#   * "The declared unit is the only authority. A quantity's scale is never inferred from its
+#     numbers." This file exists so a unit conversion never has to be reinvented ad hoc in code —
+#     conversions are looked up here and applied explicitly, never assumed.
+#   * "value_as_reported and unit_as_reported ... are never overwritten or converted in place.
+#     Conversions write value_si alongside, with the conversion rule recorded." A `conversion` row
+#     below is that recorded rule.
+#   * "basis is mandatory on any yield ... Where the source does not state it, basis is NULL and
+#     the value is not usable for cross-study comparison." The `basis` rows below are that
+#     vocabulary, taken verbatim from PLAN.md C.4/C.6.
+#   * "Ethanol % v/v <-> g/L conversion uses a stated ethanol density and is recorded as a
+#     derivation, not applied silently." — the two ethanol `conversion` rows below are exactly
+#     that record, extended to isobutanol per this project's own product list.
+#
+# Columns:
+#   entry_type      unit | conversion | basis — which kind of row this is
+#   code            for entry_type=unit: the unit symbol. For entry_type=conversion: "<from> ->
+#                   <to>". For entry_type=basis: the basis keyword from PLAN.md C.6 `basis`.
+#   from_unit       source unit of a conversion, or 'NA' (not applicable to this row's entry_type)
+#   to_unit         target unit of a conversion, or 'NA'
+#   factor          multiply a value in from_unit by this to get to_unit, or 'NA' if not
+#                   applicable, or 'unknown' where no fixed factor exists (see the OD600 row)
+#   factor_basis    the physical quantity/assumption the factor rests on (e.g. a stated density
+#                   and temperature), or 'NA' for a fixed dimensional conversion, or 'unknown'
+#                   where the conversion is fundamentally not fixed
+#   applies_to      'general', or a specific product's YAA:PRODUCT id when the conversion is
+#                   substance-specific (e.g. a density-based g/L <-> %v/v pair)
+#   description     plain-language explanation
+#   evidence, confidence   per docs/reference/CONVENTIONS.md "Curation"
+#
+# Evidence-honesty pass (this revision, following the compartments.tsv D1 rewrite): every row
+# below that was 'high' solely on the strength of citing another fermdb file (PLAN.md,
+# docs/reference/CONVENTIONS.md, a source module, or another vocabulary TSV) has been changed to
+# 'unverified' -- citing an internal document is citing memory with an extra hop, not an
+# independent check. A row stays 'high' only when its evidence names something actually checked
+# outside the repo in this session (e.g. a ChEBI lookup via web search). The confidence vocabulary
+# is closed and has four values everywhere ('unverified', 'low', 'medium', 'high'; D2);
+# 'unverified' means asserted but never checked against a source, distinct from 'low' (checked,
+# weak).
+entry_type	code	from_unit	to_unit	factor	factor_basis	applies_to	description	evidence	confidence
+unit	g/L	NA	NA	NA	NA	general	Mass concentration; the canonical_unit for isobutanol and ethanol titers in products.tsv.	PLAN.md C.4 canonical_unit field	unverified
+unit	g/g	NA	NA	NA	NA	general	Mass yield: mass of product per mass of substrate. Requires a stated `basis` (see the basis rows below) to be comparable across studies.	PLAN.md C.6 basis field	unverified
+unit	mol/mol	NA	NA	NA	NA	general	Molar yield: mole of product per mole of substrate.	PLAN.md C.4 theoretical_yield_from.mol_per_mol	unverified
+unit	% v/v	NA	NA	NA	NA	general	Volume fraction. Ambiguous on its own (v/v of what two volumes, at what temperature) unless a density-based conversion to g/L is recorded alongside it — see the conversion rows below.	docs/reference/CONVENTIONS.md "Units and quantities" ("Ethanol % v/v <-> g/L conversion uses a stated ethanol density and is recorded as a derivation")	unverified
+unit	OD600	NA	NA	NA	NA	general	Optical density at 600 nm; a proxy for biomass with NO universal conversion to g dry cell weight per litre. See the OD600 conversion row: it is deliberately left unresolved rather than given a default factor.	docs/reference/CONVENTIONS.md "Units and quantities" ("A quantity's scale is never inferred from its numbers")	unverified
+unit	h^-1	NA	NA	NA	NA	general	Specific growth rate unit (per hour), used by assay_types.tsv growth_rate_in_x_percent.	assay_types.tsv	unverified
+conversion	%v/v -> g/L (ethanol)	% v/v	g/L	7.8945	ethanol density 0.78945 g/mL at 20 degC (1% v/v = 1 mL ethanol per 100 mL solution = 0.78945 g per 100 mL = 7.8945 g/L)	YAA:PRODUCT:ethanol	Ethanol %v/v to g/L, using a stated density rather than an assumed one, per docs/reference/CONVENTIONS.md.	Ethanol density 0.78945 g/cm3 at 20 degC verified via web search 2026-09-19 (ebi.ac.uk/chebi CHEBI:16236 property page as surfaced by the search; not independently re-verified against the primary NIST/CRC value). Densities are mildly temperature-dependent; this factor assumes ~20 degC and should be re-derived if a source states a different temperature.	high
+conversion	g/L -> %v/v (ethanol)	g/L	% v/v	0.126671	inverse of 7.8945 (1/7.8945 = 0.126671)	YAA:PRODUCT:ethanol	Ethanol g/L to %v/v, inverse of the %v/v -> g/L (ethanol) row above.	Arithmetic inverse (1/7.8945) of the ethanol density verified against ebi.ac.uk/chebi via web search 2026-09-19 (see the %v/v -> g/L (ethanol) row above); same temperature caveat.	high
+conversion	%v/v -> g/L (isobutanol)	% v/v	g/L	8.02	isobutanol density 0.802 g/mL, reference temperature not confirmed (1% v/v = 1 mL isobutanol per 100 mL solution = 0.802 g per 100 mL = 8.02 g/L)	YAA:PRODUCT:isobutanol	Isobutanol %v/v to g/L, using a stated density rather than an assumed one.	Isobutanol density ~0.802 g/cm3 verified via web search 2026-09-19 (Wikipedia/ChemicalBook as surfaced by the search; the exact reference temperature for this figure was not confirmed, and sources reporting a range of roughly 0.798-0.806 g/mL depending on temperature are common for this compound, so this factor should be re-derived once a curator pins the temperature actually used in a given paper). (unverified: reference temperature not pinned)	medium
+conversion	g/L -> %v/v (isobutanol)	g/L	% v/v	0.124688	inverse of 8.02 (1/8.02 = 0.124688)	YAA:PRODUCT:isobutanol	Isobutanol g/L to %v/v, inverse of the row above.	Arithmetic inverse of the row above; same density source and same temperature caveat. (unverified: reference temperature not pinned)	medium
+conversion	OD600 -> g/L (biomass)	OD600	g/L	unknown	unknown — strain-, instrument- (path length) and growth-phase-dependent calibration curve	general	Deliberately NOT given a default factor. An OD600-to-dry-cell-weight conversion is only valid with a calibration curve recorded for the specific strain and spectrophotometer/path length used; applying a generic "fixed g/L per OD unit" rule from memory would be exactly the silently-inferred scale docs/reference/CONVENTIONS.md forbids.	docs/reference/CONVENTIONS.md "Units and quantities" ("A quantity's scale is never inferred from its numbers. Every ... measurement declares its unit, and every operation refuses input whose unit it cannot accept.")	unverified
+basis	consumed	NA	NA	NA	NA	general	Yield computed against the substrate actually consumed by the end of the measurement window.	PLAN.md C.4 (theoretical_yield_from) and C.6 (measurement.basis enum: consumed | supplied | theoretical_max_pct | per_biomass | per_volume)	unverified
+basis	supplied	NA	NA	NA	NA	general	Yield computed against the substrate supplied/initially charged, regardless of how much was actually consumed. Numerically different from `consumed` whenever conversion is incomplete, and the two must never be conflated (PLAN.md C.6 point 2).	PLAN.md C.6	unverified
+basis	theoretical_max_pct	NA	NA	NA	NA	general	Yield expressed as a percentage of the theoretical maximum yield recorded in products.tsv for that product/substrate pair.	PLAN.md C.6	unverified
+basis	per_biomass	NA	NA	NA	NA	general	A quantity normalized to biomass (e.g. specific productivity, g product per g DCW per h), rather than to substrate or reactor volume.	PLAN.md C.6	unverified
+basis	per_volume	NA	NA	NA	NA	general	A quantity normalized to working volume (e.g. volumetric productivity, g product per L per h), rather than to substrate or biomass.	PLAN.md C.6	unverified

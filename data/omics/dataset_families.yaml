@@ -1,0 +1,103 @@
+# fermdb omics dataset families
+#
+# Curated queries this atlas runs against SRA and GEO (src/fermdb/omics/sra.py,geo.py), plus the
+# counts they returned when someone last checked. These are historical snapshots, NOT enforced
+# targets: SRA and GEO grow continuously, so a live count higher than `expected_count` is normal
+# drift and `fermdb omics status` reports it as such, not as an error. A live count LOWER than
+# expected is the one direction worth a human look (a query broke, or records were withdrawn).
+#
+# PLAN.md F.3 binding rule, restated here because it gates everything this file drives: a run
+# whose conditions are unknown is a column that cannot enter any comparison, so `fermdb omics
+# discover` never queues a run for quantification -- it only ever writes
+# `sra_run.acquisition_status = 'discovered'`. Condition annotation and queuing are later,
+# human-gated steps this repo's omics layer does not perform yet.
+#
+# Curation conventions (docs/reference/CONVENTIONS.md "Curation"): every row below carries
+# `evidence` and `confidence`. The counts here were handed to this build task as measured against
+# SRA/GEO on 2026-09-19 (see docs/reference/DATA_VOLUME.md section 2), but this file was not
+# independently re-checked against NCBI on that exact date by the session that wrote it --
+# "citing a fermdb source file is not evidence" applies to a number as much as to a claim, so
+# `confidence` is `unverified` throughout rather than `high`. Run `fermdb omics discover` and
+# `fermdb omics status` for a live, high-confidence recount (its own writes carry `confidence:
+# high`, because they ARE checked against a live source in the session that runs them).
+
+version: 1
+zone: R
+measured_on: "2026-09-19"
+
+families:
+  - name: sra_isobutanol
+    target: sra
+    db: sra
+    term: isobutanol
+    expected_count: 147
+    notes: >-
+      147 records -> 120 runs, 51,076 MB total, ~288 Gbases (docs/reference/DATA_VOLUME.md section
+      2). By library_strategy: RNA-Seq 72, OTHER 20, AMPLICON 16, Tn-Seq 10, WGS 2. By organism:
+      S. cerevisiae 62, E. coli 18, Z. mobilis 12, F. graminearum 8, L. cremoris 7. 147 is a lower
+      bound: SRA text search only finds what is in submitted metadata, and fermentation metadata
+      is famously sparse (this is risk #1 in PLAN.md W). Budget ~150-250 runs after paper-driven
+      discovery, not 120. The 10 Tn-Seq runs are perturbation evidence (L1/L2 under PLAN.md J.3)
+      rather than correlation (L3) and are prioritised first in `sra_run.priority_rank`
+      (src/fermdb/omics/sra.py:priority_rank_for) -- per run, likely the most informative rows in
+      the whole corpus.
+    evidence: >-
+      docs/reference/DATA_VOLUME.md section 2 ("SRA isobutanol -> 147 records"), itself reported
+      as measured against SRA via NCBI E-utilities on 2026-09-19; not independently re-verified
+      against NCBI by this session.
+    confidence: unverified
+
+  - name: sra_isobutanol_saccharomyces
+    target: sra
+    db: sra
+    term: isobutanol AND Saccharomyces
+    expected_count: 80
+    notes: A subset of sra_isobutanol, narrowed to the Saccharomyces genus.
+    evidence: docs/reference/DATA_VOLUME.md section 2 ("SRA isobutanol AND Saccharomyces 80")
+    confidence: unverified
+
+  - name: sra_isobutanol_ecoli
+    target: sra
+    db: sra
+    term: isobutanol AND "Escherichia coli"
+    expected_count: 40
+    notes: A subset of sra_isobutanol, narrowed to E. coli.
+    evidence: >-
+      docs/reference/DATA_VOLUME.md section 2 ("SRA isobutanol AND E. coli 40")
+    confidence: unverified
+
+  - name: geo_isobutanol
+    target: geo
+    db: gds
+    term: isobutanol AND gse[EntryType]
+    expected_count: 13
+    notes: >-
+      13 GEO series against ~251 yeast isobutanol papers (docs/reference/DATA_VOLUME.md section 2
+      and section 1): roughly 95% of the isobutanol literature deposited no expression data at
+      all. This omics layer complements the literature-derived engineering records; it cannot
+      substitute for them. `geo.discover_geo_series` links each series to its SRA BioProject
+      directly from esummary's own `bioproject` field, which `sra.resolve_dataset_id` then uses to
+      point a matching SRA run at its GEO series rather than at a bare SRA study.
+    evidence: docs/reference/DATA_VOLUME.md section 2 ("GEO series (GSE) isobutanol 13")
+    confidence: unverified
+
+  - name: sra_ethanol_saccharomyces_reference_layer
+    target: sra
+    db: sra
+    term: ethanol AND "Saccharomyces cerevisiae"[Organism]
+    expected_count: 13117
+    notes: >-
+      THE CAPPED REFERENCE LAYER -- recorded here as the denominator the cap decision was made
+      against, not as a query this atlas ever bulk-runs. 147 isobutanol records against 13,117
+      ethanol records is an 89x ratio (docs/reference/DATA_VOLUME.md section 2); extrapolated at
+      the measured ~426 MB/run this is ~5.6 TB, against a ~51 GB isobutanol corpus. The project
+      decision (PLAN.md, DATA_VOLUME.md section 2) is SIX studies only, hand-picked by a curator,
+      never bulk SRA discovery against this term. `fermdb omics discover` refuses to run a
+      `guard`-ed family without `--force-guarded` (src/fermdb/omics/__init__.py:cmd_omics_discover)
+      for exactly this reason, and `sra.discover_sra_runs`'s `max_run_ids` safety cap (default
+      2000) refuses this query's ~13,000 hits even if something calls it directly.
+    guard: ethanol_reference_cap
+    evidence: >-
+      docs/reference/DATA_VOLUME.md section 2 ("SRA ethanol AND S. cerevisiae 13117"), reported as
+      the measured denominator for the reference-layer cap decision.
+    confidence: unverified

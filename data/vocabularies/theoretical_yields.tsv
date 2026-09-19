@@ -1,0 +1,60 @@
+# theoretical_yields.tsv -- theoretical mass/molar fermentation yield, keyed by (product_id,
+# substrate). New in this revision (D5): split out of products.tsv, where the yield used to be an
+# unnamed-substrate assumption baked into column names (`glucose_mw_g_mol`,
+# `theoretical_yield_g_per_g`, ...). A yield is a property of a *pair* -- one product from one
+# substrate, under one assumed stoichiometry -- not a property of the product alone, so it gets its
+# own row and its own substrate column instead of a silent glucose default. Adding a non-glucose
+# substrate for a product later (e.g. a xylose-based isobutanol yield) is a new row here, never a
+# new column.
+#
+# Columns:
+#   product_id            YAA:PRODUCT:<slug> CURIE, joining to products.tsv `id`
+#   substrate             the substrate name this yield is computed against (e.g. "glucose");
+#                          plain lowercase text for now -- there is no substrates.tsv yet
+#   substrate_mw_g_mol    molar mass of the substrate used in the yield calculation below
+#   product_mw_g_mol      molar mass of the product used in the yield calculation below (mirrors
+#                          products.tsv `product_mw_g_mol` for this product; kept alongside so this
+#                          row is self-contained and its own arithmetic can be checked without a
+#                          join)
+#   stoichiometry         the balanced reaction assumed for the theoretical yield, or 'unknown' if
+#                          not computed (PLAN.md C.4: yield "depends on the assumed pathway and the
+#                          assumed redox/ATP closure")
+#   mol_per_mol           mol product / mol substrate under `stoichiometry`; NULL (blank) unless
+#                          state='recorded' (D3's three-state-numeric rule, applied here with just
+#                          the two states this file actually uses -- see `state` below)
+#   g_per_g               mass yield under `stoichiometry`; NULL (blank) unless state='recorded'
+#   state                 'recorded' | 'unknown' -- D3 applied to theoretical yields. 'unknown'
+#                          means a yield was sought but the pathway/redox closure is not settled
+#                          (recorded as attempted, not resolved), never coerced to 0 or blank text.
+#                          There is no 'not_applicable' state in this file: every (product,
+#                          substrate) row listed here is one fermdb has chosen to track, so a yield
+#                          for it is always in principle applicable, just sometimes unresolved.
+#   evidence, confidence  per docs/reference/CONVENTIONS.md "Curation" (D2: closed four-value set
+#                          'unverified' | 'low' | 'medium' | 'high'; see products.tsv header for
+#                          the evidence-honesty rule applied to 'high').
+#
+# NULL vs 'unknown' (docs/reference/CONVENTIONS.md, "Missing values"): `state`='unknown' plus a
+# blank `mol_per_mol`/`g_per_g` means a yield was computed as attempted and not resolved; a truly
+# empty row (never attempted) is not a case this file has, because every row here is a product this
+# atlas has deliberately chosen to compute a yield for.
+#
+# Ethanol (0.511 g/g) and isobutanol (0.411 g/g) from glucose are carried over from products.tsv
+# unchanged. Their confidence is 'unverified' here even though the molar masses feeding the
+# arithmetic were themselves checked against ChEBI (see products.tsv): the *stoichiometric
+# equation* each yield rests on ("1 glucose -> 2 ethanol + 2 CO2", "1 glucose -> 1 isobutanol +
+# 2 CO2 + H2O") is cited only to PLAN.md B.2, a fermdb-internal document, not to an external
+# pathway/stoichiometry reference actually checked in this session -- citing PLAN.md for the
+# equation is the same "memory with an extra hop" compartments.tsv was rewritten to avoid, even
+# though the arithmetic that follows from it is exact and the molar masses are independently
+# verified.
+product_id	substrate	substrate_mw_g_mol	product_mw_g_mol	stoichiometry	mol_per_mol	g_per_g	state	evidence	confidence
+YAA:PRODUCT:isobutanol	glucose	180.16	74.12	1 glucose -> 1 isobutanol + 2 CO2 + H2O	1.0	0.411	recorded	PLAN.md B.2 states this exact stoichiometry (74.12/180.16=0.411 g/g); glucose and isobutanol MWs verified against ebi.ac.uk/chebi via web search 2026-09-19 (see products.tsv), but the stoichiometric equation itself is cited only to PLAN.md, an internal document, not to an external pathway reference checked in this session.	unverified
+YAA:PRODUCT:ethanol	glucose	180.16	46.07	1 glucose -> 2 ethanol + 2 CO2	2.0	0.511	recorded	PLAN.md B.2 states this exact stoichiometry (2*46.07/180.16=0.511 g/g); glucose and ethanol MWs verified against ebi.ac.uk/chebi via web search 2026-09-19 (see products.tsv), but the stoichiometric equation itself is cited only to PLAN.md, an internal document, not to an external pathway reference checked in this session.	unverified
+YAA:PRODUCT:3-methyl-1-butanol	glucose	180.16	88.15	unknown			unknown	Unlike ethanol/isobutanol, this C5 alcohol requires an extra acetyl-CoA condensation onto 2-ketoisovalerate before decarboxylation/reduction, so its carbon and redox cost is not a simple per-glucose ratio -- see PLAN.md C.4 ("the stoichiometry depends on the assumed pathway and the assumed redox/ATP closure"). A curator should fix the assumed elongation pathway before this is computed.	medium
+YAA:PRODUCT:2-methyl-1-butanol	glucose	180.16	88.15	unknown			unknown	Same isoleucine-pathway elongation problem as 3-methyl-1-butanol: an extra acetyl-CoA condensation step whose redox/ATP closure is not settled here (PLAN.md C.4). Yield left 'unknown' pending a curator-fixed pathway.	medium
+YAA:PRODUCT:n-butanol	glucose	180.16	74.12	1 glucose -> 1 n-butanol + 2 CO2 + H2O	1.0	0.411	recorded	n-butanol is a structural isomer of isobutanol (same formula C4H10O, same MW), so the same atom-balanced equation gives the same mass yield; this is this curator's own derivation by isomer analogy, not a value read from a butanol-fermentation source, and the real CoA-dependent (acetyl-CoA condensation) ABE pathway's redox/ATP closure has not been checked against it (unverified) -- treat as a mass-balance upper bound, not a confirmed pathway yield.	medium
+YAA:PRODUCT:1-propanol	glucose	180.16	60.10	unknown			unknown	1-propanol in yeast arises from the threonine/2-ketobutyrate branch, not directly from a glycolytic 6-carbon unit, so a simple per-glucose stoichiometry is not established here; left 'unknown' rather than guessed (PLAN.md C.4).	medium
+YAA:PRODUCT:2-3-butanediol	glucose	180.16	90.12	1 glucose -> 1 (2,3-butanediol) + 2 CO2	1.0	0.500	recorded	Stoichiometry is this curator's own derivation from standard butanediol-fermentation biochemistry (2 pyruvate -> alpha-acetolactate -CO2-> acetoin -CO2-> 2,3-butanediol via the same acetolactate-synthase/KARI-family chemistry used upstream of isobutanol), not read from a source for this project (unverified) -- a curator should confirm before this yield is relied on.	medium
+YAA:PRODUCT:lactate	glucose	180.16	90.08	1 glucose -> 2 lactic acid	2.0	1.000	recorded	Standard homolactic fermentation (glycolysis to pyruvate, then pyruvate + NADH -> lactate, regenerating NAD+; atom-balanced with no byproduct) -- textbook biochemistry recalled by this curator, not read from a source for this project (unverified).	medium
+YAA:PRODUCT:succinate	glucose	180.16	118.09	unknown			unknown	Succinate's per-glucose yield is genuinely pathway-dependent (oxidative-branch-only vs. reductive-branch-with-CO2-fixation vs. combined routes give materially different numbers in the metabolic-engineering literature) -- exactly the case PLAN.md C.4 warns about. Left for a curator to fix a specific pathway and citation.	medium
+YAA:PRODUCT:itaconate	glucose	180.16	130.10	unknown			unknown	Itaconate is produced from cis-aconitate via decarboxylation off the TCA cycle, and its maximum per-glucose yield depends on whether the pathway is assumed purely oxidative or supplemented with an anaplerotic/reductive route -- not settled here; left for a curator to fix a specific pathway and citation.	medium
