@@ -8,6 +8,7 @@ built inline); the CLI tests monkeypatch `fermdb.cli._literature_client` for the
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from collections.abc import Iterator
 from dataclasses import dataclass, field
@@ -17,6 +18,7 @@ import pytest
 
 from fermdb import cli
 from fermdb.db import IN_MEMORY, open_db
+from fermdb.literature import eutils as eutils_module
 from fermdb.literature.discovery import canonical_publication_id, normalize_title, run_family
 from fermdb.literature.eutils import EutilsClient, EutilsError
 from fermdb.literature.queries import (
@@ -939,3 +941,30 @@ def test_cli_literature_status_reports_every_shipped_family_with_no_runs_yet(
         "ethanol_scerevisiae_prod_ferm_tol",
     ):
         assert family_name in out
+
+
+def test_esummary_chunks_large_id_lists_to_avoid_http_414() -> None:
+    """A whole family's id list does not fit in a GET URL.
+
+    Discovery failed with HTTP 414 on the first real run: esummary joined all 1,309 ids of
+    isobutanol_all into one URL, roughly 12 kB. The small families worked, which is why it
+    survived the dry run.
+    """
+    calls: list[int] = []
+
+    class CountingTransport:
+        def get(self, url: str, *, timeout: float) -> bytes:
+            ids = url.split("id=")[1].split("&")[0].split("%2C")
+            calls.append(len(ids))
+            body = {"result": {"uids": ids, **{i: {"uid": i} for i in ids}}}
+            return json.dumps(body).encode()
+
+    client = EutilsClient(
+        transport=CountingTransport(), sleep=lambda _: None, monotonic=lambda: 0.0
+    )
+    ids = [str(i) for i in range(1, 651)]
+    out = client.esummary(db="pubmed", ids=ids)
+
+    assert len(calls) == 4, f"expected 4 chunks of <=200, got {calls}"
+    assert max(calls) <= eutils_module.MAX_IDS_PER_REQUEST
+    assert len(out) == 650, "every id must still come back exactly once"

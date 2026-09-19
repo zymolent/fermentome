@@ -73,6 +73,13 @@ class UrllibTransport:
             return bytes(response.read())
 
 
+#: Maximum ids per esummary/efetch request. NCBI's GET endpoint has a URL length limit and
+#: returns HTTP 414 well before a large family's id list fits: 1,309 ids is ~12 kB of URL.
+#: NCBI's own guidance is to POST above a couple of hundred ids; chunking GETs achieves the same
+#: without widening the Transport protocol, which the test fakes implement.
+MAX_IDS_PER_REQUEST = 200
+
+
 @dataclass(frozen=True)
 class EsearchResult:
     """One page of an esearch call."""
@@ -265,18 +272,19 @@ class EutilsClient:
         """Return one summary dict per id, in the order NCBI reports `uids` (not input order)."""
         if not ids:
             return []
-        params = {"db": db, "id": ",".join(ids), "retmode": "json"}
-        raw = self._request("esummary.fcgi", self._common_params(params))
-        payload = self._parse_json("esummary.fcgi", raw)
-        result = payload.get("result")
-        if not isinstance(result, dict):
-            raise EutilsError(f"esummary.fcgi response missing 'result': {payload!r}")
-        uids = result.get("uids", [])
-        summaries = []
-        for uid in uids:
-            doc = result.get(uid)
-            if isinstance(doc, dict):
-                summaries.append(doc)
+        summaries: list[dict[str, Any]] = []
+        for start in range(0, len(ids), MAX_IDS_PER_REQUEST):
+            chunk = ids[start : start + MAX_IDS_PER_REQUEST]
+            params = {"db": db, "id": ",".join(chunk), "retmode": "json"}
+            raw = self._request("esummary.fcgi", self._common_params(params))
+            payload = self._parse_json("esummary.fcgi", raw)
+            result = payload.get("result")
+            if not isinstance(result, dict):
+                raise EutilsError(f"esummary.fcgi response missing 'result': {payload!r}")
+            for uid in result.get("uids", []):
+                doc = result.get(uid)
+                if isinstance(doc, dict):
+                    summaries.append(doc)
         return summaries
 
     # ---------------------------------------------------------------------------------- efetch
@@ -296,5 +304,9 @@ class EutilsClient:
         """
         if not ids:
             return b""
-        params = {"db": db, "id": ",".join(ids), "rettype": rettype, "retmode": retmode}
-        return self._request("efetch.fcgi", self._common_params(params))
+        chunks: list[bytes] = []
+        for start in range(0, len(ids), MAX_IDS_PER_REQUEST):
+            chunk = ids[start : start + MAX_IDS_PER_REQUEST]
+            params = {"db": db, "id": ",".join(chunk), "rettype": rettype, "retmode": retmode}
+            chunks.append(self._request("efetch.fcgi", self._common_params(params)))
+        return b"\n".join(chunks) if len(chunks) > 1 else chunks[0]
