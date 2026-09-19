@@ -1,0 +1,15 @@
+{
+  "resultList": {
+    "result": [
+      {
+        "doi": "10.9999/fixture-closed",
+        "pmid": "10000002",
+        "pmcid": null,
+        "isOpenAccess": "N",
+        "fullTextUrlList": {
+          "fullTextUrl": []
+        }
+      }
+    ]
+  }
+}

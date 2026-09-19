@@ -126,7 +126,76 @@ Worth creating here for: `architect`, `reviewer`, `curator`, `extractor`, `data-
 problems, not the pass that produces work. Review is cheap relative to rework, and structural
 rework after curation has started is the most expensive thing this project can do.
 
-## 7. Cost shape
+## 6a. Track split, decided 2026-09-20
+
+The project owner has scoped the two tiers by track, and the split is clean:
+
+| track | models | rationale |
+|---|---|---|
+| **Literature** — discovery, triage, extraction, curation drafting | **Local (Ollama) by default**, escalating to Claude on trigger (§7a) | High volume, contained in Zone I, span-validated. Free inference buys a bigger audit sample and unlimited prompt iteration |
+| **Genomic / transcriptomic** — AWS staging, quantification, genome ingest, QC | **Claude tiers throughout** | Lower volume, higher unit stakes, and much of it is structural: the gene layer is the join key for the entire atlas, and the mtDNA annotation feeds construct design |
+
+Within the omics track, §4's rule still decides the tier: **Fable** for the genome ingest, the
+protein QC gate, the mtDNA table-3 annotation and the translational-activator loci (all
+structural or scientific, and uncontained); **Sonnet** for the AWS staging, the salmon wrapper and
+the CLI (pattern-following, tests catch it); **Fable** for the review.
+
+## 7. The local tier
+
+This machine has an RTX 4090 (24 GB VRAM) running Ollama, with `qwen3.6:35b`, `qwen3.6:27b`,
+`gpt-oss:20b`, `gemma4:31b`, `qwen2.5:7b-instruct`, and the vision model `qwen2.5vl:7b`. That is a
+fourth tier, and it is **free at the margin**, which changes where the §1 rule lands.
+
+| use | local model | why it is safe |
+|---|---|---|
+| Triage / classification of ~3,500 abstracts | `qwen2.5:7b-instruct` | Contained, audit-sampled, criteria explicit. At API prices this is ~1.4M tokens; locally it is free, so the audit sample can be *larger* for the same budget |
+| First-pass extraction draft | `qwen3.6:27b` | Safe **only because span verification is model-independent** (§3). The validator, not the model, is what rejects a number that is not in the paper |
+| Scanned or figure-only PDFs | `qwen2.5vl:7b` | Reads page images where text extraction fails. Anything it produces is `digitized` — a distinct evidence grade under C.6 rule 3 |
+| Bulk re-runs after a prompt revision | any local | Re-running is free, so prompt iteration stops being a budget decision |
+| Structure, evidence levels, conflict resolution, adversarial review | **never** | §4 and §5 apply unchanged. Free is not a safety argument |
+
+### The inversion, and the trap underneath it
+
+§3 argued that capability increases the plausibility of errors. Run backwards, that means a
+weaker local model's errors are **more obvious**, so for span-verified extraction each surviving
+error costs a reviewer less to spot. Cheap and weak is not simply worse here.
+
+**But the risk does not disappear, it moves.** A weaker model fails more often by *omission* —
+the measurement it never extracted, the modification it did not notice. False positives are
+caught by the validator and by review. **False negatives are invisible: you cannot review what
+was never proposed.**
+
+So the local tier must be evaluated on **recall, not precision**. The phase-1 gold standard
+exists for exactly this: run the same 20 papers through the local model and through the top tier,
+and compare what each *missed*. If local recall holds, it does the bulk work for nothing. If it
+does not, the top tier extracts and local does triage only.
+
+That measurement is a phase-1 deliverable, and it should decide the routing — not the fact that
+local inference happens to be free.
+
+## 7a. Escalation from local to Claude
+
+Local models run first on the literature track; these four triggers hand a document to Claude.
+
+| trigger | why |
+|---|---|
+| **Self-consistency disagreement** — run the local model twice and escalate where the passes differ | The interesting one. Two passes are free locally, which makes this a signal that would be prohibitively expensive with a metered model. It targets the **false-negative** risk of §7 directly: a field one pass extracts and the other misses is exactly the omission that review cannot see |
+| **Validator failure after one retry** — span will not resolve, schema invalid, yield exceeds the theoretical maximum | The local model has demonstrably failed on this document |
+| **High-value corpus, unconditionally** — all 33 isobutanol × mitochondria papers | 33 papers is a rounding error in cost and they are the core of the strategy C versus E decision |
+| **Curator flag** from the queue | A human has looked and wants it done properly |
+
+Mechanics:
+
+* Every extraction records `extracted_by_tier`, so the phase-1 gold standard can measure
+  local-versus-Claude **recall** per field type (§7). Any field type where local recall is poor
+  becomes an always-escalate rule rather than a judgement call.
+* Escalation carries a **budget cap**; when it is exhausted, documents queue as
+  `escalation_pending` rather than silently falling back to the local result.
+* Escalation never changes a confidence value. A Claude-produced extraction is still
+  `unverified` until a curator checks it — §5 rule 2 is about the derivation of confidence, and
+  tier is not part of it.
+
+## 8. Cost shape
 
 Round 1 was 3 top-tier, 3 Sonnet, 1 Haiku across 7 agents for ~982k subagent tokens. Applying §4
 retrospectively — Sonnet for the benchmark draft, keeping Fable for schema and review — would

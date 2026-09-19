@@ -1,0 +1,16 @@
+{
+  "_fixture_note": "Synthetic esummary.fcgi fixture paired with esearch_ethanol_plain.json. Not a live recording.",
+  "header": {"type": "esummary", "version": "0.3"},
+  "result": {
+    "uids": ["50998877"],
+    "50998877": {
+      "uid": "50998877",
+      "title": "Respiratory deficiency and fermentative capacity in petite Saccharomyces cerevisiae",
+      "pubdate": "1988",
+      "fulljournalname": "Journal of Bacteriology",
+      "articleids": [
+        {"idtype": "pubmed", "idtypen": 1, "value": "50998877"}
+      ]
+    }
+  }
+}

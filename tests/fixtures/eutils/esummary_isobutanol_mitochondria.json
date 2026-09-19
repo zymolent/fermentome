@@ -1,0 +1,39 @@
+{
+  "_fixture_note": "Synthetic, structurally accurate esummary.fcgi response modeled on the real NCBI E-utilities JSON schema. Not a literal recording of a live NCBI call (this session has no network access); used only to exercise EutilsClient/discovery parsing against a FakeTransport in tests/test_literature.py.",
+  "header": {
+    "type": "esummary",
+    "version": "0.3"
+  },
+  "result": {
+    "uids": ["20981231", "20981232", "20981233"],
+    "20981231": {
+      "uid": "20981231",
+      "title": "Compartmentalized metabolic engineering for isobutanol production in mitochondria",
+      "pubdate": "2013 Apr",
+      "fulljournalname": "Nature Biotechnology",
+      "articleids": [
+        {"idtype": "pubmed", "idtypen": 1, "value": "20981231"},
+        {"idtype": "doi", "idtypen": 3, "value": "10.1000/example.nbt2013"}
+      ]
+    },
+    "20981232": {
+      "uid": "20981232",
+      "title": "Mitochondrial targeting of the Ehrlich pathway in Saccharomyces cerevisiae",
+      "pubdate": "2015",
+      "fulljournalname": "Metabolic Engineering",
+      "articleids": [
+        {"idtype": "pubmed", "idtypen": 1, "value": "20981232"}
+      ]
+    },
+    "20981233": {
+      "uid": "20981233",
+      "title": "A second, unrelated report of the same finding",
+      "pubdate": "2016 Jan",
+      "fulljournalname": "Metabolic Engineering",
+      "articleids": [
+        {"idtype": "pubmed", "idtypen": 1, "value": "20981233"},
+        {"idtype": "doi", "idtypen": 3, "value": "10.1000/example.nbt2013"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+LOCUS       NC_001224_EXCERPT        147 bp    DNA     linear   PLN 20-SEP-2026
+DEFINITION  FIXTURE EXCERPT, not a real GenBank record: positions 27666..27812
+            of NC_001224.1 (Saccharomyces cerevisiae S288C mitochondrion,
+            complete genome), fetched live via NCBI efetch on 2026-09-19 and
+            trimmed to exactly the ATP8 (Q0080) CDS so tests/test_omics.py can
+            exercise src/fermdb/omics/references.py's translation self-check
+            without embedding the full 85,779 bp chromosome. Every base, the
+            CDS location and the /translation qualifier below are real NCBI
+            data; only the surrounding record (LOCUS/DEFINITION/coordinates
+            renumbered to 1..147) is synthetic scaffolding.
+ACCESSION   NC_001224_EXCERPT
+VERSION     NC_001224_EXCERPT
+SOURCE      mitochondrion Saccharomyces cerevisiae S288C
+  ORGANISM  Saccharomyces cerevisiae S288C
+FEATURES             Location/Qualifiers
+     source          1..147
+                     /organism="Saccharomyces cerevisiae S288C"
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:559292"
+     gene            1..147
+                     /gene="ATP8"
+                     /locus_tag="Q0080"
+     CDS             1..147
+                     /gene="ATP8"
+                     /locus_tag="Q0080"
+                     /codon_start=1
+                     /transl_table=3
+                     /product="F1F0 ATP synthase subunit 8"
+                     /protein_id="NP_009312.1"
+                     /translation="MPQLVPFYFMNQLTYGFLLMITLLILFSQFFLPMILRLYVSRLF
+                     ISKL"
+ORIGIN
+        1 atgccacaat tagttccatt ttattttatg aatcaattaa catatggttt cttattaatg
+       61 attctattat taattttatt ctcacaattc tttttaccta tgatcttaag attatatgta
+      121 tctagattat ttatttctaa attataa
+//

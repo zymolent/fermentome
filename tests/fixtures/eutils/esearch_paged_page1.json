@@ -1,0 +1,12 @@
+{
+  "_fixture_note": "Synthetic esearch.fcgi fixture, page 1 of 3 (retmax=2, count=5), for exercising EutilsClient.esearch_all_ids pagination. Not a live recording.",
+  "header": {"type": "esearch", "version": "0.3"},
+  "esearchresult": {
+    "count": "5",
+    "retmax": "2",
+    "retstart": "0",
+    "idlist": ["40000001", "40000002"],
+    "translationset": [],
+    "querytranslation": "yeast[tiab] AND mtDNA[tiab]"
+  }
+}

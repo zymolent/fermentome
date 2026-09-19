@@ -1,0 +1,15 @@
+{
+  "resultList": {
+    "result": [
+      {
+        "doi": "10.9999/fixture-pmc-fallback",
+        "pmid": "10000003",
+        "pmcid": "PMC1000003",
+        "isOpenAccess": "Y",
+        "fullTextUrlList": {
+          "fullTextUrl": []
+        }
+      }
+    ]
+  }
+}

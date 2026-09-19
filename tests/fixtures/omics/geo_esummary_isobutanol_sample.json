@@ -1,0 +1,73 @@
+{
+  "_fixture_note": "Trimmed, real NCBI esummary (db=gds) responses, fetched live via eutils on 2026-09-19/20 for GSE175794 and GSE200448. 'samples' arrays are truncated (real n_samples is larger than the arrays below); every other field is verbatim. The third entry, 'uid': '999999999', is SYNTHETIC (not a real GEO record) and exists only to exercise the no-linked-bioproject case; it is clearly out of NCBI's real uid range.",
+  "header": { "type": "esummary", "version": "0.3" },
+  "result": {
+    "uids": ["200175794", "200200448", "999999999"],
+    "200175794": {
+      "uid": "200175794",
+      "accession": "GSE175794",
+      "title": "Tryptophan plays a central role in yeast’s tolerance to isobutanol",
+      "gpl": "23380",
+      "gse": "175794",
+      "taxon": "Saccharomyces cerevisiae S288C",
+      "entrytype": "GSE",
+      "gdstype": "Expression profiling by high throughput sequencing",
+      "pdat": "2021/10/20",
+      "suppfile": "XLSX",
+      "samples": [
+        { "accession": "GSM5348134", "title": "1. WT" },
+        { "accession": "GSM5348155", "title": "22. Sc12+Trp+IB" }
+      ],
+      "n_samples": 24,
+      "extrelations": [
+        {
+          "relationtype": "SRA",
+          "targetobject": "SRP321884",
+          "targetftplink": "ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP321/SRP321884/"
+        }
+      ],
+      "pubmedids": ["34645498"],
+      "ftplink": "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE175nnn/GSE175794/",
+      "bioproject": "PRJNA733673"
+    },
+    "200200448": {
+      "uid": "200200448",
+      "accession": "GSE200448",
+      "title": "Deep sequencing and fitness calculation for plasmids carrying the CREATE cassette from the enriched tolerant strains under different pressures by using Illumina protocol",
+      "gpl": "21117",
+      "gse": "200448",
+      "taxon": "Escherichia coli str. K-12 substr. MG1655",
+      "entrytype": "GSE",
+      "gdstype": "Other",
+      "pdat": "2024/04/01",
+      "suppfile": "TXT",
+      "samples": [
+        { "accession": "GSM6033853", "title": "High temperature" },
+        { "accession": "GSM6033850", "title": "Isobutanol" }
+      ],
+      "n_samples": 5,
+      "extrelations": [],
+      "pubmedids": [],
+      "ftplink": "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE200nnn/GSE200448/",
+      "bioproject": "PRJNA824516"
+    },
+    "999999999": {
+      "uid": "999999999",
+      "accession": "GSE999999",
+      "title": "Synthetic fixture series with no linked BioProject",
+      "gpl": "00000",
+      "gse": "999999",
+      "taxon": "Saccharomyces cerevisiae",
+      "entrytype": "GSE",
+      "gdstype": "Other",
+      "pdat": "2020/01/01",
+      "suppfile": "",
+      "samples": [],
+      "n_samples": 0,
+      "extrelations": [],
+      "pubmedids": [],
+      "ftplink": "",
+      "bioproject": ""
+    }
+  }
+}

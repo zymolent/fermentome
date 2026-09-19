@@ -1,0 +1,15 @@
+{
+  "_fixture_note": "Synthetic, structurally accurate esearch.fcgi response modeled on the real NCBI E-utilities JSON schema. Not a literal recording of a live NCBI call (this session has no network access); used only to exercise EutilsClient's parsing against a FakeTransport in tests/test_literature.py.",
+  "header": {
+    "type": "esearch",
+    "version": "0.3"
+  },
+  "esearchresult": {
+    "count": "3",
+    "retmax": "3",
+    "retstart": "0",
+    "idlist": ["20981231", "20981232", "20981233"],
+    "translationset": [],
+    "querytranslation": "isobutanol[tiab] AND mitochondri*[tiab]"
+  }
+}

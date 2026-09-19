@@ -875,7 +875,31 @@ discover runs → rank relevance → fetch the paper → extract conditions from
 ```
 
 Quantifying a run whose conditions are unknown produces a column in a matrix that cannot be used
-in any comparison. **Condition annotation gates quantification, not the other way round.**
+in any comparison.
+
+**Amended 2026-09-20. This gate was an economic rule wearing a scientific costume, and the two
+have now been separated:**
+
+| rule | status |
+|---|---|
+| *No contrast, comparison or aggregate without an approved `condition_context`* | **Scientific. Stands unconditionally.** This is what protects every downstream claim |
+| *Do not quantify a run whose conditions are unknown* | **Economic. Void when compute is free.** It existed to avoid spending cloud time and storage on columns nobody could use |
+
+The isobutanol corpus is 120 runs and 51 GB — roughly 36 core-hours, which is about **$9 of spot
+compute** on the `c7i.16xlarge` the omics track uses. Quantifying the handful of runs whose
+conditions never get resolved therefore wastes single-digit dollars, against a real gain: mapping
+rates and QC expose unusable runs immediately, and an exploratory matrix exists months before
+condition curation finishes.
+
+The rule was written when the corpus in view was thousands of runs, where that arithmetic
+reverses.
+
+So: **quantify everything now, define contrasts only from approved conditions.** A quantified run
+with unknown conditions is a legitimate artifact carrying `condition_context = NULL`; it simply
+cannot enter a contrast, and the schema enforces that rather than the pipeline order.
+
+The rule reverts to its original form if the corpus ever expands to a scale where compute is a
+real cost — the ethanol universe at 13,117 runs, for instance.
 
 ## F.4 Processing pipeline
 

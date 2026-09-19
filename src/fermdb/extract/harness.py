@@ -1,0 +1,1045 @@
+"""One publication in, one Zone I ``extraction`` row out.
+
+PLAN.md H.5 and V.4 between them describe this module completely:
+
+* **H.5** — per publication, emit schema-constrained JSON into Zone I, with a verbatim quote and
+  character offsets for *every* extracted value, `review_state='proposed'`, and a deterministic
+  validator that re-reads the source at those offsets.
+* **V.4** — extraction cost is the budget line that dominates the whole project, and the way it is
+  controlled is not a cheaper model but a smaller prompt: send the methods and results sections
+  only, not the whole paper. PLAN.md's own arithmetic makes that roughly thirteen times cheaper
+  across the corpus. :func:`split_sections` and :func:`build_excerpt` are that saving.
+
+Sending an excerpt rather than the paper creates the one genuinely tricky problem in this file.
+The model reports offsets into the text it was shown, but a span is only useful if it points into
+the document. So every span is verified **twice**: once against the excerpt at the offsets the
+model gave (:func:`fermdb.llm.validate.verify_span`, exact, no normalization), and again against
+the whole document after :meth:`Excerpt.to_document` translates them. A quote that survives only
+the first check — because it straddles the boundary between two stitched-together sections, say —
+is rejected. Only document offsets are ever stored, because an offset into a temporary excerpt is
+an offset into something nobody can reconstruct.
+
+Three things this module deliberately does not do:
+
+* **It does not write Zone R or Zone H.** If there is no ``publication`` row for the paper it
+  refuses, rather than creating one: a publication record is Zone R and PLAN.md L.5 forbids an
+  agent from writing there. Run literature discovery first.
+* **It does not promote anything.** Everything it writes is ``review_state='proposed'``, and the
+  ``extraction`` table's CHECK constraints make any other state require a named curator.
+* **It does not store a partial payload.** If any record fails validation, the run fails — after
+  one retry with the validator's complaints fed back to the model (see
+  :func:`fermdb.llm.runtime.run`). Storing the records that happened to pass would put
+  half-validated output in the same table, in the same shape, as validated output.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import sqlite3
+import uuid
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+from importlib import resources
+from pathlib import Path
+from typing import Any, Final
+
+from ..config import Settings
+from ..llm import (
+    LlmConfig,
+    Provider,
+    ResultCache,
+    RunStats,
+    Span,
+    load_theoretical_yields,
+    load_units,
+    resolver_from_ids,
+    run,
+    validate_records,
+    verify_span,
+)
+from ..llm.validate import EntityResolver, TheoreticalYields, UnitTable
+from .schemas import (
+    RECORD_KINDS,
+    iter_payload_records,
+    load_vocabulary,
+    payload_schema,
+    record_path,
+)
+
+__all__ = [
+    "DEFAULT_EXTRACTION_SECTIONS",
+    "EXTRACTOR",
+    "EXTRACTOR_VERSION",
+    "SECTION_NAMES",
+    "TRIAGE_SCHEMA",
+    "UNSECTIONED",
+    "Excerpt",
+    "ExcerptPiece",
+    "ExtractionError",
+    "ExtractionOutcome",
+    "PromptError",
+    "PromptFile",
+    "RecordNote",
+    "Section",
+    "SectioningError",
+    "SourceTextError",
+    "TriageVerdict",
+    "build_excerpt",
+    "extract_publication",
+    "find_publication",
+    "load_prompt",
+    "load_source_text",
+    "split_sections",
+    "triage_publication",
+    "write_extraction",
+]
+
+JsonObject = dict[str, Any]
+JsonSchema = dict[str, Any]
+
+#: Who wrote the row, recorded on every extraction.
+EXTRACTOR: Final[str] = "fermdb.extract.harness"
+
+#: Bumped when this module changes what an extraction row *means* — the section selection, the
+#: span translation, the validation gate. Not a release number: it is the answer to "would this
+#: code produce the same row from the same paper?", which a curator reviewing an old row needs.
+EXTRACTOR_VERSION: Final[str] = "1"
+
+
+# ---------------------------------------------------------------------------------- exceptions
+
+
+class ExtractionError(RuntimeError):
+    """Extraction could not be completed. The base for everything this module raises."""
+
+
+class SectioningError(ExtractionError):
+    """The document could not be split into the sections extraction needs."""
+
+
+class SourceTextError(ExtractionError):
+    """There is no readable full text for this publication."""
+
+
+class PromptError(ExtractionError):
+    """A prompt file is missing, malformed, or was rendered with the wrong placeholders."""
+
+
+# ------------------------------------------------------------------------------------ sections
+
+#: Normalized section names. ``front_matter`` is whatever precedes the first recognized heading —
+#: usually a title block and author list — and ``other`` is a heading that was recognized as a
+#: heading but not as one of these.
+SECTION_NAMES: Final[tuple[str, ...]] = (
+    "front_matter",
+    "abstract",
+    "introduction",
+    "methods",
+    "results",
+    "results_and_discussion",
+    "discussion",
+    "conclusion",
+    "acknowledgements",
+    "references",
+    "supplementary",
+    "other",
+)
+
+#: The name given to a document with no recognizable headings at all. Not in
+#: :data:`DEFAULT_EXTRACTION_SECTIONS`, so such a document fails loudly by default rather than
+#: quietly costing whole-paper tokens; an operator who wants that pays for it on purpose.
+UNSECTIONED: Final[str] = "unsectioned"
+
+#: What the model is shown. PLAN.md V.4's staged filter, spelled as a constant so the cost
+#: decision is visible and changeable in one place.
+DEFAULT_EXTRACTION_SECTIONS: Final[tuple[str, ...]] = (
+    "methods",
+    "results",
+    "results_and_discussion",
+)
+
+# Order matters: 'results and discussion' is tried before 'results' and before 'discussion',
+# because a combined section matched as either of its halves would silently drop the other half.
+_HEADING_KEYWORDS: Final[tuple[tuple[str, re.Pattern[str]], ...]] = (
+    ("results_and_discussion", re.compile(r"^results?\s+and\s+discussions?$")),
+    ("methods", re.compile(r"^(?:materials?\s+and\s+)?methods?$")),
+    ("methods", re.compile(r"^methods?\s+and\s+materials?$")),
+    ("methods", re.compile(r"^experimental(?:\s+(?:procedures?|section|methods?|details?))?$")),
+    ("results", re.compile(r"^results?$")),
+    ("discussion", re.compile(r"^discussions?$")),
+    ("abstract", re.compile(r"^(?:abstract|summary)$")),
+    ("introduction", re.compile(r"^(?:introduction|background)$")),
+    ("conclusion", re.compile(r"^(?:conclusions?|concluding\s+remarks)$")),
+    ("acknowledgements", re.compile(r"^acknowledge?ments?$")),
+    ("references", re.compile(r"^(?:references?|bibliography|literature\s+cited)$")),
+    ("supplementary", re.compile(r"^supplement(?:ary|al)(?:\s+\w+)*$")),
+)
+
+# A heading is a whole line, optionally numbered ('2.1 Methods'), optionally a markdown heading
+# ('## Methods'), optionally emphasized ('**Methods**'), optionally followed by a colon. Short,
+# because a paragraph that happens to begin with the word Results is not a heading.
+_HEADING_RE: Final[re.Pattern[str]] = re.compile(
+    r"^[ \t]*(?:\#{1,6}[ \t]*)?(?:\d+(?:\.\d+)*[.)]?[ \t]*)?"
+    r"\*{0,2}([A-Za-z][^\n]{0,60}?)\*{0,2}[ \t]*:?[ \t]*$",
+    re.MULTILINE,
+)
+
+_WHITESPACE_RE: Final[re.Pattern[str]] = re.compile(r"\s+")
+
+#: How a section is announced inside the excerpt. The model is told these count toward its
+#: offsets and that a quote must not cross one; :meth:`Excerpt.to_document` enforces the second
+#: half by refusing to translate a span that is not wholly inside one piece.
+_MARKER_TEMPLATE: Final[str] = "[[section: {name}]]"
+_PIECE_SEPARATOR: Final[str] = "\n\n"
+
+
+@dataclass(frozen=True)
+class Section:
+    """One contiguous stretch of the document, 0-based half-open ``[char_start, char_end)``."""
+
+    name: str
+    char_start: int
+    char_end: int
+    heading_as_reported: str | None = None
+
+    @property
+    def length(self) -> int:
+        """``char_end - char_start``. Never plus one (CONVENTIONS.md, "Coordinates")."""
+        return self.char_end - self.char_start
+
+    def text_of(self, document: str) -> str:
+        """This section's own text, cut out of the document."""
+        return document[self.char_start : self.char_end]
+
+
+def _normalize_heading(text: str) -> str:
+    return _WHITESPACE_RE.sub(" ", text).strip().strip(".").lower()
+
+
+def _heading_name(text: str) -> str | None:
+    normalized = _normalize_heading(text)
+    if not normalized:
+        return None
+    for name, pattern in _HEADING_KEYWORDS:
+        if pattern.match(normalized):
+            return name
+    return None
+
+
+def split_sections(document: str) -> tuple[Section, ...]:
+    """Split a paper's plain text into named, contiguous, non-overlapping sections.
+
+    The returned sections tile the document exactly: the first starts at 0, the last ends at
+    ``len(document)``, and each begins at its own heading line. That is what makes an offset
+    translatable in both directions later, and it is why the heading line belongs to the section
+    it announces rather than to the one before it.
+
+    A document with no recognizable heading comes back as a single :data:`UNSECTIONED` section
+    rather than as an error: deciding what to do about that is :func:`build_excerpt`'s job, and it
+    has the caller's wanted-section list to decide with.
+    """
+    boundaries: list[tuple[int, str, str]] = []
+    for match in _HEADING_RE.finditer(document):
+        name = _heading_name(match.group(1))
+        if name is None:
+            continue
+        boundaries.append((match.start(), name, match.group(1).strip()))
+
+    if not boundaries:
+        return (Section(UNSECTIONED, 0, len(document)),)
+
+    sections: list[Section] = []
+    if boundaries[0][0] > 0:
+        sections.append(Section("front_matter", 0, boundaries[0][0]))
+    for index, (start, name, heading) in enumerate(boundaries):
+        end = boundaries[index + 1][0] if index + 1 < len(boundaries) else len(document)
+        sections.append(Section(name, start, end, heading))
+    return tuple(sections)
+
+
+@dataclass(frozen=True)
+class ExcerptPiece:
+    """One document section as it appears in the excerpt, with both coordinate systems."""
+
+    name: str
+    doc_start: int
+    doc_end: int
+    exc_start: int
+    exc_end: int
+
+
+@dataclass(frozen=True)
+class Excerpt:
+    """The text actually sent to the model, plus the map back to the document.
+
+    ``text`` is what the model sees and what its offsets refer to; ``pieces`` is how those offsets
+    become document offsets. Nothing outside this class should do that arithmetic.
+    """
+
+    text: str
+    pieces: tuple[ExcerptPiece, ...]
+    document_chars: int
+
+    @property
+    def section_names(self) -> tuple[str, ...]:
+        """The sections included, in document order, with repeats kept."""
+        return tuple(piece.name for piece in self.pieces)
+
+    @property
+    def chars(self) -> int:
+        """Characters actually sent, markers included."""
+        return len(self.text)
+
+    @property
+    def fraction_of_document(self) -> float:
+        """Sent characters over document characters — PLAN.md V.4's saving, measured per paper."""
+        if self.document_chars <= 0:
+            return 0.0
+        return self.chars / self.document_chars
+
+    def to_document(self, char_start: int, char_end: int) -> tuple[int, int] | None:
+        """Translate excerpt offsets into document offsets, or None if they do not translate.
+
+        None means the span is not wholly inside one included section: it runs across a section
+        marker, or past the end of a piece into the next. Returning None rather than clamping is
+        the point — a clamped span would resolve to *some* text, which is exactly the outcome the
+        span check exists to prevent.
+        """
+        if char_end <= char_start:
+            return None
+        for piece in self.pieces:
+            if piece.exc_start <= char_start and char_end <= piece.exc_end:
+                offset = piece.doc_start - piece.exc_start
+                return char_start + offset, char_end + offset
+        return None
+
+    def section_at(self, char_start: int) -> str | None:
+        """Which section an excerpt offset falls in, or None if it falls on a marker."""
+        for piece in self.pieces:
+            if piece.exc_start <= char_start < piece.exc_end:
+                return piece.name
+        return None
+
+
+def build_excerpt(document: str, sections: Sequence[Section], wanted: Sequence[str]) -> Excerpt:
+    """Stitch the wanted sections into the text the model will be shown.
+
+    Each piece is announced by a ``[[section: name]]`` marker so the model knows what it is
+    reading. The markers are not part of any piece's coordinate range, so a quote that includes
+    one cannot be translated back and is rejected — which is the behaviour we want, because such
+    a quote does not occur in the paper.
+    """
+    chosen = [section for section in sections if section.name in wanted]
+    if not chosen:
+        found = sorted({section.name for section in sections})
+        raise SectioningError(
+            f"none of the wanted sections {list(wanted)} are in this document; it has {found}. "
+            f"Either the full text is a fragment, or the text conversion lost the headings. "
+            f"Pass --sections with a name that is actually present (or "
+            f"'{UNSECTIONED}' to send the whole text and pay for it) rather than extracting "
+            f"from a paper whose methods and results were never found."
+        )
+
+    parts: list[str] = []
+    pieces: list[ExcerptPiece] = []
+    cursor = 0
+    for section in chosen:
+        if parts:
+            parts.append(_PIECE_SEPARATOR)
+            cursor += len(_PIECE_SEPARATOR)
+        marker = _MARKER_TEMPLATE.format(name=section.name) + "\n"
+        parts.append(marker)
+        cursor += len(marker)
+        body = section.text_of(document)
+        pieces.append(
+            ExcerptPiece(
+                name=section.name,
+                doc_start=section.char_start,
+                doc_end=section.char_end,
+                exc_start=cursor,
+                exc_end=cursor + len(body),
+            )
+        )
+        parts.append(body)
+        cursor += len(body)
+
+    return Excerpt(text="".join(parts), pieces=tuple(pieces), document_chars=len(document))
+
+
+# ------------------------------------------------------------------------------------- prompts
+
+_PROMPT_PACKAGE: Final[str] = "fermdb.extract"
+_PROMPT_DIRNAME: Final[str] = "prompts"
+_PROMPT_SUFFIX: Final[str] = ".md"
+_FRONT_MATTER_DELIMITER: Final[str] = "---"
+_PLACEHOLDER_RE: Final[re.Pattern[str]] = re.compile(r"\{\{([a-z_][a-z0-9_]*)\}\}")
+
+
+@dataclass(frozen=True)
+class PromptFile:
+    """A versioned prompt read off disk. Never an inline string.
+
+    PLAN.md L.3: prompts are versioned files and ``prompt_version`` is stored with every output,
+    because an extraction is not reproducible without the prompt that produced it. :attr:`version`
+    therefore carries both the *declared* version from the file's front matter and a digest of the
+    file's bytes — a prompt edited without bumping its declared version is a different prompt, and
+    would otherwise reuse the old version string over new text and hit the old cache entries.
+    """
+
+    name: str
+    declared_version: str
+    role: str
+    template: str
+    sha256: str
+    origin: str
+
+    @property
+    def version(self) -> str:
+        """``'extraction/v1+3f2a...'`` — what is stored in ``extraction.prompt_version``."""
+        return f"{self.name}/{self.declared_version}+{self.sha256[:12]}"
+
+    @property
+    def placeholders(self) -> frozenset[str]:
+        """Every ``{{name}}`` the template expects."""
+        return frozenset(_PLACEHOLDER_RE.findall(self.template))
+
+    def render(self, values: Mapping[str, str]) -> str:
+        """Substitute every ``{{name}}``, refusing a mismatch in either direction.
+
+        A missing value would send the model a literal ``{{excerpt}}``; an extra one usually means
+        a renamed placeholder that is now being silently ignored. Both are worth a loud failure,
+        because the resulting prompt would still *look* fine in a log.
+        """
+        expected = self.placeholders
+        supplied = frozenset(values)
+        if expected != supplied:
+            missing = sorted(expected - supplied)
+            unexpected = sorted(supplied - expected)
+            raise PromptError(
+                f"{self.origin}: placeholder mismatch (missing={missing}, unexpected={unexpected})"
+            )
+        return _PLACEHOLDER_RE.sub(lambda match: values[match.group(1)], self.template)
+
+
+def _parse_front_matter(text: str, origin: str) -> tuple[dict[str, str], str]:
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != _FRONT_MATTER_DELIMITER:
+        raise PromptError(
+            f"{origin}: a prompt file must open with a '---' front-matter block declaring at "
+            f"least 'name' and 'version'; an unversioned prompt produces an unreproducible "
+            f"extraction (PLAN.md L.3)"
+        )
+    header: dict[str, str] = {}
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == _FRONT_MATTER_DELIMITER:
+            return header, "\n".join(lines[index + 1 :]).lstrip("\n")
+        if not line.strip():
+            continue
+        key, separator, value = line.partition(":")
+        if not separator:
+            raise PromptError(f"{origin}: front-matter line {line!r} is not 'key: value'")
+        header[key.strip().lower()] = value.strip()
+    raise PromptError(f"{origin}: front-matter block is never closed with '---'")
+
+
+def load_prompt(name: str, *, directory: Path | None = None) -> PromptFile:
+    """Load a versioned prompt by name.
+
+    ``directory`` overrides the packaged ``prompts/`` folder — for tests, and for a curator
+    trialling a revised prompt without editing the installed package. The override is reflected in
+    :attr:`PromptFile.origin` and, through the content digest, in the stored ``prompt_version``, so
+    a row produced by a trial prompt can never be mistaken for one produced by the shipped prompt.
+    """
+    if directory is not None:
+        path = directory / f"{name}{_PROMPT_SUFFIX}"
+        if not path.is_file():
+            raise PromptError(f"no prompt file at {path}")
+        raw = path.read_text(encoding="utf-8")
+        origin = str(path)
+    else:
+        resource = (
+            resources.files(_PROMPT_PACKAGE)
+            .joinpath(_PROMPT_DIRNAME)
+            .joinpath(f"{name}{_PROMPT_SUFFIX}")
+        )
+        if not resource.is_file():
+            raise PromptError(
+                f"no packaged prompt named {name!r} in {_PROMPT_PACKAGE}/{_PROMPT_DIRNAME}"
+            )
+        raw = resource.read_text(encoding="utf-8")
+        origin = f"{_PROMPT_PACKAGE}/{_PROMPT_DIRNAME}/{name}{_PROMPT_SUFFIX}"
+
+    header, template = _parse_front_matter(raw, origin)
+    declared_name = header.get("name", name)
+    version = header.get("version")
+    if not version:
+        raise PromptError(f"{origin}: front matter has no 'version'")
+    if declared_name != name:
+        raise PromptError(
+            f"{origin}: front matter declares name {declared_name!r} but the file is {name!r}; "
+            f"the two must agree or a stored prompt_version names the wrong file"
+        )
+    if not template.strip():
+        raise PromptError(f"{origin}: the prompt body is empty")
+    return PromptFile(
+        name=name,
+        declared_version=version,
+        role=header.get("role", "extraction"),
+        template=template,
+        sha256=hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+        origin=origin,
+    )
+
+
+# ---------------------------------------------------------------------------------- validation
+
+
+@dataclass(frozen=True)
+class RecordNote:
+    """A non-fatal finding about one proposed record, kept for the curator who reviews it."""
+
+    record_path: str
+    code: str
+    message: str
+
+    def as_dict(self) -> dict[str, str]:
+        """The stored form, inside ``extraction.validation``."""
+        return {"record_path": self.record_path, "code": self.code, "message": self.message}
+
+
+def _translate_span(
+    record: JsonObject, *, path: str, document: str, excerpt: Excerpt
+) -> tuple[JsonObject | None, str | None]:
+    """Move a validated span from excerpt coordinates into document coordinates.
+
+    The span has already been verified against the excerpt by
+    :func:`fermdb.llm.validate.validate_records`. This re-verifies it against the document, which
+    is not redundant: the translation is arithmetic, and arithmetic that is wrong produces offsets
+    that look perfectly plausible.
+    """
+    raw = record.get("span")
+    if not isinstance(raw, Mapping):
+        return None, f"{path}: accepted record has no span object after validation"
+    quote = raw.get("quote")
+    start = raw.get("char_start")
+    end = raw.get("char_end")
+    if not isinstance(quote, str) or not isinstance(start, int) or not isinstance(end, int):
+        return None, f"{path}: span is malformed after validation: {dict(raw)!r}"
+
+    mapped = excerpt.to_document(start, end)
+    if mapped is None:
+        return None, (
+            f"{path}: the span [{start}, {end}) is not wholly inside one of the sections you "
+            f"were given — it runs across a [[section: ...]] marker. Quote from inside a single "
+            f"section."
+        )
+    doc_start, doc_end = mapped
+    span = Span(
+        quote=quote,
+        char_start=doc_start,
+        char_end=doc_end,
+        section=excerpt.section_at(start),
+    )
+    verdict = verify_span(document, span)
+    if not verdict.ok:
+        return None, (
+            f"{path}: the span verified against the excerpt but not against the document "
+            f"({verdict.reason}): {verdict.detail}"
+        )
+    checked = dict(record)
+    checked["span"] = span.as_dict()
+    return checked, None
+
+
+def _normalized_payload(
+    raw: Mapping[str, Any], accepted: Sequence[tuple[str, int, JsonObject]]
+) -> JsonObject:
+    """The payload as it is stored: validated records, document offsets, forced provenance.
+
+    Not the model's raw reply. What is stored has been through
+    :func:`fermdb.llm.validate.validate_records` — ``confidence='unverified'``, ``zone='I'``,
+    ``review_state='proposed'`` forced onto every record whatever the model claimed — and has had
+    its spans translated from excerpt coordinates into document coordinates. Storing the raw reply
+    instead would put excerpt offsets in the database, and an excerpt is not something a curator
+    opening the row a year later can reconstruct.
+
+    The raw reply is not lost: ``extraction.input_hash`` plus the model and prompt version is the
+    cache key it is stored under (PLAN.md L.3), so a run with the cache enabled can produce it
+    again byte for byte.
+
+    Validation is all-or-nothing, so a record's position here is the same as its position in the
+    reply, which is what makes ``record_path`` mean the same thing on the span row, the curation
+    task and the stored payload.
+    """
+    payload: JsonObject = {kind: [] for kind in RECORD_KINDS}
+    for kind, _, record in accepted:
+        payload[kind].append(record)
+    confidence = raw.get("self_confidence")
+    if isinstance(confidence, str):
+        payload["self_confidence"] = confidence
+    return payload
+
+
+def _validate_payload(
+    payload: Mapping[str, Any],
+    *,
+    document: str,
+    excerpt: Excerpt,
+    units: UnitTable,
+    yields: TheoreticalYields,
+    resolve_entity: EntityResolver | None,
+) -> tuple[list[str], list[RecordNote], list[tuple[str, int, JsonObject]]]:
+    """Run every deterministic check over a whole payload.
+
+    Returns ``(fatal errors, non-fatal notes, accepted records)``. The errors are what gets fed
+    back to the model on a retry, so they are phrased as instructions to it rather than as a log
+    line: "quote from inside a single section", not "span translation failed".
+    """
+    flattened = iter_payload_records(payload)
+    report = validate_records(
+        [record for _, _, record in flattened],
+        source_text=excerpt.text,
+        units=units,
+        yields=yields,
+        resolve_entity=resolve_entity,
+        require_span=True,
+    )
+    errors: list[str] = []
+    notes: list[RecordNote] = []
+    accepted: list[tuple[str, int, JsonObject]] = []
+
+    for (kind, index, _), verdict in zip(flattened, report.verdicts, strict=True):
+        path = record_path(kind, index)
+        for issue in verdict.issues:
+            if issue.fatal:
+                errors.append(f"{path}: {issue.message}")
+            else:
+                notes.append(RecordNote(path, issue.code, issue.message))
+        if not verdict.accepted or verdict.record is None:
+            continue
+        translated, failure = _translate_span(
+            verdict.record, path=path, document=document, excerpt=excerpt
+        )
+        if translated is None:
+            errors.append(failure or f"{path}: the span could not be placed in the document")
+            continue
+        accepted.append((kind, index, translated))
+
+    return errors, notes, accepted
+
+
+# ------------------------------------------------------------------------------------ the runs
+
+
+@dataclass(frozen=True)
+class TriageVerdict:
+    """The cheap model's answer to "is this paper worth the expensive one?"."""
+
+    recommend_extraction: bool
+    has_quantitative_production_data: bool
+    has_genetic_modifications: bool
+    reason: str
+    stats: RunStats
+
+
+#: The triage answer's shape. Four fields, no spans: triage extracts nothing, so there is nothing
+#: to point at. It decides whether the extractor runs, and that decision is re-made every time the
+#: prompt version changes rather than stored as a fact about the paper.
+TRIAGE_SCHEMA: Final[JsonSchema] = {
+    "type": "object",
+    "required": [
+        "has_quantitative_production_data",
+        "has_genetic_modifications",
+        "recommend_extraction",
+        "reason",
+    ],
+    "properties": {
+        "has_quantitative_production_data": {"type": "boolean"},
+        "has_genetic_modifications": {"type": "boolean"},
+        "recommend_extraction": {"type": "boolean"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 400},
+    },
+    "additionalProperties": False,
+}
+
+
+@dataclass(frozen=True)
+class ExtractionOutcome:
+    """Everything one extraction produced, whether or not it was written."""
+
+    publication_id: str
+    extraction_id: str | None
+    payload: JsonObject
+    records: tuple[tuple[str, int, JsonObject], ...]
+    notes: tuple[RecordNote, ...]
+    excerpt: Excerpt
+    stats: RunStats
+    prompt_version: str
+    self_confidence: str | None
+    #: Validator complaints from each attempt the model got wrong, oldest first. Empty on a
+    #: first-try success. Stored because "the model needed to be told twice, about this" is a
+    #: measurement of the prompt, and the only place it is ever recorded.
+    failed_attempts: tuple[tuple[str, ...], ...] = ()
+
+    @property
+    def record_count(self) -> int:
+        """How many proposed records survived validation."""
+        return len(self.records)
+
+    @property
+    def counts_by_kind(self) -> dict[str, int]:
+        """Accepted records per payload section, for a one-line report."""
+        counts: dict[str, int] = {}
+        for kind, _, _ in self.records:
+            counts[kind] = counts.get(kind, 0) + 1
+        return counts
+
+    def summary(self) -> str:
+        """One line for a CLI or a log."""
+        kinds = ", ".join(f"{kind}={count}" for kind, count in sorted(self.counts_by_kind.items()))
+        return (
+            f"{self.publication_id}: {self.record_count} proposed record(s)"
+            f"{' (' + kinds + ')' if kinds else ''}; "
+            f"sent {self.excerpt.chars}/{self.excerpt.document_chars} chars "
+            f"({self.excerpt.fraction_of_document:.0%} of the document); "
+            f"{len(self.notes)} note(s)"
+        )
+
+
+def triage_publication(
+    *,
+    publication_id: str,
+    source_text: str,
+    provider: Provider,
+    config: LlmConfig,
+    sections: Sequence[str] = DEFAULT_EXTRACTION_SECTIONS,
+    prompt_directory: Path | None = None,
+    cache: ResultCache | None = None,
+) -> TriageVerdict:
+    """Ask the cheap model whether the expensive one should read this paper.
+
+    PLAN.md L.3's ordering, made runnable: this uses the ``triage`` model role, sees the same
+    excerpt the extractor would, and extracts nothing. A caller that skips it pays full price on
+    every paper; a caller that treats its "no" as final loses papers, which is why the prompt tells
+    the model to be generous and why the verdict is advisory rather than stored.
+    """
+    excerpt = build_excerpt(source_text, split_sections(source_text), sections)
+    prompt_file = load_prompt("triage", directory=prompt_directory)
+    prompt = prompt_file.render(
+        {
+            "publication_id": publication_id,
+            "section_names": ", ".join(excerpt.section_names),
+            "excerpt": excerpt.text,
+        }
+    )
+    result = run(
+        prompt,
+        TRIAGE_SCHEMA,
+        provider=provider,
+        model=config.model_for("triage"),
+        prompt_version=prompt_file.version,
+        options=config.options,
+        timeout_s=config.timeout_s,
+        cache=cache,
+    )
+    value = result.value
+    return TriageVerdict(
+        recommend_extraction=bool(value["recommend_extraction"]),
+        has_quantitative_production_data=bool(value["has_quantitative_production_data"]),
+        has_genetic_modifications=bool(value["has_genetic_modifications"]),
+        reason=str(value["reason"]),
+        stats=result.stats,
+    )
+
+
+def extract_publication(
+    conn: sqlite3.Connection,
+    *,
+    publication_id: str,
+    source_text: str,
+    provider: Provider,
+    config: LlmConfig,
+    settings: Settings,
+    sections: Sequence[str] = DEFAULT_EXTRACTION_SECTIONS,
+    prompt_directory: Path | None = None,
+    resolve_entity: EntityResolver | None = None,
+    cache: ResultCache | None = None,
+    run_id: str | None = None,
+    write: bool = True,
+    now: datetime | None = None,
+) -> ExtractionOutcome:
+    """Extract one publication into a proposed Zone I ``extraction`` row.
+
+    Args:
+        conn: An open connection. Read for the vocabulary, written only if ``write``.
+        publication_id: Must already exist in ``publication``. This function will not create one:
+            that row is Zone R and PLAN.md L.5 forbids an agent from writing there.
+        source_text: The paper's plain text. Sectioned here; only the wanted sections are sent.
+        provider: Any :class:`~fermdb.llm.providers.Provider`. Tests pass the mock.
+        config: Supplies the model for the ``extraction`` role, sampling options and the timeout.
+            No model name is chosen here.
+        resolve_entity: Injected id resolver. Defaults to one over the product vocabulary, which
+            is the only id space the payload references; pass a wider one where more ids are in
+            play. Never falls back to "assume it resolves".
+        write: False runs everything including validation and writes nothing — the dry run a
+            curator uses to see what a prompt revision would produce.
+
+    Returns:
+        An :class:`ExtractionOutcome`. ``extraction_id`` is None when ``write`` is False.
+
+    Raises:
+        ExtractionError: No publication row, no sections, or a malformed payload.
+        LlmValidationError: The model's output failed validation on every attempt. Nothing is
+            stored: a payload where only some records validated is not a smaller good extraction,
+            it is an extraction whose failures have been hidden.
+    """
+    if _publication_row(conn, publication_id) is None:
+        raise ExtractionError(
+            f"no publication row for {publication_id!r}. Extraction will not create one: a "
+            f"publication record is Zone R and no agent may write there (PLAN.md L.5). Run "
+            f"`fermdb literature discover` first."
+        )
+
+    document = source_text
+    excerpt = build_excerpt(document, split_sections(document), sections)
+    vocabulary = load_vocabulary(settings, conn)
+    schema = payload_schema(vocabulary)
+    units = load_units(settings)
+    yields = load_theoretical_yields(settings)
+    resolver = (
+        resolve_entity if resolve_entity is not None else resolver_from_ids(vocabulary.product_ids)
+    )
+
+    prompt_file = load_prompt("extraction", directory=prompt_directory)
+    prompt = prompt_file.render(
+        {
+            "publication_id": publication_id,
+            "section_names": ", ".join(excerpt.section_names),
+            "excerpt": excerpt.text,
+            "schema_json": json.dumps(schema, indent=2, sort_keys=True),
+        }
+    )
+
+    def check(candidate: JsonObject) -> list[str]:
+        errors, _, _ = _validate_payload(
+            candidate,
+            document=document,
+            excerpt=excerpt,
+            units=units,
+            yields=yields,
+            resolve_entity=resolver,
+        )
+        return errors
+
+    result = run(
+        prompt,
+        schema,
+        provider=provider,
+        model=config.model_for("extraction"),
+        prompt_version=prompt_file.version,
+        options=config.options,
+        timeout_s=config.timeout_s,
+        cache=cache,
+        post_validate=check,
+    )
+
+    # Re-validated after the run rather than reusing what `check` computed, so that a value served
+    # from cache — which skips `post_validate` entirely — is still checked against this source
+    # text before it is written down. The cost is a few microseconds of deterministic work against
+    # a model call that has already happened.
+    errors, notes, accepted = _validate_payload(
+        result.value,
+        document=document,
+        excerpt=excerpt,
+        units=units,
+        yields=yields,
+        resolve_entity=resolver,
+    )
+    if errors:
+        raise ExtractionError(
+            f"{publication_id}: a validated result failed re-validation before storage, which "
+            f"means the cached entry was produced against different source text or this code "
+            f"changed under it: {'; '.join(errors[:5])}"
+        )
+
+    self_confidence = result.value.get("self_confidence")
+    outcome = ExtractionOutcome(
+        publication_id=publication_id,
+        extraction_id=None,
+        payload=_normalized_payload(result.value, accepted),
+        records=tuple(accepted),
+        notes=tuple(notes),
+        excerpt=excerpt,
+        stats=result.stats,
+        prompt_version=prompt_file.version,
+        self_confidence=self_confidence if isinstance(self_confidence, str) else None,
+        failed_attempts=result.failed_attempts,
+    )
+    if not write:
+        return outcome
+    extraction_id = write_extraction(conn, outcome, run_id=run_id, now=now)
+    return replace(outcome, extraction_id=extraction_id)
+
+
+# ------------------------------------------------------------------------------------- storage
+
+
+def _utc_now_iso(now: datetime | None = None) -> str:
+    return (now or datetime.now(UTC)).astimezone(UTC).isoformat(timespec="seconds")
+
+
+def _publication_row(conn: sqlite3.Connection, publication_id: str) -> sqlite3.Row | None:
+    row: sqlite3.Row | None = conn.execute(
+        "SELECT id FROM publication WHERE id = ?", (publication_id,)
+    ).fetchone()
+    return row
+
+
+def find_publication(
+    conn: sqlite3.Connection, *, pmid: str | None = None, doi: str | None = None
+) -> sqlite3.Row | None:
+    """Look a publication up by PMID or DOI, preferring the PMID when both are given."""
+    if pmid:
+        row = conn.execute(
+            "SELECT * FROM publication WHERE pmid = ? OR id = ?", (pmid, f"pmid:{pmid}")
+        ).fetchone()
+        if row is not None:
+            return row  # type: ignore[no-any-return]
+    if doi:
+        row = conn.execute(
+            "SELECT * FROM publication WHERE doi = ? OR id = ?", (doi, f"doi:{doi}")
+        ).fetchone()
+        if row is not None:
+            return row  # type: ignore[no-any-return]
+    return None
+
+
+def load_source_text(
+    conn: sqlite3.Connection, settings: Settings, *, publication_id: str
+) -> tuple[str, str]:
+    """The stored full text for a publication, as ``(text, origin)``.
+
+    Reads the ``fulltext_asset`` row acquisition wrote. Refuses anything it cannot decode as text
+    rather than guessing: there is no PDF text extractor in this build's dependencies, and a PDF
+    decoded as UTF-8 with errors replaced would produce a document full of plausible-looking
+    garbage for a model to quote from.
+    """
+    row = conn.execute(
+        "SELECT content_path, media_type FROM fulltext_asset "
+        "WHERE publication_id = ? AND storage_state = 'stored_fulltext' "
+        "ORDER BY retrieved_at DESC LIMIT 1",
+        (publication_id,),
+    ).fetchone()
+    if row is None:
+        raise SourceTextError(
+            f"no stored full text for {publication_id}. Either it is not open access (see "
+            f"`fermdb literature manual-queue export`) or it was never fetched. Pass "
+            f"--text-file to extract from a local copy instead."
+        )
+    path = settings.data_dir / str(row["content_path"])
+    if not path.is_file():
+        raise SourceTextError(
+            f"{publication_id}: fulltext_asset points at {path}, which does not exist. The "
+            f"derived tier may have been rebuilt without re-acquiring."
+        )
+    media_type = (row["media_type"] or "").split(";", 1)[0].strip().lower()
+    return _decode_text(path, media_type, publication_id), str(path)
+
+
+def _decode_text(path: Path, media_type: str, publication_id: str) -> str:
+    data = path.read_bytes()
+    if media_type == "application/pdf" or data[:5] == b"%PDF-":
+        raise SourceTextError(
+            f"{publication_id}: the stored full text is a PDF ({path}), and this build has no PDF "
+            f"text extractor. Convert it to text first, or pass --text-file. Reporting this "
+            f"rather than decoding the bytes anyway: a PDF read as text produces plausible "
+            f"garbage, and a model will happily quote from it."
+        )
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise SourceTextError(
+            f"{publication_id}: {path} is not valid UTF-8 ({exc}). Not decoding with errors "
+            f"replaced: a replacement character inside a quote makes a span unverifiable against "
+            f"the real text."
+        ) from exc
+
+
+def write_extraction(
+    conn: sqlite3.Connection,
+    outcome: ExtractionOutcome,
+    *,
+    run_id: str | None = None,
+    now: datetime | None = None,
+) -> str:
+    """Write one proposed extraction and its spans. Returns the new extraction id.
+
+    ``review_state`` is ``'proposed'`` and no curator column is set, which the ``extraction``
+    table's CHECK constraints require of an unreviewed row. Promotion out of Zone I happens in
+    :mod:`fermdb.curate.queue`, by a human.
+
+    Span rows are written ``zone='I'``, not ``'R'``, even though ``quoted_text`` is the paper's
+    own words. The zone describes the *claim*, and the claim a span makes is "this passage is the
+    evidence for that value" — which is the model's, not the paper's. The quote inside it is
+    verbatim by construction and verified twice; the choice of it is inference.
+    """
+    extraction_id = f"YAA:EXTR:{uuid.uuid4().hex}"
+    timestamp = _utc_now_iso(now)
+    validation = {
+        "notes": [note.as_dict() for note in outcome.notes],
+        "accepted_records": outcome.record_count,
+        "excerpt_chars": outcome.excerpt.chars,
+        "document_chars": outcome.excerpt.document_chars,
+        "sections_sent": list(outcome.excerpt.section_names),
+        "attempts": outcome.stats.attempts,
+        "cache_hit": outcome.stats.cache_hit,
+        # What the model got wrong before it got it right. A prompt whose extractions all needed
+        # a retry for the same reason is a prompt with a bug in it, and this is where that shows.
+        "failed_attempts": [list(attempt) for attempt in outcome.failed_attempts],
+    }
+    conn.execute(
+        "INSERT INTO extraction (id, publication_id, section, extractor, extractor_version, "
+        "model, model_version, prompt_version, run_id, input_hash, payload, self_confidence, "
+        "validation, review_state, created_at, zone) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'proposed', ?, 'I')",
+        (
+            extraction_id,
+            outcome.publication_id,
+            ",".join(outcome.excerpt.section_names),
+            EXTRACTOR,
+            EXTRACTOR_VERSION,
+            outcome.stats.model,
+            outcome.stats.model_version,
+            outcome.prompt_version,
+            run_id,
+            outcome.stats.input_hash,
+            json.dumps(outcome.payload, sort_keys=True),
+            outcome.self_confidence,
+            json.dumps(validation, sort_keys=True),
+            timestamp,
+        ),
+    )
+
+    for kind, index, record in outcome.records:
+        span = record.get("span")
+        if not isinstance(span, Mapping):
+            continue
+        conn.execute(
+            "INSERT INTO span (id, publication_id, extraction_id, section, char_start, "
+            "char_end, quoted_text, record_path, zone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'I')",
+            (
+                f"YAA:SPAN:{uuid.uuid4().hex}",
+                outcome.publication_id,
+                extraction_id,
+                span.get("section"),
+                span.get("char_start"),
+                span.get("char_end"),
+                span.get("quote"),
+                record_path(kind, index),
+            ),
+        )
+    conn.commit()
+    return extraction_id

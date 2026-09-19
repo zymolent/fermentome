@@ -1,0 +1,8 @@
+<OA>
+  <records>
+    <record id="PMC1000003" citation="Fixture Journal, 2021" license="cc-by">
+      <link format="tgz" updated="2021-01-01" href="ftp://fixture.example.org/PMC1000003.tar.gz"/>
+      <link format="pdf" updated="2021-01-01" href="ftp://fixture.example.org/PMC1000003.pdf"/>
+    </record>
+  </records>
+</OA>

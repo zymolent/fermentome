@@ -1,0 +1,12 @@
+{
+  "_fixture_note": "Synthetic esearch.fcgi fixture for a plain (non-criterion-tagged) ethanol family term, used to test the exclude-unless-admitted default. Not a live recording.",
+  "header": {"type": "esearch", "version": "0.3"},
+  "esearchresult": {
+    "count": "1",
+    "retmax": "1",
+    "retstart": "0",
+    "idlist": ["50998877"],
+    "translationset": [],
+    "querytranslation": "ethanol[tiab] AND mitochondri*[tiab]"
+  }
+}

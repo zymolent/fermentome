@@ -1,0 +1,12 @@
+{
+  "doi": "10.9999/fixture-bronze",
+  "is_oa": true,
+  "oa_status": "bronze",
+  "title": "Fixture: free-to-read but unlicensed mtDNA engineering report",
+  "best_oa_location": {
+    "url": "https://fixture.example.org/bronze/landing",
+    "url_for_pdf": "https://fixture.example.org/bronze/fulltext.pdf",
+    "license": null,
+    "host_type": "publisher"
+  }
+}

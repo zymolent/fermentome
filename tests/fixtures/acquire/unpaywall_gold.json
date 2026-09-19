@@ -1,0 +1,12 @@
+{
+  "doi": "10.9999/fixture-gold",
+  "is_oa": true,
+  "oa_status": "gold",
+  "title": "Fixture: a gold open-access isobutanol titer report",
+  "best_oa_location": {
+    "url": "https://fixture.example.org/gold/landing",
+    "url_for_pdf": "https://fixture.example.org/gold/fulltext.pdf",
+    "license": "cc-by",
+    "host_type": "publisher"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "_fixture_note": "Synthetic esearch.fcgi fixture, page 3 of 3 (final, short page). Not a live recording.",
+  "header": {"type": "esearch", "version": "0.3"},
+  "esearchresult": {
+    "count": "5",
+    "retmax": "2",
+    "retstart": "4",
+    "idlist": ["40000005"],
+    "translationset": [],
+    "querytranslation": "yeast[tiab] AND mtDNA[tiab]"
+  }
+}

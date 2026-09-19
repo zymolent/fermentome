@@ -515,19 +515,67 @@ CREATE TABLE publication (
 
 -- An extraction is always Zone I until a curator promotes it: it is model output about a paper,
 -- not the paper. The CHECK makes that structural rather than a habit.
+--
+-- The column list is PLAN.md H.5's, filled out from the original stub when
+-- src/fermdb/extract/harness.py was written. Section 14 ("Extraction and curation") is the other
+-- half of the same story and explains the review_state lifecycle in full; read it with this.
 CREATE TABLE extraction (
     id                TEXT PRIMARY KEY,
     publication_id    TEXT NOT NULL REFERENCES publication(id),
+    -- Which sections of the paper the model was actually shown, comma-separated in document
+    -- order. PLAN.md V.4 sends methods + results only, which is ~13x cheaper than whole text --
+    -- and that makes this column load-bearing rather than decorative: "the model did not report
+    -- X" means nothing unless you know whether it was shown the part of the paper X lives in.
+    section           TEXT,
     extractor         TEXT NOT NULL,
     extractor_version TEXT NOT NULL,
+    model             TEXT,
+    -- What actually answered, which stops being the same as `model` the moment a tag is re-pulled.
+    model_version     TEXT,
+    -- The prompt file's declared version PLUS a digest of its bytes. An extraction is not
+    -- reproducible without the prompt that produced it (PLAN.md L.3), and a prompt edited without
+    -- a version bump would otherwise reuse an old version string over new text.
     prompt_version    TEXT,
-    review_state      TEXT NOT NULL DEFAULT 'pending'
-                      CHECK (review_state IN ('pending', 'accepted', 'rejected')),
+    run_id            TEXT,
+    -- The `input_hash` half of PLAN.md L.3's (input_hash, model, prompt_version) cache key, so a
+    -- stored row can be traced back to the cached model call that produced it.
+    input_hash        TEXT,
+    -- The typed payload as JSON: strains, modifications, pathway_configurations, measurements,
+    -- conditions, bottlenecks, co_reported_higher_alcohols (src/fermdb/extract/schemas.py).
+    payload           TEXT,
+    -- What the model said about its own certainty. Kept as an audit trail and READ BY NOTHING:
+    -- docs/reference/MODEL_ROUTING.md 5.2 forbids model capability or self-report from entering
+    -- the derivation of a confidence value. Every extracted value's confidence is 'unverified'.
+    self_confidence   TEXT,
+    -- The deterministic validator's report (fermdb.llm.validate): the non-fatal issues a curator
+    -- should see. Fatally rejected records are not in `payload` at all -- they were never stored.
+    validation        TEXT,
+    -- PLAN.md H.5's lifecycle. 'proposed' is where every model output lands.
+    review_state      TEXT NOT NULL DEFAULT 'proposed'
+                      CHECK (review_state IN ('proposed', 'accepted', 'edited', 'rejected')),
+    curator           TEXT,
+    reviewed_at       TEXT,
+    review_reason     TEXT,
     created_at        TEXT NOT NULL DEFAULT (datetime('now')),
-    zone              TEXT NOT NULL DEFAULT 'I' CHECK (zone = 'I')
+    zone              TEXT NOT NULL DEFAULT 'I' CHECK (zone = 'I'),
+    -- Leaving Zone I is a curator action (PLAN.md L.1, L.5). A row that claims to have been
+    -- reviewed must name who reviewed it, when, and why, so a process cannot mark its own
+    -- proposal accepted without leaving a name behind; and a row still 'proposed' must carry
+    -- none of the three, so a half-filled review cannot masquerade as an unreviewed proposal.
+    CHECK (review_state = 'proposed'
+           OR (curator IS NOT NULL AND reviewed_at IS NOT NULL AND review_reason IS NOT NULL)),
+    CHECK (review_state <> 'proposed'
+           OR (curator IS NULL AND reviewed_at IS NULL AND review_reason IS NULL))
 );
 
+CREATE INDEX extraction_by_publication ON extraction(publication_id, review_state);
+
 -- The exact text an extraction came from. 0-based half-open [char_start, char_end).
+--
+-- Offsets are into the WHOLE document, not into the methods+results excerpt the model was shown.
+-- The harness verifies a span twice: once against the excerpt (the text the model actually saw,
+-- which is what its offsets refer to) and again against the document after translating them.
+-- A quote that survives only the first check is not storable.
 CREATE TABLE span (
     id             TEXT PRIMARY KEY,
     publication_id TEXT NOT NULL REFERENCES publication(id),
@@ -536,9 +584,15 @@ CREATE TABLE span (
     char_start     INTEGER,
     char_end       INTEGER,
     quoted_text    TEXT,
+    -- Which field of which record in the extraction's payload this span is the evidence for --
+    -- 'measurements[0]', 'modifications[2]'. Without it a span is a quote attached to a whole
+    -- extraction, and a curator reviewing one value cannot tell which quote justified it.
+    record_path    TEXT,
     zone           TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
     CHECK (char_start IS NULL OR char_end IS NULL OR char_end > char_start)
 );
+
+CREATE INDEX span_by_extraction ON span(extraction_id);
 
 
 -- ---------------------------------------------------------------------------------------------
@@ -1272,10 +1326,18 @@ CREATE TABLE conflict_member (
     PRIMARY KEY (conflict_id, assertion_id)
 );
 
+-- The audit log of every curation decision. Section 15 below drives it for the extraction queue;
+-- `claim`, `release`, `accept` and `edit` were added to `action` there.
 CREATE TABLE curation_event (
     id          TEXT PRIMARY KEY,
     curator     TEXT NOT NULL,
-    action      TEXT NOT NULL CHECK (action IN ('create', 'promote', 'reject', 'supersede',
+    -- 'human' or 'agent'. A background curation worker is an agent: it may claim a task, release
+    -- one, and comment. It may not accept, edit or promote -- PLAN.md L.5, "no agent may promote
+    -- its own proposal". The CHECK at the foot of this table makes that a property of the
+    -- database rather than a rule some Python function is trusted to remember.
+    actor_kind  TEXT NOT NULL DEFAULT 'human' CHECK (actor_kind IN ('human', 'agent')),
+    action      TEXT NOT NULL CHECK (action IN ('create', 'claim', 'release', 'accept', 'edit',
+                                                'promote', 'reject', 'supersede',
                                                 'override_level', 'resolve_conflict', 'comment')),
     target_type TEXT NOT NULL,
     target_id   TEXT NOT NULL,              -- polymorphic; see header note
@@ -1283,8 +1345,11 @@ CREATE TABLE curation_event (
     -- is a signal about the model, and throwing it away loses that signal.
     rationale   TEXT NOT NULL,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    zone        TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R')
+    zone        TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    CHECK (action NOT IN ('accept', 'edit', 'promote') OR actor_kind = 'human')
 );
+
+CREATE INDEX curation_event_by_target ON curation_event(target_type, target_id, created_at);
 
 
 -- ---------------------------------------------------------------------------------------------
@@ -1458,3 +1523,394 @@ JOIN (
             AS n_open_direction_conflicts
     FROM assertion a2
 ) AS counts ON counts.assertion_id = a.id;
+
+
+-- ---------------------------------------------------------------------------------------------
+-- 13. Full text acquisition
+--
+-- src/fermdb/literature/acquire.py resolves open-access status and retrieves full text;
+-- src/fermdb/literature/manual_queue.py handles what it could not. PLAN.md H.4 is binding: full
+-- text is stored ONLY for content whose licence permits it -- everything else is a pointer
+-- (a URL) plus, where a fetch was attempted, a record that it happened and why it did not yield
+-- stored bytes.
+--
+-- Both tables are provenance of a retrieval attempt, not a scientific claim about the paper, so
+-- they follow `raw_object`'s precedent above: zone 'R' by definition, no `evidence`/`confidence`
+-- columns. `publication_id` is nullable on both because acquisition can run ahead of `publication`
+-- being populated -- a DOI/PMID handed in from discovery may not have a `publication` row yet.
+-- ---------------------------------------------------------------------------------------------
+
+CREATE TABLE fulltext_asset (
+    id                  TEXT PRIMARY KEY,
+    publication_id      TEXT REFERENCES publication(id),
+    doi                 TEXT,
+    pmid                TEXT,
+    oa_status           TEXT NOT NULL
+                        CHECK (oa_status IN ('gold', 'green', 'hybrid', 'bronze', 'closed',
+                                             'unknown')),
+    license             TEXT,                -- as reported by the OA source; NULL = not stated
+    -- Three states on purpose (CONVENTIONS.md "Missing values"): 'yes'/'no' is a resolved claim,
+    -- 'unknown' is recorded-but-unresolved, and NULL is "no licence information reached us at
+    -- all" -- distinct from having checked and found the licence ambiguous.
+    text_mining_allowed TEXT CHECK (text_mining_allowed IN ('yes', 'no', 'unknown')),
+    resolved_via        TEXT NOT NULL
+                        CHECK (resolved_via IN ('unpaywall', 'europepmc', 'pmc', 'none')),
+    -- Where bytes were found, whether or not they were stored: PLAN.md H.4 keeps a pointer even
+    -- for a paper whose licence forbids storing a local copy.
+    best_oa_url         TEXT,
+    -- 'stored_fulltext' = the bytes below are ours; 'pointer_only' = oa_status/licence forbids
+    -- storing a copy, only best_oa_url is kept; 'not_found' = nothing retrievable was resolved.
+    storage_state       TEXT NOT NULL
+                        CHECK (storage_state IN ('stored_fulltext', 'pointer_only', 'not_found')),
+    content_path        TEXT,                -- relative to Settings.data_dir; NULL unless stored
+    checksum_sha256     TEXT,
+    media_type          TEXT,
+    source_url          TEXT,                -- exact URL/origin the bytes came from, if any
+    retrieved_at        TEXT,                -- ISO 8601 UTC; NULL if bytes were never fetched
+    fetch_error         TEXT,                -- never silently dropped: why a fetch failed
+    zone                TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    CHECK (doi IS NOT NULL OR pmid IS NOT NULL),
+    -- The three "we actually kept bytes" columns agree with storage_state in both directions,
+    -- the same discipline the three-state numerics elsewhere in this file use.
+    CHECK (storage_state = 'stored_fulltext'
+           OR (content_path IS NULL AND checksum_sha256 IS NULL)),
+    CHECK (storage_state <> 'stored_fulltext'
+           OR (content_path IS NOT NULL AND checksum_sha256 IS NOT NULL
+               AND source_url IS NOT NULL AND retrieved_at IS NOT NULL))
+);
+
+CREATE INDEX fulltext_asset_by_doi ON fulltext_asset(doi);
+CREATE INDEX fulltext_asset_by_pmid ON fulltext_asset(pmid);
+-- A content hash is unique by construction; two rows sharing one would mean two publications
+-- were byte-identical, which is worth refusing rather than silently allowing.
+CREATE UNIQUE INDEX fulltext_asset_checksum_uq ON fulltext_asset(checksum_sha256)
+    WHERE checksum_sha256 IS NOT NULL;
+
+-- THE MANUAL DOWNLOAD QUEUE -- an explicit requirement from the project owner (PLAN.md H.4). A
+-- paper that is not open access, or whose full text could not be retrieved, is recorded here
+-- rather than dropped or retried forever: `manual_queue.py` exports the pending rows as a
+-- worklist and re-ingests whatever the owner drops back into a folder. Same zone/no-evidence
+-- rationale as `fulltext_asset` above -- this is acquisition logistics, not a biological claim.
+CREATE TABLE manual_download_queue (
+    id                     TEXT PRIMARY KEY,
+    publication_id         TEXT REFERENCES publication(id),
+    pmid                   TEXT,
+    doi                    TEXT,
+    title                  TEXT,
+    journal                TEXT,
+    year                   INTEGER,
+    publisher_url          TEXT,
+    best_known_link        TEXT,
+    why_unavailable        TEXT NOT NULL
+                           CHECK (why_unavailable IN ('paywalled', 'no_pdf_found',
+                                                      'fetch_failed', 'licence_forbids')),
+    -- Lower is more urgent. Always written by acquire.compute_priority from priority_topic and
+    -- reports_titer_or_yield, never hand-set, so PLAN.md H.4's ranking rule
+    -- (isobutanol > isobutanol x mitochondria > mtDNA engineering > ethanol, titer/yield papers
+    -- first within a tier) lives in exactly one place and this column is only its recorded
+    -- output.
+    priority               INTEGER NOT NULL,
+    priority_topic         TEXT NOT NULL
+                           CHECK (priority_topic IN ('isobutanol', 'isobutanol_mitochondria',
+                                                     'mtdna_engineering', 'ethanol', 'other')),
+    reports_titer_or_yield INTEGER NOT NULL DEFAULT 0
+                           CHECK (reports_titer_or_yield IN (0, 1)),
+    status                 TEXT NOT NULL DEFAULT 'pending'
+                           CHECK (status IN ('pending', 'provided', 'skipped')),
+    -- Set once `manual-queue ingest` matches a dropped-in file back to this row.
+    fulltext_asset_id      TEXT REFERENCES fulltext_asset(id),
+    notes                  TEXT,
+    added_at               TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at             TEXT,
+    zone                   TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    CHECK (doi IS NOT NULL OR pmid IS NOT NULL),
+    CHECK (status = 'provided' OR fulltext_asset_id IS NULL)
+);
+
+-- One open row per paper: a repeated failed acquisition attempt updates the existing row (see
+-- acquire.enqueue_manual_download) instead of piling up duplicates for the same DOI.
+CREATE UNIQUE INDEX manual_download_queue_doi_uq ON manual_download_queue(doi)
+    WHERE doi IS NOT NULL;
+CREATE UNIQUE INDEX manual_download_queue_pmid_only_uq ON manual_download_queue(pmid)
+    WHERE pmid IS NOT NULL AND doi IS NULL;
+CREATE INDEX manual_download_queue_by_status_priority ON manual_download_queue(status, priority);
+
+
+-- ---------------------------------------------------------------------------------------------
+-- 14. Literature discovery
+--
+-- Corpus construction and inclusion triage (PLAN.md H.2, H.3, R.2), owned by
+-- src/fermdb/literature/{eutils,discovery,queries}.py and driven by the versioned corpus
+-- definition in data/literature/query_families.yaml. `publication` already exists in section 6
+-- above and is reused as-is; nothing here modifies it.
+--
+-- search_run and screening_record are deliberately NOT zoned the way most fact tables are:
+--
+--   * search_run is a record of one E-utilities query having been executed -- a fact about a
+--     computation, not a claim about biology -- and carries no `zone` at all, for exactly the
+--     reason `processing_run` (section 7) already gives for the same choice.
+--   * screening_record's `triage_state` is a deterministic function of query_families.yaml (repo
+--     tier, Zone R) and the recorded rule in discovery.py: re-running the same family against the
+--     same publication reproduces the same triage. That is Zone H's own definition
+--     ("reconstructible from Zone R by running recorded code"), so it is stamped zone = 'H' and
+--     that value is enforced by CHECK, exactly as `extraction` (section 6) enforces zone = 'I' for
+--     the opposite reason. A future topical/relevance classifier (H.3) that scores title+abstract
+--     is model output and MUST live in its own Zone I table with review_state = 'proposed' -- it
+--     must never overwrite `triage_state` here directly.
+-- ---------------------------------------------------------------------------------------------
+
+CREATE TABLE search_run (
+    id                      TEXT PRIMARY KEY,
+    family                  TEXT NOT NULL,           -- query_families.yaml family name
+    db                      TEXT NOT NULL,            -- 'pubmed' | 'pmc' | ...
+    term                    TEXT NOT NULL,            -- the exact term(s) executed, for audit
+    started_at              TEXT NOT NULL,
+    finished_at             TEXT,
+    -- esearch's reported count, summed across any criterion-tagged sub-queries; NOT deduplicated
+    -- against other families or across sub-queries of the same family (that only happens once
+    -- esummary/DOI data is in hand, at the screening_record level below).
+    hit_count               INTEGER,
+    retrieved_count         INTEGER,                 -- ids actually paged and passed to esummary
+    query_families_version  INTEGER NOT NULL,        -- query_families.yaml `version` in effect
+    dry_run                 INTEGER NOT NULL DEFAULT 0 CHECK (dry_run IN (0, 1))
+);
+
+CREATE INDEX search_run_by_family ON search_run(family, finished_at);
+
+CREATE TABLE screening_record (
+    id                   TEXT PRIMARY KEY,
+    publication_id       TEXT NOT NULL REFERENCES publication(id),
+    family               TEXT NOT NULL,
+    first_seen_run_id    TEXT NOT NULL REFERENCES search_run(id),
+    last_seen_run_id     TEXT NOT NULL REFERENCES search_run(id),
+    triage_state         TEXT NOT NULL
+                        CHECK (triage_state IN ('included', 'needs_full_text', 'excluded')),
+    -- Never NULL for an exclusion: "an excluded paper is a decision, not an absence" (PLAN.md
+    -- H.3), and a changed policy must be able to ask what it would now include, which requires
+    -- knowing why each record was excluded in the first place. Citing this row's own family/term
+    -- is not a substitute for a reason naming the actual policy applied.
+    exclusion_reason     TEXT,
+    -- The B.3 criterion (E1-E4, PLAN.md B.3.1-B.3.4) this hit is a full-text CANDIDATE for
+    -- (triage_state = 'needs_full_text') or has been curator-confirmed under (triage_state =
+    -- 'included'); NULL for 'excluded', and always NULL for an isobutanol-tier record, which has
+    -- no admission criteria at all.
+    admitted_criterion   TEXT CHECK (admitted_criterion IN ('E1', 'E2', 'E3', 'E4', 'E5')),
+    -- Denormalized from query_families.yaml as of the run that first wrote this row, so the R.2
+    -- policy actually applied to THIS record stays legible even if the family's tier or default
+    -- disposition changes later.
+    product_tier         TEXT NOT NULL CHECK (product_tier IN ('isobutanol', 'ethanol')),
+    default_disposition  TEXT NOT NULL
+                        CHECK (default_disposition IN ('include_unless_excluded',
+                                                       'exclude_unless_admitted')),
+    pmid                 TEXT,
+    doi                  TEXT,
+    title_normalized     TEXT,
+    -- Mirrors extraction.review_state (section 6): every automated triage starts 'proposed'. A
+    -- curator moving a row to 'accepted' or 'rejected' is what stops a later discovery run from
+    -- silently overwriting their judgement -- see the upsert logic in discovery.py, which only
+    -- refreshes triage_state/exclusion_reason/admitted_criterion while review_state is still
+    -- 'proposed', and otherwise only bumps last_seen_run_id.
+    review_state         TEXT NOT NULL DEFAULT 'proposed'
+                        CHECK (review_state IN ('proposed', 'accepted', 'rejected')),
+    zone                 TEXT NOT NULL DEFAULT 'H' CHECK (zone = 'H'),
+    created_at           TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at           TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (publication_id, family),
+    CHECK (triage_state <> 'excluded' OR exclusion_reason IS NOT NULL),
+    CHECK (admitted_criterion IS NULL OR product_tier = 'ethanol')
+);
+
+CREATE INDEX screening_record_by_triage ON screening_record(family, triage_state);
+CREATE INDEX screening_record_by_publication ON screening_record(publication_id);
+
+
+-- ---------------------------------------------------------------------------------------------
+-- 15. Extraction and curation
+--
+-- The curation queue, owned by src/fermdb/curate/queue.py, feeding on the `extraction` rows that
+-- src/fermdb/extract/harness.py writes (section 6 above holds `extraction` and `span`; the
+-- `actor_kind` column and the claim/release/accept/edit actions on `curation_event` in section 10
+-- were added for this section).
+--
+-- The project owner's requirement is that curation runs as a SECONDARY, PARALLEL, BACKGROUND job
+-- rather than as a step inside extraction, and three things in this table exist only because of
+-- that:
+--
+--   * A LEASE, not a lock. `claimed_by` + `lease_expires_at` let several workers pull tasks at
+--     once without collision, and let a task whose worker died be picked up again instead of
+--     sitting 'in_progress' forever. Claiming is a compare-and-swap UPDATE (queue.claim_next), so
+--     two workers that select the same row cannot both win.
+--   * ONE TASK PER PROPOSED RECORD, not per extraction. A curator accepts or rejects one strain,
+--     one measurement, one bottleneck. A whole-extraction verdict would force a reviewer to
+--     reject eleven good rows to get rid of one bad one.
+--   * REJECTIONS ARE RETAINED. A rejected task is never deleted -- `queue.py` contains no DELETE
+--     at all, and a test asserts it stays that way. `proposal_hash` and `repeat_of` are why: a
+--     model that keeps re-proposing something a curator already rejected is telling you something
+--     about the model, and that signal exists only if the rejection is still there to match
+--     against.
+--
+-- Zone I, like the extraction it came from: a proposed record supports no conclusion until a
+-- curator promotes it, and promotion is a curator action only (PLAN.md L.1, L.5).
+-- ---------------------------------------------------------------------------------------------
+
+CREATE TABLE curation_task (
+    id              TEXT PRIMARY KEY,
+    extraction_id   TEXT NOT NULL REFERENCES extraction(id),
+    publication_id  TEXT NOT NULL REFERENCES publication(id),
+    -- 'measurements[0]' -- which record of which payload section this task is about. Unique per
+    -- extraction, which is what makes enqueueing idempotent: a background scanner that runs twice
+    -- over the same extraction creates the task once.
+    record_path     TEXT NOT NULL,
+    record_kind     TEXT NOT NULL,          -- strains | modifications | measurements | ...
+    -- The single proposed record, as JSON, copied out of extraction.payload. Copied rather than
+    -- joined so that a curator reviews exactly the bytes the task was created from even if the
+    -- payload is later re-extracted under a new prompt version.
+    payload         TEXT NOT NULL,
+    status          TEXT NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending', 'in_progress', 'accepted', 'edited', 'rejected')),
+    -- Lower sorts first. A number rather than an enum so a policy can be tuned without a
+    -- migration; the policy that sets it belongs in data, not here.
+    priority        INTEGER NOT NULL DEFAULT 100,
+    claimed_by      TEXT,                   -- worker id holding the lease
+    claimed_at      TEXT,
+    lease_expires_at TEXT,                  -- ISO 8601 UTC; past = reclaimable by another worker
+    attempt_count   INTEGER NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+    curator         TEXT,
+    curator_kind    TEXT CHECK (curator_kind IN ('human', 'agent')),
+    resolved_at     TEXT,
+    resolution_reason TEXT,
+    -- Set only by an 'edited' resolution: the curator's corrected record. The original stays in
+    -- `payload`, because what the model proposed and what a human had to fix are two facts.
+    edited_payload  TEXT,
+    -- sha256 over (publication_id, record_kind, the record with span offsets removed). Two
+    -- proposals of the same claim hash the same even if the model re-derived the offsets.
+    proposal_hash   TEXT NOT NULL,
+    -- The earlier task, if any, that proposed the same thing and was rejected.
+    repeat_of       TEXT REFERENCES curation_task(id),
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    zone            TEXT NOT NULL DEFAULT 'I' CHECK (zone = 'I'),
+    -- A claimed task names its holder and when the claim lapses, or it is not really claimed.
+    CHECK (status <> 'in_progress'
+           OR (claimed_by IS NOT NULL AND claimed_at IS NOT NULL
+               AND lease_expires_at IS NOT NULL)),
+    -- A resolved task names who resolved it, when and why. Same reasoning as `extraction`'s
+    -- review columns: a verdict with no name attached is not a curation record.
+    CHECK (status IN ('pending', 'in_progress')
+           OR (curator IS NOT NULL AND curator_kind IS NOT NULL AND resolved_at IS NOT NULL
+               AND resolution_reason IS NOT NULL)),
+    -- PLAN.md L.5, at the storage layer: only a human resolves. An agent worker can hold a lease
+    -- and hand it back; it cannot decide.
+    CHECK (status IN ('pending', 'in_progress') OR curator_kind = 'human'),
+    CHECK (status <> 'edited' OR edited_payload IS NOT NULL),
+    CHECK (status = 'edited' OR edited_payload IS NULL)
+);
+
+-- One task per proposed record. The uniqueness is the idempotency guarantee, not a nicety.
+CREATE UNIQUE INDEX curation_task_record_uq ON curation_task(extraction_id, record_path);
+-- The pull query: the next unclaimed (or lease-expired) task, highest priority first.
+CREATE INDEX curation_task_pull ON curation_task(status, priority, created_at);
+-- The re-proposal lookup: has a curator already rejected this exact claim?
+CREATE INDEX curation_task_by_proposal ON curation_task(proposal_hash, status);
+CREATE INDEX curation_task_by_extraction ON curation_task(extraction_id);
+
+
+-- ---------------------------------------------------------------------------------------------
+-- 16. Omics acquisition
+--
+-- Metadata harvested from SRA and GEO (docs/reference/DATA_VOLUME.md section 2, PLAN.md F),
+-- owned by src/fermdb/omics/{sra,geo,references}.py and driven by the curated query definitions
+-- in data/omics/dataset_families.yaml. This is a METADATA-ONLY layer: `sra_run.location_url`
+-- records where a run's bytes live, but nothing in this section means they have been fetched.
+-- `raw_object` (section 7 above) is the only table that means "we actually have these bytes", and
+-- it stays empty until the separate, explicitly costed bulk-download step of
+-- docs/reference/DATA_VOLUME.md section 6 is run -- src/fermdb/omics/sra.py has no function that
+-- performs it (`download_run_bytes` is a deliberate tripwire, not a stub).
+--
+-- `dataset` (section 7) is extended here rather than duplicated: a GEO series' esummary response
+-- and an SRA study both fit its existing shape and just needed a few more columns. `sample_count`
+-- is the count SRA/GEO themselves reported, not a derived COUNT(*) over `sra_run` -- the two can
+-- differ (a series can list samples with no public run yet), and collapsing them would hide that.
+-- ---------------------------------------------------------------------------------------------
+
+ALTER TABLE dataset ADD COLUMN bioproject TEXT;   -- PRJNA...; how a GEO series links to SRA runs
+ALTER TABLE dataset ADD COLUMN title TEXT;
+ALTER TABLE dataset ADD COLUMN organism TEXT;
+ALTER TABLE dataset ADD COLUMN sample_count INTEGER
+    CHECK (sample_count IS NULL OR sample_count >= 0);
+ALTER TABLE dataset ADD COLUMN retrieved_at TEXT;
+
+-- One row per SRA run, the finest grain SRA reports at. `dataset_id` resolves to the GEO series
+-- sharing this run's bioproject when one exists, else to an SRA-study-level `dataset` row, else
+-- NULL -- an unresolved link is not an absent run (src/fermdb/omics/sra.py:resolve_dataset_id).
+--
+-- Fixed Zone R: every column is exactly what SRA's runinfo reported, not a curator's or model's
+-- reading of it -- `library_strategy` in particular is submitter-supplied and occasionally wrong,
+-- but recording the mislabel is Zone R's job, not this table's.
+CREATE TABLE sra_run (
+    id                   TEXT PRIMARY KEY,       -- insdc.sra:SRR...
+    run_accession        TEXT NOT NULL UNIQUE,    -- SRR...
+    dataset_id           TEXT REFERENCES dataset(id),
+    experiment_accession TEXT,                    -- SRX...
+    study_accession      TEXT,                    -- SRP...
+    bioproject           TEXT,                    -- PRJNA...
+    biosample            TEXT,                    -- SAMN...
+    organism             TEXT,
+    taxid                INTEGER,
+    library_strategy     TEXT,                    -- RNA-Seq | WGS | AMPLICON | Tn-Seq | OTHER | ...
+    library_layout       TEXT CHECK (library_layout IN ('SINGLE', 'PAIRED', 'unknown')),
+    platform             TEXT,
+    instrument_model     TEXT,
+    spots                INTEGER CHECK (spots IS NULL OR spots >= 0),
+    bases                INTEGER CHECK (bases IS NULL OR bases >= 0),
+    size_mb              REAL CHECK (size_mb IS NULL OR size_mb >= 0),
+    -- Where the bytes can be fetched from, exactly as SRA's runinfo reported it (an NCBI, AWS or
+    -- GCP URL depending on the run). A location, not a retrieval: nothing has moved.
+    location_url         TEXT,
+    -- PLAN.md F.3: a run enters quantification only once its conditions are annotated, which this
+    -- metadata-only harvest never does, so 'discovered' is the only state this package writes.
+    acquisition_status   TEXT NOT NULL DEFAULT 'discovered'
+                         CHECK (acquisition_status IN ('discovered', 'condition_annotated',
+                                                       'queued', 'excluded')),
+    -- DATA_VOLUME.md section 2: Tn-Seq runs are perturbation evidence (L1/L2 under J.3), not
+    -- correlation (L3), so per run they are the most informative rows in the corpus. Lower sorts
+    -- first; src/fermdb/omics/sra.py:priority_rank_for is the one place this rule is computed.
+    priority_rank        INTEGER NOT NULL DEFAULT 100,
+    retrieved_at         TEXT NOT NULL,
+    zone                 TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    evidence             TEXT NOT NULL,
+    confidence           TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
+);
+
+CREATE INDEX sra_run_by_dataset ON sra_run(dataset_id);
+CREATE INDEX sra_run_by_priority ON sra_run(priority_rank, run_accession);
+
+-- The small DNA references this pass fetches in full (DATA_VOLUME.md sections 0 and 5): the
+-- S288C nuclear assembly and the mitochondrial genome, content-addressed by sha256 so the exact
+-- bytes behind any downstream analysis are always re-derivable (PLAN.md N.2, J.5 provenance).
+CREATE TABLE reference_sequence (
+    id                   TEXT PRIMARY KEY,
+    kind                 TEXT NOT NULL CHECK (kind IN ('nuclear_genome', 'nuclear_annotation',
+                                                       'mitochondrial_genome',
+                                                       'mitochondrial_annotation')),
+    organism_id          TEXT REFERENCES organism(id),
+    assembly_accession   TEXT NOT NULL,           -- e.g. GCF_000146045.2
+    sequence_accession   TEXT NOT NULL,           -- e.g. NC_001224.1
+    -- The genome that carries this sequence, and hence (via encoding_genome) the NCBI
+    -- translation table it must be read by.
+    encoding_genome      TEXT NOT NULL REFERENCES encoding_genome(id),
+    file_path            TEXT NOT NULL,           -- content-addressed path under Settings.genomes_dir
+    checksum_sha256      TEXT NOT NULL,
+    size_bytes           INTEGER NOT NULL CHECK (size_bytes >= 0),
+    source_url           TEXT NOT NULL,
+    -- Set once src/fermdb/omics/references.py:verify_mitochondrial_translation has translated this
+    -- sequence's annotated CDS under encoding_genome's table and matched NCBI's own /translation
+    -- -- the check that proves the fetched reference and genetic_code.py agree, per this task.
+    translation_verified INTEGER NOT NULL DEFAULT 0 CHECK (translation_verified IN (0, 1)),
+    retrieved_at         TEXT NOT NULL,
+    zone                 TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    evidence             TEXT NOT NULL,
+    confidence           TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    UNIQUE (sequence_accession, kind)
+);
+
+CREATE INDEX reference_sequence_by_assembly ON reference_sequence(assembly_accession);

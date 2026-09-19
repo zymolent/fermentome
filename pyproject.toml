@@ -9,16 +9,24 @@ description = "Isobutanol strain-engineering decision-support atlas"
 requires-python = ">=3.11"
 dependencies = [
     "pyyaml>=6",  # env/paths.yaml, vocabularies, benchmark set
+    "pypdf>=4",   # text from the PDFs the owner supplies via the manual download queue
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML"]
 
 [project.scripts]
 fermdb = "fermdb.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# Non-.py files read at runtime from beside their modules. Without this a wheel installs without
+# them and load_prompt() / open_db() fail with FileNotFoundError — it works today only because
+# pytest uses pythonpath=["src"] and installs are from source.
+[tool.setuptools.package-data]
+"fermdb.db" = ["*.sql"]
+"fermdb.extract" = ["prompts/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

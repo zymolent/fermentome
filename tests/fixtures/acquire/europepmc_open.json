@@ -1,0 +1,23 @@
+{
+  "resultList": {
+    "result": [
+      {
+        "doi": "10.9999/fixture-europepmc-open",
+        "pmid": "10000001",
+        "pmcid": "PMC1000001",
+        "isOpenAccess": "Y",
+        "license": "cc-by",
+        "fullTextUrlList": {
+          "fullTextUrl": [
+            {
+              "availability": "Open access",
+              "documentStyle": "pdf",
+              "site": "Europe_PMC",
+              "url": "https://europepmc.example.org/PMC1000001/fulltext.pdf"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

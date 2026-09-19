@@ -1,0 +1,12 @@
+{
+  "_fixture_note": "Synthetic esearch.fcgi fixture for an ethanol E1 (competing-sink) sub-query. Not a live recording; see esearch_isobutanol_mitochondria.json for the general note.",
+  "header": {"type": "esearch", "version": "0.3"},
+  "esearchresult": {
+    "count": "1",
+    "retmax": "1",
+    "retstart": "0",
+    "idlist": ["30112233"],
+    "translationset": [],
+    "querytranslation": "PDC1[tiab] AND deletion[tiab]"
+  }
+}

@@ -1,0 +1,12 @@
+LOCUS       SYN_CHR_A                 18 bp    DNA     linear   PLN 20-SEP-2026
+DEFINITION  SYNTHETIC fixture chromosome, not real S. cerevisiae sequence, for
+            exercising the nuclear multi-accession fetch/store loop only.
+ACCESSION   SYN_CHR_A
+VERSION     SYN_CHR_A
+FEATURES             Location/Qualifiers
+     source          1..18
+                     /organism="synthetic fixture organism"
+                     /mol_type="genomic DNA"
+ORIGIN
+        1 atgaaacgtt taggctga
+//

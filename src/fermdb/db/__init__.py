@@ -34,7 +34,7 @@ from typing import Final
 #:    `<facet>_as_reported` shadows were added; every `confidence` CHECK widened to four values.
 #:    A version-1 database cannot be read as a version-2 one, and open_db refuses rather than
 #:    guessing at the migration.
-SCHEMA_VERSION: Final[int] = 2
+SCHEMA_VERSION: Final[int] = 3  # v3: literature, full-text, extraction/curation and omics tables
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

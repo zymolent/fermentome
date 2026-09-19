@@ -191,7 +191,40 @@ No GPU. No cluster.
 
 ---
 
-## 6. AWS plan
+## 6. Decision: AWS, because the constraint is connection stability
+
+**Decided 2026-09-20 by the project owner: the local connection is slow and unstable.** That is
+the deciding constraint, and it is one no benchmark on this machine could have revealed.
+
+The workstation is otherwise capable — 16 cores, 68 GB RAM, 567 GB free, WSL2 Ubuntu already
+running — and would absorb 51 GB and ~36 core-hours in one overnight run. Compute was never the
+problem. **Bandwidth is**, and an unstable link does not merely make a 51 GB transfer slow, it
+makes it *fail repeatedly and restart*.
+
+### The argument that actually settles it
+
+Earlier I justified AWS on speed. That undersold it. The real point:
+
+> With a server-side `aws s3 cp`, **the 51 GB never traverses your connection at all.** S3 copies
+> it from SRA's Open Data mirror into your bucket internally. Your link carries API calls on the
+> way in and ~1.4 GB of results on the way out.
+
+A slow, unstable connection is therefore almost irrelevant to the job — which is exactly the
+opposite of the local plan, where that connection *is* the pipeline.
+
+Two consequences to design for, both about surviving a dropped link:
+
+* **Nothing interactive.** The job must not be driven from a laptop session that can vanish
+  mid-run. Launch it from a `t4g.micro` under `tmux`/`systemd`, or as a user-data script that
+  runs and then shuts the instance down. A disconnect must cost nothing.
+* **Resumable at every step.** Per-run `run.json` markers so an interrupted batch restarts where
+  it stopped, and the staging copy is idempotent so re-running it is safe.
+
+Keep the **content-addressed raw archive** (§6.1) regardless: it is what makes re-quantification
+against per-strain references free later, and re-downloading is precisely what this connection
+cannot do cheaply.
+
+## 6a. The AWS plan
 
 ### The proposed two-phase split: assessment
 

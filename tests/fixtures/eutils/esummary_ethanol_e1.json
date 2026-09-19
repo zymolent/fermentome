@@ -1,0 +1,16 @@
+{
+  "_fixture_note": "Synthetic esummary.fcgi fixture paired with esearch_ethanol_e1.json. Not a live recording; see esearch_isobutanol_mitochondria.json for the general note.",
+  "header": {"type": "esummary", "version": "0.3"},
+  "result": {
+    "uids": ["30112233"],
+    "30112233": {
+      "uid": "30112233",
+      "title": "Pyruvate decarboxylase deletion and the C2 requirement in Saccharomyces cerevisiae",
+      "pubdate": "1996",
+      "fulljournalname": "Yeast",
+      "articleids": [
+        {"idtype": "pubmed", "idtypen": 1, "value": "30112233"}
+      ]
+    }
+  }
+}
