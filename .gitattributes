@@ -1,0 +1,22 @@
+# Normalise line endings. This project is developed on Windows but is designed to run on Linux
+# and WSL (src/fermdb/paths.py translates both path spellings), so text is stored LF in the
+# repository and checked out native. Without this, a Linux checkout sees CRLF in shell scripts
+# and heredocs and fails in ways that are tedious to diagnose.
+* text=auto eol=lf
+
+# Always LF, regardless of platform — these are read by tools that do not tolerate CRLF.
+*.sh        text eol=lf
+*.py        text eol=lf
+*.sql       text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.toml      text eol=lf
+*.tsv       text eol=lf
+justfile    text eol=lf
+
+# Binary: never touch.
+*.png       binary
+*.jpg       binary
+*.gz        binary
+*.sqlite    binary
+*.parquet   binary

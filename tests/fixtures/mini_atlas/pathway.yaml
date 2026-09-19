@@ -1,0 +1,6 @@
+- id: YAA:PATHWAY:fx-isobutanol
+  name: Fixture Ehrlich-based isobutanol pathway
+  product_id: YAA:PROD:fx-isobutanol
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

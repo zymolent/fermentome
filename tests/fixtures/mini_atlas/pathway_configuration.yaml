@@ -1,0 +1,14 @@
+# The fixture's one complete isobutanol pathway_configuration. Its parts and their compartments
+# are pathway_route_step.yaml; its outcome measurement is measurement.yaml
+# (YAA:MEAS:fx-titer-a, on the same host_strain_id).
+
+- id: YAA:PWCFG:fx-native-split
+  name: Fixture native-split isobutanol configuration
+  pathway_id: YAA:PATHWAY:fx-isobutanol
+  product_id: YAA:PROD:fx-isobutanol
+  compartment_strategy_id: A_native_split
+  host_strain_id: YAA:STRAIN:fx-host
+  description: "Fixture configuration: AHAS/KARI/DHAD in the mitochondrial matrix, KDC/ADH Ehrlich steps in the cytosol, per the seeded A_native_split compartment strategy."
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

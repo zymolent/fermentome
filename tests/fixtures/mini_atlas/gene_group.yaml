@@ -1,0 +1,60 @@
+# Gene groups for the five Ehrlich/Ilv step roles used by the fixture pathway configuration.
+#
+# `anchor_id` values are S288C systematic names recalled from background knowledge, not looked
+# up against SGD this session — harmless here because every row is synthetic and never asserted
+# as curated fact, but flagged per the task's sourcing rule regardless.
+#
+# Every row therefore carries confidence 'unverified', not 'low'. The two are different claims:
+# 'low' means the value was checked against a source and the source is weak; 'unverified' means
+# it was asserted and never checked at all, which is exactly what happened here. Collapsing the
+# two would make a recalled identifier indistinguishable from a checked one.
+
+- id: YAA:GG:fx-ahas
+  anchor_namespace: sgd_systematic
+  anchor_id: YMR108W  # ILV2 / AHAS (unverified)
+  standard_name: ILV2
+  scope: species
+  membership_method: anchor
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; anchor_id recalled from background knowledge"
+  confidence: unverified
+
+- id: YAA:GG:fx-kari
+  anchor_namespace: sgd_systematic
+  anchor_id: YLR355C  # ILV5 / KARI (unverified)
+  standard_name: ILV5
+  scope: species
+  membership_method: anchor
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; anchor_id recalled from background knowledge"
+  confidence: unverified
+
+- id: YAA:GG:fx-dhad
+  anchor_namespace: sgd_systematic
+  anchor_id: YJR016C  # ILV3 / DHAD (unverified)
+  standard_name: ILV3
+  scope: species
+  membership_method: anchor
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; anchor_id recalled from background knowledge"
+  confidence: unverified
+
+- id: YAA:GG:fx-kdc
+  anchor_namespace: sgd_systematic
+  anchor_id: YDR380W  # ARO10 / KDC (unverified)
+  standard_name: ARO10
+  scope: species
+  membership_method: anchor
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; anchor_id recalled from background knowledge"
+  confidence: unverified
+
+- id: YAA:GG:fx-adh
+  anchor_namespace: sgd_systematic
+  anchor_id: YMR303C  # ADH2 / ADH (unverified)
+  standard_name: ADH2
+  scope: species
+  membership_method: anchor
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; anchor_id recalled from background knowledge"
+  confidence: unverified

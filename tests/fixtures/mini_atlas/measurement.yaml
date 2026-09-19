@@ -1,0 +1,31 @@
+# fx-titer-a: the pathway_configuration's outcome measurement, and the direct_perturbation
+#   evidence for the L1 assertion (YAA:ASSERT:fx-l1) and for one side of the conflicting pair
+#   (YAA:ASSERT:fx-conflict-a).
+# fx-conflict-b: the other side of the conflicting pair (YAA:ASSERT:fx-conflict-b) — same strain,
+#   same quantity_kind, a different (fictional) study, a different value. `basis` is left unset
+#   (NULL) on both: correct because quantity_kind is 'titer', not 'yield', so a basis was never
+#   applicable to record.
+
+- id: YAA:MEAS:fx-titer-a
+  strain_id: YAA:STRAIN:fx-host
+  quantity_kind: titer
+  product_id: YAA:PROD:fx-isobutanol
+  value_as_reported: 1.8
+  unit_as_reported: g/L
+  assay_method: HPLC
+  source_locator: "table 1"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:MEAS:fx-conflict-b
+  strain_id: YAA:STRAIN:fx-host
+  quantity_kind: titer
+  product_id: YAA:PROD:fx-isobutanol
+  value_as_reported: 3.4
+  unit_as_reported: g/L
+  assay_method: GC
+  source_locator: "table 2"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

@@ -1,0 +1,33 @@
+# The long-tail facets of YAA:CTX:fx-1 -- the ones with no first-class column on
+# `condition_context`. Each carries its own zone, because a facet row can be a curator's reading,
+# a parser's output or a model's guess independently of the context it hangs off:
+#   shaking_rpm       parsed from prose by recorded code -> Zone H, verbatim kept beside it
+#   inoculum_od600    'unknown': the (synthetic) source says an inoculum was used, not what it was
+#   antifoam          'not_applicable': a shake flask that had none
+
+- context_id: YAA:CTX:fx-1
+  facet: shaking_rpm
+  value: "200"
+  value_state: recorded
+  as_reported: "shaken at 200 rpm"
+  unit: rpm
+  zone: H
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- context_id: YAA:CTX:fx-1
+  facet: inoculum_od600
+  value_state: unknown
+  as_reported: "inoculated to a low starting density"
+  unit: OD600
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: unverified
+
+- context_id: YAA:CTX:fx-1
+  facet: antifoam
+  value_state: not_applicable
+  as_reported: "no antifoam was added"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

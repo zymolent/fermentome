@@ -1,0 +1,5 @@
+- conflict_id: YAA:CONF:fx-1
+  assertion_id: YAA:ASSERT:fx-conflict-a
+
+- conflict_id: YAA:CONF:fx-1
+  assertion_id: YAA:ASSERT:fx-conflict-b

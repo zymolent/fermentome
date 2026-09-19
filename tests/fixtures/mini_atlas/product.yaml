@@ -1,0 +1,6 @@
+- id: YAA:PROD:fx-isobutanol
+  name: isobutanol
+  canonical_unit: g/L
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

@@ -1,0 +1,38 @@
+# Theoretical yields are per (product, substrate): glucose is named, not assumed. The three rows
+# are the three states the `<col>_state` companion exists for.
+#
+#   glucose:  recorded. 1 mol isobutanol (MW 74.12) per mol glucose (MW 180.16) = 0.411 g/g, the
+#             standard redox-balanced Ehrlich stoichiometry. Numbers recalled from background
+#             knowledge and not re-derived against a cited source this session, so confidence is
+#             'unverified' -- asserted but never checked -- rather than 'low' (checked, weak).
+#   xylose:   recorded that a theoretical yield exists, unresolved which. The row exists so the
+#             absence is a fact rather than an unfinished import; the QC bound must not silently
+#             fall back to the glucose number.
+#   glycerol: mol_per_mol not applicable in the (synthetic) source's own framing, g_per_g never
+#             recorded at all -- numeric NULL and state NULL, the fourth state.
+
+- product_id: YAA:PROD:fx-isobutanol
+  substrate: glucose
+  g_per_g: 0.411
+  g_per_g_state: recorded
+  mol_per_mol: 1.0
+  mol_per_mol_state: recorded
+  stoichiometry: "C6H12O6 -> C4H10O + 2 CO2 + H2O (redox-balanced Ehrlich route)"
+  zone: R
+  evidence: "synthetic test fixture; stoichiometry and MWs recalled from background knowledge, never checked against a source this session"
+  confidence: unverified
+
+- product_id: YAA:PROD:fx-isobutanol
+  substrate: xylose
+  g_per_g_state: unknown
+  mol_per_mol_state: unknown
+  zone: R
+  evidence: "synthetic test fixture; the (fictional) source states a xylose route exists but gives no theoretical yield"
+  confidence: low
+
+- product_id: YAA:PROD:fx-isobutanol
+  substrate: glycerol
+  mol_per_mol_state: not_applicable
+  zone: R
+  evidence: "synthetic test fixture; the (fictional) source reports mass yield only and calls a molar basis inapplicable to its mixed feed"
+  confidence: low

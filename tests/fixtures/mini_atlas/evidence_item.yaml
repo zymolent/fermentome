@@ -1,0 +1,49 @@
+- id: YAA:EV:fx-l1
+  assertion_id: YAA:ASSERT:fx-l1
+  evidence_type: direct_perturbation
+  direction: increases
+  independent_group: fixture-lab-1
+  publication_id: "doi:10.9999/fixture-a"
+  strain_id: YAA:STRAIN:fx-host
+  control_strain_id: YAA:STRAIN:fx-ctrl
+  measurement_id: YAA:MEAS:fx-titer-a
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:EV:fx-l5
+  assertion_id: YAA:ASSERT:fx-l5
+  evidence_type: ai_inference
+  model: fixture-fake-model
+  model_version: v0
+  prompt_version: p0
+  review_state: pending
+  zone: I
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:EV:fx-conflict-a
+  assertion_id: YAA:ASSERT:fx-conflict-a
+  evidence_type: direct_perturbation
+  direction: increases
+  independent_group: fixture-lab-1
+  publication_id: "doi:10.9999/fixture-a"
+  strain_id: YAA:STRAIN:fx-host
+  control_strain_id: YAA:STRAIN:fx-ctrl
+  measurement_id: YAA:MEAS:fx-titer-a
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:EV:fx-conflict-b
+  assertion_id: YAA:ASSERT:fx-conflict-b
+  evidence_type: direct_perturbation
+  direction: increases
+  independent_group: fixture-lab-2
+  publication_id: "doi:10.9999/fixture-b"
+  strain_id: YAA:STRAIN:fx-host
+  control_strain_id: YAA:STRAIN:fx-ctrl
+  measurement_id: YAA:MEAS:fx-conflict-b
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

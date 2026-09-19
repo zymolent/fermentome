@@ -1,0 +1,11 @@
+- id: YAA:MTINS:fx-1
+  modification_id: YAA:MOD:fx-mtdna
+  locus: COX2
+  utr_source: COX2
+  activator_required: "fixture placeholder (synthetic; not asserting a specific real translational activator)"
+  displaced_gene: COX2
+  respiration_retained: 0
+  rescue_strategy: nuclear_allotopic_copy
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

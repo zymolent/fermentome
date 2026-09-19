@@ -1,0 +1,93 @@
+# The five parts of the fixture's one complete pathway_configuration (see pathway_route_step.yaml
+# for which compartment each is placed in), plus the two-row contrast that is the whole point of
+# the encoding-genome model (schema.sql section 3).
+#
+# fx-adh's `sequence` is the fixture's edge case for the compartment-safety gate: it is a short,
+# entirely invented ORF (NOT a real ADH2 coding sequence) containing an unrecoded CUN run, so it
+# translates as MLLLLEF* under table 1 and as MTTTTEF* under table 3. Verified by running
+# fermdb.recode.check_compartment_safety against it directly.
+#
+# THE CONTRAST (fx-kdc-matrix-nuclear vs fx-kdc-mtdna). Both parts are the same enzyme in the
+# same compartment -- the mitochondrial matrix -- and differ only in which genome encodes them:
+#
+#   fx-kdc-matrix-nuclear   nuclear-encoded, presequence-targeted. Translated on cytosolic
+#                           ribosomes under table 1 and then imported. Its sequence still carries
+#                           the unrecoded CUN run and that is CORRECT: recoding it would
+#                           mistranslate the protein. check_compartment_safety accepts it.
+#   fx-kdc-mtdna            carried on mtDNA, translated in the matrix under table 3. The same
+#                           ORF filed this way is REJECTED until recoded, so this row stores the
+#                           recoded sequence, which encodes the identical protein (MLLLLEF*).
+#
+# Keying the genetic code on the compartment instead of the genome would collapse these two rows
+# into one and tell a bench scientist to recode the first -- the error this schema now refuses.
+
+- id: YAA:PART:fx-ahas
+  step_role_id: AHAS
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-ahas
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:PART:fx-kari
+  step_role_id: KARI
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-kari
+  cofactor_preference: NADPH
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:PART:fx-dhad
+  step_role_id: DHAD
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-dhad
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:PART:fx-kdc
+  step_role_id: KDC
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-kdc
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:PART:fx-adh
+  step_role_id: ADH
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-adh
+  sequence: ATGCTTCTCCTACTGGAATTCTAA
+  sequence_compartment_id: cytosol
+  sequence_encoding_genome: nuclear
+  cofactor_preference: NADH
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; sequence is an invented short ORF built to carry an unrecoded CUN run for testing the compartment-safety gate, not a real ADH2 coding sequence"
+  confidence: low
+
+# Nuclear-encoded, targeted to the matrix by a presequence: NO recoding needed or wanted.
+- id: YAA:PART:fx-kdc-matrix-nuclear
+  step_role_id: KDC
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-kdc
+  variant_of: YAA:PART:fx-kdc
+  sequence: ATGCTTCTCCTACTGGAATTCTAA
+  sequence_compartment_id: mitochondrial_matrix
+  sequence_encoding_genome: nuclear
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; the same invented ORF as fx-adh, filed as a presequence-targeted nuclear construct destined for the matrix -- translated under table 1 on cytosolic ribosomes, so the CUN run is not a hazard here"
+  confidence: low
+
+# The same enzyme carried on mtDNA: translated in the matrix under table 3, so recoded first.
+- id: YAA:PART:fx-kdc-mtdna
+  step_role_id: KDC
+  source_organism_id: YAA:ORG:fx-scer
+  gene_group_id: YAA:GG:fx-kdc
+  variant_of: YAA:PART:fx-kdc
+  sequence: ATGTTATTATTATTAGAATTCTAA
+  sequence_compartment_id: mitochondrial_matrix
+  sequence_encoding_genome: mitochondrial
+  zone: R
+  evidence: "synthetic test fixture, not a real observation; the fx-kdc-matrix-nuclear ORF recoded for table 3 by fermdb.recode.recode(mode='to_table3'), which encodes the identical protein"
+  confidence: low

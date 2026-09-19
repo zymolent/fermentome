@@ -1,0 +1,15 @@
+# `type` omitted -> defaults to 'mtdna_edit' (see modification_localization_change.yaml note).
+# No evidence/confidence columns exist on this subtype table; they live on the parent
+# `modification` row. No encoding_genome column either: an mtDNA edit is mitochondrially encoded
+# by definition, which is why `recoded_for_table_3` belongs here and nowhere else -- see
+# modification_localization_change.yaml for the nuclear half of the same contrast.
+
+- modification_id: YAA:MOD:fx-mtdna
+  technique: biolistic_transformation
+  recipient_state: rho_minus
+  marker: "fixture placeholder marker (synthetic; not asserting a specific real mtDNA marker gene)"
+  recoded_for_table_3: 1
+  heteroplasmy_achieved: 0.65
+  feasibility_rating: frontier
+  available_here: 0
+  labs_demonstrating: 2

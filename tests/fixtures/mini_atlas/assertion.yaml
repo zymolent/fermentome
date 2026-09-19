@@ -1,0 +1,65 @@
+# fx-l1: supported only by direct_perturbation evidence -> assertion_level.level should be 'L1'.
+# fx-l5: supported only by ai_inference evidence, Zone I -> assertion_level.level should be 'L5'.
+# fx-conflict-a / fx-conflict-b: the same subject+predicate+object, evidenced by two different
+#   (fictional) studies reporting different titers for the same strain -- a magnitude conflict,
+#   linked by conflict.yaml / conflict_member.yaml.
+
+- id: YAA:ASSERT:fx-l1
+  subject_type: gene_group
+  subject_id: YAA:GG:fx-kari
+  predicate: affects_production_of
+  object_type: product
+  object_id: YAA:PROD:fx-isobutanol
+  product_id: YAA:PROD:fx-isobutanol
+  direction: increases
+  created_by_kind: curator
+  created_by: "fixture-loader (synthetic)"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:ASSERT:fx-l5
+  subject_type: gene_group
+  subject_id: YAA:GG:fx-adh
+  predicate: affects_yield_of
+  object_type: product
+  object_id: YAA:PROD:fx-isobutanol
+  product_id: YAA:PROD:fx-isobutanol
+  direction: increases
+  created_by_kind: agent
+  created_by: "fixture-fake-model@v0 (synthetic)"
+  zone: I
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:ASSERT:fx-conflict-a
+  subject_type: strain
+  subject_id: YAA:STRAIN:fx-host
+  predicate: affects_production_of
+  object_type: product
+  object_id: YAA:PROD:fx-isobutanol
+  product_id: YAA:PROD:fx-isobutanol
+  direction: increases
+  effect_size: 1.8
+  effect_unit: g/L
+  created_by_kind: curator
+  created_by: "fixture-loader (synthetic)"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:ASSERT:fx-conflict-b
+  subject_type: strain
+  subject_id: YAA:STRAIN:fx-host
+  predicate: affects_production_of
+  object_type: product
+  object_id: YAA:PROD:fx-isobutanol
+  product_id: YAA:PROD:fx-isobutanol
+  direction: increases
+  effect_size: 3.4
+  effect_unit: g/L
+  created_by_kind: curator
+  created_by: "fixture-loader (synthetic)"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

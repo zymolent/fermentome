@@ -1,0 +1,5 @@
+- id: YAA:CONF:fx-1
+  kind: magnitude
+  context_difference: "Study A (shake flask, aerobic, synthetic) reported 1.8 g/L; Study B (bioreactor, fed-batch, synthetic) reported 3.4 g/L for the same strain and quantity."
+  status: open
+  zone: H

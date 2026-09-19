@@ -1,0 +1,10 @@
+# pathway_route is generative (Zone H or I, never R) per schema.sql section 9 — it enumerates a
+# configuration, it does not report one. No evidence/confidence columns exist on this table.
+
+- id: YAA:ROUTE:fx-native-split-1
+  pathway_configuration_id: YAA:PWCFG:fx-native-split
+  host_strain_id: YAA:STRAIN:fx-host
+  cofactor_strategy: native_NADPH
+  deletion_set: "[]"
+  balance_status: not_evaluated
+  zone: H

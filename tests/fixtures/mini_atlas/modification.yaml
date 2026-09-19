@@ -1,0 +1,24 @@
+# fx-mtdna: the mtdna_edit modification record (subtype rows in modification_mtdna_edit.yaml and
+#   mtdna_insertion.yaml).
+# fx-loc: the localization_change modification whose verification_method is 'none_reported'
+#   (subtype row in modification_localization_change.yaml).
+
+- id: YAA:MOD:fx-mtdna
+  strain_id: YAA:STRAIN:fx-host
+  type: mtdna_edit
+  target_gene_group_id: YAA:GG:fx-kdc
+  target_locus: COX2
+  details: "Fixture: KDC ORF integrated into mtDNA at the COX2 locus (synthetic; not a real construct)."
+  publication_id: "doi:10.9999/fixture-b"
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:MOD:fx-loc
+  strain_id: YAA:STRAIN:fx-host
+  type: localization_change
+  target_gene_group_id: YAA:GG:fx-kdc
+  details: "Fixture: KDC claimed relocalized to the mitochondrial matrix for a strategy-C-style build (synthetic); no localization verification was performed."
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

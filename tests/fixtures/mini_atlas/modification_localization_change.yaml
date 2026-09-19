@@ -1,0 +1,19 @@
+# `type` is omitted deliberately: it defaults to 'localization_change' in schema.sql, which is
+# also what makes the composite FK (modification_id, type) -> modification(id, type) work.
+# `verification_method` is set explicitly to the fixture's required edge case: a claimed
+# relocalization with no localization evidence at all. `import_efficiency_reported` is likewise
+# omitted -> NULL (never recorded), consistent with there being no verification to measure it from.
+#
+# `encoding_genome: nuclear` is stated rather than left to the column default, because it is the
+# scientific content of the row: this construct reaches the matrix by import, so it is read under
+# table 1 and must NOT be recoded. Contrast modification_mtdna_edit.yaml, whose gene is carried on
+# mtDNA and therefore carries recoded_for_table_3: 1.
+
+- modification_id: YAA:MOD:fx-loc
+  target_compartment_id: mitochondrial_matrix
+  encoding_genome: nuclear
+  targeting_sequence: MLSRLLQCVKPATRVLARAAPTT
+  source_of_sequence: "fixture-invented N-terminal presequence, not from a real protein"
+  cleavage_site_predicted: 1
+  n_terminal_fusion_retained: 0
+  verification_method: none_reported

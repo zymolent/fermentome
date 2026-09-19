@@ -1,0 +1,20 @@
+# Two independent (fictional) studies, used to source the two conflicting measurements/
+# assertions in assertion.yaml / evidence_item.yaml / conflict.yaml.
+
+- id: "doi:10.9999/fixture-a"
+  doi: "10.9999/fixture-a"
+  title: "Fixture Study A: synthetic isobutanol titer report"
+  year: 2019
+  journal: Fixture Journal of Fermentation
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: "doi:10.9999/fixture-b"
+  doi: "10.9999/fixture-b"
+  title: "Fixture Study B: synthetic isobutanol titer report"
+  year: 2021
+  journal: Fixture Journal of Fermentation
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

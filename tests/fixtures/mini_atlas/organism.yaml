@@ -1,0 +1,12 @@
+# Phase-0 mini-atlas fixture: organism.
+#
+# Every row here is synthetic. `evidence` says so explicitly on every row so a fixture row can
+# never be mistaken for curated data (docs/reference/CONVENTIONS.md "Curation").
+
+- id: YAA:ORG:fx-scer
+  ncbi_taxid: 4932  # background knowledge, not looked up this session (unverified)
+  name: Fixture Saccharomyces cerevisiae
+  rank: species
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

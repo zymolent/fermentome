@@ -1,0 +1,44 @@
+# The compartments half of "one complete isobutanol pathway_configuration with its parts,
+# compartments and a measurement": AHAS/KARI/DHAD placed in the mitochondrial matrix, KDC/ADH
+# (the Ehrlich steps) placed in the cytosol, matching compartment_strategy A_native_split.
+#
+# Every step also names its encoding genome, because the compartment alone does not fix the
+# genetic code (schema.sql section 3). All five are 'nuclear' here, and the three matrix steps
+# are the case that matters: Ilv2/Ilv5/Ilv3 are nuclear-encoded and imported, so a native-split
+# build recodes nothing at all. A strategy-E route would put 'mitochondrial' on the same
+# compartment and mean an entirely different construct.
+
+- route_id: YAA:ROUTE:fx-native-split-1
+  step_order: 1
+  step_role_id: AHAS
+  part_id: YAA:PART:fx-ahas
+  compartment_id: mitochondrial_matrix
+  encoding_genome: nuclear
+
+- route_id: YAA:ROUTE:fx-native-split-1
+  step_order: 2
+  step_role_id: KARI
+  part_id: YAA:PART:fx-kari
+  compartment_id: mitochondrial_matrix
+  encoding_genome: nuclear
+
+- route_id: YAA:ROUTE:fx-native-split-1
+  step_order: 3
+  step_role_id: DHAD
+  part_id: YAA:PART:fx-dhad
+  compartment_id: mitochondrial_matrix
+  encoding_genome: nuclear
+
+- route_id: YAA:ROUTE:fx-native-split-1
+  step_order: 4
+  step_role_id: KDC
+  part_id: YAA:PART:fx-kdc
+  compartment_id: cytosol
+  encoding_genome: nuclear
+
+- route_id: YAA:ROUTE:fx-native-split-1
+  step_order: 5
+  step_role_id: ADH
+  part_id: YAA:PART:fx-adh
+  compartment_id: cytosol
+  encoding_genome: nuclear

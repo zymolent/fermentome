@@ -1,0 +1,15 @@
+- id: YAA:STRAIN:fx-host
+  organism_id: YAA:ORG:fx-scer
+  canonical_name: FX-HOST-1
+  class: engineered
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
+
+- id: YAA:STRAIN:fx-ctrl
+  organism_id: YAA:ORG:fx-scer
+  canonical_name: FX-CTRL-1
+  class: laboratory
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low

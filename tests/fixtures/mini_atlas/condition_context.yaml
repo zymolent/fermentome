@@ -1,0 +1,62 @@
+# Demonstrates the three missing-value states of docs/reference/CONVENTIONS.md side by side on
+# one row, each on a different facet so none of the three is coerced into another:
+#   aeration_class: omitted -> SQL NULL      -- never recorded
+#   feedstock_class: 'NA'                    -- recorded as not applicable (medium is defined,
+#                                                not feedstock-derived)
+#   mode: 'unknown'                          -- recorded, but the (synthetic) source did not
+#                                                resolve which fermentation mode
+#
+# The numeric facets carry the same three states through their `<col>_state` companion, which is
+# the only way a REAL column can hold them (schema.sql section 7):
+#   temperature_c 30.0 + temperature_c_state 'recorded'   -- a number, and it is a number
+#   ph            NULL + ph_state 'unknown'               -- the source mentions pH, never states
+#                                                            it; NOT the same as 'never recorded'
+#   vvm           NULL + vvm_state 'not_applicable'       -- a shake flask has no gas sparging
+#   dilution_rate NULL + dilution_rate_state NULL         -- never recorded at all
+#
+# The `<facet>_as_reported` shadows hold the (synthetic) verbatim strings the paper would have
+# used. They are Zone R and are never re-parsed in place; the parsed columns beside them are the
+# rebuildable Zone H reading of exactly those strings.
+
+- id: YAA:CTX:fx-1
+  context_hash: fx-ctx-hash-0001
+
+  medium_name: Fixture defined minimal medium
+  medium_name_as_reported: "fixture defined minimal medium (synthetic)"
+  medium_class: defined
+  medium_class_as_reported: "chemically defined"
+
+  carbon_source_main: glucose
+  carbon_source_main_as_reported: "D-glucose"
+  total_sugar_g_l: 20.0
+  total_sugar_g_l_state: recorded
+  total_sugar_g_l_as_reported: "2% (w/v) glucose"
+  feedstock_class: "NA"
+  feedstock_class_as_reported: "not a feedstock-derived medium"
+  nitrogen_source: ammonium sulfate
+
+  # aeration_class omitted -> NULL: never recorded.
+  vvm_state: not_applicable
+  vvm_as_reported: "shake flask, no sparging"
+
+  mode: unknown
+  mode_as_reported: "cultures were fermented"
+
+  temperature_c: 30.0
+  temperature_c_state: recorded
+  temperature_c_as_reported: "30 C"
+
+  ph_state: unknown
+  ph_as_reported: "the pH of the medium"
+  ph_controlled: 0
+  ph_controlled_state: recorded
+  ph_controlled_as_reported: "uncontrolled"
+
+  vessel_type: shake_flask
+  working_volume_l: 0.05
+  working_volume_l_state: recorded
+
+  completeness_score: 0.4
+  zone: R
+  evidence: synthetic test fixture, not a real observation
+  confidence: low
