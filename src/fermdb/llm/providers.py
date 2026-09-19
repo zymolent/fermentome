@@ -1,28 +1,45 @@
-"""Three interchangeable LLM providers behind one interface (PLAN.md L.3).
+"""Four interchangeable LLM providers behind one interface (PLAN.md L.3).
 
-    ollama  HTTP to a local Ollama daemon. The machine this atlas is built on has one, and
-            local models are the intended production path for extraction.
-    mock    deterministic, offline, no daemon, no network. The DEFAULT everywhere.
-    api     a deliberate stub. Remote calls are out of scope for this task.
+    ollama     HTTP to a local Ollama daemon. The machine this atlas is built on has one, and
+               local models are the intended production path for extraction.
+    mock       deterministic, offline, no daemon, no network. The DEFAULT everywhere.
+    agent-sdk  Claude, driven through the Claude Agent SDK — the Claude Code harness as a
+               library, authenticated by a **subscription login**, not a metered API key.
+               This is the escalation tier of MODEL_ROUTING.md §7a.
+    api        a deliberate stub that raises and points at agent-sdk, so nobody wires the
+               metered path by accident.
 
-Two rules this module exists to make structural, both from
-``docs/reference/MODEL_ROUTING.md`` §3 and §5:
+Three rules this module exists to make structural, the first two from
+``docs/reference/MODEL_ROUTING.md`` §3 and §5 and the third from the project owner:
 
 * **The provider is not a safety boundary.** Nothing here decides whether an output is
   trustworthy; :mod:`fermdb.llm.validate` does, by checks that are the same whatever produced
   the text. "Capability increases the plausibility of errors" — a bigger model buys a
   better-reading wrong answer, not a safer one, so no code path may branch on model tier.
-* **No model name is written in code.** Models come from configuration. The documented defaults
-  live in :data:`DEFAULT_MODELS` — one constant, resolved through :meth:`LlmConfig.model_for`,
-  which is the only way a caller should ever learn a model name.
+* **No model name is written in code.** Models come from configuration:
+  :data:`fermdb.config.DEFAULT_LLM_MODELS` and :data:`fermdb.config.DEFAULT_ESCALATION_MODEL`
+  are the only places a model name is written down, and :meth:`LlmConfig.model_for` is the only
+  way a caller should ever learn one. Ids are full ids, never aliases — an alias moves under a
+  run and takes reproducibility with it.
+* **Claude is reached through the subscription, never through the API.** :class:`AgentSdkProvider`
+  requires ``CLAUDE_CODE_OAUTH_TOKEN`` (from ``claude setup-token``) or an existing Claude Code
+  login, refuses to run on ``ANTHROPIC_API_KEY`` alone, and blanks that variable for the child
+  process so a key lying around in the environment cannot silently start a bill. No credential is
+  ever read from a configuration file; put it in ``env/secrets.local.env``, which is gitignored.
 
-``mock`` is the default provider on purpose. An unconfigured caller then produces a loud local
-failure rather than quietly reaching a daemon (or, once ``api`` exists, the network and a bill).
-Real runs opt in with ``FERMDB_LLM_PROVIDER=ollama``.
+``mock`` is the default local provider on purpose. An unconfigured caller then produces a loud
+local failure rather than quietly reaching a daemon or the network. Real runs opt in with
+``FERMDB_LLM_PROVIDER=ollama``.
+
+Nothing here reads the environment for its own configuration. Every ``FERMDB_LLM_*`` value is
+resolved once by :func:`fermdb.config.resolve_settings` and handed to :meth:`LlmConfig.load`, so
+``fermdb config`` reports exactly what a run will use. The two environment reads that remain are
+credentials, which are deliberately not settings.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -33,16 +50,35 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final, Protocol
 
-from ..config import Settings
+from ..config import (
+    DEFAULT_ESCALATION_MODEL,
+    DEFAULT_ESCALATION_PROVIDER,
+    DEFAULT_LLM_BASE_URL,
+    DEFAULT_LLM_MODEL_ROLES,
+    DEFAULT_LLM_MODELS,
+    DEFAULT_LLM_OPTIONS,
+    DEFAULT_LLM_PROVIDER,
+    DEFAULT_LLM_TIMEOUT_S,
+    LLM_ENV_PREFIX,
+    SettingItem,
+    Settings,
+    resolve_settings,
+)
 
 __all__ = [
     "DEFAULT_BASE_URL",
+    "DEFAULT_ESCALATION_PROVIDER",
     "DEFAULT_MODELS",
     "DEFAULT_OPTIONS",
     "DEFAULT_PROVIDER",
     "DEFAULT_TIMEOUT_S",
+    "ESCALATION_ROLE",
     "MODEL_ROLES",
     "PROVIDER_NAMES",
+    "AgentReply",
+    "AgentRequest",
+    "AgentRunner",
+    "AgentSdkProvider",
     "ApiProvider",
     "Completion",
     "HttpRequest",
@@ -55,48 +91,40 @@ __all__ = [
     "ProviderResponseError",
     "ProviderUnavailableError",
     "Transport",
+    "build_escalation_provider",
     "build_provider",
+    "subscription_credential",
 ]
 
 JsonObject = dict[str, Any]
 
 #: Every provider this module knows how to build.
-PROVIDER_NAMES: Final[tuple[str, ...]] = ("ollama", "mock", "api")
+PROVIDER_NAMES: Final[tuple[str, ...]] = ("ollama", "mock", "agent-sdk", "api")
 
-#: Default when nothing is configured: offline, deterministic, incapable of spending money.
-DEFAULT_PROVIDER: Final[str] = "mock"
+#: Re-exported from :mod:`fermdb.config`, which owns the defaults so that `fermdb config` can
+#: report them. Named here for the callers that have always imported them from this module.
+DEFAULT_PROVIDER: Final[str] = DEFAULT_LLM_PROVIDER
+DEFAULT_BASE_URL: Final[str] = DEFAULT_LLM_BASE_URL
+DEFAULT_TIMEOUT_S: Final[float] = DEFAULT_LLM_TIMEOUT_S
+DEFAULT_MODELS: Final[Mapping[str, str]] = DEFAULT_LLM_MODELS
+DEFAULT_OPTIONS: Final[Mapping[str, Any]] = DEFAULT_LLM_OPTIONS
 
-#: Where a local Ollama daemon listens unless configured otherwise.
-DEFAULT_BASE_URL: Final[str] = "http://localhost:11434"
-
-#: Generous by design. A 27B model answering a long extraction prompt on one RTX 4090 is not
-#: fast, and a timeout that fires mid-generation looks exactly like a daemon that is down.
-DEFAULT_TIMEOUT_S: Final[float] = 900.0
-
-#: The documented default model per role. Overridden by ``FERMDB_LLM_MODEL_<ROLE>``.
-#:
-#: Roles follow MODEL_ROUTING.md §4: high-volume triage gets the cheap model, extraction gets a
-#: larger one *and* the full validator, vision handles figures and scanned pages. The tier is a
-#: cost decision, never a safety one.
-DEFAULT_MODELS: Final[Mapping[str, str]] = {
-    "triage": "qwen2.5:7b-instruct",
-    "extraction": "qwen3.6:27b",
-    "vision": "qwen2.5vl:7b",
-}
+#: The escalation model is a role like any other, so :meth:`LlmConfig.model_for` stays the single
+#: way to learn a model name — but it is *not* one of the local roles, so it is kept out of
+#: :data:`DEFAULT_MODELS`, where every entry is a model the Ollama daemon is expected to serve.
+ESCALATION_ROLE: Final[str] = "escalation"
 
 #: Roles in a stable order, for reporting.
-MODEL_ROLES: Final[tuple[str, ...]] = tuple(DEFAULT_MODELS)
+MODEL_ROLES: Final[tuple[str, ...]] = (*DEFAULT_LLM_MODEL_ROLES, ESCALATION_ROLE)
 
-#: Sampling defaults. Greedy and seeded: an extraction that cannot be reproduced cannot be
-#: audited, and `temperature: 0` costs nothing here.
-DEFAULT_OPTIONS: Final[Mapping[str, Any]] = {
-    "temperature": 0.0,
-    "seed": 0,
-    "num_ctx": 8192,
-}
-
-ENV_PREFIX: Final[str] = "FERMDB_LLM_"
+ENV_PREFIX: Final[str] = LLM_ENV_PREFIX
 _JSON_HEADERS: Final[Mapping[str, str]] = {"Content-Type": "application/json"}
+
+#: The subscription credential the Agent SDK uses, and the one this project supports.
+OAUTH_TOKEN_VAR: Final[str] = "CLAUDE_CODE_OAUTH_TOKEN"
+
+#: The metered credential. Deliberately *not* used: see the module docstring, rule three.
+API_KEY_VAR: Final[str] = "ANTHROPIC_API_KEY"
 
 
 # --------------------------------------------------------------------------------------- errors
@@ -238,55 +266,83 @@ def _safe_http_body(exc: urllib.error.HTTPError, *, limit: int = 400) -> str:
 # ------------------------------------------------------------------------------------ the config
 
 
-def _env_float(env: Mapping[str, str], key: str, default: float) -> float:
-    raw = env.get(key)
-    if raw is None or not raw.strip():
-        return default
+Items = Mapping[str, SettingItem]
+
+
+def _item(items: Items, key: str) -> SettingItem:
     try:
-        return float(raw)
+        return items[key]
+    except KeyError as exc:  # pragma: no cover - only a typo in this module can reach it
+        raise ProviderConfigError(f"setting {key!r} is not declared in fermdb.config") from exc
+
+
+def _setting_float(items: Items, key: str) -> float:
+    item = _item(items, key)
+    try:
+        return float(item.value)
     except ValueError as exc:
-        raise ProviderConfigError(f"{key}={raw!r} is not a number") from exc
+        raise ProviderConfigError(f"{item.env_var}={item.value!r} is not a number") from exc
 
 
-def _env_int(env: Mapping[str, str], key: str) -> int | None:
-    raw = env.get(key)
-    if raw is None or not raw.strip():
+def _setting_int(items: Items, key: str) -> int | None:
+    """The value as an integer, or None when it is unset — which is a real, distinct state."""
+    item = _item(items, key)
+    if not item.value.strip():
         return None
     try:
-        return int(raw)
+        return int(item.value)
     except ValueError as exc:
-        raise ProviderConfigError(f"{key}={raw!r} is not an integer") from exc
+        raise ProviderConfigError(f"{item.env_var}={item.value!r} is not an integer") from exc
 
 
-def _env_bool(env: Mapping[str, str], key: str, default: bool) -> bool:
-    raw = env.get(key)
-    if raw is None or not raw.strip():
-        return default
-    lowered = raw.strip().lower()
+def _setting_bool(items: Items, key: str) -> bool:
+    item = _item(items, key)
+    lowered = item.value.strip().lower()
     if lowered in ("1", "true", "yes", "on"):
         return True
     if lowered in ("0", "false", "no", "off"):
         return False
-    raise ProviderConfigError(f"{key}={raw!r} is not a boolean (use true/false)")
+    raise ProviderConfigError(f"{item.env_var}={item.value!r} is not a boolean (use true/false)")
+
+
+def _setting_provider(items: Items, key: str) -> str:
+    item = _item(items, key)
+    name = item.value.strip().lower()
+    if name not in PROVIDER_NAMES:
+        raise ProviderConfigError(f"{item.env_var}={name!r} is not one of {PROVIDER_NAMES}")
+    return name
+
+
+def _default_models() -> dict[str, str]:
+    return {**DEFAULT_MODELS, ESCALATION_ROLE: DEFAULT_ESCALATION_MODEL}
 
 
 @dataclass(frozen=True)
 class LlmConfig:
-    """Resolved LLM configuration: provider, endpoint, models per role, options, cache location.
+    """Resolved LLM configuration: providers, endpoint, models per role, options, cache, budget.
 
-    Every field comes from the environment over a documented default; no model name, endpoint or
-    directory is written at a call site. Built with :meth:`load`, which reads ``FERMDB_LLM_*``
-    and takes the cache directory from :class:`~fermdb.config.Settings` so it lands in the
-    derived (rebuildable) tier like every other generated artefact.
+    Every field comes from :class:`~fermdb.config.Settings` over a documented default; no model
+    name, endpoint or directory is written at a call site, and this class never reads the
+    environment itself. Built with :meth:`load`, which takes the cache directory from `Settings`
+    so it lands in the derived (rebuildable) tier like every other generated artefact.
+
+    ``escalation_provider`` and ``escalation_model`` describe the §7a tier and are separate from
+    ``provider``/``models``: the local tier runs first on everything, and escalation is a
+    different backend reached for a minority of documents. Nothing escalates because this is
+    configured — see :mod:`fermdb.llm.escalation`.
     """
 
     provider: str = DEFAULT_PROVIDER
     base_url: str = DEFAULT_BASE_URL
-    models: Mapping[str, str] = field(default_factory=lambda: dict(DEFAULT_MODELS))
+    models: Mapping[str, str] = field(default_factory=_default_models)
     options: Mapping[str, Any] = field(default_factory=lambda: dict(DEFAULT_OPTIONS))
     timeout_s: float = DEFAULT_TIMEOUT_S
     cache_dir: Path | None = None
     cache_enabled: bool = True
+    escalation_provider: str = DEFAULT_ESCALATION_PROVIDER
+    escalation_max_documents: int = 0
+    escalation_max_tokens: int | None = None
+    claude_cli_path: Path | None = None
 
     @classmethod
     def load(
@@ -295,69 +351,63 @@ class LlmConfig:
         *,
         env: Mapping[str, str] | None = None,
     ) -> LlmConfig:
-        """Resolve configuration from ``FERMDB_LLM_*`` plus documented defaults.
+        """Resolve configuration through :class:`~fermdb.config.Settings`.
 
-        Recognised keys (all optional)::
-
-            FERMDB_LLM_PROVIDER        ollama | mock | api           (default: mock)
-            FERMDB_LLM_BASE_URL        Ollama endpoint               (default: localhost:11434)
-            FERMDB_LLM_TIMEOUT_S       seconds per call              (default: 900)
-            FERMDB_LLM_MODEL_TRIAGE    model for the triage role     (see DEFAULT_MODELS)
-            FERMDB_LLM_MODEL_EXTRACTION
-            FERMDB_LLM_MODEL_VISION
-            FERMDB_LLM_TEMPERATURE / _SEED / _NUM_CTX / _NUM_PREDICT  sampling options
-            FERMDB_LLM_CACHE           true | false                  (default: true)
-            FERMDB_LLM_CACHE_DIR       overrides the derived-tier default
+        `env` wins when given (tests pass ``env={}`` for a documented-defaults run); otherwise
+        the values come from `settings`, and failing that from a fresh resolution over the
+        process environment. Whichever path is taken, `fermdb.config.LLM_SETTINGS` is the list of
+        recognised keys and their defaults, and `fermdb config` prints them.
         """
-        active: Mapping[str, str] = os.environ if env is None else env
+        if env is not None:
+            items: Items = resolve_settings(env)
+        elif settings is not None:
+            items = settings.setting_items()
+        else:
+            items = resolve_settings(None)
 
-        provider = (active.get(ENV_PREFIX + "PROVIDER") or DEFAULT_PROVIDER).strip().lower()
-        if provider not in PROVIDER_NAMES:
-            raise ProviderConfigError(
-                f"{ENV_PREFIX}PROVIDER={provider!r} is not one of {PROVIDER_NAMES}"
-            )
-
-        base_url = (active.get(ENV_PREFIX + "BASE_URL") or DEFAULT_BASE_URL).strip().rstrip("/")
-
-        models = dict(DEFAULT_MODELS)
+        models = _default_models()
         for role in MODEL_ROLES:
-            override = active.get(f"{ENV_PREFIX}MODEL_{role.upper()}")
-            if override and override.strip():
-                models[role] = override.strip()
+            key = "llm_escalation_model" if role == ESCALATION_ROLE else f"llm_model_{role}"
+            models[role] = _item(items, key).value
 
         options = dict(DEFAULT_OPTIONS)
-        options["temperature"] = _env_float(
-            active, ENV_PREFIX + "TEMPERATURE", float(DEFAULT_OPTIONS["temperature"])
-        )
-        for option_key, env_key in (("seed", "SEED"), ("num_ctx", "NUM_CTX")):
-            value = _env_int(active, ENV_PREFIX + env_key)
+        options["temperature"] = _setting_float(items, "llm_temperature")
+        for option_key, setting_key in (("seed", "llm_seed"), ("num_ctx", "llm_num_ctx")):
+            value = _setting_int(items, setting_key)
             if value is not None:
                 options[option_key] = value
-        num_predict = _env_int(active, ENV_PREFIX + "NUM_PREDICT")
+        num_predict = _setting_int(items, "llm_num_predict")
         if num_predict is not None:
             options["num_predict"] = num_predict
 
+        max_documents = _setting_int(items, "llm_escalation_max_documents")
+        cli_path = _item(items, "llm_claude_cli_path").value
+
         return cls(
-            provider=provider,
-            base_url=base_url,
+            provider=_setting_provider(items, "llm_provider"),
+            base_url=_item(items, "llm_base_url").value.rstrip("/"),
             models=models,
             options=options,
-            timeout_s=_env_float(active, ENV_PREFIX + "TIMEOUT_S", DEFAULT_TIMEOUT_S),
-            cache_dir=cls._cache_dir(settings, active),
-            cache_enabled=_env_bool(active, ENV_PREFIX + "CACHE", True),
+            timeout_s=_setting_float(items, "llm_timeout_s"),
+            cache_dir=cls._cache_dir(settings, items),
+            cache_enabled=_setting_bool(items, "llm_cache"),
+            escalation_provider=_setting_provider(items, "llm_escalation_provider"),
+            escalation_max_documents=0 if max_documents is None else max_documents,
+            escalation_max_tokens=_setting_int(items, "llm_escalation_max_tokens"),
+            claude_cli_path=Path(cli_path) if cli_path else None,
         )
 
     @staticmethod
-    def _cache_dir(settings: Settings | None, env: Mapping[str, str]) -> Path | None:
+    def _cache_dir(settings: Settings | None, items: Items) -> Path | None:
         """Where cached results live: an explicit override, else the derived tier, else nowhere.
 
         ``llm_cache_dir`` is honoured if a future ``env/paths.yaml`` defines it; until then the
         cache sits under the configured ``data_dir``, which is derived-tier and therefore the one
         tier fermdb may create on its own (CONVENTIONS.md, "Paths and configuration").
         """
-        override = env.get(ENV_PREFIX + "CACHE_DIR")
-        if override and override.strip():
-            return Path(override.strip())
+        override = _item(items, "llm_cache_dir").value
+        if override:
+            return Path(override)
         if settings is None:
             return None
         try:
@@ -613,25 +663,258 @@ class MockProvider:
         )
 
 
+# ------------------------------------------------------------------------------------ agent-sdk
+
+
+@dataclass(frozen=True)
+class AgentRequest:
+    """One escalation call, as handed to an :data:`AgentRunner`."""
+
+    prompt: str
+    model: str
+    schema: Mapping[str, Any] | None
+    timeout_s: float
+    cli_path: Path | None
+
+
+@dataclass(frozen=True)
+class AgentReply:
+    """What an :data:`AgentRunner` returns: the text, plus whatever the run reported about cost."""
+
+    text: str
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    finish_reason: str | None = None
+    model_version: str | None = None
+
+
+#: Injection seam for :class:`AgentSdkProvider`, exactly as :data:`Transport` is for Ollama.
+#: Tests pass a function over recorded replies; nothing in the test suite may start a CLI or
+#: reach a socket.
+AgentRunner = Callable[[AgentRequest], AgentReply]
+
+
+def subscription_credential(
+    env: Mapping[str, str] | None = None, *, home: Path | None = None
+) -> str:
+    """Name the subscription credential the Agent SDK will use, or raise saying how to get one.
+
+    Two accepted sources, both a Claude Code login rather than a metered key:
+
+    * ``CLAUDE_CODE_OAUTH_TOKEN`` in the environment, from ``claude setup-token``;
+    * an existing ``~/.claude/.credentials.json`` written by an interactive ``claude`` login.
+
+    ``ANTHROPIC_API_KEY`` is deliberately **not** accepted. The owner's instruction is that
+    escalation runs on the subscription, and falling back to a key that happens to be exported
+    would turn a configuration accident into a bill. The error says so rather than failing
+    mysteriously later, inside a subprocess.
+    """
+    active: Mapping[str, str] = os.environ if env is None else env
+    token = active.get(OAUTH_TOKEN_VAR)
+    if token and token.strip():
+        return OAUTH_TOKEN_VAR
+    credentials = (Path.home() if home is None else home) / ".claude" / ".credentials.json"
+    if credentials.exists():
+        return str(credentials)
+    extra = (
+        f" {API_KEY_VAR} is set, but it is not used: escalation runs on the Claude Code "
+        "subscription, not the metered API."
+        if active.get(API_KEY_VAR)
+        else ""
+    )
+    raise ProviderConfigError(
+        f"no subscription credential for the 'agent-sdk' provider. Run `claude setup-token` and "
+        f"put {OAUTH_TOKEN_VAR}=... in env/secrets.local.env (gitignored), or log in with "
+        f"`claude` so {credentials} exists.{extra}"
+    )
+
+
+def claude_agent_sdk_runner(request: AgentRequest) -> AgentReply:
+    """The real runner: one non-interactive Claude Agent SDK query, tools off, JSON out.
+
+    The credential is checked *before* the SDK is imported, so a misconfigured run fails with an
+    actionable message instead of an ImportError or a subprocess that quietly picks up whatever
+    credential it can find. ``ANTHROPIC_API_KEY`` is blanked for the child process for the same
+    reason (best effort: it stops the SDK's own key lookup, which is where the metered path would
+    otherwise start).
+
+    Every built-in tool is disallowed. This provider exists to turn a prompt into JSON, and an
+    escalation that could read or write files would be a different, much larger, trust question.
+    """
+    source = subscription_credential()
+    try:
+        import claude_agent_sdk  # type: ignore[import-not-found]
+    except ImportError as exc:
+        raise ProviderUnavailableError(
+            "the 'agent-sdk' provider needs the claude-agent-sdk package "
+            "(pip install claude-agent-sdk). It is not a dependency of fermdb yet; see the "
+            f"escalation notes in docs/reference/MODEL_ROUTING.md §7a. Credential found: {source}"
+        ) from exc
+
+    options_kwargs: dict[str, Any] = {
+        "system_prompt": (
+            "You are an extraction backend. Reply with a single JSON object and nothing else."
+        ),
+        "allowed_tools": [],
+        "disallowed_tools": [
+            "Bash",
+            "Read",
+            "Write",
+            "Edit",
+            "NotebookEdit",
+            "Glob",
+            "Grep",
+            "WebFetch",
+            "WebSearch",
+            "Agent",
+            "Task",
+            "Skill",
+            "TodoWrite",
+        ],
+        "permission_mode": "dontAsk",
+        "model": request.model,
+        "max_turns": 1,
+        "setting_sources": [],
+        "env": {API_KEY_VAR: "", "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "0"},
+    }
+    if request.schema is not None:
+        options_kwargs["output_format"] = {"type": "json_schema", "schema": dict(request.schema)}
+    if request.cli_path is not None:
+        options_kwargs["cli_path"] = str(request.cli_path)
+
+    async def _collect() -> AgentReply:
+        texts: list[str] = []
+        structured: Any = None
+        result_text = ""
+        usage: Any = None
+        finish: str | None = None
+        options = claude_agent_sdk.ClaudeAgentOptions(**options_kwargs)
+        async for message in claude_agent_sdk.query(prompt=request.prompt, options=options):
+            if isinstance(message, claude_agent_sdk.AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, claude_agent_sdk.TextBlock):
+                        texts.append(str(block.text))
+            elif isinstance(message, claude_agent_sdk.ResultMessage):
+                finish = str(message.subtype)
+                structured = getattr(message, "structured_output", None)
+                raw = message.result
+                result_text = raw if isinstance(raw, str) else json.dumps(raw)
+                usage = getattr(message, "usage", None)
+        if isinstance(structured, dict):
+            text = json.dumps(structured)
+        else:
+            text = result_text or "\n".join(texts)
+        return AgentReply(
+            text=text,
+            input_tokens=_usage_count(usage, "input_tokens"),
+            output_tokens=_usage_count(usage, "output_tokens"),
+            finish_reason=finish,
+            model_version=request.model,
+        )
+
+    try:
+        reply: AgentReply = asyncio.run(asyncio.wait_for(_collect(), request.timeout_s))
+    except TimeoutError as exc:
+        raise ProviderUnavailableError(
+            f"the Claude Agent SDK did not finish within {request.timeout_s:g}s"
+        ) from exc
+    except ProviderError:
+        raise
+    except Exception as exc:  # the SDK raises its own family; none of it is importable here
+        raise ProviderUnavailableError(
+            f"the Claude Agent SDK failed: {type(exc).__name__}: {exc}"
+        ) from exc
+    return reply
+
+
+def _usage_count(usage: object, key: str) -> int | None:
+    if isinstance(usage, Mapping):
+        value = usage.get(key)
+        return value if isinstance(value, int) and not isinstance(value, bool) else None
+    return None
+
+
+class AgentSdkProvider:
+    """Claude through the Claude Agent SDK, on a subscription login. The §7a escalation tier.
+
+    Same one-method contract as every other provider, so :func:`fermdb.llm.runtime.run` validates
+    an escalated answer with the same checks it applies to a local one. That is the point: the
+    escalation tier buys recall, not trust — a Claude extraction is still Zone I, still
+    span-verified, still ``unverified`` until a curator says otherwise.
+    """
+
+    name = "agent-sdk"
+
+    def __init__(
+        self,
+        *,
+        timeout_s: float = DEFAULT_TIMEOUT_S,
+        cli_path: Path | None = None,
+        runner: AgentRunner | None = None,
+    ) -> None:
+        self._timeout_s = timeout_s
+        self._cli_path = cli_path
+        self._runner: AgentRunner = claude_agent_sdk_runner if runner is None else runner
+
+    def complete(
+        self,
+        prompt: str,
+        *,
+        model: str,
+        schema: Mapping[str, Any] | None = None,
+        options: Mapping[str, Any] | None = None,
+        timeout_s: float | None = None,
+    ) -> Completion:
+        """Run one query. ``options`` is accepted and ignored: sampling is not exposed here."""
+        started = time.monotonic()
+        reply = self._runner(
+            AgentRequest(
+                prompt=prompt,
+                model=model,
+                schema=schema,
+                timeout_s=self._timeout_s if timeout_s is None else timeout_s,
+                cli_path=self._cli_path,
+            )
+        )
+        if not reply.text.strip():
+            raise ProviderResponseError(
+                f"{self.name} returned an empty reply for model {model!r} "
+                f"(finish_reason={reply.finish_reason!r})"
+            )
+        return Completion(
+            text=reply.text,
+            provider=self.name,
+            model=model,
+            model_version=reply.model_version or model,
+            prompt_tokens=reply.input_tokens,
+            completion_tokens=reply.output_tokens,
+            duration_s=time.monotonic() - started,
+            finish_reason=reply.finish_reason,
+        )
+
+
 # ------------------------------------------------------------------------------------------ api
 
 
 #: Raised by :class:`ApiProvider`. Kept as a constant so the pointer stays in one place.
 API_PROVIDER_POINTER: Final[str] = (
-    "the 'api' provider is a deliberate stub: this build calls local models only. "
-    "Use FERMDB_LLM_PROVIDER=ollama for a real run, or 'mock' in tests. To add a remote "
-    "backend, implement complete() here on the same Provider interface as OllamaProvider, and "
-    "read docs/reference/MODEL_ROUTING.md first - §4 says which roles may use a stronger model "
-    "and §5 says which may never, whatever the provider."
+    "the 'api' provider is a deliberate stub: this build never calls the metered Anthropic API. "
+    "Claude is reached through 'agent-sdk', which authenticates with a Claude Code subscription "
+    f"login ({OAUTH_TOKEN_VAR} from `claude setup-token`) - set "
+    "FERMDB_LLM_ESCALATION_PROVIDER=agent-sdk. Use FERMDB_LLM_PROVIDER=ollama for local runs, or "
+    "'mock' in tests. Wiring a metered client here is a cost decision, not a code change: read "
+    "docs/reference/MODEL_ROUTING.md first - §4 says which roles may use a stronger model and §5 "
+    "says which may never, whatever the provider."
 )
 
 
 class ApiProvider:
-    """Placeholder for a remote API backend. Construction is fine; calling it is not.
+    """Placeholder for the metered Anthropic API client. Construction is fine; calling it is not.
 
-    Construction deliberately succeeds so that configuration can be inspected, listed and
-    reported without exploding; the failure lands on the one operation that would have made a
-    network call.
+    Kept deliberately, rather than deleted: a named stub that raises is what stops somebody
+    adding a metered path by reflex when the subscription one is inconvenient. Construction
+    succeeds so configuration can be inspected, listed and reported without exploding; the
+    failure lands on the one operation that would have spent money.
     """
 
     name = "api"
@@ -655,29 +938,63 @@ class ApiProvider:
 # -------------------------------------------------------------------------------------- factory
 
 
+def _build(
+    name: str,
+    config: LlmConfig,
+    *,
+    transport: Transport | None,
+    mock: MockProvider | None,
+    runner: AgentRunner | None,
+) -> Provider:
+    if name == "mock":
+        return mock if mock is not None else MockProvider()
+    if name == "ollama":
+        return OllamaProvider(
+            base_url=config.base_url,
+            timeout_s=config.timeout_s,
+            options=config.options,
+            transport=transport,
+        )
+    if name == "agent-sdk":
+        return AgentSdkProvider(
+            timeout_s=config.timeout_s,
+            cli_path=config.claude_cli_path,
+            runner=runner,
+        )
+    if name == "api":
+        return ApiProvider(config=config)
+    raise ProviderConfigError(f"unknown provider {name!r}; expected one of {PROVIDER_NAMES}")
+
+
 def build_provider(
     config: LlmConfig | None = None,
     *,
     transport: Transport | None = None,
     mock: MockProvider | None = None,
+    runner: AgentRunner | None = None,
 ) -> Provider:
-    """Build the configured provider.
+    """Build the configured **local** provider — the one that runs first on everything.
 
-    ``transport`` overrides Ollama's HTTP layer and ``mock`` supplies a pre-loaded mock; both
-    exist so a test can exercise the same factory the CLI uses without reaching a socket.
+    ``transport`` overrides Ollama's HTTP layer, ``mock`` supplies a pre-loaded mock and
+    ``runner`` overrides the Agent SDK's; all three exist so a test can exercise the same factory
+    the CLI uses without reaching a socket.
     """
     active = LlmConfig() if config is None else config
-    if active.provider == "mock":
-        return mock if mock is not None else MockProvider()
-    if active.provider == "ollama":
-        return OllamaProvider(
-            base_url=active.base_url,
-            timeout_s=active.timeout_s,
-            options=active.options,
-            transport=transport,
-        )
-    if active.provider == "api":
-        return ApiProvider(config=active)
-    raise ProviderConfigError(
-        f"unknown provider {active.provider!r}; expected one of {PROVIDER_NAMES}"
-    )
+    return _build(active.provider, active, transport=transport, mock=mock, runner=runner)
+
+
+def build_escalation_provider(
+    config: LlmConfig | None = None,
+    *,
+    transport: Transport | None = None,
+    mock: MockProvider | None = None,
+    runner: AgentRunner | None = None,
+) -> Provider:
+    """Build the configured **escalation** provider (MODEL_ROUTING.md §7a).
+
+    Separate from :func:`build_provider` because the two tiers are different backends and a run
+    holds both at once. Building one costs nothing and reaches nothing; the credential check and
+    the subprocess happen on the first :meth:`complete`.
+    """
+    active = LlmConfig() if config is None else config
+    return _build(active.escalation_provider, active, transport=transport, mock=mock, runner=runner)

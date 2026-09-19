@@ -15,6 +15,7 @@ Two properties this file exists to hold down, both from docs/reference/MODEL_ROU
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
 from collections.abc import Mapping
@@ -23,9 +24,15 @@ from typing import Any
 
 import pytest
 
-from fermdb.config import Settings
+from fermdb.config import (
+    DEFAULT_ESCALATION_MODEL,
+    DEFAULT_ESCALATION_PROVIDER,
+    LLM_SETTINGS,
+    Settings,
+)
 from fermdb.llm import (
     DEFAULT_MODELS,
+    DEFAULT_PROVIDER,
     ISSUE_CODES,
     MODEL_CONFIDENCE,
     MODEL_REVIEW_STATE,
@@ -55,12 +62,24 @@ from fermdb.llm import (
     validate_records,
     verify_span,
 )
-from fermdb.llm.providers import API_PROVIDER_POINTER, urllib_transport
+from fermdb.llm.providers import (
+    API_KEY_VAR,
+    API_PROVIDER_POINTER,
+    ESCALATION_ROLE,
+    OAUTH_TOKEN_VAR,
+    AgentReply,
+    AgentRequest,
+    AgentSdkProvider,
+    build_escalation_provider,
+    subscription_credential,
+    urllib_transport,
+)
 from fermdb.llm.runtime import LlmResponseError, parse_json_object
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PATHS_FILE = REPO_ROOT / "env" / "paths.yaml"
 LLM_SOURCE_DIR = REPO_ROOT / "src" / "fermdb" / "llm"
+CONFIG_SOURCE = REPO_ROOT / "src" / "fermdb" / "config.py"
 
 
 # ------------------------------------------------------------------------------------- fixtures
@@ -169,14 +188,77 @@ def test_defaults_are_generous_enough_for_a_27b_model_on_one_gpu() -> None:
 
 
 def test_no_model_name_is_written_anywhere_but_the_defaults_table() -> None:
-    """MODEL_ROUTING.md: models come from config. A literal at a call site defeats that."""
-    for model in DEFAULT_MODELS.values():
-        for source in sorted(LLM_SOURCE_DIR.glob("*.py")):
+    """MODEL_ROUTING.md: models come from config. A literal at a call site defeats that.
+
+    The escalation model is held to the same rule as the local ones. It is the one most likely to
+    be pasted into a call site — it reads like a product name rather than a configured value.
+    """
+    every_model = (*DEFAULT_MODELS.values(), DEFAULT_ESCALATION_MODEL)
+    sources = [CONFIG_SOURCE, *sorted(LLM_SOURCE_DIR.glob("*.py"))]
+    for model in every_model:
+        for source in sources:
             occurrences = source.read_text(encoding="utf-8").count(model)
-            if source.name == "providers.py":
-                assert occurrences == 1, f"{model} appears {occurrences}x in providers.py"
+            if source.name == "config.py":
+                assert occurrences == 1, f"{model} appears {occurrences}x in config.py"
             else:
                 assert occurrences == 0, f"{model} is hardcoded in {source.name}"
+
+
+def test_providers_never_reads_the_environment_for_its_own_configuration() -> None:
+    """A previous review found FERMDB_LLM_* read directly here, outside Settings.
+
+    `fermdb config` can only report what a run will do if there is exactly one reader of the
+    environment, and it is `fermdb.config`. The two `os.environ` uses left in providers.py are
+    credentials, which are deliberately not settings — so the assertion is on the prefix, not on
+    `os.environ`.
+    """
+    source = (LLM_SOURCE_DIR / "providers.py").read_text(encoding="utf-8")
+    assert "resolve_settings" in source, "providers.py no longer resolves through fermdb.config"
+    # No env-var name is looked up here; the names live in fermdb.config.LLM_SETTINGS. (They do
+    # still appear in prose and in the 'api' stub's pointer, which is guidance, not a lookup.)
+    for lookup in (".get(ENV_PREFIX", '.get(f"{ENV_PREFIX}', '.get("FERMDB', "environ.get("):
+        assert lookup not in source, f"providers.py looks a setting up itself: {lookup}"
+    credential_reads = [line for line in source.splitlines() if "os.environ" in line]
+    assert len(credential_reads) == 1, (
+        "providers.py reads os.environ more than once; the only permitted read is the "
+        f"credential lookup in subscription_credential, found: {credential_reads}"
+    )
+    body = source.split("def subscription_credential(", 1)[1].split("\ndef ", 1)[0]
+    assert "os.environ" in body
+
+
+def test_llm_settings_are_reported_by_settings_so_fermdb_config_can_print_them(
+    settings: Settings,
+) -> None:
+    reported = {item.key: item for item in settings.describe_settings()}
+    assert reported["llm_provider"].value == DEFAULT_PROVIDER
+    assert reported["llm_provider"].env_var == "FERMDB_LLM_PROVIDER"
+    assert reported["llm_provider"].origin == "default"
+    assert reported["llm_escalation_model"].value == DEFAULT_ESCALATION_MODEL
+    # Every setting the config module declares is reported; none is readable only from code.
+    assert {spec.key for spec in LLM_SETTINGS} == set(reported)
+
+
+def test_settings_records_where_a_value_came_from() -> None:
+    settings = Settings.load(
+        paths_file=PATHS_FILE, env={"FERMDB_LLM_ESCALATION_MAX_DOCUMENTS": "7"}
+    )
+    item = settings.setting_item("llm_escalation_max_documents")
+    assert (item.value, item.origin) == ("7", "env")
+    assert settings.setting_item("llm_provider").origin == "default"
+    assert LlmConfig.load(settings).escalation_max_documents == 7
+
+
+def test_no_credential_is_ever_a_configured_setting() -> None:
+    """CONVENTIONS.md: configuration is committed and reportable. A token is neither.
+
+    `llm_escalation_max_tokens` is a budget, not a credential, which is why this checks the shape
+    of the name rather than looking for the substring "token" anywhere in it.
+    """
+    for spec in LLM_SETTINGS:
+        assert not spec.key.endswith(("_token", "_key", "_secret", "_password", "_credential"))
+        assert "api_key" not in spec.key
+        assert not spec.default.startswith("sk-")
 
 
 def test_no_theoretical_yield_constant_is_hardcoded_in_the_validator() -> None:
@@ -302,10 +384,153 @@ def test_api_provider_is_a_stub_with_a_pointer() -> None:
     assert str(caught.value) == API_PROVIDER_POINTER
 
 
+def test_the_api_stub_points_at_the_subscription_path_not_at_an_api_key() -> None:
+    """The owner's instruction, made structural: no metered client, and the stub says where to go.
+
+    If this ever reads "set ANTHROPIC_API_KEY", the escalation tier has quietly become a billed
+    one, and the message would be actively teaching the wrong thing.
+    """
+    assert "agent-sdk" in API_PROVIDER_POINTER
+    assert OAUTH_TOKEN_VAR in API_PROVIDER_POINTER
+    assert "claude setup-token" in API_PROVIDER_POINTER
+    assert f"set {API_KEY_VAR}" not in API_PROVIDER_POINTER
+
+
+# --------------------------------------------------------------------------------- agent-sdk
+
+
+def test_agent_sdk_provider_runs_through_an_injected_runner_and_records_provenance() -> None:
+    seen: list[AgentRequest] = []
+
+    def runner(request: AgentRequest) -> AgentReply:
+        seen.append(request)
+        return AgentReply(
+            text='{"titer_g_per_l": 22.6}',
+            input_tokens=900,
+            output_tokens=30,
+            finish_reason="success",
+        )
+
+    provider = AgentSdkProvider(runner=runner, timeout_s=42.0)
+    completion = provider.complete(
+        "extract the titer", model="configured-escalation-model", schema=OBJECT_SCHEMA
+    )
+
+    assert provider.name == "agent-sdk"
+    assert seen[0].model == "configured-escalation-model"
+    assert seen[0].schema == OBJECT_SCHEMA
+    assert seen[0].timeout_s == 42.0
+    assert completion.text == '{"titer_g_per_l": 22.6}'
+    assert completion.total_tokens == 930
+    # The model that answered is recorded, so an escalated row names its tier's model.
+    assert completion.model_version == "configured-escalation-model"
+
+
+def test_agent_sdk_provider_rejects_an_empty_reply_rather_than_returning_blank_text() -> None:
+    provider = AgentSdkProvider(runner=lambda request: AgentReply(text="   "))
+    with pytest.raises(ProviderError, match="empty reply"):
+        provider.complete("hello", model="m")
+
+
+def test_escalation_authenticates_with_a_subscription_login(tmp_path: Path) -> None:
+    assert (
+        subscription_credential({OAUTH_TOKEN_VAR: "oauth-token"}, home=tmp_path) == OAUTH_TOKEN_VAR
+    )
+    credentials = tmp_path / ".claude" / ".credentials.json"
+    credentials.parent.mkdir(parents=True)
+    credentials.write_text("{}", encoding="utf-8")
+    assert subscription_credential({}, home=tmp_path) == str(credentials)
+
+
+def test_an_api_key_alone_is_refused_so_escalation_cannot_silently_become_metered(
+    tmp_path: Path,
+) -> None:
+    """The owner's instruction — escalation runs on Claude Code, not the API — enforced here.
+
+    A machine with ANTHROPIC_API_KEY exported is the realistic accident: the SDK would happily
+    use it, the run would work, and the first sign of trouble would be an invoice.
+    """
+    with pytest.raises(ProviderConfigError) as caught:
+        subscription_credential({API_KEY_VAR: "sk-ant-whatever"}, home=tmp_path)
+    message = str(caught.value)
+    assert "claude setup-token" in message
+    assert OAUTH_TOKEN_VAR in message
+    assert "not the metered API" in message
+
+
+def test_no_credential_at_all_says_exactly_what_to_run(tmp_path: Path) -> None:
+    with pytest.raises(ProviderConfigError, match="secrets.local.env"):
+        subscription_credential({}, home=tmp_path)
+
+
+def test_secrets_file_is_gitignored_so_a_token_cannot_be_committed() -> None:
+    ignored = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+    assert "env/secrets.local.env" in [line.strip() for line in ignored]
+
+
+# ------------------------------------------------------------------------------- escalation cfg
+
+
+def test_the_escalation_tier_is_configured_separately_from_the_local_one() -> None:
+    config = LlmConfig.load(env={})
+    assert config.provider == "mock"  # local: offline unless asked otherwise
+    assert config.escalation_provider == DEFAULT_ESCALATION_PROVIDER == "agent-sdk"
+    assert config.model_for(ESCALATION_ROLE) == DEFAULT_ESCALATION_MODEL
+
+
+def test_the_escalation_model_is_a_full_id_never_an_alias() -> None:
+    """A run that records an alias cannot be reproduced once the alias moves.
+
+    Full ids carry no date suffix either — `claude-opus-5`, not `claude-opus-5-20260401`.
+    """
+    model = LlmConfig.load(env={}).model_for(ESCALATION_ROLE)
+    assert re.fullmatch(r"claude-[a-z]+-\d+(?:-\d+)?", model), model
+    assert not re.search(r"-\d{8}$", model)
+    assert model not in ("opus", "sonnet", "latest", "claude")
+
+
+def test_the_escalation_tier_is_overridable_like_every_other_setting() -> None:
+    config = LlmConfig.load(
+        env={
+            "FERMDB_LLM_ESCALATION_PROVIDER": "mock",
+            "FERMDB_LLM_ESCALATION_MODEL": "some-other-model",
+            "FERMDB_LLM_ESCALATION_MAX_DOCUMENTS": "12",
+            "FERMDB_LLM_ESCALATION_MAX_TOKENS": "50000",
+        }
+    )
+    assert config.escalation_provider == "mock"
+    assert config.model_for(ESCALATION_ROLE) == "some-other-model"
+    assert config.escalation_max_documents == 12
+    assert config.escalation_max_tokens == 50000
+    assert isinstance(build_escalation_provider(config), MockProvider)
+
+
+def test_an_unset_token_budget_is_none_not_zero() -> None:
+    """NULL versus 0 is the same distinction CONVENTIONS.md makes about missing values.
+
+    Zero would mean "no escalation may spend any tokens", which is the opposite of "no token cap".
+    """
+    config = LlmConfig.load(env={})
+    assert config.escalation_max_tokens is None
+    assert LlmConfig.load(env={"FERMDB_LLM_ESCALATION_MAX_TOKENS": "0"}).escalation_max_tokens == 0
+
+
+def test_build_escalation_provider_defaults_to_the_agent_sdk_and_reaches_nothing() -> None:
+    """Building the real escalation provider must not check a credential or start anything.
+
+    The credential check belongs on the first call, so `fermdb config` and a dry run can inspect
+    an escalation setup on a machine that has no token at all.
+    """
+    provider = build_escalation_provider(LlmConfig.load(env={}))
+    assert isinstance(provider, AgentSdkProvider)
+    assert provider.name == "agent-sdk"
+
+
 def test_build_provider_covers_every_declared_name() -> None:
     assert isinstance(build_provider(LlmConfig(provider="mock")), MockProvider)
     assert isinstance(build_provider(LlmConfig(provider="ollama")), OllamaProvider)
     assert isinstance(build_provider(LlmConfig(provider="api")), ApiProvider)
+    assert isinstance(build_provider(LlmConfig(provider="agent-sdk")), AgentSdkProvider)
 
 
 # ------------------------------------------------------------------------------ the JSON checker

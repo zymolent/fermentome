@@ -34,7 +34,32 @@ from typing import Final
 #:    `<facet>_as_reported` shadows were added; every `confidence` CHECK widened to four values.
 #:    A version-1 database cannot be read as a version-2 one, and open_db refuses rather than
 #:    guessing at the migration.
-SCHEMA_VERSION: Final[int] = 3  # v3: literature, full-text, extraction/curation and omics tables
+#: 4: ONE version covering everything the 2026-09-20 DUET round added to `schema.sql`. Two
+#:    packages grew tables in the same round, in parallel, and each independently bumped the
+#:    version it found on disk (3) by one; the second to merge renumbered itself to 5, which
+#:    briefly made this file claim a version 4 that no database was ever stamped with. Reconciled
+#:    back to a single 4 on review: the version counts *on-disk formats that exist*, not the number
+#:    of agents that touched the file, and 3 -> 4 is the only real transition here. Both entries
+#:    are kept below so the merge history stays legible.
+#:
+#:    4a (functional annotation) -- added section 17: `gene_annotation`, owned by
+#:    src/fermdb/annotate/.
+#:
+#:    4b (omics acquisition) -- extended section 16: `sra_run` gained `reference_assembly`,
+#:    `reference_match_quality` and `unmapped_fraction` (nullable; PLAN.md F.4's per-run
+#:    reference-choice loss, measured later by quantification, not this build) and
+#:    `relevance_uncertain` (NOT NULL, defaults 0; flags e.g. this corpus's 8 Fusarium graminearum
+#:    runs for curator review). New table `reference_genome_asset` for fetched-and-checksummed
+#:    bytes of any non-anchor reference genome (bacterial hosts; CEN.PK/Ethanol Red if ever
+#:    fetched) -- kept separate from `reference_sequence` because that table's `kind` CHECK and
+#:    `encoding_genome` foreign key are yeast-specific (nuclear/mitochondrial, NCBI genetic code
+#:    tables 1/3) and would misrepresent a bacterial replicon (table 11). Owned by
+#:    src/fermdb/omics/{references,sra}.py; see data/omics/reference_genomes.yaml.
+#:
+#:    The rule for the next parallel round, so this does not recur: a bump is per *round*, not per
+#:    agent. An agent that finds the version already ahead of the last released one adds its note
+#:    under that same integer instead of incrementing again.
+SCHEMA_VERSION: Final[int] = 4  # v4: functional annotation + omics acquisition (one round)
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

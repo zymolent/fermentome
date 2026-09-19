@@ -126,6 +126,47 @@ Worth creating here for: `architect`, `reviewer`, `curator`, `extractor`, `data-
 problems, not the pass that produces work. Review is cheap relative to rework, and structural
 rework after curation has started is the most expensive thing this project can do.
 
+## 5a. Correction: "mechanical" was the wrong label for `.gitignore`
+
+§4 routed "CI, tooling, formatting" to the cheapest tier as mechanical work. A `.gitignore`
+written there listed `env/` under *Virtual environments* and ignored `data/` as generated output.
+Both are **committed repo tiers** in this project. The result: the entire curated layer —
+vocabularies, the benchmark set, the query families, `env/paths.yaml` — was untracked through two
+commits, and `CONVENTIONS.md`'s claim that curation gets "version control, review and blame for
+free" was false from the first commit.
+
+Nothing caught it, and nothing could: **a `.gitignore` has no tests.** pytest, ruff and mypy were
+all green while the property was gone.
+
+Run it through §1's own three questions and the misrouting is obvious: contained? no. Checkable?
+no. Low blast radius? no — it silently governs everything curated. **`.gitignore` is not tooling;
+it encodes which tier each directory belongs to, which is structure.** The generic-template
+assumptions a cheap model reasonably brings are exactly wrong for a project with a bespoke
+three-tier layout.
+
+The general lesson, which is more useful than the specific fix: **a file's tier is not its
+apparent difficulty.** Config that encodes an architectural decision belongs with structure, no
+matter how short it is. Other files in this repo with the same property: `pyproject.toml`
+(package-data — which also shipped broken), `env/paths.yaml`, and the CI workflow's gate list.
+
+## 5b. Token economy, directed 2026-09-20
+
+The project owner's instruction: *use subscription auth, but prioritise deliverables — save
+tokens for them.* Three rules follow.
+
+1. **Local models do the bulk.** Triage, first-pass extraction, re-runs after a prompt change.
+   Free inference is the reason the corpus can be screened at all.
+2. **Escalation is rationed to where it changes an outcome** — the 33 isobutanol × mitochondria
+   papers, validator failures, and self-consistency disagreements. Not "anything important-looking".
+3. **Orchestration is a cost too.** Three build rounds have spent ~3.5M subagent tokens. That was
+   right while the schema was being designed, where a structural error is expensive. It is not
+   right for routine work. Prefer: fewer agents, cheap deterministic checks over review agents,
+   and doing small corrections in the main session rather than opening a round for them.
+
+The reviewer slot stays expensive (§2). It has caught the only defects in this project that tests
+could not — and both times the finding was in work authored at the *top* tier, which is the
+argument for keeping it, not for spreading spend evenly.
+
 ## 6a. Track split, decided 2026-09-20
 
 The project owner has scoped the two tiers by track, and the split is clean:

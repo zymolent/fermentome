@@ -17,7 +17,13 @@ import yaml
 
 VALID_PRODUCT_TIERS = ("isobutanol", "ethanol")
 VALID_DISPOSITIONS = ("include_unless_excluded", "exclude_unless_admitted")
-#: The ethanol admission criteria. E1-E4 are PLAN.md B.3.1-B.3.4 / R.2.
+#: The ethanol admission criteria. E1-E4 are PLAN.md B.3 / R.2; E5 and E6 were added later
+#: (see below and docs/reference/ETHANOL_REFERENCE_SLOTS.md).
+#:
+#: E6 added 2026-09-20 at the owner's request: the genetic basis of industrial performance --
+#: what makes Ethanol Red hyper-producing and ethanol-tolerant relative to laboratory strains.
+#: Ethanol Red is the proxy genome for the real chassis, so this is the most directly
+#: transferable ethanol question available. Expect a polygenic answer (unverified).
 #:
 #: E5 was added 2026-09-20 from docs/design/DUET_TARGET.md: in the target architecture ethanol is
 #: not only the competing sink to be deleted (E1) but the **redox carrier** into the mitochondrial
@@ -29,7 +35,7 @@ VALID_DISPOSITIONS = ("include_unless_excluded", "exclude_unless_admitted")
 #: written into PLAN.md B.3 and the schema's CHECK; adding one is a scoping decision that should
 #: show up in a diff here, not appear silently in a YAML file. Keep it in step with
 #: data/literature/query_families.yaml and the screening_record CHECK constraint.
-VALID_CRITERIA = ("E1", "E2", "E3", "E4", "E5")
+VALID_CRITERIA = ("E1", "E2", "E3", "E4", "E5", "E6")
 
 #: Every key a family mapping may carry. Anything else is an error, not a silent no-op.
 _FAMILY_KEYS = frozenset(

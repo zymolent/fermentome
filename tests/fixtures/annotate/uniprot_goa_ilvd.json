@@ -1,0 +1,23 @@
+{
+  "numberOfHits": 2,
+  "results": [
+    {
+      "geneProductId": "UniProtKB:P05791",
+      "goId": "GO:0004160",
+      "goName": "dihydroxy-acid dehydratase activity",
+      "goAspect": "molecular_function",
+      "evidenceCode": "IDA",
+      "taxonId": 511145,
+      "symbol": "ilvD"
+    },
+    {
+      "geneProductId": "UniProtKB:P05791",
+      "goId": "GO:0009082",
+      "goName": "branched-chain amino acid biosynthetic process",
+      "goAspect": "biological_process",
+      "evidenceCode": "IEA",
+      "taxonId": 511145,
+      "symbol": "ilvD"
+    }
+  ]
+}

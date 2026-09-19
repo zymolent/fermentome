@@ -36,6 +36,7 @@ from fermdb.omics import sra as sra_mod
 FIXTURES = Path(__file__).parent / "fixtures" / "omics"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REAL_DATASET_FAMILIES = REPO_ROOT / "data" / "omics" / "dataset_families.yaml"
+REAL_REFERENCE_GENOMES = REPO_ROOT / "data" / "omics" / "reference_genomes.yaml"
 
 
 def _read(name: str) -> str:
@@ -981,6 +982,438 @@ def test_dataset_families_path_is_off_repo_root(tmp_path: Path) -> None:
     assert dataset_families_path(settings) == (
         tmp_path / "data" / "omics" / "dataset_families.yaml"
     )
+
+
+# ---------------------------------------------------------------------------------------------
+# data/omics/reference_genomes.yaml and its loader
+# ---------------------------------------------------------------------------------------------
+
+
+def test_load_reference_genomes_reads_the_real_file() -> None:
+    refs = references_mod.load_reference_genomes(REAL_REFERENCE_GENOMES)
+    ids = {r.id for r in refs}
+    # The corpus's five organisms (docs/reference/DATA_VOLUME.md section 2), plus Fusarium
+    # graminearum kept only for curator review -- see the relevance_uncertain assertions below.
+    assert {
+        "s288c_r64",
+        "cenpk113_7d",
+        "ethanol_red",
+        "ecoli_k12_mg1655",
+        "zymomonas_mobilis_zm4",
+        "lactococcus_cremoris_kw2",
+        "fusarium_graminearum_ph1",
+    } <= ids
+    for ref in refs:
+        assert ref.evidence
+        assert ref.confidence in ("unverified", "low", "medium", "high")
+        assert ref.accession
+
+
+def test_s288c_r64_entry_agrees_with_the_already_fetched_anchor() -> None:
+    """The catalog's anchor entry must never drift from what `fetch_nuclear_reference` actually
+    fetches -- this is the one place both are cross-checked against each other."""
+    refs = {r.id: r for r in references_mod.load_reference_genomes(REAL_REFERENCE_GENOMES)}
+    anchor = refs["s288c_r64"]
+    assert anchor.accession == references_mod.ASSEMBLY_ACCESSION
+    assert anchor.is_species_default is True
+    assert anchor.fetched is True
+
+
+def test_cenpk_and_ethanol_red_are_parallel_non_default_comparators() -> None:
+    """Both are catalogued (per this build task, "in parallel... so later we can compare both"),
+    neither is the species default -- a plain "Saccharomyces cerevisiae" run must resolve to the
+    S288C anchor, never silently to either comparator."""
+    refs = {r.id: r for r in references_mod.load_reference_genomes(REAL_REFERENCE_GENOMES)}
+    cenpk, ethanol_red = refs["cenpk113_7d"], refs["ethanol_red"]
+    assert cenpk.is_species_default is False
+    assert ethanol_red.is_species_default is False
+    assert cenpk.accession == "GCA_002571405.2"
+    assert ethanol_red.accession == "GCA_029255905.1"
+    assert ethanol_red.structural_caveats is not None
+    assert "scaffold" in ethanol_red.structural_caveats.lower()
+
+
+def test_fusarium_graminearum_entry_is_flagged_relevance_uncertain() -> None:
+    refs = {r.id: r for r in references_mod.load_reference_genomes(REAL_REFERENCE_GENOMES)}
+    fusarium = refs["fusarium_graminearum_ph1"]
+    assert fusarium.relevance_uncertain is True
+    assert fusarium.relevance_note
+    assert fusarium.fetched is False
+
+
+def test_load_reference_genomes_missing_file_raises(tmp_path: Path) -> None:
+    with pytest.raises(references_mod.ReferenceGenomesError):
+        references_mod.load_reference_genomes(tmp_path / "does-not-exist.yaml")
+
+
+def test_load_reference_genomes_rejects_a_bad_confidence_value(tmp_path: Path) -> None:
+    bad = tmp_path / "refs.yaml"
+    bad.write_text(
+        "references:\n"
+        "  - {id: x, organism: X, accession: ACC1, assembly_level: Chromosome, role: r,\n"
+        "     evidence: e, confidence: pretty_sure}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(references_mod.ReferenceGenomesError):
+        references_mod.load_reference_genomes(bad)
+
+
+def test_load_reference_genomes_rejects_a_duplicate_id(tmp_path: Path) -> None:
+    bad = tmp_path / "refs.yaml"
+    bad.write_text(
+        "references:\n"
+        "  - {id: x, organism: X, accession: ACC1, assembly_level: Chromosome, role: r,\n"
+        "     evidence: e, confidence: unverified}\n"
+        "  - {id: x, organism: Y, accession: ACC2, assembly_level: Chromosome, role: r,\n"
+        "     evidence: e, confidence: unverified}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(references_mod.ReferenceGenomesError):
+        references_mod.load_reference_genomes(bad)
+
+
+def test_reference_genomes_path_is_off_repo_root(tmp_path: Path) -> None:
+    (tmp_path / "env").mkdir()
+    (tmp_path / "env" / "paths.yaml").write_text(
+        "repo:\n  repo_root: '.'\nderived: {}\nsource: {}\n", encoding="utf-8"
+    )
+    settings = Settings.load(paths_file=tmp_path / "env" / "paths.yaml", env={})
+    assert references_mod.reference_genomes_path(settings) == (
+        tmp_path / "data" / "omics" / "reference_genomes.yaml"
+    )
+
+
+# ---------------------------------------------------------------------------------------------
+# references.py: select_reference -- "transcriptomic data is based on which genome"
+# ---------------------------------------------------------------------------------------------
+
+
+@pytest.fixture
+def real_references() -> list[references_mod.ReferenceGenome]:
+    return references_mod.load_reference_genomes(REAL_REFERENCE_GENOMES)
+
+
+def test_select_reference_strain_matched_for_s288c(
+    real_references: list[references_mod.ReferenceGenome],
+) -> None:
+    selection = references_mod.select_reference("Saccharomyces cerevisiae S288C", real_references)
+    assert selection.assembly_accession == references_mod.ASSEMBLY_ACCESSION
+    assert selection.match_quality == "strain_matched"
+    assert selection.matched_reference_id == "s288c_r64"
+
+
+def test_select_reference_species_exact_for_plain_saccharomyces_never_cenpk_or_ethanol_red(
+    real_references: list[references_mod.ReferenceGenome],
+) -> None:
+    """The 56-run "plain S. cerevisiae, strain unknown" case this build task describes: species
+    matches, but the atlas must never guess it is CEN.PK or Ethanol Red."""
+    selection = references_mod.select_reference("Saccharomyces cerevisiae", real_references)
+    assert selection.match_quality == "species_exact"
+    assert selection.assembly_accession == references_mod.ASSEMBLY_ACCESSION
+    assert selection.matched_reference_id == "s288c_r64"
+
+
+def test_select_reference_strain_matched_for_each_bacterial_host(
+    real_references: list[references_mod.ReferenceGenome],
+) -> None:
+    cases = {
+        "Escherichia coli str. K-12 substr. MG1655": "GCF_000005845.2",
+        "Zymomonas mobilis subsp. mobilis ZM4 = ATCC 31821": "GCF_000007105.1",
+    }
+    for organism, accession in cases.items():
+        selection = references_mod.select_reference(organism, real_references)
+        assert selection.match_quality == "strain_matched", organism
+        assert selection.assembly_accession == accession, organism
+
+
+def test_select_reference_species_exact_for_plain_ecoli_and_lactococcus(
+    real_references: list[references_mod.ReferenceGenome],
+) -> None:
+    assert references_mod.select_reference("Escherichia coli", real_references) == (
+        references_mod.ReferenceSelection("GCF_000005845.2", "species_exact", "ecoli_k12_mg1655")
+    )
+    assert references_mod.select_reference("Lactococcus cremoris", real_references) == (
+        references_mod.ReferenceSelection(
+            "GCF_000468955.1", "species_exact", "lactococcus_cremoris_kw2"
+        )
+    )
+
+
+def test_select_reference_none_for_an_unrecognized_organism(
+    real_references: list[references_mod.ReferenceGenome],
+) -> None:
+    assert references_mod.select_reference("Homo sapiens", real_references) == (
+        references_mod.ReferenceSelection(None, "none", None)
+    )
+    assert references_mod.select_reference("", real_references) == (
+        references_mod.ReferenceSelection(None, "none", None)
+    )
+
+
+def test_select_reference_species_proxy_when_no_exact_species_reference_exists() -> None:
+    """The third, currently-unexercised-by-real-data branch: a reference explicitly declared as a
+    stand-in (`proxy_for`) for an organism with no species-level default of its own."""
+    proxy_ref = references_mod.ReferenceGenome(
+        id="proxy_ref",
+        organism="Some Genus relative",
+        taxid=None,
+        accession="GCF_999999999.1",
+        assembly_level="Complete Genome",
+        n50_bp=None,
+        role="test proxy",
+        is_species_default=False,
+        fetched=False,
+        structural_caveats=None,
+        strain_match_names=(),
+        species_match_names=(),
+        proxy_for=("Some Unreferenced Species",),
+        relevance_uncertain=False,
+        relevance_note=None,
+        evidence="test fixture",
+        confidence="unverified",
+    )
+    selection = references_mod.select_reference("Some Unreferenced Species", [proxy_ref])
+    assert selection == references_mod.ReferenceSelection(
+        "GCF_999999999.1", "species_proxy", "proxy_ref"
+    )
+
+
+def test_select_reference_species_exact_requires_the_is_species_default_flag() -> None:
+    """A reference that is NOT is_species_default must not be reachable by a plain species name,
+    even if it lists that species in species_match_names by mistake -- is_species_default gates
+    species_exact, per select_reference's own docstring."""
+    non_default = references_mod.ReferenceGenome(
+        id="not_default",
+        organism="Testus organismus STRAIN",
+        taxid=None,
+        accession="GCF_111111111.1",
+        assembly_level="Complete Genome",
+        n50_bp=None,
+        role="test",
+        is_species_default=False,
+        fetched=False,
+        structural_caveats=None,
+        strain_match_names=(),
+        species_match_names=("Testus organismus",),
+        proxy_for=(),
+        relevance_uncertain=False,
+        relevance_note=None,
+        evidence="test fixture",
+        confidence="unverified",
+    )
+    assert references_mod.select_reference("Testus organismus", [non_default]) == (
+        references_mod.ReferenceSelection(None, "none", None)
+    )
+
+
+# ---------------------------------------------------------------------------------------------
+# references.py: is_relevance_uncertain
+# ---------------------------------------------------------------------------------------------
+
+
+def test_is_relevance_uncertain_true_for_fusarium_graminearum() -> None:
+    assert references_mod.is_relevance_uncertain("Fusarium graminearum") is True
+    assert references_mod.is_relevance_uncertain("Fusarium graminearum PH-1") is True
+
+
+def test_is_relevance_uncertain_false_for_the_corpus_organisms(runinfo_csv: str) -> None:
+    runs = sra_mod.parse_runinfo_csv(runinfo_csv)
+    non_fusarium = [r.organism for r in runs]
+    assert non_fusarium  # the fixture actually has rows
+    for organism in non_fusarium:
+        assert references_mod.is_relevance_uncertain(organism) is False
+
+
+# ---------------------------------------------------------------------------------------------
+# sra.py: reference_assembly / reference_match_quality / relevance_uncertain on real fixture rows
+# ---------------------------------------------------------------------------------------------
+
+
+def test_sra_run_row_without_reference_genomes_leaves_reference_columns_null_but_still_flags(
+    runinfo_csv: str,
+) -> None:
+    """Backward compatibility: a caller that does not pass `reference_genomes` (every existing
+    call site before this build task) must see exactly the old row shape for those two columns."""
+    run = sra_mod.parse_runinfo_csv(runinfo_csv)[0]
+    row = sra_mod.sra_run_row(run, dataset_id=None, retrieved_at="t")
+    assert row["reference_assembly"] is None
+    assert row["reference_match_quality"] is None
+    assert "relevance_uncertain" in row  # always computed, catalog or not
+
+
+def test_sra_run_row_with_reference_genomes_populates_the_real_corpus_rows(
+    runinfo_csv: str, real_references: list[references_mod.ReferenceGenome]
+) -> None:
+    runs = {r.run_accession: r for r in sra_mod.parse_runinfo_csv(runinfo_csv)}
+
+    zymomonas_tnseq = sra_mod.sra_run_row(
+        runs["SRR33767563"], dataset_id=None, retrieved_at="t", reference_genomes=real_references
+    )
+    assert zymomonas_tnseq["reference_assembly"] == "GCF_000007105.1"
+    assert zymomonas_tnseq["reference_match_quality"] == "strain_matched"
+    assert zymomonas_tnseq["relevance_uncertain"] == 0
+
+    lactococcus = sra_mod.sra_run_row(
+        runs["SRR7892090"], dataset_id=None, retrieved_at="t", reference_genomes=real_references
+    )
+    assert lactococcus["reference_assembly"] == "GCF_000468955.1"
+    assert lactococcus["reference_match_quality"] == "species_exact"
+
+    ecoli_strain_named = sra_mod.sra_run_row(
+        runs["SRR29711608"], dataset_id=None, retrieved_at="t", reference_genomes=real_references
+    )
+    assert ecoli_strain_named["reference_match_quality"] == "strain_matched"
+
+    plain_yeast = sra_mod.sra_run_row(
+        runs["SRR16642822"], dataset_id=None, retrieved_at="t", reference_genomes=real_references
+    )
+    assert plain_yeast["reference_match_quality"] == "species_exact"
+    assert plain_yeast["reference_assembly"] == references_mod.ASSEMBLY_ACCESSION
+
+    s288c_named = sra_mod.sra_run_row(
+        runs["SRR14687229"], dataset_id=None, retrieved_at="t", reference_genomes=real_references
+    )
+    assert s288c_named["reference_match_quality"] == "strain_matched"
+
+
+def test_write_sra_runs_persists_reference_columns_and_relevance_flag(
+    conn: sqlite3.Connection,
+    runinfo_csv: str,
+    real_references: list[references_mod.ReferenceGenome],
+) -> None:
+    runs = sra_mod.parse_runinfo_csv(runinfo_csv)
+    sra_mod.write_sra_runs(
+        conn,
+        runs,
+        geo_dataset_ids_by_bioproject={},
+        retrieved_at="t",
+        reference_genomes=real_references,
+    )
+    row = conn.execute(
+        "SELECT reference_assembly, reference_match_quality, relevance_uncertain, "
+        "unmapped_fraction FROM sra_run WHERE run_accession = 'SRR33767563'"
+    ).fetchone()
+    assert row["reference_assembly"] == "GCF_000007105.1"
+    assert row["reference_match_quality"] == "strain_matched"
+    assert row["relevance_uncertain"] == 0
+    assert row["unmapped_fraction"] is None  # PLAN.md F.4: never assumed by discovery
+
+
+def test_write_sra_runs_never_clobbers_a_manually_recorded_unmapped_fraction(
+    conn: sqlite3.Connection, runinfo_csv: str
+) -> None:
+    """`unmapped_fraction` belongs to a future quantification step, not discovery -- re-running
+    discovery (e.g. to refresh reference selection) must not erase a value that step already
+    wrote."""
+    runs = sra_mod.parse_runinfo_csv(runinfo_csv)
+    sra_mod.write_sra_runs(conn, runs, geo_dataset_ids_by_bioproject={}, retrieved_at="t1")
+    conn.execute("UPDATE sra_run SET unmapped_fraction = 0.12 WHERE run_accession = 'SRR33767563'")
+    conn.commit()
+    sra_mod.write_sra_runs(conn, runs, geo_dataset_ids_by_bioproject={}, retrieved_at="t2")
+    value = conn.execute(
+        "SELECT unmapped_fraction FROM sra_run WHERE run_accession = 'SRR33767563'"
+    ).fetchone()[0]
+    assert value == pytest.approx(0.12)
+
+
+def test_sra_run_relevance_uncertain_schema_check_rejects_out_of_range_values(
+    conn: sqlite3.Connection,
+) -> None:
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO sra_run (id, run_accession, retrieved_at, relevance_uncertain, zone, "
+            "evidence, confidence) VALUES ('x', 'SRR1', 't', 2, 'R', 'e', 'high')"
+        )
+
+
+def test_sra_run_unmapped_fraction_schema_check_rejects_out_of_range_values(
+    conn: sqlite3.Connection,
+) -> None:
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO sra_run (id, run_accession, retrieved_at, unmapped_fraction, zone, "
+            "evidence, confidence) VALUES ('x', 'SRR1', 't', 1.5, 'R', 'e', 'high')"
+        )
+
+
+def test_sra_run_reference_match_quality_schema_check_rejects_an_unknown_value(
+    conn: sqlite3.Connection,
+) -> None:
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO sra_run (id, run_accession, retrieved_at, reference_match_quality, zone, "
+            "evidence, confidence) VALUES ('x', 'SRR1', 't', 'pretty_sure', 'R', 'e', 'high')"
+        )
+
+
+# ---------------------------------------------------------------------------------------------
+# references.py: fetch_organism_reference / reference_genome_asset (item 5: bacterial genomes)
+# ---------------------------------------------------------------------------------------------
+
+
+def test_fetch_organism_reference_fetches_genome_and_annotation_per_accession(
+    tmp_path: Path,
+) -> None:
+    fake = FakeFetch()
+    _fake_nuccore(
+        fake, "SYN_CHR_A", fasta=_read("synthetic_chr_a.fasta"), genbank=_read("synthetic_chr_a.gb")
+    )
+    assets = references_mod.fetch_organism_reference(
+        _client(fake), tmp_path, ["SYN_CHR_A"], retrieved_at="t"
+    )
+    assert {(a.accession, a.kind) for a in assets} == {
+        ("SYN_CHR_A", "genome"),
+        ("SYN_CHR_A", "annotation"),
+    }
+    for asset in assets:
+        assert Path(asset.stored.path).is_file()
+
+
+def test_write_reference_genome_asset_rows_round_trips_and_is_idempotent(
+    conn: sqlite3.Connection, tmp_path: Path
+) -> None:
+    fake = FakeFetch()
+    _fake_nuccore(
+        fake, "SYN_CHR_A", fasta=_read("synthetic_chr_a.fasta"), genbank=_read("synthetic_chr_a.gb")
+    )
+    assets = references_mod.fetch_organism_reference(
+        _client(fake), tmp_path, ["SYN_CHR_A"], retrieved_at="2026-09-20T00:00:00Z"
+    )
+    rows = [
+        references_mod.reference_genome_asset_row(
+            asset,
+            reference_id="ecoli_k12_mg1655",
+            organism="Escherichia coli str. K-12 substr. MG1655",
+            retrieved_at="2026-09-20T00:00:00Z",
+        )
+        for asset in assets
+    ]
+    written = references_mod.write_reference_genome_asset_rows(conn, rows)
+    assert written == 2
+    references_mod.write_reference_genome_asset_rows(conn, rows)  # idempotent re-run
+    count = conn.execute("SELECT COUNT(*) FROM reference_genome_asset").fetchone()[0]
+    assert count == 2
+
+    stored = conn.execute(
+        "SELECT kind, zone, confidence, reference_id, organism FROM reference_genome_asset "
+        "ORDER BY kind"
+    ).fetchall()
+    assert [r["kind"] for r in stored] == ["annotation", "genome"]
+    assert all(r["zone"] == "R" for r in stored)
+    assert all(r["confidence"] == "high" for r in stored)
+    assert all(r["reference_id"] == "ecoli_k12_mg1655" for r in stored)
+
+
+def test_reference_genome_asset_kind_schema_check_rejects_an_unknown_value(
+    conn: sqlite3.Connection,
+) -> None:
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO reference_genome_asset (id, reference_id, organism, sequence_accession, "
+            "kind, file_path, checksum_sha256, size_bytes, source_url, retrieved_at, zone, "
+            "evidence, confidence) VALUES ('x', 'r', 'o', 'ACC1', 'protein', 'p', 'c', 1, 'u', "
+            "'t', 'R', 'e', 'high')"
+        )
 
 
 # ---------------------------------------------------------------------------------------------

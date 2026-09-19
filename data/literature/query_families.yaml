@@ -251,3 +251,18 @@ families:
            "ethanol-acetaldehyde shuttle"[tiab] OR "ethanol acetaldehyde shuttle"[tiab] OR
            POS5[tiab] OR "NADH kinase"[tiab] OR "mitochondrial NADPH"[tiab] OR
            "mitochondrial redox"[tiab] OR "redox shuttle"[tiab])
+
+      # E6 added 2026-09-20 at the owner's request. Ethanol Red is the proxy genome for the real
+      # chassis, so "what makes an industrial strain industrial" is the most directly transferable
+      # ethanol question available. Expect a polygenic answer dominated by CNV and aneuploidy
+      # rather than a few clean alleles (unverified) -- see docs/reference/ETHANOL_REFERENCE_SLOTS.md.
+      - criterion: E6
+        label: industrial_performance_basis
+        term: >-
+          ("Saccharomyces cerevisiae"[tiab] OR yeast[tiab]) AND
+          (industrial[tiab] OR bioethanol[tiab] OR "Ethanol Red"[tiab] OR "PE-2"[tiab] OR
+           JAY270[tiab] OR CAT-1[tiab]) AND
+          (genome[tiab] OR "comparative genomics"[tiab] OR QTL[tiab] OR aneuploidy[tiab] OR
+           "copy number"[tiab] OR polymorphism[tiab] OR "reverse engineering"[tiab]) AND
+          (tolerance[tiab] OR robustness[tiab] OR "high gravity"[tiab] OR productivity[tiab] OR
+           yield[tiab])

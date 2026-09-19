@@ -1,0 +1,33 @@
+{
+  "primaryAccession": "P39522",
+  "comments": [
+    {
+      "commentType": "COFACTOR",
+      "cofactors": [
+        {
+          "name": "[4Fe-4S] cluster",
+          "cofactorCrossReference": {
+            "database": "ChEBI",
+            "id": "CHEBI:49883"
+          }
+        }
+      ]
+    },
+    {
+      "commentType": "SUBCELLULAR LOCATION",
+      "subcellularLocations": [
+        {
+          "location": {
+            "value": "Mitochondrion matrix"
+          }
+        }
+      ]
+    },
+    {
+      "commentType": "FUNCTION",
+      "texts": [
+        {"value": "Catalyzes the dehydration of 2,3-dihydroxyisovalerate."}
+      ]
+    }
+  ]
+}

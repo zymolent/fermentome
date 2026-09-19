@@ -10,7 +10,7 @@ them is arithmetic and labelled as such. ⚠ marks a figure from background know
 
 | | |
 |---|---|
-| **Entire isobutanol SRA corpus** | **51 GB** (measured: 120 runs, 51,076 MB, 288 Gbases) |
+| **Entire isobutanol SRA corpus** | **~48–51 GB** — two runinfo fetches of the same query disagree (120 runs / 51,076 MB vs ~148 runs / ~48.4 GB). **Both are recorded, neither is discarded** — see §2 |
 | Retained after processing | **~4–6 GB** total project, including PDFs and database |
 | Transient during processing | ~100–140 GB, streamed and deleted |
 | Compute | **~100–150 core-hours** (corrected — see §5) |
@@ -30,8 +30,29 @@ see §4, which is the part worth reading.
 | `isobutanol` (all) | **1,027** |
 | `isobutanol AND (production OR biosynthesis OR fermentation)` | **768** |
 | `isobutanol AND (Saccharomyces OR yeast)` | **251** |
+| `isobutanol AND (mitochondri* OR matrix OR compartment)` | **33** |
 | mtDNA transformation / genome engineering / editing + yeast | **823** |
+| mtDNA methods (biolistic, mito-base-editing, allotopic) + yeast | **919** |
+| `ethanol AND mitochondri* AND yeast` | **642** |
 | `ethanol AND Saccharomyces cerevisiae AND (production OR fermentation OR tolerance)` | **6,072** |
+
+*(Three rows added 2026-09-20. They were measured on 2026-09-19/20 alongside the others but were
+not carried into this table, because at the time neither the mitochondrial methods layer nor
+criterion E5 had a scoping decision that needed sizing. Both now do.)*
+
+Two of the new rows size decisions that were previously guesses:
+
+* **33 records for isobutanol × mitochondria.** The compartment-targeted route — DUET's strategy C,
+  and the strategy `ISOBUTANOL_PROGRAM.md` §4 recommends running first — has a literature of a few
+  dozen papers. That is small enough to read **completely and by hand**, which is the right way to
+  treat the core of the program, and it is a useful corrective to any expectation that automated
+  screening is what makes strategy C tractable.
+* **642 records for ethanol × mitochondria × yeast.** This is the outer bound on criterion **E5**
+  (PLAN.md B.3.5, ethanol as mitochondrial redox shuttle), against 6,072 for the general ethanol
+  query. E5 is therefore **~10% of the ethanol literature**, not a marginal addition — and it still
+  sits under the existing ~150-publication ethanol cap only because E5 admits the shuttle
+  mechanism, not mitochondrial biology in general. That narrowing is what the criterion's
+  exclusions in B.3.5 do, and 642 is the number that shows why they are load-bearing.
 
 The literature asymmetry is ~6×, on a deliberately narrowed ethanol query. The isobutanol
 literature at 1,027 records is small enough to screen completely, which is the premise the
@@ -75,6 +96,83 @@ Fetched for the full `isobutanol` result set:
 **Organisms:** *S. cerevisiae* 62 · *E. coli* 18 · *Zymomonas mobilis* 12 · *Fusarium graminearum*
 8 · *Lactococcus cremoris* 7 · others.
 
+### AMENDMENT 2026-09-20 — the two fetches do not agree, and the difference is not rounding
+
+*What this replaces:* the presentation of the block above as a single measured fact. **120 runs /
+51,076 MB** is still exactly what one runinfo fetch returned and is not withdrawn. It is no longer
+presented as *the* count.
+
+A second runinfo fetch of the **same query**, on 2026-09-20, returned **~148 runs and ~48.4 GB**.
+
+| fetch | date | runs | total size |
+|---|---|---|---|
+| A | 2026-09-19 | **120** | **51,076 MB ≈ 51 GB** |
+| B | 2026-09-20 | **~148** | **~48.4 GB** |
+
+*Why both are kept.* The two move in **opposite directions** — more runs, fewer bytes — so this is
+not simple corpus growth between fetches. Candidate explanations, none verified:
+
+* SRA text search is not deterministic across fetches; the result set drifts as metadata is
+  re-indexed (unverified).
+* The two fetches resolved different `.sra` storage variants, or one included runs whose size field
+  was empty and the other did not. A run with a NULL size contributes to the run count and not to
+  the byte total, which produces exactly this signature (unverified).
+* Runs were suppressed or re-released between the fetches (unverified).
+
+Picking the larger, the smaller, or an average would all be the same mistake: manufacturing one
+number where the evidence supports two. The discrepancy is **itself a datum about SRA text search**,
+and it is the reason the rule below exists.
+
+*The rule this imposes on the ingest — binding.* The corpus size is **not** a constant in this
+document. The ingest **pins the count at fetch time** and records, per fetch:
+`query_string`, `retrieval_timestamp` (UTC), `run_count`, `total_bytes`, `runs_with_null_size`, and
+the accession list. Downstream cost and compute estimates cite a **specific fetch**, not "the
+corpus". Two fetches that disagree are stored as two rows, and the disagreement is surfaced rather
+than resolved — the same treatment section J.4 of PLAN.md gives to conflicting literature claims.
+
+*What does not change.* Both figures round to the same conclusion at the resolution that matters:
+**~50 GB, tens of core-hours, single-digit-to-low-double-digit dollars.** No decision in §5, §6 or
+§10 turns on 120 vs 148. The reason to record it properly is that a number quoted without its
+retrieval time is the kind of fact that later cannot be reproduced or defended.
+
+### Per-organism breakdown of the isobutanol SRA corpus (fetch B, 2026-09-20)
+
+From the fetch-B runinfo. This supersedes the one-line organism tally above, which gave counts
+without library strategy and so could not answer "which of these are usable expression data".
+
+| organism | runs | library strategy | what it is for |
+|---|---|---|---|
+| ***S. cerevisiae*** | **56** | RNA-Seq | The yeast expression layer |
+| ***S. cerevisiae* S288C** | **48** | RNA-Seq | Submitted under the S288C label specifically |
+| **— yeast RNA-Seq subtotal** | **104** | RNA-Seq | |
+| ***E. coli* K-12 MG1655** | **20** | RNA-Seq, OTHER, AMPLICON, WGS | Only the RNA-Seq subset enters the expression layer |
+| ***Zymomonas mobilis* ZM4** | **11** | **Tn-Seq**, OTHER | Genome-wide fitness screens |
+| ***Fusarium graminearum*** | **8** | RNA-Seq | Screened at paper level; no isobutanol production program |
+| ***Lactococcus cremoris*** | **5** | RNA-Seq | Source of `kivD` / `adhA` |
+
+**Correction, and it matters.** The library-strategy table above reports **10 Tn-Seq runs** and
+gives the impression, read alongside a yeast-dominated organism tally, that they are yeast. **They
+are not. The Tn-Seq runs are *Zymomonas mobilis* ZM4.** §4 of this document calls Tn-Seq
+"potentially the highest-value rows in the set" — that judgement stands, but it is a statement
+about a **bacterial** fitness screen, and interpreting it requires the *Z. mobilis* genome and
+annotation. That is why PLAN.md B.4 now gives the role-3 bacterial hosts a genome and annotation
+layer instead of "no genome layer".
+
+**Strain assignment is submitted metadata, not a finding.** The 56/48 split between
+"*S. cerevisiae*" and "*S. cerevisiae* S288C" records **what the submitter typed**. The 56 are not
+"not S288C", and the 48 are not confirmed S288C. Isobutanol work is done in CEN.PK, in BY-derived
+laboratory strains and in industrial backgrounds, and the organism field does not resolve which.
+The strain behind each run is curated from the paper, enters as Zone H with its own evidence and
+confidence, and `'unknown'` is a legitimate and expected result. PLAN.md F.4 sets out the
+consequence: quantify every run against the S288C R64 anchor, and additionally against the CEN.PK
+or Ethanol Red proxy where the curated strain warrants it.
+
+*Reconciliation with the counts above.* The listed organisms total 104 + 44 = **148**, matching
+fetch B. Fetch A's 120 is 28 fewer and its per-organism split was not retained at the time; the
+missing 28 cannot be attributed to particular organisms after the fact. That is recorded as a
+limitation rather than reconstructed by subtraction, because subtracting two fetches that disagree
+on total bytes would produce a breakdown that looks measured and is not.
+
 ### The ratio that justifies the ethanol cap
 
 **147 isobutanol records against 13,117 ethanol records: 89×.** The entire isobutanol omics corpus
@@ -82,7 +180,7 @@ is under 1% of the ethanol corpus. Extrapolating the measured 426 MB/run:
 
 | corpus | runs | extrapolated size |
 |---|---|---|
-| Isobutanol, everything | 120 | **51 GB (measured)** |
+| Isobutanol, everything | 120 (fetch A) / ~148 (fetch B) | **51 GB / ~48 GB, both measured** |
 | Ethanol reference layer, 6 capped studies | ~60–100 | ~25–45 GB |
 | All ethanol + *S. cerevisiae* | 13,117 | **~5.6 TB** |
 | All *S. cerevisiae* transcriptomes | 50,626 | **~21.6 TB** |
@@ -96,6 +194,11 @@ you are not asking.
 fermentation metadata is famously sparse — this is risk #1 in PLAN.md W. Studies that deposited
 runs without the word "isobutanol" in the metadata are invisible to this query and must be found
 paper → BioProject → runs. Budget **~150–250 runs** after paper-driven discovery, not 120.
+
+*(Amended 2026-09-20: "not 120" now reads "not 120–148". The fetch-B result of ~148 runs sits at
+the very bottom of this budget range before any paper-driven discovery has happened, which
+strengthens rather than weakens the caveat — the query is close to exhausted and the remaining
+runs will have to be found through papers.)*
 
 **13 GEO series against 251 yeast isobutanol papers is the more important number.** Roughly 95% of
 the isobutanol literature deposited no expression data at all. The omics layer will complement the

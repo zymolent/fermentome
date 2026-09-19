@@ -26,13 +26,13 @@ than read from a source in this session — each must be verified before it ente
                                                   │        ILV3   [Fe-S, O₂-labile ⚠]
                                                   │                ↓
                                                   │        2-KETOISOVALERATE
-                                                  │            ╱      ╲
-                                    ??? carrier ──┼───────────╱        ╲
-                                    UNKNOWN ⚠     │      BAT1        LEU4/LEU9
-                                                  │    [competing]   [competing]
-     2-ketoisovalerate                            │       ↓              ↓
-          ↓ ARO10 / PDC1/5/6 / kivD               │     valine        leucine
-     isobutyraldehyde                             │
+                                                  │          ╱     │      ╲
+                                    ??? carrier ──┼─────────╱      │       ╲
+                                    UNKNOWN ⚠     │      BAT1    ECM31    LEU4/LEU9
+                                                  │  [competing][competing][competing]
+     2-ketoisovalerate                            │       ↓        ↓          ↓
+          ↓ ARO10 / PDC1/5/6 / kivD               │     valine  pantothenate leucine
+     isobutyraldehyde                             │                ⚠  → CoA
           ↓ ADH1-7 / ADH6 / adhA  [NADH or NADPH] │
      ISOBUTANOL                                   │
 ```
@@ -47,6 +47,33 @@ in the schema rather than a remark:
 3. **The carrier is unidentified.** How 2-ketoisovalerate leaves the matrix in the
    cytosolic-Ehrlich configuration is not settled ⚠. This is modelled as an explicit gap
    (section 5), not as an absent row.
+
+**AMENDMENT 2026-09-20 — DUET_TARGET.md §6. `ECM31` added as the third 2-KIV drain.**
+
+*What this replaces:* the 2-ketoisovalerate node of the diagram above, and the competing-reaction
+set it encodes, which showed **two** branches — valine via `BAT1`/`BAT2` and leucine via
+`LEU4`/`LEU9` — and treated that as the complete set. It was not complete.
+
+*Why:* **`ECM31`, ketopantoate hydroxymethyltransferase, pulls 2-ketoisovalerate into pantothenate
+biosynthesis and thence CoA (unverified).** It is named in the DUET gene set among the competing /
+by-product genes, so the destination document carried it while this program document did not. A
+competing-reaction set that is missing a drain will under-count the leak at the exact node the
+route is built around.
+
+*What follows from it:*
+
+* `ECM31` joins `BAT1`/`BAT2` and `LEU4`/`LEU9` everywhere the 2-KIV competing set is enumerated —
+  here, in `PLAN.md` G.3, in route enumeration and in the deletion candidates a route proposes.
+* **It is not a like-for-like deletion candidate.** Pantothenate feeds CoA, and the pathway is
+  plausibly essential (unverified), so an `ecm31Δ` proposal must carry an essentiality check and
+  fall back to attenuation if it fails. "Delete" and "attenuate" are different proposals and the
+  atlas must distinguish them for this node.
+* The split of 2-KIV between the three drains is **not measured in any chassis** as far as this
+  document knows. That is a `knowledge_gap` row (§5), seeded before curation rather than discovered
+  during it.
+* Every biochemical claim here about `ECM31` is **(unverified)** — background knowledge, never
+  checked against a source. It enters at `confidence = 'unverified'`. The same text is mirrored in
+  `PLAN.md` G.3; correct both together when it is verified.
 
 Theoretical mass yield, glucose → isobutanol: **0.411 g/g** (1 glucose → 1 isobutanol + 2 CO₂ +
 H₂O; 74.12 / 180.16). Every stored yield is checked against it.
@@ -238,11 +265,11 @@ resolve that for the user — it should show the trade in one view.
 For *"engineer S. cerevisiae for isobutanol"*, the phase-3 output:
 
 ```
-ROUTE #n   strategy C · KivD(matrix) + AdhA(matrix) · NADH-KARI · pdc1Δ background
+ROUTE #n   strategy C · KivD(matrix) + AdhA(matrix) · NADH-KARI · Pdc-POSITIVE background
 ├─ Demonstrated      nearest published configuration, its titer/yield/conditions      [L1/L2]
 ├─ Balance           carbon ✓  redox ✓ per compartment  ATP ✓                         [computed]
 ├─ Parts             5 parts, 4 with prior expression in this host/compartment        [L1]
-├─ Deletions         PDC1, BAT1 — each with measured consequence and control          [L1/L2]
+├─ Deletions         BAT1, LEU4, ECM31 (attenuate ⚠) — each with consequence + control [L1/L2]
 ├─ Bottlenecks       2-KIV supply (7 studies); matrix NADH (3); export (gap)          [L2/L3]
 ├─ Feasibility       all modifications routine — no mtDNA editing required            [computed]
 ├─ Ceiling           stoichiometric 0.411 g/g · toxicity-limited ~X g/L               [L2]
@@ -253,3 +280,23 @@ ROUTE #n   strategy C · KivD(matrix) + AdhA(matrix) · NADH-KARI · pdc1Δ back
 Every line carries its evidence level and opens its chain. The last line is the one that makes it
 a design tool rather than a review: it is computed as the complement of the evidence, and it is
 where the next experiment lives.
+
+**AMENDMENT 2026-09-20 — DUET_TARGET.md §5.1 and §6. Two corrections to the sample above.**
+
+*What this replaces:* the header line, which read **"pdc1Δ background"**, and the deletions line,
+which read **"PDC1, BAT1"**.
+
+*Why:* both encoded the incumbent architecture, in which ethanol is the sink to defeat. DUET does
+the opposite — it **retains and strengthens** the ethanol–acetaldehyde shuttle, because Adh3
+oxidises ethanol in the matrix and, via Pos5, that NADH becomes the NADPH Ilv5 requires. The
+chassis is **Pdc-positive** and co-produces ethanol by design. A sample output that proposed
+deleting *PDC1* was advertising the wrong product. The deletions line now carries the corrected
+2-KIV competing set, `ECM31` included, and flags it as an attenuation candidate rather than a
+deletion candidate (§1).
+
+*Not corrected here:* the diagram in §1 still labels cytosolic ethanol **"the sink to defeat"**,
+which is the pre-DUET framing. It is left standing deliberately — that label is accurate for the
+*cytosolic* Ehrlich configuration (strategy A/B), which the atlas still models and still ranks
+against. It is wrong only for strategy C, which is DUET. The distinction belongs in §2, where the
+four configurations are compared, and is recorded here rather than fixed by overwriting a diagram
+that is correct for three of the four cases.

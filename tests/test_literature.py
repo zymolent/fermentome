@@ -296,8 +296,11 @@ def test_the_real_shipped_query_families_file_loads_and_matches_the_recorded_mea
     # (mitochondrial redox shuttle) was added from docs/design/DUET_TARGET.md: in the target
     # architecture ethanol carries reducing equivalents into the matrix rather than only
     # competing for pyruvate, so that literature needs its own admission route.
+    # E6 (genetic basis of industrial performance) was added at the owner's request: what makes
+    # Ethanol Red hyper-producing and ethanol-tolerant. Ethanol Red is the proxy genome for the
+    # real chassis, so it is the most directly transferable ethanol question available.
     capped = families["ethanol_scerevisiae_prod_ferm_tol"]
-    assert [sq.criterion for sq in capped.sub_queries] == ["E1", "E2", "E3", "E4", "E5"]
+    assert [sq.criterion for sq in capped.sub_queries] == ["E1", "E2", "E3", "E4", "E5", "E6"]
 
     # And the ethanol x mtDNA family must actually be admissible. It previously ran as a bare
     # `term`, so every hit carried no criterion and defaulted to 'excluded' -- the coverage was

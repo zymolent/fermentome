@@ -90,6 +90,26 @@ double the scope:
 | Protein structure prediction at scale | AlphaFold DB is referenced for specific enzymes; nothing is folded here. |
 | Clinical, food-safety or regulatory data | Out of domain. |
 
+**AMENDMENT 2026-09-20 — DUET §5.4. One carve-out from the downstream exclusion.**
+
+*What this replaces:* the unqualified reading of the two rows above (techno-economic modelling;
+and, in B.3.6, "process control, distillation and downstream separation") as excluding everything
+downstream of the fermenter, including the conditions under which a titer was measured.
+
+*Why:* DUET recovers isobutanol by stripping with waste CO₂ from the adjacent ethanol fermenter
+and decanting the heterogeneous azeotrope, so **in-situ product removal is a property of DUET's
+fermentation, not of a separate downstream unit**. A 2 g/L titer measured under continuous
+stripping and a 2 g/L titer measured in a sealed flask are not the same measurement: the first has
+had the product — and therefore the product inhibition — removed as it formed. Comparing them
+silently is a comparability error of exactly the class section K.4 exists to prevent.
+
+*The carve-out, and its limit:* `in_situ_product_removal` becomes a **`condition_context` facet**
+(C.5), so ISPR and non-ISPR measurements can never be pooled without the difference being visible.
+Nothing else moves in scope. Separation train design, solvent selection, distillation modelling,
+energy integration and TEA all stay out; the atlas still supplies normalized numbers to a TEA tool
+rather than computing cost. DUET's recovery route is also a patent-family commitment, which is
+handled by the patent layer of R.1, not by a process-engineering layer.
+
 ## A.3 The five properties that define success
 
 1. **Traceability.** Every number in the interface has a path back to a publication, an accession
@@ -120,7 +140,7 @@ are served by the same machinery.
 |---|---|---|
 | **Isobutanol strain engineer (primary)** | "which route should I build next, and what will stop it" | Route ranking (G.7), parts catalog (G.6), bottleneck model (G.8), engineering history per node |
 | Pathway / compartment engineer | "cytosolic relocalization or mitochondrial targeting, and what does each cost" | Compartment layer (G.5), localization records with verification method |
-| Strain developer | "which background, and which deletions come with it" | Strain page, lineage DAG, modification sets, *pdc*-minus chassis records |
+| Strain developer | "which background, and which deletions come with it" | Strain page, lineage DAG, modification sets, ploidy and marker-free editing history, *pdc*-minus chassis records (as a comparator, not the default — B.4) |
 | Fermentation scientist | "what titer is realistic, and under what aeration" | Phenotype atlas faceted by condition class |
 | Reviewer / PI | "is this claim actually supported" | Evidence page with full support and conflicts |
 | An AI agent acting for any of the above | structured, cited answers | MCP server and the assertion API (section L) |
@@ -201,12 +221,34 @@ that:
 
 > **An ethanol record is admitted only if it answers a question the isobutanol program asks.**
 
-Every admitted record stores which of the four criteria below it was admitted under. A record
+Every admitted record stores which of the **five** criteria below it was admitted under. A record
 that satisfies none is excluded, with the exclusion recorded and re-runnable (R.2).
 
-### B.3.1 Criterion E1 — the competing sink
+**AMENDMENT 2026-09-20 — DUET §5.1. There are five criteria, not four, and E1 is no longer the
+primary one.**
 
-The most important one, and the reason ethanol cannot simply be dropped. Pyruvate decarboxylase
+*What this replaces:* "four criteria" throughout B.3, and the framing — stated in B.3.1 below and
+inherited by everything that cites it — that ethanol enters the atlas mainly as the competitor to
+be deleted.
+
+*Why:* DUET's first architectural claim is that **ethanol is the mechanism, not the enemy**.
+Ethanol diffuses into the matrix, Adh3 oxidises it there, and the resulting matrix NADH feeds both
+the final Ehrlich ADH step and — through Pos5, the mitochondrial NADH kinase — the matrix NADPH
+that Ilv5 requires. That literature (mitochondrial alcohol dehydrogenase, the
+ethanol–acetaldehyde shuttle as a cytosol→matrix route for reducing equivalents, matrix NADH/NADPH
+pools, `POS5`) was **entirely unscoped** by E1–E4, which only asked what deleting ethanol
+production costs. It is now criterion **E5** (B.3.5). The fifth criterion already exists in
+`data/literature/query_families.yaml` and in the schema CHECK on the criterion column; PLAN.md was
+the last document still listing four.
+
+E1 stays, unchanged in content and unchanged in value — knowing precisely what *PDC* deletion
+costs is still required, both to read the incumbent literature and to argue why DUET does not do
+it. What changes is its rank: **E5 is the primary ethanol framing for this atlas, E1 is the
+counterfactual.**
+
+### B.3.1 Criterion E1 — the competing sink (the counterfactual, not the plan)
+
+The reason ethanol cannot simply be dropped from the atlas. Pyruvate decarboxylase
 sends pyruvate to acetaldehyde and then ethanol; the isobutanol route needs that same pyruvate for
 acetolactate. **Ethanol is not a neighbouring product, it is the competitor.**
 
@@ -215,8 +257,28 @@ C2 auxotrophy, the glucose-tolerance evolution that makes Pdc-minus strains usab
 promoter-replacement and dynamic-control strategies, and the redox consequences of removing the
 principal NADH sink — including the glycerol branch (*GPD1*/*GPD2*) that compensates.
 
-This material is arguably the highest-value content in the entire ethanol layer, because a
-Pdc-minus or Pdc-attenuated background is the likely starting chassis.
+**AMENDMENT 2026-09-20 — DUET §5.1. The chassis is Pdc-POSITIVE.**
+
+*What this replaces:* the sentence that stood here, verbatim — *"This material is arguably the
+highest-value content in the entire ethanol layer, because a Pdc-minus or Pdc-attenuated
+background is the likely starting chassis."*
+
+*Why:* it is false with respect to the strain this atlas exists to design. DUET deliberately
+**retains and strengthens** the ethanol–acetaldehyde shuttle: deleting *PDC* cripples the yeast,
+imposes the C2 auxotrophy, and removes the redox carrier the matrix pathway depends on. The
+production chassis is Pdc-positive and co-produces ethanol by design (B.4).
+
+*What E1 is for instead:* E1 records are the **counterfactual layer**. They answer "what does the
+incumbent architecture cost, and what would we be giving up" — the C2 auxotrophy, the growth
+defect, the redox consequences of removing the principal NADH sink, the compensating glycerol
+branch, the evolved suppressors. Those are the measured consequences that make the Pdc-positive
+choice arguable rather than asserted, and they are also what the atlas needs in order to read the
+Gevo/Butamax-lineage literature, essentially all of which is Pdc-attenuated. E1 records may
+therefore never be used to characterise the DUET chassis itself; they characterise the alternative
+it rejected. An assertion about DUET derived from a Pdc-minus background is a cross-chassis
+inference and is capped accordingly (J.3).
+
+The highest-value content in the ethanol layer is now **E5** (B.3.5).
 
 ### B.3.2 Criterion E2 — the performance ceiling
 
@@ -253,16 +315,130 @@ The named transcriptomic short list also lives here — at most six reprocessed 
 cover: anaerobic versus aerobic reference physiology, the *pdc*-minus background, ethanol stress
 (shock and adapted, separately), and one industrial-strain reference. Nothing else.
 
-### B.3.5 What is explicitly excluded
+**AMENDMENT 2026-09-20 — DUET §5.1. The short list gains an E5 slot and loses nothing.**
 
-Lignocellulosic hydrolysate and pretreatment optimization; pentose utilization engineering; SSF
-and CBP process studies; consolidated bioprocessing; strain-screening surveys; ethanol tolerance
-QTL mapping beyond mechanisms admitted under E4; yeast strain biodiversity surveys; and process
-control, distillation and downstream separation.
+*What this replaces:* a six-study list in which every slot served E1–E4, and in which the only
+redox-relevant slot was the *pdc*-minus background.
+
+*Why:* with E5 in scope, the atlas needs at least one reprocessed study of **cells respiring or
+co-metabolising ethanol** — the physiological state in which Adh3 is actually carrying flux and
+the matrix NADH pool is being fed. Without it the E5 criterion has literature but no expression
+data behind it. The cap stays at six. The slots are now: (1) anaerobic vs aerobic reference
+physiology; (2) **ethanol as carbon source / diauxic-shift respiratory reference — the E5 slot**;
+(3) the *pdc*-minus background, retained as the E1 counterfactual; (4) ethanol stress, shock;
+(5) ethanol stress, adapted; (6) an industrial-strain reference. Nothing else.
+
+### B.3.5 Criterion E5 — ethanol as mitochondrial redox shuttle
+
+**ADDED 2026-09-20 — DUET §5.1. New subsection; nothing was replaced, this criterion was simply
+absent from PLAN.md while already present in `data/literature/query_families.yaml` and in the
+schema CHECK constraint on the admission-criterion column. The renumbering it forces is recorded
+at the end of this subsection.**
+
+The primary ethanol framing for this atlas, and the one the destination strain depends on.
+
+DUET's redox architecture runs *through* ethanol rather than around it:
+
+```
+ethanol (cytosol) --diffuses--> mitochondrial matrix
+   --Adh3--> acetaldehyde + matrix NADH
+        |
+        +--> final ADH step of the matrix Ehrlich pathway      [needs NADH]
+        |
+        +--Pos5 (mitochondrial NADH kinase)--> matrix NADPH
+                 --> Ilv5 / KARI                               [needs NADPH]
+```
+
+Ilv5 needs NADPH and the Ehrlich alcohol-dehydrogenase step needs NADH. Ethanol oxidation by Adh3
+supplies the NADH directly in the right compartment, and `POS5` is the only named route from
+matrix NADH to matrix NADPH ⚠. That is what makes the architecture close — and it is also why
+**`POS5` capacity is the atlas's highest-priority bottleneck hypothesis** (G.8), with an
+NADH-preferring KARI variant as the highest-priority de-risking part (G.6). Both are seeded as
+`knowledge_gap` rows before curation starts, so the literature search is actively looking for them
+rather than stumbling on them.
+
+**Admitted under E5:**
+
+* `ADH3` and mitochondrial alcohol dehydrogenase generally — localization, kinetics, directionality
+  (matrix ethanol oxidation vs. acetaldehyde reduction), and the consequences of `adh3Δ`.
+* The **ethanol–acetaldehyde shuttle** as a route for cytosol→matrix reducing equivalents: its
+  stoichiometry, its measured capacity, the acetaldehyde permeability assumption it rests on, and
+  the studies that dispute it. Disputes are stored, not resolved (J.4).
+* **Matrix NADH and NADPH pool** measurements and the methods used to measure them per
+  compartment, since a whole-cell cofactor ratio cannot answer an E5 question.
+* `POS5` (mitochondrial NADH kinase) — expression level, overexpression phenotypes, `pos5Δ`
+  consequences, and any measured matrix NADPH response.
+* `ADH2` and the other routes by which ethanol re-enters central metabolism, where they bear on
+  how much ethanol is available to the matrix.
+* The respiratory / diauxic-shift physiology of ethanol as a **carbon source**, which is the
+  condition under which all of the above is normally measured.
+
+**Not admitted under E5:** ethanol tolerance (that is E4), ethanol titer records (E2/E3), and
+general mitochondrial bioenergetics with no stated link to a cytosol→matrix redox route. E5 is a
+redox-shuttle criterion, not a mitochondria criterion.
+
+**Interaction with E1.** E1 and E5 point in opposite engineering directions, and that is
+deliberate: E1 measures the cost of removing the ethanol sink, E5 measures the benefit of keeping
+it. A record may be admitted under both, and the pair is exactly what makes the Pdc-positive
+decision (B.4) reviewable. The admission criterion is stored per record, so "show me everything
+that argues against retaining PDC" stays an answerable query.
+
+**Evidence ceiling.** Most of the E5 literature was generated for reasons unrelated to branched-
+chain alcohols. An assertion about DUET's matrix redox balance that rests only on E5 records is a
+transfer claim and is capped at **L3** (J.3) until there is a direct measurement in an
+isobutanol-producing strain — the same rule E4 already carries.
+
+*Renumbering caused by this insertion:* the exclusions section that was **B.3.5** is now
+**B.3.6**. The criterion ↔ section mapping E*n* ↔ B.3.*n* is preserved, which is what
+`src/fermdb/db/schema.sql` and `src/fermdb/literature/queries.py` comment against; those comments
+say "E1-E4 / B.3.1-B.3.4" and now read one criterion short. `docs/design/DUET_TARGET.md` §5.2
+cites the exclusions as B.3.5 and now points one section early. Neither file is editable from
+this change; both are flagged in the report rather than silently left wrong.
+
+### B.3.6 What is explicitly excluded
+
+*(Was B.3.5 until 2026-09-20; renumbered by the insertion of E5 above.)*
+
+Lignocellulosic hydrolysate and pretreatment optimization; SSF and CBP process studies;
+consolidated bioprocessing; strain-screening surveys; ethanol tolerance QTL mapping beyond
+mechanisms admitted under E4; yeast strain biodiversity surveys; and process control, distillation
+and downstream separation.
 
 Each of these is legitimate science and none of it advances an isobutanol build. They are named
 here so the exclusion is a decision on the record rather than an oversight, and so that a future
 change of mind can re-run the filter over what was skipped.
+
+**AMENDMENT 2026-09-20 — DUET §5.2. Pentose utilisation is no longer excluded.**
+
+*What this replaces:* the phrase **"pentose utilization engineering"**, which stood second in the
+exclusion list above and has been struck from it.
+
+*Why:* it excluded the thing the destination strain is built on. DUET's entire substrate partition
+is **C6 → ethanol on the existing train, C5 → isobutanol in the bolt-on fermenter**; the stranded
+pentose stream is roughly a third of the fermentable sugar and is the only reason the process has
+a feedstock at all. `XKS1 TAL1 TKL1 RKI1 RPE1` are core DUET genes (DUET_TARGET §3). Excluding
+pentose utilisation made the plan contradict its own destination in the most direct way available.
+
+*Now in scope, first-class:*
+
+| area | what enters |
+|---|---|
+| **Xylose utilisation** | Both routes — XR/XDH (`XYL1`/`XYL2` and their cofactor imbalance) and xylose isomerase (`xylA`, fungal and bacterial sources) — with the cofactor consequence recorded, because it is a redox claim and therefore interacts with E5 |
+| **Arabinose utilisation** | Bacterial and fungal L-arabinose routes, at lower depth than xylose until the feedstock analysis says otherwise |
+| **Non-oxidative PPP** | `XKS1` `TAL1` `TKL1` `RKI1` `RPE1` — overexpression sets, measured flux consequences, and the deletion/attenuation partners they are normally shipped with |
+| **Pentose transport** | Which transporters carry xylose and arabinose, and at what affinity, since glucose–xylose transporter competition is the usual reason a co-fermentation stalls ⚠ |
+| **Glucose repression and carbon-programmed switching** | `MIG1`, `SNF1`/`HXK2`, glucose-repressed and glucose-derepressed promoters, and the kinetics of derepression. DUET makes the C6→C5 handover automatic with no inducer, so **the switch is a designed component and its literature is program literature, not background** |
+
+*Admission depth.* This is admitted for the **isobutanol program**, not as a general pentose
+atlas. The test is DUET's: a pentose record enters if it bears on making C5 into 2-ketoisovalerate
+in an industrial strain, or on the C6/C5 handover. Pentose work aimed at maximising *ethanol* from
+xylose enters under the ethanol layer's existing cap, as E3/E4, and does not get its own budget.
+
+*Schema consequence — this is the part that would have broken silently.* `condition_context`
+currently models one carbon source per context well and a mixture badly. DUET requires both
+**MIXED** (glucose and xylose present together, as in a real hydrolysate) and **SEQUENTIAL**
+(glucose consumed first, then xylose, the programmed switch) carbon regimes, and the difference
+between them is the whole point of the design. C.5 is amended accordingly.
 
 ## B.4 Organisms, by their role in the isobutanol program
 
@@ -277,6 +453,55 @@ tool base), W303. Industrial backgrounds — Ethanol Red, PE-2/JAY270, CAT-1 and
 distillers' lineages ⚠ — admitted for their robustness and tolerance, which matter for a real
 process. Plus the *pdc*-minus and Pdc-attenuated derivatives (B.3.1), which are chassis in their
 own right.
+
+**AMENDMENT 2026-09-20 — DUET §5.3. The real chassis is an industrial polyploid with no public
+genome, so the atlas runs two proxies in parallel and says so.**
+
+*What this replaces:* the recommendation — made in the planning conversation and carried into the
+paragraph above and into E.2 — that **CEN.PK113-7D is the chassis**, and the implication in B.3.1
+that a Pdc-minus derivative is the likely background.
+
+*Why:* neither is true of the destination. DUET is built in an **industrial polyploid
+*S. cerevisiae* that the owner already holds**, running at ~120 g/L ethanol in an existing Indian
+2G plant, engineered by **marker-free multiplex editing**, and **Pdc-positive** by design. It is
+haploid in neither genotype nor behaviour, its genome is **not sequenced and not public**, and it
+is not any of the strains named above.
+
+*The resolution — two proxies and an anchor, never collapsed into one:*
+
+| role | strain | assembly | what it is for | what it may not be used for |
+|---|---|---|---|---|
+| **Anchor** | S288C | RefSeq **R64** | The systematic-name namespace every `gene_group` is anchored on (C.3); the coordinate space quantification reports in (F.4) | Any physiology or robustness claim. S288C is a laboratory strain and a poor model of an industrial one ⚠ |
+| **Industrial proxy** | **Ethanol Red** | **GCA_029255905.1** (Scaffold, N50 189 kb, Padova) | Standing in for the owner's strain: industrial genetic background, distillers' lineage, high-ethanol robustness, aneuploid/polyploid-typical architecture ⚠ | Gene-level coordinate work that a scaffold-level assembly cannot support; anything requiring chromosome-scale continuity |
+| **Physiology comparator** | **CEN.PK113-7D** | **GCA_002571405.2** (Chromosome, N50 913 kb, Delft) | Quantitative physiology: the chemostat, carbon-balance and fermentation datasets that actually have the numbers ⚠; the chromosome-scale assembly for structural questions | Robustness, tolerance or industrial-performance claims. CEN.PK is a laboratory strain |
+
+Both assemblies are verified present on NCBI as of 2026-09-20. They are ingested **in parallel,
+not ranked** — the two proxies answer different questions and the atlas never silently substitutes
+one for the other. Every strain-level conclusion records **which proxy produced it**.
+
+*The honesty rule this forces, stated plainly.* A conclusion derived from Ethanol Red or
+CEN.PK113-7D is **a hypothesis about the owner's strain, not a fact about it.** Such assertions are
+**capped at L3** (J.3) and may not be promoted by accumulating more proxy evidence — only a
+measurement in the actual chassis lifts the cap. The atlas renders the proxy in the assertion, so
+"this was shown in Ethanol Red" is visible at the point of reading rather than buried in provenance.
+
+*Why this costs nothing later.* The join key is `gene_group`, never a raw gene id (C.3). When the
+owner's strain is sequenced, it enters as one more member of each existing group with its own
+assembly and its own coordinates; the proxy-derived rows keep their strain attribution and their L3
+cap, and new rows measured in the real chassis simply outrank them. **No migration, no re-keying,
+no re-curation** — which is the concrete payoff of having refused to join on gene ids.
+
+*What `chassis_profile` must therefore model:* **ploidy** (and aneuploidy, per chromosome, since an
+industrial polyploid is rarely uniformly *n*), **allele dosage** (a heterozygous deletion in a
+polyploid is not a deletion), **marker-free multiplex editing history** (no auxotrophic markers
+available, which constrains every proposed modification), industrial robustness traits, and
+`genome_available` as an explicit boolean rather than an absent row. A modification proposal that
+assumes haploid single-copy editing is wrong for this chassis and the schema should be able to say
+so.
+
+*Unchanged:* the mitochondrial-genetics background of the laboratory strains stays relevant, but
+only for **strategy E** (mtDNA engineering) later, under the escalation condition already recorded
+in `ISOBUTANOL_PROGRAM.md` §4 — attempt E when strategy C is demonstrated to be import-limited.
 
 **Role 2 — alternative eukaryotic chassis (the fallback comparison).** *Yarrowia lipolytica*,
 *Kluyveromyces marxianus* (thermotolerance, which pairs with in-situ product removal since
@@ -310,6 +535,11 @@ natural ethanologen, useful as a calibration point for what a sugar-to-alcohol y
 reach ⚠ — and nothing more. It gets no genome layer, no transcriptomics and no engineering
 program.
 
+*(Superseded for Z. mobilis by the amendment below: ZM4 is a role-3 bacterial isobutanol host with
+Tn-Seq data in the measured SRA corpus, and it now gets a genome and annotation layer under role 3.
+Its role-5 standing as an ethanol yield-ceiling reference is unchanged and unexpanded — these are
+two different admissions of the same organism, recorded separately.)*
+
 ### Ingestion depth by role
 
 | layer | R1 chassis | R2 alt. chassis | R3 demonstration | R4 parts source | R5 ethanol ref |
@@ -321,6 +551,53 @@ program.
 | Engineering records | full | full | **full** | n/a | E1 only |
 | Measurements | full | full | **full** | n/a | E2/E3 only |
 | Transcriptomics | full | isobutanol only | isobutanol only | no | ≤6 studies |
+
+**AMENDMENT 2026-09-20 — owner direction, 2026-09-20. Role-3 bacterial hosts get a genome and
+annotation layer.**
+
+*What this replaces:* the **"no"** in the *R3 demonstration* column of the
+"Genome assembly + annotation" row of the table above, and the sentence in Role 5 that
+*Z. mobilis* "gets no genome layer, no transcriptomics and no engineering program".
+
+*Why:* the owner has directed that isobutanol production in the established bacterial hosts be
+studied properly — genomes, transcriptomes, annotations, pathways and ontology where the data
+exists — rather than treated as a source of transferable anecdotes. The original "no" was a budget
+decision made on the assumption that role-3 organisms contribute parts and strategies but not
+sequence context. Two things make that wrong. First, **most of the isobutanol route was established
+in these organisms**, and reading an *E. coli* ketoacid-pool result without its genomic context
+(operon structure, regulator, the deletions already in MG1655 derivatives) is reading a conclusion
+without its premises. Second, **the SRA corpus is not what the table assumed** — the measured
+breakdown (DATA_VOLUME §2) shows bacterial runs that the role-3 row said would not be ingested,
+including the Tn-Seq fitness screens, which are *Zymomonas*, not yeast.
+
+*Revised depth for role 3 — the row above is replaced by this table:*
+
+| organism | genome + annotation | transcriptome | pathway / ontology | note |
+|---|---|---|---|---|
+| ***E. coli* K-12 MG1655** | **full** (reference assembly + annotation) | **yes** — 20 runs in the measured isobutanol corpus (RNA-Seq, OTHER, AMPLICON, WGS; only the RNA-Seq runs enter the expression layer) | full — EcoCyc-class pathway detail, GO | The organism the ketoacid route was assembled in; the highest titers and near-theoretical anaerobic yields ⚠ |
+| ***Zymomonas mobilis* ZM4** | **full** | **yes** — 11 runs (Tn-Seq, OTHER). **The Tn-Seq runs are *Zymomonas*, not yeast** — see the correction in DATA_VOLUME §2 | full | Genome-wide fitness screens are the highest-information rows in the whole corpus, and they need a genome to be interpretable at all. Also a role-5 ethanol yield-ceiling reference; the two admissions stay separate |
+| ***Lactococcus cremoris*** | **full** | **yes** — 5 runs (RNA-Seq) | annotation + pathway | Source of `kivD` and `adhA`; a parts-source organism that also has expression data, so R3 and R4 overlap here |
+| ***Corynebacterium glutamicum*** | **full** | **none in the measured corpus** — genome + annotation only until paper-driven discovery finds runs | full | Natively strong valine pathway; its precursor-supply engineering is the closest industrial analogue to the 2-KIV problem |
+| ***Bacillus subtilis*** | **full** | **none in the measured corpus** — genome + annotation only | full | Source of `alsS`; same R3/R4 overlap as *L. cremoris* |
+
+*Still "no genome layer":* the remaining role-3 organisms named above — *Clostridium* spp.,
+*Cupriavidus/Ralstonia*, *Geobacillus* and the cyanobacteria — and all role-4 parts sources that
+are not in the five-organism list. They keep gene, protein, enzyme and variant records only. The
+line is drawn at **organisms with either a measured isobutanol SRA presence or an established
+industrial isobutanol program**, which is a re-runnable criterion rather than a taste judgement.
+*Fusarium graminearum* has 8 RNA-Seq runs in the corpus but no isobutanol production program; it is
+screened at the paper level before any genome work is committed, and is not in the table above.
+
+*Transcriptome counts are provisional by construction.* The per-organism numbers above are from a
+runinfo fetch that disagrees with an earlier one on the same query (120 runs vs ~148; DATA_VOLUME
+§2 records both and neither is discarded). The ingest **pins the real count at fetch time with a
+retrieval timestamp** and reconciles against these figures; it does not treat either number as
+ground truth.
+
+*What does not change:* role 3 is still not a chassis role. These organisms get sequence context so
+their results can be read, not so that anything is built in them. No isobutanol *build* is planned
+in a bacterium, and a bacterial result remains a transfer claim against the yeast chassis, capped
+at L3 (J.3) exactly as before.
 
 The organism hierarchy is NCBI Taxonomy, not a bespoke tree. A `Yeast / Bacteria / Fungi / Other`
 grouping is a *display* tag over taxonomy, because "yeast" is a polyphyletic lifestyle and not a
@@ -369,6 +646,22 @@ something — that is the test this table exists to apply.
 | What yield fraction is achievable for a sugar-to-alcohol process in yeast? | E2 benchmark records, yield as % of 0.511 g/g |
 | What does the wild-type baseline look like in my background? | E3 records for the chosen strain under matched conditions |
 | What happens physiologically when the Pdc sink is removed? | E1 records: growth, C2 requirement, redox, glycerol, evolved suppressors |
+
+**AMENDMENT 2026-09-20 — DUET §5.1, §5.2 and §7. Four questions the table could not express.**
+
+*What this replaces:* nothing is withdrawn. The table above stands. It was, however, **complete
+only for the scope that preceded the DUET corrections** — it has no question whose answer depends
+on matrix redox, on a pentose substrate, on product removal, or on which proxy strain produced a
+result. By the table's own test ("if a question has no query shape, the schema is missing
+something"), those four absences were schema gaps hiding as unasked questions.
+
+| question | query shape | needs |
+|---|---|---|
+| **Can matrix NADH supply both the Ehrlich ADH step and, via Pos5, the NADPH Ilv5 needs?** *(the highest-priority bottleneck hypothesis)* | E5 records for `ADH3` and `POS5`, joined to compartment-resolved NADH/NADPH pool measurements, with the shuttle stoichiometry summed per compartment | Criterion E5 (B.3.5); compartment-aware cofactor stoichiometry; a `knowledge_gap` row seeded before curation, because this will return mostly gaps |
+| **What removes the `POS5` single point of failure?** | Parts catalog filtered to NADH-preferring KARI variants, with source organism, measured cofactor preference and every host and compartment they have been expressed in | Parts catalog (G.6) — this is the highest-priority parts question and is seeded as a gap alongside the one above |
+| **Which pentose route, and what does the C6→C5 handover cost?** | Configurations grouped by pentose route (XR/XDH vs. xylose isomerase) with the non-oxidative PPP set they shipped with, restricted to `carbon_regime ∈ (MIXED, SEQUENTIAL)`, reporting the redox consequence per route | B.3.6 pentose scope; the `carbon_regime` and `carbon_phase` facets (C.5) |
+| **Is this titer comparable to that one?** | Any two measurements, with `in_situ_product_removal`, `carbon_regime` and `reference_assembly` compared before the numbers are, and the comparison refused with a stated reason where they differ | The C.5 facet amendments; comparability classes (K.4). **Refusal is a valid answer here** and is the feature, not a failure |
+| **Which proxy produced this, and does it hold for the real chassis?** | Any strain-level assertion, rendered with its source strain (Ethanol Red / CEN.PK113-7D / S288C) and its L3 cap, plus what measurement in the owner's strain would lift it | `chassis_profile` with `genome_available`; the proxy attribution rule (B.4) |
 
 ## B.6 The biology the schema must not flatten
 
@@ -604,6 +897,62 @@ Rules, carried from `genome-db`'s `NULL` vs `'NA'` convention and extended:
   recorded. It is the primary metadata-quality signal (section S.2) and the primary reason a
   study will be excluded from a meta-analysis.
 
+**AMENDMENT 2026-09-20 — DUET §5.2 and §5.4. Two facet changes, both of which would otherwise
+produce silently wrong comparisons.**
+
+**(a) The Carbon facet group is replaced.** *What this replaces:* the row above, which modelled
+`carbon_sources[]` as a list but carried no statement of how the sources are **presented in time**.
+A list of two sugars cannot distinguish a real hydrolysate co-fermentation from a programmed
+glucose-then-xylose switch, and DUET is the second of those.
+
+*Why it matters:* DUET's substrate partition is C6 → ethanol, C5 → isobutanol, made automatic by
+glucose-repressed promoters. A measurement taken while glucose is still present and a measurement
+taken after derepression are different physiological states of the same vessel. Pooling them is
+not a rounding error, it is averaging across the switch the design is built on.
+
+*Replacement row:*
+
+| facet group | fields |
+|---|---|
+| Carbon | `carbon_sources[] {compound, concentration, unit, role}` where `role` ∈ (`primary`, `secondary`, `co_substrate`, `trace`); **`carbon_regime`** ∈ (`SINGLE`, `MIXED`, `SEQUENTIAL`, `FED`, `unknown`); **`carbon_phase`** — for `SEQUENTIAL` and `FED`, which source is being consumed at the sampling point, with its own `as_reported` shadow; `total_sugar_g_l`, `feedstock_class` (`defined`/`molasses`/`hydrolysate`/`starch`/`other`), `hydrolysate_inhibitors[] {compound, concentration}` |
+
+`carbon_regime` is **required, and `'unknown'` is a legitimate and common value** — a paper that
+lists two sugars without saying whether they were co-fed or sequential has genuinely not recorded
+it, and that is different from NULL (nothing about carbon recorded at all) and different from
+`'NA'`. The three states are never collapsed. Two contexts with different `carbon_regime` are
+different contexts and hash differently; a comparability class (K.4) that spans regimes must say
+so in its own definition.
+
+**(b) New facet group: in-situ product removal.** *What this replaces:* nothing — this facet was
+absent, and its absence was the bug. A.2 excluded downstream processing, and that exclusion was
+over-read to mean the atlas need not record whether product was being removed during the
+fermentation.
+
+*Why it matters:* DUET strips isobutanol continuously with waste CO₂ from the adjacent ethanol
+fermenter. A titer measured under continuous stripping has had its product inhibition removed as it
+formed; the same number in a sealed flask has not. For a product whose toxicity binds well below
+the stoichiometric ceiling (B.2), this is frequently the **dominant** difference between two
+otherwise comparable numbers.
+
+*New row:*
+
+| facet group | fields |
+|---|---|
+| Product removal | **`in_situ_product_removal`** ∈ (`none`, `gas_stripping`, `vacuum`, `pervaporation`, `liquid_liquid_extraction`, `adsorption`, `membrane`, `other`, `unknown`); `ispr_continuous` (bool); `ispr_carrier` (e.g. the stripping gas, with `as_reported`); `ispr_rate` + unit; `product_retained_in_broth` (bool — whether the reported titer is broth concentration or a recovered total) |
+
+`in_situ_product_removal = 'none'` is an **assertion that the vessel was sealed or vented without
+recovery**, and is only written when the methods say so. Where the paper is silent the value is
+`'unknown'`, never `'none'` — defaulting to `'none'` would convert "we don't know" into "we know
+there was no stripping", which is the exact coercion the missing-value rule forbids.
+
+**The comparability consequence, which is the point of both changes.** A measurement whose
+`in_situ_product_removal` is `'unknown'` may not enter an aggregate with measurements that state a
+value, and the same holds for `carbon_regime`. Both facets join `aeration_class` as
+**class-defining** rather than merely descriptive: they participate in `context_hash`, they appear
+in every comparability-class definition (K.4), and the UI surfaces them on any two numbers it puts
+on the same axis. `product_retained_in_broth = false` additionally flags the titer as
+non-comparable to broth titers without a stated reconciliation.
+
 ## C.6 `measurement`
 
 Every quantitative experimental result — production and phenotype alike — is one row.
@@ -747,6 +1096,45 @@ supply the gene-group anchor that everything else joins on.
 | Tier-2 yeast genomes | RefSeq | 3 |
 | Tier-3 bacterial genomes | RefSeq, gene-level only | as needed |
 
+**AMENDMENT 2026-09-20 — DUET §5.3 and owner direction. Accessions pinned; two rows re-phased.**
+
+*What this replaces:* "published assemblies" and "NCBI" as unpinned source descriptions, the
+phase-2 placement of the industrial assemblies, and the "gene-level only" depth for bacterial
+genomes.
+
+*Why:* an assembly named without its accession and version is not a reproducible input — the
+project's own rule that a gene id is meaningless without its assembly applies to the plan as much
+as to the data. And the two proxy strains of B.4 are not phase-2 nice-to-haves; they are how the
+atlas represents a chassis whose genome does not exist publicly, so they are needed when the first
+strain-level conclusion is drawn.
+
+*Pinned, verified on NCBI 2026-09-20:*
+
+| strain | accession | level | contig N50 | centre | phase | role (B.4) |
+|---|---|---|---|---|---|---|
+| S288C | RefSeq **R64** | Chromosome | — | SGD | 1 | anchor namespace |
+| **CEN.PK113-7D** | **GCA_002571405.2** | Chromosome | 913 kb | Delft | **1** | physiology comparator |
+| **Ethanol Red** | **GCA_029255905.1** | Scaffold | 189 kb | Padova | **1** (was 2) | industrial proxy |
+
+The accession **with its version suffix** is stored, not the assembly name. A version bump is a new
+assembly and a new set of coordinates, and the atlas treats it as such.
+
+*The Ethanol Red caveat, recorded where it will be read.* GCA_029255905.1 is **scaffold-level with
+a 189 kb N50**, against 913 kb for the chromosome-level CEN.PK assembly. That is a fourfold
+difference in continuity and it constrains what the industrial proxy can be asked. Gene content,
+presence/absence and sequence-level comparison are fine; **synteny, structural variation,
+subtelomeric content and copy number are not**, and copy number is exactly what matters for a
+polyploid chassis. Where a question needs chromosome-scale continuity, CEN.PK answers it and the
+answer is labelled a laboratory-strain answer. The atlas does not paper over the gap by preferring
+whichever assembly is convenient.
+
+*Bacterial genomes are no longer gene-level only.* Per the B.4 amendment, **E. coli K-12 MG1655,
+Z. mobilis ZM4, L. cremoris, C. glutamicum and B. subtilis** get full assembly + annotation from
+RefSeq, phase 2. The remaining bacteria stay gene-level. Accessions are pinned at ingest with the
+same rule as above and are not listed here, because unlike the two yeast proxies they have not been
+verified in this session and writing them from memory would be exactly the failure this project
+forbids.
+
 **Decision: consume published variant calls rather than re-calling from reads, in phase 2.**
 Re-calling ~1,000 isolate genomes is days of compute and a large storage commitment to reproduce
 a published result. The atlas re-calls only where it needs something the published VCF does not
@@ -885,8 +1273,11 @@ have now been separated:**
 | *No contrast, comparison or aggregate without an approved `condition_context`* | **Scientific. Stands unconditionally.** This is what protects every downstream claim |
 | *Do not quantify a run whose conditions are unknown* | **Economic. Void when compute is free.** It existed to avoid spending cloud time and storage on columns nobody could use |
 
-The isobutanol corpus is 120 runs and 51 GB — roughly 36 core-hours, which is about **$9 of spot
-compute** on the `c7i.16xlarge` the omics track uses. Quantifying the handful of runs whose
+The isobutanol corpus is ~50 GB — roughly 36 core-hours, which is about **$9 of spot compute** on
+the `c7i.16xlarge` the omics track uses. *(Amended 2026-09-20: this read "120 runs and 51 GB". Two
+runinfo fetches of the same query disagree — 120 runs / 51 GB and ~148 runs / ~48 GB — and
+DATA_VOLUME §2 records both rather than picking one. The arithmetic below is unaffected at this
+resolution, which is the point: no decision here turns on the difference.)* Quantifying the handful of runs whose
 conditions never get resolved therefore wastes single-digit dollars, against a real gain: mapping
 rates and QC expose unusable runs immediately, and an exploratory matrix exists months before
 condition curation finishes.
@@ -930,6 +1321,50 @@ ones. The honest first step is one reference, with the loss measured (unmapped f
 strain) and reported, moving to per-strain or pangenome references once the loss is quantified.
 Recording the target assembly on every quantification is what makes that transition possible
 without invalidating earlier data.
+
+**AMENDMENT 2026-09-20 — DUET §5.3. "One reference" becomes "one anchor plus two proxies", because
+the corpus is not one strain.**
+
+*What this replaces:* the decision immediately above, in its unqualified form — *quantify
+everything against S288C R64 in phase 3, per-strain references later*. The **anchor** half of that
+decision stands. The **only** half does not.
+
+*Why: the transcriptomic corpus is not S288C.* The measured SRA isobutanol corpus (DATA_VOLUME §2)
+contains **104 yeast RNA-Seq runs — 56 submitted as *S. cerevisiae* and 48 as *S. cerevisiae*
+S288C**. The 56 are not S288C by declaration and are not necessarily S288C in fact: isobutanol work
+is done in CEN.PK, in BY-derived laboratory strains and in industrial backgrounds, and the
+submitter's organism field records what was typed, not what was sequenced. Quantifying all 104
+against R64 and reporting one number per gene would silently mix strains whose gene content differs
+— and gene *absence* in an industrial strain reads as "expressed at zero", which is the precise
+error the missing-value rule exists to prevent.
+
+*The rule, restated:*
+
+1. **S288C R64 remains the anchor.** Every run is quantified against it, so there is always one
+   comparable space, and `gene_group` (C.3) is what results are reported on — never a raw gene id.
+2. **Runs whose submitted strain resolves to CEN.PK113-7D or to an industrial background are
+   additionally quantified against their own proxy** — GCA_002571405.2 and GCA_029255905.1
+   respectively. Two quantifications of the same run, each recording its target assembly. They are
+   stored side by side and are never averaged.
+3. **The unmapped fraction and the decoy rate per run per reference are first-class QC outputs**,
+   not log lines. A run whose mapping rate against R64 is materially worse than against its proxy
+   is evidence that the strain assignment matters for that study, and it is surfaced rather than
+   absorbed into the QC gate.
+4. **`reference_assembly` is required on every quantification row and on every contrast.** A
+   contrast may not mix quantifications made against different references. This is enforced by the
+   schema, not by pipeline discipline.
+5. **Strain assignment is curated, not trusted.** The submitted organism field enters as Zone R
+   `as_reported`; the resolved strain is Zone H with its own evidence and confidence, and
+   `'unknown'` is a legitimate resolution for a run whose paper does not name a background. An
+   unknown-strain run is quantified against the anchor only.
+
+*Bacterial runs are separate and are not affected by any of this.* The 20 *E. coli* K-12 MG1655,
+11 *Z. mobilis* ZM4 and 5 *L. cremoris* runs are quantified against their own species' RefSeq
+annotation — now ingested per the B.4 and E.2 amendments — and never against a yeast reference.
+Their results reach yeast questions through `ortholog_link` (C.3), which is a claim carrying a
+method and a score, never an identity, and never a merge into a yeast `gene_group`. The Tn-Seq runs
+in the corpus are *Zymomonas* fitness screens, not expression data, and do not enter the
+quantification pipeline at all; they are a separate data type with a separate model.
 
 QC gates carried from `genome-db`: mapping rate ≥ 0.50 accept / 0.35–0.50 flag / below reject ⚠,
 rates stored as fractions in [0,1] with a CHECK constraint — because a percentage written where a
@@ -1060,6 +1495,7 @@ assertions, and it is the template for how the atlas represents engineering trad
    --ILV3--> 2-KETOISOVALERATE  (mitochondrial)
         ├── BAT1(mito)/BAT2(cyt) --> VALINE                         (competing)
         ├── LEU4/LEU9 --> 2-isopropylmalate --> leucine             (competing)
+        ├── ECM31 --> ketopantoate --> PANTOTHENATE / CoA           (competing) ⚠
         └── [transport / compartment boundary — the engineering problem]
              2-ketoisovalerate(cyt) --ARO10/PDC1/PDC5/PDC6 or kivD--> isobutyraldehyde
                 --ADH1-7 / ADH6 / adhA [NADH or NADPH]--> ISOBUTANOL
@@ -1070,6 +1506,36 @@ Annotated with: the compartment boundary and the two published strategies for re
 the NADPH/NADH mismatch across Ilv5 and the alcohol dehydrogenase ⚠; the promiscuity of the
 2-ketoacid decarboxylases, which is why isoamyl alcohol and 2-methyl-1-butanol appear as
 by-products ⚠; and pyruvate competition with Pdc-mediated ethanol formation.
+
+**AMENDMENT 2026-09-20 — DUET §6. `ECM31` added to the 2-KIV competing-reaction set.**
+
+*What this replaces:* the competing-reaction set at the 2-ketoisovalerate node, which listed the
+valine branch (`BAT1`/`BAT2`) and the leucine branch (`LEU4`/`LEU9`) and stopped there. That set
+was incomplete, not merely abbreviated.
+
+*Why:* **`ECM31`, ketopantoate hydroxymethyltransferase, draws 2-ketoisovalerate into pantothenate
+and thence CoA biosynthesis (unverified)**. It is a third drain on the precursor pool the whole
+route is competing for, and it was missing from the sketch. It is named in the DUET gene set
+(DUET_TARGET §3) among the competing / by-product genes, so the destination document had it and
+this plan did not.
+
+*Consequences for the model, not just the diagram:*
+
+* `ECM31` is a member of the competing-reaction set wherever that set is enumerated — route
+  enumeration (G.7), the bottleneck model (G.8), and the deletion candidates a route proposes.
+* **It is not interchangeable with `BAT1`/`BAT2` or `LEU4`/`LEU9` as a deletion candidate.**
+  Pantothenate is a CoA precursor and the pathway is plausibly essential (unverified); an
+  `ecm31Δ` proposal must carry an essentiality check and, if essential, an attenuation rather than
+  a deletion. The route ranker must be able to tell "delete" from "attenuate" for this node.
+* Flux through it is likely small relative to the valine branch (unverified). Small does not mean
+  ignorable when the pool is the bottleneck, and the honest state is that **the atlas has no
+  measured split of 2-KIV between the three drains in any chassis**. That is a `knowledge_gap` row
+  (G.8), seeded now, not a gap discovered during curation.
+* Every claim in this amendment about `ECM31`'s biochemistry is **(unverified)** — asserted from
+  background knowledge and never checked against a source. It enters the database at
+  `confidence = 'unverified'` and must be re-verified against primary literature before any
+  assertion depends on it. The same mirrored text is in `ISOBUTANOL_PROGRAM.md` §1; the two must
+  be corrected together when it is checked.
 
 Both diagrams are **generated from the database**, not drawn. If the diagram and the data can
 disagree, the diagram is decoration. See section P.3.
@@ -1950,9 +2416,27 @@ Short by design, and short **is** the deliverable. E1 competing-sink records, E2
 benchmarks, E3 wild-type baselines, E4 transferable mechanisms with rationales. Caps enforced in
 code, not by intention.
 
-*Acceptance:* at or under cap (≤150 publications, ≤60 measurement studies); every record names its
-admission criterion; deleting *PDC* in the model returns its measured physiological consequences;
-no admitted record lacks a criterion.
+**AMENDMENT 2026-09-20 — DUET §5.1. E5 lands in this phase, and it moves earlier within it.**
+
+*What this replaces:* the criterion list above (E1–E4) and the acceptance test, which could pass
+with no matrix-redox content at all.
+
+*Why:* E5 — ethanol as mitochondrial redox shuttle (B.3.5) — is the primary ethanol framing and is
+what the isobutanol core of phase 1 will be reaching for. Curating it after E1–E4 would mean phase
+3's route ranking asks "can Pos5 supply the matrix NADPH" against an empty layer.
+
+*Revised:* E5 is curated **first** within phase 2, not last. **`ADH3` and `POS5` records are a
+phase-2 blocker**, not a nice-to-have: without them the highest-priority bottleneck hypothesis
+(G.8) has no evidence to be weighed against, and phase 3.5's decision checkpoint has nothing to
+decide on. The outer bound on the E5 literature is ~642 records (DATA_VOLUME §1) against a
+~150-publication ethanol cap, so E5 needs its own sub-budget agreed before curation opens —
+otherwise it consumes the whole cap and E1–E4 arrive empty.
+
+*Revised acceptance:* at or under cap (≤150 publications, ≤60 measurement studies); every record
+names its admission criterion; **the criterion set the loader accepts is E1–E5, and a record
+admitted under E5 with no `ADH3`/`POS5`/shuttle/matrix-cofactor content fails validation**;
+deleting *PDC* in the model returns its measured physiological consequences **and is rendered as
+the counterfactual it is, not as the chassis**; no admitted record lacks a criterion.
 
 ### Phase 3 — Route enumeration and ranking (4–5 weeks)
 
@@ -2060,6 +2544,45 @@ have terms that constrain redistribution, and a public atlas that has mirrored t
 discovered too late. The schema carries `license` and `redistributable` per source, exports honour
 them, and where redistribution is not permitted the atlas stores identifiers and links rather than
 content. This is an explicit phase-0 task, not a phase-7 discovery.
+
+### R.1.1 Patent / FTO layer
+
+**ADDED 2026-09-20 — DUET §6. New subsection; nothing replaced. The source table above lists
+fifteen sources and not one of them is a patent source, which is an omission rather than a
+decision.**
+
+DUET commits to **four patent families and a freedom-to-operate opinion against the Gevo, Butamax
+and DuPont estates within six months**. Two consequences for the atlas, and only two:
+
+1. **A route's novelty is not knowable from the publication record alone.** DUET's third
+   architectural claim is that the mitochondrial route sits *outside* the incumbent patent space.
+   That is a claim about claim language, and the atlas cannot support or refute it with papers.
+2. **"Does this route sit inside someone's claim space?" must be answerable**, at least as
+   "here are the families to read", for any route the ranker proposes (G.7). A route ranked first
+   on evidence and unbuildable on freedom-to-operate is a wrong answer delivered confidently.
+
+**Minimum viable scope**, deliberately small: a `patent` source alongside publications, holding
+family-level records — family id, priority date, assignee, jurisdictions, status, and the
+independent claims relevant to **mitochondrial and compartment-targeted isobutanol pathways**.
+Linked to `pathway_configuration` and to parts (G.6) the same way publications are, so a route
+surfaces its neighbouring claims.
+
+**Not designed here, and deliberately not.** The source (EPO OPS, Google Patents, Lens.org,
+PatentsView), the ingest cadence, the claim-parsing approach and the data model are all open
+questions and belong in `docs/reference/OPEN_QUESTIONS.md`. Designing a patent pipeline in this
+document before anyone has looked at the licence terms of a patent API would repeat the mistake the
+licensing paragraph above exists to prevent.
+
+**Two hard boundaries, stated now so they are not negotiated later.**
+
+* **The atlas does not produce an FTO opinion.** It holds patent *records* and links them to
+  routes. An FTO opinion is a legal instrument produced by counsel, and anything the atlas emits
+  that resembles one is a liability. The UI labels patent links as "claims to read", never as
+  clearance.
+* **Patent claims are Zone R and are never promoted.** A claim is what a document asserts, not what
+  is true or enforceable; validity, scope after prosecution and jurisdictional differences are
+  outside what this atlas can evaluate. No patent record may raise the evidence level of any
+  scientific assertion (J.3) — a patent is evidence about the legal landscape, not about biology.
 
 ## R.2 Relevance pipeline
 

@@ -12,6 +12,16 @@ reported, never a curator's or a model's reading of it. PLAN.md F.3 is the reaso
 `acquisition_status` only ever comes out of this module as `'discovered'` -- a run whose
 conditions are unknown cannot enter any comparison, so condition annotation and queuing are later,
 human-gated steps this module does not perform.
+
+**Which genome a run's transcriptomic data should be quantified against** is also METADATA-ONLY
+here: `sra_run_row` calls `references.select_reference` (given the caller's
+`data/omics/reference_genomes.yaml` catalog, loaded once by whoever drives discovery) to fill
+`reference_assembly`/`reference_match_quality`, and `references.is_relevance_uncertain` to fill
+`relevance_uncertain` -- always, independent of whether a catalog was supplied, since it needs only
+`organism`. `unmapped_fraction` stays `NULL` here unconditionally: this module discovers runs, it
+does not quantify them, so the reference-choice loss PLAN.md F.4 asks to measure has nothing to
+report yet (see `_UPSERT_SRA_RUN_SQL`, which deliberately never assigns that column on conflict
+either, so a value a future quantification step writes is never clobbered by re-running discovery).
 """
 
 from __future__ import annotations
@@ -24,6 +34,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from . import ESearchResult, EutilsClient, OmicsFetchError
+from . import references as references_mod
 
 #: DATA_VOLUME.md section 2: Tn-Seq runs are perturbation evidence (L1/L2 under PLAN.md J.3)
 #: rather than correlation (L3), so per run they are the most informative rows in the corpus and
@@ -224,8 +235,22 @@ def sra_run_row(
     *,
     dataset_id: str | None,
     retrieved_at: str,
+    reference_genomes: Sequence[references_mod.ReferenceGenome] | None = None,
 ) -> dict[str, object]:
-    """`run` as a `sra_run` table row, ready for a parameterized INSERT/UPSERT."""
+    """`run` as a `sra_run` table row, ready for a parameterized INSERT/UPSERT.
+
+    `reference_genomes`, when given, is consulted via `references.select_reference` to fill
+    `reference_assembly`/`reference_match_quality`; when omitted (the default), those two columns
+    are left `None` (NULL) -- distinct from the literal string `'none'` `select_reference` itself
+    can return, which means "a catalog was consulted and nothing in it matched" rather than
+    "selection was never attempted". `relevance_uncertain` is always computed: it needs only
+    `run.organism`, never a catalog (see `references.is_relevance_uncertain`).
+    """
+    selection = (
+        references_mod.select_reference(run.organism, reference_genomes)
+        if reference_genomes is not None
+        else None
+    )
     return {
         "id": f"insdc.sra:{run.run_accession}",
         "run_accession": run.run_accession,
@@ -245,6 +270,9 @@ def sra_run_row(
         "size_mb": run.size_mb,
         "location_url": run.location_url or None,
         "priority_rank": priority_rank_for(run.library_strategy),
+        "reference_assembly": selection.assembly_accession if selection is not None else None,
+        "reference_match_quality": selection.match_quality if selection is not None else None,
+        "relevance_uncertain": 1 if references_mod.is_relevance_uncertain(run.organism) else 0,
         "retrieved_at": retrieved_at,
         "evidence": (
             f"NCBI SRA runinfo for {run.run_accession}, fetched live via eutils efetch on "
@@ -270,10 +298,12 @@ _UPSERT_SRA_RUN_SQL = """
 INSERT INTO sra_run (id, run_accession, dataset_id, experiment_accession, study_accession,
                       bioproject, biosample, organism, taxid, library_strategy, library_layout,
                       platform, instrument_model, spots, bases, size_mb, location_url,
-                      priority_rank, retrieved_at, evidence, confidence)
+                      priority_rank, reference_assembly, reference_match_quality,
+                      relevance_uncertain, retrieved_at, evidence, confidence)
 VALUES (:id, :run_accession, :dataset_id, :experiment_accession, :study_accession, :bioproject,
         :biosample, :organism, :taxid, :library_strategy, :library_layout, :platform,
-        :instrument_model, :spots, :bases, :size_mb, :location_url, :priority_rank, :retrieved_at,
+        :instrument_model, :spots, :bases, :size_mb, :location_url, :priority_rank,
+        :reference_assembly, :reference_match_quality, :relevance_uncertain, :retrieved_at,
         :evidence, :confidence)
 ON CONFLICT(run_accession) DO UPDATE SET
     dataset_id = excluded.dataset_id,
@@ -281,8 +311,15 @@ ON CONFLICT(run_accession) DO UPDATE SET
     bases = excluded.bases,
     size_mb = excluded.size_mb,
     location_url = excluded.location_url,
+    reference_assembly = excluded.reference_assembly,
+    reference_match_quality = excluded.reference_match_quality,
+    relevance_uncertain = excluded.relevance_uncertain,
     retrieved_at = excluded.retrieved_at,
     evidence = excluded.evidence
+-- unmapped_fraction is deliberately absent from both the column list and this SET clause: it is
+-- NULL on every row this module writes (see the module docstring), and omitting it here means a
+-- value a future quantification step wrote is preserved across a re-run of discovery, not
+-- clobbered back to NULL.
 """
 
 
@@ -292,13 +329,15 @@ def write_sra_runs(
     *,
     geo_dataset_ids_by_bioproject: Mapping[str, str],
     retrieved_at: str,
+    reference_genomes: Sequence[references_mod.ReferenceGenome] | None = None,
 ) -> int:
     """Upsert `runs` into `sra_run`, writing an SRA-study `dataset` row first where one is needed.
 
     Idempotent on `run_accession` (docs/reference/CONVENTIONS.md "Pipelines and provenance": every
     pipeline is idempotent on a declared key) -- re-running discovery updates the existing row
     rather than erroring or duplicating it. Does not open or close `conn`; `fermdb.db.open_db` is
-    the only function that does that.
+    the only function that does that. `reference_genomes` is passed straight through to
+    `sra_run_row` for every run; see that function's docstring for what omitting it means.
     """
     written = 0
     seen_dataset_ids: set[str] = set()
@@ -313,7 +352,12 @@ def write_sra_runs(
             if study_row is not None:
                 conn.execute(_UPSERT_DATASET_SQL, study_row)
                 seen_dataset_ids.add(dataset_id)
-        row = sra_run_row(run, dataset_id=dataset_id, retrieved_at=retrieved_at)
+        row = sra_run_row(
+            run,
+            dataset_id=dataset_id,
+            retrieved_at=retrieved_at,
+            reference_genomes=reference_genomes,
+        )
         conn.execute(_UPSERT_SRA_RUN_SQL, row)
         written += 1
     conn.commit()

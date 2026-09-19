@@ -14,6 +14,20 @@ anything if it disagrees.
 
 Everything here is Zone R (`reference_sequence.zone` fixes it by CHECK): exactly what NCBI
 Nucleotide reported, checksummed, never a curator's or a model's reading of it.
+
+**Reference selection, for "which genome is this transcriptomic run against".** The isobutanol SRA
+corpus spans five organisms (docs/reference/DATA_VOLUME.md section 2), so quantification needs a
+reference PER ORGANISM, not one for the whole corpus. `data/omics/reference_genomes.yaml` catalogs
+every reference this atlas currently knows about -- the S288C anchor, the two parallel *S.
+cerevisiae* comparators (CEN.PK113-7D, Ethanol Red), and the three small bacterial hosts (E. coli
+K-12 MG1655, Zymomonas mobilis ZM4, Lactococcus cremoris) -- plus a Fusarium graminearum entry kept
+only for curator review (see `is_relevance_uncertain`). `load_reference_genomes` parses it,
+`select_reference` chooses per run (never guessing a strain runinfo did not report), and
+`fetch_organism_reference` generalizes `fetch_fasta`/`fetch_genbank`/`store_content_addressed` to
+fetch any small (2-5 Mb) organism's genome+annotation -- landing in `reference_genome_asset`, a
+separate table from `reference_sequence`, because that table's `kind`/`encoding_genome` columns are
+yeast-specific (nuclear/mitochondrial, NCBI tables 1/3) and would misrepresent a bacterial replicon
+under table 11.
 """
 
 from __future__ import annotations
@@ -21,11 +35,14 @@ from __future__ import annotations
 import hashlib
 import re
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
+import yaml
+
 from .. import genetic_code
+from ..config import Settings
 from . import EUTILS_BASE, EutilsClient, OmicsFetchError
 
 #: Verified live against the NCBI Datasets API
@@ -488,12 +505,337 @@ def write_reference_rows(conn: sqlite3.Connection, rows: list[dict[str, object]]
     return len(rows)
 
 
+# ---------------------------------------------------------------------------------------------
+# data/omics/reference_genomes.yaml: the reference genome catalog, and per-run selection.
+#
+# THE OWNER'S QUESTION this section answers: "transcriptomic data is based on which genome" --
+# quantified PER ORGANISM (five in the isobutanol corpus, docs/reference/DATA_VOLUME.md section 2),
+# never assumed to be one reference for the whole atlas. Loading this file is package-level (like
+# `load_dataset_families` in `omics/__init__.py`) for the same reason: it is a curated fact table,
+# not something either `sra.py` or a hypothetical future quantification module owns more than the
+# other.
+# ---------------------------------------------------------------------------------------------
+
+_CONFIDENCE_VALUES: tuple[str, ...] = ("unverified", "low", "medium", "high")
+
+#: `sra_run.reference_match_quality`'s CHECK constraint (schema.sql, "omics acquisition"), restated
+#: here because `select_reference` is the one function that produces these four strings. `'none'`
+#: is a real, storable value -- "this atlas looked and found no reference" -- never confused with
+#: the column being left NULL ("selection was never attempted"; see `sra.sra_run_row`).
+REFERENCE_MATCH_QUALITIES: tuple[str, ...] = (
+    "strain_matched",
+    "species_exact",
+    "species_proxy",
+    "none",
+)
+
+
+class ReferenceGenomesError(ValueError):
+    """`data/omics/reference_genomes.yaml` is missing, malformed, or internally inconsistent."""
+
+
+@dataclass(frozen=True)
+class ReferenceGenome:
+    """One row of `data/omics/reference_genomes.yaml`: a reference genome the isobutanol/ethanol
+    corpus's organisms need, independent of whether fermdb has fetched its bytes yet (`fetched`).
+
+    `strain_match_names` and `species_match_names` are exact strings as SRA runinfo's
+    `ScientificName` reports them -- `select_reference` below matches on exact string equality
+    only, deliberately, never a prefix or substring (docs/reference/CONVENTIONS.md "never guess"
+    applied to reference selection, not only to strain identity).
+    """
+
+    id: str
+    organism: str
+    taxid: int | None
+    accession: str
+    assembly_level: str
+    n50_bp: int | None
+    role: str
+    is_species_default: bool
+    fetched: bool
+    structural_caveats: str | None
+    strain_match_names: tuple[str, ...]
+    species_match_names: tuple[str, ...]
+    proxy_for: tuple[str, ...]
+    relevance_uncertain: bool
+    relevance_note: str | None
+    evidence: str
+    confidence: str
+
+
+def load_reference_genomes(path: str | Path) -> list[ReferenceGenome]:
+    """Parse `data/omics/reference_genomes.yaml`'s `references` list into `ReferenceGenome` rows.
+
+    No path is hardcoded here: the caller resolves `path` from `Settings` (repo tier), per
+    docs/reference/CONVENTIONS.md ("Paths and configuration") -- see `reference_genomes_path`.
+    """
+    file_path = Path(path)
+    if not file_path.is_file():
+        raise ReferenceGenomesError(f"no reference genomes file at {file_path}")
+    with file_path.open("r", encoding="utf-8") as handle:
+        document = yaml.safe_load(handle)
+    if not isinstance(document, dict) or "references" not in document:
+        raise ReferenceGenomesError(
+            f"{file_path}: expected a mapping with a top-level 'references'"
+        )
+    entries = document["references"]
+    if not isinstance(entries, list):
+        raise ReferenceGenomesError(f"{file_path}: 'references' must be a list")
+
+    result: list[ReferenceGenome] = []
+    seen: set[str] = set()
+    for index, row in enumerate(entries):
+        if not isinstance(row, dict):
+            raise ReferenceGenomesError(f"{file_path}: references[{index}] must be a mapping")
+        try:
+            entry_id = str(row["id"])
+            organism = str(row["organism"])
+            accession = str(row["accession"])
+            assembly_level = str(row["assembly_level"])
+            role = str(row["role"])
+            evidence = str(row["evidence"])
+            confidence = str(row["confidence"])
+        except KeyError as exc:
+            raise ReferenceGenomesError(f"{file_path}: references[{index}] missing {exc}") from exc
+        if confidence not in _CONFIDENCE_VALUES:
+            raise ReferenceGenomesError(
+                f"{file_path}: references[{index}] ({entry_id!r}) has confidence {confidence!r}; "
+                f"must be one of {'/'.join(_CONFIDENCE_VALUES)}"
+            )
+        if entry_id in seen:
+            raise ReferenceGenomesError(f"{file_path}: duplicate reference id {entry_id!r}")
+        seen.add(entry_id)
+        result.append(
+            ReferenceGenome(
+                id=entry_id,
+                organism=organism,
+                taxid=row.get("taxid"),
+                accession=accession,
+                assembly_level=assembly_level,
+                n50_bp=row.get("n50_bp"),
+                role=role,
+                is_species_default=bool(row.get("is_species_default", False)),
+                fetched=bool(row.get("fetched", False)),
+                structural_caveats=row.get("structural_caveats"),
+                strain_match_names=tuple(row.get("strain_match_names") or ()),
+                species_match_names=tuple(row.get("species_match_names") or ()),
+                proxy_for=tuple(row.get("proxy_for") or ()),
+                relevance_uncertain=bool(row.get("relevance_uncertain", False)),
+                relevance_note=row.get("relevance_note"),
+                evidence=evidence,
+                confidence=confidence,
+            )
+        )
+    return result
+
+
+def reference_genomes_path(settings: Settings) -> Path:
+    """`data/omics/reference_genomes.yaml`, resolved off `settings.repo_root`.
+
+    Same pattern as `fermdb.omics.dataset_families_path`: a fixed sub-path off the already-
+    configurable `repo_root` rather than its own `env/paths.yaml` key.
+    """
+    return settings.repo_root / "data" / "omics" / "reference_genomes.yaml"
+
+
+@dataclass(frozen=True)
+class ReferenceSelection:
+    """The reference chosen for one `sra_run.organism`, and how well it matches."""
+
+    assembly_accession: str | None
+    match_quality: str
+    matched_reference_id: str | None
+
+
+def select_reference(organism: str, references: Sequence[ReferenceGenome]) -> ReferenceSelection:
+    """Choose a reference for `organism` (an SRA runinfo `ScientificName`, verbatim).
+
+    Three passes, most specific first, each an EXACT string match -- no prefix or substring
+    matching, deliberately: a looser match could silently pair, say, a pathogenic *E. coli*
+    isolate's run with the K-12 lab-strain reference (PLAN.md S.3 "never guess").
+
+    1. `strain_matched` -- `organism` names a cataloged reference's own strain exactly.
+    2. `species_exact` -- `organism`'s species matches a reference marked `is_species_default`
+       for that species (at most one default per species in this catalog; a plain "Saccharomyces
+       cerevisiae" run resolves to the S288C anchor here, never to CEN.PK or Ethanol Red).
+    3. `species_proxy` -- no exact species reference exists, but a cataloged reference declares
+       itself a stand-in (`proxy_for`) for this organism. Not exercised by the current five-organism
+       corpus (each already has its own species-level default); the mechanism exists for the day a
+       run appears in a species this catalog has not been extended to cover.
+
+    Returns `('none', None)` when nothing matches -- a real, recorded answer (PLAN.md F.3's
+    metadata-poverty problem means an unrecognized organism string is expected, not a bug), and
+    when `organism` itself is blank.
+    """
+    name = organism.strip() if organism else ""
+    if not name:
+        return ReferenceSelection(None, "none", None)
+
+    for ref in references:
+        if name in ref.strain_match_names:
+            return ReferenceSelection(ref.accession, "strain_matched", ref.id)
+
+    for ref in references:
+        if ref.is_species_default and name in ref.species_match_names:
+            return ReferenceSelection(ref.accession, "species_exact", ref.id)
+
+    for ref in references:
+        if name in ref.proxy_for:
+            return ReferenceSelection(ref.accession, "species_proxy", ref.id)
+
+    return ReferenceSelection(None, "none", None)
+
+
+#: Runs whose organism resolves to one of these are flagged for curator review rather than folded
+#: silently into the corpus: PLAN.md's "never guess" rule applied to relevance, not only to strain.
+#: Fusarium graminearum (8 RNA-Seq runs in the isobutanol SRA corpus, docs/reference/DATA_VOLUME.md
+#: section 2) is very plausibly a false-positive hit on the word "isobutanol" (unverified: this
+#: session's own domain judgement -- see data/omics/reference_genomes.yaml's
+#: `fusarium_graminearum_ph1` entry), not a project decision that these runs belong in the
+#: isobutanol program.
+_RELEVANCE_UNCERTAIN_ORGANISM_PREFIXES: tuple[str, ...] = ("Fusarium graminearum",)
+
+
+def is_relevance_uncertain(organism: str) -> bool:
+    """True if `organism` (an SRA runinfo `ScientificName`) should set `sra_run.
+    relevance_uncertain`.
+
+    A prefix check, unlike `select_reference`'s exact match: flagging for review is a caution
+    (worst case a curator looks at one extra, genuinely relevant run) rather than an identity
+    claim, so it deliberately also catches a strain-suffixed variant such as "Fusarium graminearum
+    PH-1".
+    """
+    name = organism.strip() if organism else ""
+    return any(name.startswith(prefix) for prefix in _RELEVANCE_UNCERTAIN_ORGANISM_PREFIXES)
+
+
+# ---------------------------------------------------------------------------------------------
+# Generic organism reference fetch (item 5: "extend the reference fetch to handle the bacterial
+# genomes"). `fetch_fasta`/`fetch_genbank`/`store_content_addressed` above are already generic and
+# accession-agnostic -- this is the loop over them for an organism this module has no per-gene
+# translation check for. Rows land in `reference_genome_asset` (schema.sql, "omics acquisition"),
+# never in `reference_sequence`: that table's `kind` CHECK and `encoding_genome` foreign key are
+# yeast-specific (nuclear/mitochondrial, NCBI genetic code tables 1/3) and would misrepresent a
+# bacterial replicon, which reads under table 11 (data/omics/reference_genomes.yaml notes this per
+# bacterial entry).
+# ---------------------------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class FetchedReferenceAsset:
+    accession: str
+    kind: str  # 'genome' | 'annotation'
+    stored: StoredFile
+    source_url: str
+
+
+def fetch_organism_reference(
+    client: EutilsClient,
+    genomes_dir: Path,
+    accessions: Sequence[str],
+    *,
+    retrieved_at: str,
+) -> list[FetchedReferenceAsset]:
+    """Fetch and content-address FASTA + GenBank for each of `accessions`, generically.
+
+    No translation-table verification is performed (unlike `fetch_mitochondrial_reference`): a
+    bacterial genome's genetic code is uniform per replicon under NCBI table 11, not compartment-
+    dependent the way yeast's is, so there is no table-1-vs-table-3 disagreement here to prove.
+    `retrieved_at` is the caller's single wall-clock read, exactly as `fetch_nuclear_reference`
+    takes it, so every asset from one call carries the same timestamp.
+    """
+    assets: list[FetchedReferenceAsset] = []
+    for accession in accessions:
+        fasta = fetch_fasta(client, accession)
+        genbank = fetch_genbank(client, accession)
+        assets.append(
+            FetchedReferenceAsset(
+                accession=accession,
+                kind="genome",
+                stored=store_content_addressed(genomes_dir, fasta.content),
+                source_url=fasta.source_url,
+            )
+        )
+        assets.append(
+            FetchedReferenceAsset(
+                accession=accession,
+                kind="annotation",
+                stored=store_content_addressed(genomes_dir, genbank.content),
+                source_url=genbank.source_url,
+            )
+        )
+    return assets
+
+
+def reference_genome_asset_row(
+    asset: FetchedReferenceAsset,
+    *,
+    reference_id: str,
+    organism: str,
+    retrieved_at: str,
+) -> dict[str, object]:
+    """One `asset` as a `reference_genome_asset` table row, ready for a parameterized INSERT."""
+    slug = asset.accession.lower().replace(".", "-").replace("_", "-")
+    return {
+        "id": f"YAA:REFASSET:{reference_id}-{asset.kind}-{slug}",
+        "reference_id": reference_id,
+        "organism": organism,
+        "sequence_accession": asset.accession,
+        "kind": asset.kind,
+        "file_path": str(asset.stored.path),
+        "checksum_sha256": asset.stored.checksum_sha256,
+        "size_bytes": asset.stored.size_bytes,
+        "source_url": asset.source_url,
+        "retrieved_at": retrieved_at,
+        "zone": "R",
+        "evidence": (
+            f"NCBI Nucleotide accession {asset.accession}, fetched live via eutils efetch on "
+            f"{retrieved_at}, catalogued in data/omics/reference_genomes.yaml as {reference_id!r}"
+        ),
+        "confidence": "high",
+    }
+
+
+_UPSERT_REFERENCE_GENOME_ASSET_SQL = """
+INSERT INTO reference_genome_asset (id, reference_id, organism, sequence_accession, kind,
+                                     file_path, checksum_sha256, size_bytes, source_url,
+                                     retrieved_at, zone, evidence, confidence)
+VALUES (:id, :reference_id, :organism, :sequence_accession, :kind, :file_path, :checksum_sha256,
+        :size_bytes, :source_url, :retrieved_at, :zone, :evidence, :confidence)
+ON CONFLICT(sequence_accession, kind) DO UPDATE SET
+    file_path = excluded.file_path,
+    checksum_sha256 = excluded.checksum_sha256,
+    size_bytes = excluded.size_bytes,
+    retrieved_at = excluded.retrieved_at,
+    evidence = excluded.evidence
+"""
+
+
+def write_reference_genome_asset_rows(
+    conn: sqlite3.Connection, rows: list[dict[str, object]]
+) -> int:
+    """Upsert `rows` into `reference_genome_asset`, keyed by `(sequence_accession, kind)`.
+
+    Does not open or close `conn`; `fermdb.db.open_db` is the only function that does that.
+    """
+    for row in rows:
+        conn.execute(_UPSERT_REFERENCE_GENOME_ASSET_SQL, row)
+    conn.commit()
+    return len(rows)
+
+
 __all__ = [
     "ASSEMBLY_ACCESSION",
     "ASSEMBLY_NAME",
     "MITOCHONDRIAL_ACCESSION",
     "NUCLEAR_CHROMOSOME_ACCESSIONS",
+    "REFERENCE_MATCH_QUALITIES",
+    "FetchedReferenceAsset",
     "FetchedSequence",
+    "ReferenceGenome",
+    "ReferenceGenomesError",
+    "ReferenceSelection",
     "ReferenceVerificationError",
     "StoredFile",
     "TranslationCheck",
@@ -501,8 +843,15 @@ __all__ = [
     "fetch_genbank",
     "fetch_mitochondrial_reference",
     "fetch_nuclear_reference",
+    "fetch_organism_reference",
+    "is_relevance_uncertain",
+    "load_reference_genomes",
     "parse_fasta_sequence",
+    "reference_genome_asset_row",
+    "reference_genomes_path",
+    "select_reference",
     "store_content_addressed",
     "verify_mitochondrial_translation",
+    "write_reference_genome_asset_rows",
     "write_reference_rows",
 ]

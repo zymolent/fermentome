@@ -1,0 +1,30 @@
+[
+  {
+    "goid": "GO:0004160",
+    "go_term": "dihydroxy-acid dehydratase activity",
+    "go_aspect": "molecular_function",
+    "annotation_type": "IDA",
+    "locus_url": "https://www.yeastgenome.org/locus/S000005791"
+  },
+  {
+    "goid": "GO:0009082",
+    "go_term": "branched-chain amino acid biosynthetic process",
+    "go_aspect": "biological_process",
+    "annotation_type": "IMP",
+    "locus_url": "https://www.yeastgenome.org/locus/S000005791"
+  },
+  {
+    "goid": "GO:0051536",
+    "go_term": "iron-sulfur cluster binding",
+    "go_aspect": "molecular_function",
+    "annotation_type": "IEA",
+    "locus_url": "https://www.yeastgenome.org/locus/S000005791"
+  },
+  {
+    "goid": "GO:0005739",
+    "go_term": "mitochondrion",
+    "go_aspect": "cellular_component",
+    "annotation_type": "HDA",
+    "locus_url": "https://www.yeastgenome.org/locus/S000005791"
+  }
+]

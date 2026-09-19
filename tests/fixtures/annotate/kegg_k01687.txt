@@ -1,0 +1,6 @@
+ENTRY       K01687                      KO
+NAME        ilvD, EDD
+DEFINITION  dihydroxy-acid dehydratase / 6-phosphogluconate dehydratase [EC:4.2.1.9 4.2.1.12]
+PATHWAY     ko00290  Valine, leucine and isoleucine biosynthesis
+            ko00030  Pentose phosphate pathway
+///

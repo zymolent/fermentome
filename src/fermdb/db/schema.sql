@@ -1690,11 +1690,11 @@ CREATE TABLE screening_record (
     -- knowing why each record was excluded in the first place. Citing this row's own family/term
     -- is not a substitute for a reason naming the actual policy applied.
     exclusion_reason     TEXT,
-    -- The B.3 criterion (E1-E4, PLAN.md B.3.1-B.3.4) this hit is a full-text CANDIDATE for
+    -- The B.3 criterion (E1-E6, PLAN.md B.3) this hit is a full-text CANDIDATE for
     -- (triage_state = 'needs_full_text') or has been curator-confirmed under (triage_state =
     -- 'included'); NULL for 'excluded', and always NULL for an isobutanol-tier record, which has
     -- no admission criteria at all.
-    admitted_criterion   TEXT CHECK (admitted_criterion IN ('E1', 'E2', 'E3', 'E4', 'E5')),
+    admitted_criterion   TEXT CHECK (admitted_criterion IN ('E1', 'E2', 'E3', 'E4', 'E5', 'E6')),
     -- Denormalized from query_families.yaml as of the run that first wrote this row, so the R.2
     -- policy actually applied to THIS record stays legible even if the family's tier or default
     -- disposition changes later.
@@ -1884,6 +1884,39 @@ CREATE TABLE sra_run (
 CREATE INDEX sra_run_by_dataset ON sra_run(dataset_id);
 CREATE INDEX sra_run_by_priority ON sra_run(priority_rank, run_accession);
 
+-- Added for "see transcriptomic data is based on which genome, analyse according to that"
+-- (SCHEMA_VERSION -> 4, entry 4b; a concurrent, unrelated bump in the same round briefly pushed
+-- this to 5 and was reconciled back on review -- see src/fermdb/db/__init__.py's version-history
+-- comment). The isobutanol SRA corpus spans five organisms
+-- (docs/reference/DATA_VOLUME.md section 2), so the reference is chosen PER RUN by
+-- src/fermdb/omics/references.py:select_reference, off data/omics/reference_genomes.yaml --
+-- never a single atlas-wide reference.
+--
+-- reference_assembly is deliberately a free-text accession, not a foreign key into
+-- reference_sequence: that table only ever holds the S288C anchor's own fetched bytes (nuclear +
+-- mitochondrial), never the CEN.PK/Ethanol Red/bacterial assemblies this atlas catalogs but has
+-- not fetched byte-for-byte (see reference_genome_asset below for the ones it has).
+ALTER TABLE sra_run ADD COLUMN reference_assembly TEXT;
+-- The literal 'none' is a real, stored value ("a catalog was consulted and nothing matched"), not
+-- interchangeable with the column being NULL ("selection was never attempted") -- the same
+-- NULL-vs-sentinel distinction CONVENTIONS.md draws for NULL vs 'NA' vs 'unknown' elsewhere.
+ALTER TABLE sra_run ADD COLUMN reference_match_quality TEXT
+    CHECK (reference_match_quality IS NULL
+           OR reference_match_quality IN ('strain_matched', 'species_exact', 'species_proxy',
+                                           'none'));
+-- PLAN.md F.4: the reference-choice loss must be MEASURED, not assumed. NULL until a
+-- quantification pipeline (not yet built in this codebase) populates it; src/fermdb/omics/sra.py
+-- never writes a value here, and its UPSERT deliberately never touches this column on conflict
+-- either, so a later quantification write survives a re-run of discovery.
+ALTER TABLE sra_run ADD COLUMN unmapped_fraction REAL
+    CHECK (unmapped_fraction IS NULL OR (unmapped_fraction BETWEEN 0 AND 1));
+-- Set for a run whose match to a curated query term may be a false positive (e.g. this corpus's 8
+-- Fusarium graminearum runs against the term "isobutanol") rather than a genuine corpus member --
+-- src/fermdb/omics/references.py:is_relevance_uncertain. Curator review, not deletion (PLAN.md
+-- S.3 "never guess"); always computed (defaults to 0), unlike the two reference_* columns above.
+ALTER TABLE sra_run ADD COLUMN relevance_uncertain INTEGER NOT NULL DEFAULT 0
+    CHECK (relevance_uncertain IN (0, 1));
+
 -- The small DNA references this pass fetches in full (DATA_VOLUME.md sections 0 and 5): the
 -- S288C nuclear assembly and the mitochondrial genome, content-addressed by sha256 so the exact
 -- bytes behind any downstream analysis are always re-derivable (PLAN.md N.2, J.5 provenance).
@@ -1914,3 +1947,113 @@ CREATE TABLE reference_sequence (
 );
 
 CREATE INDEX reference_sequence_by_assembly ON reference_sequence(assembly_accession);
+
+-- Fetched-and-checksummed bytes for a reference genome OTHER than the S288C anchor (item 5: "the
+-- bacterial genomes, they are small, 2-5 Mb" -- also open to CEN.PK/Ethanol Red if either is ever
+-- fetched in full). Deliberately separate from `reference_sequence` above: this table carries no
+-- genetic-code claim at all (no `kind` CHECK restricted to nuclear/mitochondrial, no
+-- `encoding_genome` foreign key), because a bacterial replicon reads under NCBI genetic code table
+-- 11, which `encoding_genome` does not model (that table is yeast-specific: nuclear/mitochondrial,
+-- tables 1/3 -- src/fermdb/genetic_code.py). `reference_id` is a free-text slug into
+-- data/omics/reference_genomes.yaml, not a foreign key: that file is curated data, not a table.
+CREATE TABLE reference_genome_asset (
+    id                 TEXT PRIMARY KEY,
+    reference_id       TEXT NOT NULL,           -- e.g. 'ecoli_k12_mg1655' (data/omics/reference_genomes.yaml)
+    organism           TEXT NOT NULL,
+    sequence_accession TEXT NOT NULL,           -- e.g. NC_000913.3
+    kind               TEXT NOT NULL CHECK (kind IN ('genome', 'annotation')),
+    file_path          TEXT NOT NULL,           -- content-addressed path under Settings.genomes_dir
+    checksum_sha256    TEXT NOT NULL,
+    size_bytes         INTEGER NOT NULL CHECK (size_bytes >= 0),
+    source_url         TEXT NOT NULL,
+    retrieved_at       TEXT NOT NULL,
+    zone               TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    evidence           TEXT NOT NULL,
+    confidence         TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    UNIQUE (sequence_accession, kind)
+);
+
+CREATE INDEX reference_genome_asset_by_reference ON reference_genome_asset(reference_id);
+
+
+-- ---------------------------------------------------------------------------------------------
+-- 17. Functional annotation
+--
+-- Owned by src/fermdb/annotate/ (sources.py, importers.py). THE KEY DESIGN POINT, restated from
+-- that package's docstring: for every organism in DUET_TARGET.md/ISOBUTANOL_PROGRAM.md's roster
+-- -- S. cerevisiae and, per the owner's directive, the bacterial hosts studied for comparison
+-- (E. coli, Z. mobilis, L. cremoris, C. glutamicum, B. subtilis) -- GO terms, pathway/KO/EC
+-- membership, protein domains, cofactor specificity, subcellular location, transporter family,
+-- complex membership, TF targets and phenotypes are ALREADY CURATED at SGD/UniProt/KEGG/
+-- Pfam/InterPro/TCDB/Complex Portal, better than this atlas could compute it from sequence alone.
+-- `gene_annotation` below is therefore an IMPORT target, not a computation target: one row per
+-- (gene_group, source, term), each carrying the source's own identifier, label and (for GO) its
+-- evidence code -- never a locally re-derived score.
+--
+-- Two things are the opposite of that and stay OUT of this table on purpose, because no source
+-- above provides either systematically and both sit on DUET's own critical path
+-- (docs/design/DUET_TARGET.md section 2, "Mitochondrial, not cytosolic" and "Fe-S protection,
+-- dual-purpose"): mitochondrial targeting-sequence/presequence prediction (yeast only), and Fe-S
+-- cluster protein annotation (Ilv3 is the named critical case). `fermdb.annotate` carries their
+-- interfaces as TODO stubs (`PresequencePrediction`/`FeSClusterAnnotation`); neither is
+-- implemented, and no row in this table can have come from such a computation -- `zone` stays
+-- 'R' for every row an importer writes (exactly what the source reported), never 'I'.
+--
+-- `gene_annotation.source` names one row of data/annotation/annotation_sources.yaml, which is the
+-- licence/redistributability authority (KEGG, TCDB and YEASTRACT+ are marked
+-- redistributable: false there -- their importers store identifiers and links only, never a
+-- copied-out reaction list, pathway map, or bulk export); this schema does not repeat that policy
+-- in a CHECK, because "what may be redistributed" is a fact about the source, not a shape the
+-- database can enforce on a row already written.
+--
+-- `evidence_code` is GO's own vocabulary (IDA, IEA, ...), carried through unflattened per
+-- docs/reference/CONVENTIONS.md "Evidence" rather than collapsed into one confidence value --
+-- `fermdb.annotate.sources.go_evidence_category`/`recommended_confidence_for_go_evidence` is the
+-- mapping this atlas uses onto its own confidence vocabulary (IDA-class codes are direct
+-- experimental evidence and rate higher than IEA-class electronic/computational ones). The CHECK
+-- below makes it structurally impossible for a non-GO source to carry one, the same way
+-- `evidence_item`'s per-evidence-type CHECKs (section 10) make it impossible for a row to lie
+-- about what kind of evidence it is.
+--
+-- `reaction_id`/`pathway_id` are the "pathway/reaction linkage" this section adds without
+-- duplicating either table: set ONLY when a term already resolves to a row this atlas
+-- independently curates (an EC/KO already given its own `reaction`, or a KEGG pathway map already
+-- given its own `pathway`, both in ISOBUTANOL_PROGRAM.md's hand-modelled route) -- NULL for the
+-- overwhelming majority of rows, which point at the external source only.
+-- ---------------------------------------------------------------------------------------------
+
+CREATE TABLE gene_annotation (
+    id             TEXT PRIMARY KEY,          -- YAA:ANNOT:<uuid>
+    gene_group_id  TEXT NOT NULL REFERENCES gene_group(id),
+    source         TEXT NOT NULL CHECK (source IN ('sgd_go', 'uniprot_goa', 'kegg', 'pfam',
+                                                   'interpro', 'uniprot', 'tcdb', 'complex_portal',
+                                                   'yeastract', 'sgd_phenotype')),
+    term_id        TEXT NOT NULL,             -- GO:0006094 | K00826 | PF00106 | IPR002198 | ...
+    term_label     TEXT,
+    term_namespace TEXT,                      -- GO aspect, or 'pathway'/'ko'/'ec'/'domain'/...
+    -- GO evidence codes ONLY (IDA, IEA, ...); NULL for every non-GO source, because the concept
+    -- does not exist there -- a structurally absent field on that row's source, not an
+    -- unresolved fact (docs/reference/CONVENTIONS.md "Missing values" governs a fact a source
+    -- could have recorded but didn't, not a column a row's own source-type never had).
+    evidence_code  TEXT,
+    reaction_id    TEXT REFERENCES reaction(id),
+    pathway_id     TEXT REFERENCES pathway(id),
+    source_url     TEXT,                      -- resolved from annotation_sources.yaml's url_pattern
+    source_version TEXT,                      -- release/version string the source reported, if any
+    retrieved_at   TEXT,
+    zone           TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence       TEXT NOT NULL,
+    confidence     TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    CHECK (evidence_code IS NULL OR source IN ('sgd_go', 'uniprot_goa'))
+);
+
+CREATE INDEX gene_annotation_by_gene_group ON gene_annotation(gene_group_id, source);
+CREATE INDEX gene_annotation_by_term ON gene_annotation(source, term_id);
+
+-- The idempotency key src/fermdb/annotate/importers.py re-imports against
+-- (find_gene_annotation/write_gene_annotation): COALESCE folds NULL evidence_code to '' because
+-- SQLite's plain UNIQUE treats every NULL as distinct from every other NULL, which would let two
+-- non-GO rows for the same (gene_group, source, term) both insert instead of the second updating
+-- the first.
+CREATE UNIQUE INDEX gene_annotation_dedup
+    ON gene_annotation(gene_group_id, source, term_id, COALESCE(evidence_code, ''));
