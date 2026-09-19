@@ -115,3 +115,65 @@ command now.
 3. **Eight *F. graminearum* runs** are flagged `relevance_uncertain` as a likely keyword false
    positive. Confirm they are out and I will drop them rather than fetch a Fusarium genome.
 4. **M4** (GC panel) remains open; the by-product design is optional so it does not block.
+
+---
+
+# Session 2 — quantification, literature, extraction
+
+## Delivered since the report above
+
+**Literature corpus discovered: 5,164 unique publications** (6,381 screening records,
+deduplicated), 9 search runs, every family landing exactly on its baseline.
+
+| family | records | |
+|---|---|---|
+| ethanol_scerevisiae_prod_ferm_tol | 1,423 | needs_full_text |
+| isobutanol_all | 1,309 | included |
+| mtdna_methods_yeast | 1,298 | included |
+| **mtdna_engineering_yeast** | **912** | included |
+| isobutanol_production | 649 | included |
+| ethanol_mitochondria_yeast | 504 | needs_full_text |
+| isobutanol_yeast | 257 | included |
+| **isobutanol_mitochondria** | **29** | included |
+
+The asymmetric policy is visibly working: 4,454 isobutanol/mtDNA records default to `included`,
+while all 1,927 ethanol records sit in `needs_full_text` awaiting admission under E1–E6. None
+silently admitted.
+
+**The extraction chain works end to end on a real paper.** Against `avalos2013.pdf` the local
+27B model returned *"Compartmentalization of the Ehrlich pathway into mitochondria increased
+isobutanol production by 260%"*, the span resolved against the source, and a fabricated control
+quote was rejected. That independently confirms the 260% figure this project had carried as ⚠.
+
+**Matrix assembler validated** on live output: 6,187 genes × 10 samples, median 5,985 genes
+detected, median 78.3% mapping, 10/10 above the QC floor.
+
+## Three more silent-failure bugs
+
+| bug | would have looked like |
+|---|---|
+| `--gencode` on the salmon index split NCBI headers on `\|`, naming all 6,187 transcripts `lcl` | a valid matrix with every gene collapsed into one row |
+| `esummary` joined a whole family's ids into one GET URL (~12 kB) | HTTP 414 — the honest one. The dry run missed it because dry run issues only `esearch`, which returns no id list |
+| the local 27B model returns an **empty string**, not an error, whenever `format` is used | *"this paper contains no facts"* — across a whole corpus |
+
+Running total: **eight bugs tonight, none of which announced itself**. Each was caught by
+checking a result against an independent expectation — a sequence length, a `git check-ignore`,
+a mapping rate, a hit count, a response length. None by the test suite as it stood; tests were
+added after each.
+
+## Fixes that outlive tonight
+
+* `canonical_source_text()` — spans are recorded against whitespace-canonical text, so a verbatim
+  PDF quote verifies **without** weakening `verify_span`'s exact comparison.
+* Measured local-model compatibility table in `MODEL_ROUTING.md` §7b, with `providers.py` holding
+  only a pointer (an existing test forbids model names outside the defaults table — and it caught
+  me writing them into a comment).
+* `esummary`/`efetch` chunk at 200 ids.
+* Query baselines re-measured against the queries that actually ship, so drift detection compares
+  like with like for the first time.
+
+## Cost
+
+**~$0.85 total.** 172 objects staged for ~$0 (server-side), one c7i.4xlarge at $0.714/h.
+Instances verified at every step; the first instance proved the safety design by terminating
+itself rather than idling.
