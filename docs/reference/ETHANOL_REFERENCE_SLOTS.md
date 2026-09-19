@@ -56,6 +56,42 @@ For each slot, three candidates, each with:
 The last two matter most. A shortlist that only argues *for* each candidate is not a shortlist,
 it is three advocacy notes — the owner is choosing between them and needs the weaknesses.
 
+## Cap accounting — sub-budget, accepted 2026-09-20
+
+The cap needed a sub-budget or E5 would have eaten it. E5's outer bound is **642 publications**
+against a ~150 total, so without a per-criterion allocation the broadest criterion consumes the
+layer and E1–E4 arrive empty. The owner accepted a sub-budget; this is the allocation, revised
+from the pre-E6 proposal to give the new criterion a share:
+
+| criterion | slot(s) | budget | why this size |
+|---|---|---|---|
+| **E5** redox shuttle | 6 | **45** | Load-bearing for DUET's architecture and currently unrepresented; largest share, but a seventh of its 642 outer bound |
+| **E6** industrial performance | 7 | **25** | The owner's own question, and partly *computable* from the genome set rather than only read |
+| **E1** competing sink | 2 | **25** | The counterfactual. Needed, but DUET keeps Pdc, so it is no longer the primary framing |
+| **E2** performance ceiling | 5 | **20** | Small, authoritative set; more would be padding |
+| **E3** wild-type baselines | 1 | **20** | |
+| **E4** transferable mechanism | 3, 4 | **15** | Split across shock and adapted; the tightest, because ethanol-to-C4 transfer is capped at L3 anyway |
+| | | **150** | |
+
+The budget is a ceiling per criterion, not a quota to fill. An unspent share is not reallocated
+automatically — it is reported, because "we found fewer admissible papers than expected" is a
+finding about the literature, not slack to consume.
+
+## Ethanol Red — accepted as the proxy, 2026-09-20
+
+The owner accepted Ethanol Red (`GCA_029255905.1`) as the industrial proxy genome, with its
+scaffold-level limitation understood. Standing consequences, to be repeated wherever a result
+leans on it:
+
+* Gene content and SNP-level comparison: usable.
+* **Structural variants and subtelomeric regions: not reliably callable at N50 189 kb** — and
+  those are exactly where industrial-strain adaptations are often reported (unverified). So slot 7
+  will be systematically blind to one of the likelier classes of answer, and must say so rather
+  than reporting absence as evidence of absence.
+* Every proxy-derived conclusion is a hypothesis about the real chassis, capped at L3.
+* Sequencing the owner's own strain removes the limitation entirely, and the `gene_group` layer
+  means it drops in without rework. That remains the highest value-per-rupee action available.
+
 ## Cap accounting
 
 Slots are the admission mechanism, not an addition to the cap: the ethanol layer stays at ~150

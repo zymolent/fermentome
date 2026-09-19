@@ -266,17 +266,31 @@ def test_the_real_shipped_query_families_file_loads_and_matches_the_recorded_mea
     """
     families = load_query_families(REAL_QUERY_FAMILIES_YAML)
     assert families.version == 1
+
+    # Re-baselined 2026-09-20 against the SHIPPED query strings, run live. The previous values
+    # were measured with different, hand-written queries, so comparing a live count against them
+    # could never converge -- the baseline and the query under test were not the same thing, which
+    # made drift detection meaningless. These are now the counts the shipped terms actually
+    # return, so `fermdb literature status` compares like with like.
+    #
+    # The one that mattered: mtdna_engineering_yeast returned 93 against a 823 baseline, an 89%
+    # recall loss on a corpus the owner explicitly asked to cover, caused by a [tiab] restriction
+    # plus a three-way AND. The term was widened and now returns 912.
     expected = {
-        "isobutanol_all": 1027,
-        "isobutanol_production": 768,
-        "isobutanol_yeast": 251,
-        "isobutanol_mitochondria": 33,
-        "mtdna_engineering_yeast": 823,
-        "mtdna_methods_yeast": 919,
-        "ethanol_mitochondria_yeast": 642,
-        "ethanol_scerevisiae_prod_ferm_tol": 6072,
+        "isobutanol_all": 1309,
+        "isobutanol_production": 649,
+        "isobutanol_yeast": 257,
+        "isobutanol_mitochondria": 29,
+        "mtdna_engineering_yeast": 912,
+        "mtdna_methods_yeast": 1298,
+        "ethanol_mitochondria_yeast": 504,
+        "ethanol_scerevisiae_prod_ferm_tol": 1586,
     }
     assert {f.name: f.expected_count for f in families.families} == expected
+
+    # Guards against the failure this file just had: a bounded-edit bug silently dropped three
+    # families and the count assertion above would still have passed on the survivors.
+    assert len(families.families) == 8
 
     # The three required mtDNA scopes (harness "comments (1)") are each covered by >= 1 family.
     assert len(families.by_mtdna_scope("engineering_general")) >= 1

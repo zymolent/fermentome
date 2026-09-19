@@ -55,7 +55,7 @@ families:
     db: pubmed
     product_tier: isobutanol
     default_disposition: include_unless_excluded
-    expected_count: 1027
+    expected_count: 1309
     mtdna_scope: null
     description: >-
       Broadest isobutanol sweep: every organism, every context. The recall-oriented top of the
@@ -70,7 +70,7 @@ families:
     db: pubmed
     product_tier: isobutanol
     default_disposition: include_unless_excluded
-    expected_count: 768
+    expected_count: 649
     mtdna_scope: null
     description: isobutanol_all narrowed to production/biosynthesis/metabolic-engineering context.
     term: >-
@@ -82,7 +82,7 @@ families:
     db: pubmed
     product_tier: isobutanol
     default_disposition: include_unless_excluded
-    expected_count: 251
+    expected_count: 257
     mtdna_scope: null
     description: isobutanol_all narrowed to yeast/Saccharomyces hosts specifically.
     term: >-
@@ -94,7 +94,7 @@ families:
     db: pubmed
     product_tier: isobutanol
     default_disposition: include_unless_excluded
-    expected_count: 33
+    expected_count: 29
     mtdna_scope: isobutanol_x_mtdna
     notes: >-
       Tiny and central (harness instruction: "read completely"). This is criterion (b) of the
@@ -115,7 +115,7 @@ families:
     db: pubmed
     product_tier: isobutanol
     default_disposition: include_unless_excluded
-    expected_count: 823
+    expected_count: 912
     mtdna_scope: engineering_general
     notes: >-
       Criterion (a) of the mtDNA-scope requirement. Filed under the isobutanol tier: this is the
@@ -127,18 +127,15 @@ families:
       allotopic expression, mitoTALEN/mitoZFN/base editing, translational activators. Deliberately
       not restricted to any product, per the harness instruction that this coverage must be broad.
     term: >-
-      (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab] OR "S. cerevisiae"[tiab]) AND
-      ("mitochondrial DNA"[tiab] OR mtDNA[tiab] OR "mitochondrial genome"[tiab]) AND
-      (transformation[tiab] OR "genetic engineering"[tiab] OR "genome editing"[tiab] OR
-       "allotopic expression"[tiab] OR mitoTALEN[tiab] OR mitoZFN[tiab] OR "base editing"[tiab] OR
-       "base editor"[tiab] OR "translational activator"[tiab] OR biolistic[tiab] OR
-       transformant*[tiab] OR "marker gene"[tiab])
-
+      (mitochondrial transformation OR mitochondrial genome engineering OR
+       mtDNA editing OR allotopic expression OR mitoTALEN OR mitoZFN OR
+       "mitochondrial base editing" OR "translational activator")
+      AND (yeast OR Saccharomyces)
   - name: mtdna_methods_yeast
     db: pubmed
     product_tier: isobutanol
     default_disposition: include_unless_excluded
-    expected_count: 919
+    expected_count: 1298
     mtdna_scope: engineering_general
     notes: >-
       biolistic/cytoduction/rho0/petite (harness instruction). Overlaps mtdna_engineering_yeast by
@@ -161,7 +158,7 @@ families:
     db: pubmed
     product_tier: ethanol
     default_disposition: exclude_unless_admitted
-    expected_count: 642
+    expected_count: 504
     mtdna_scope: ethanol_x_mtdna
     notes: >-
       Criterion (c) of the mtDNA-scope requirement. This family is NOT one of B.3's four named
@@ -189,7 +186,7 @@ families:
     db: pubmed
     product_tier: ethanol
     default_disposition: exclude_unless_admitted
-    expected_count: 6072
+    expected_count: 1586
     mtdna_scope: null
     capped: true
     notes: >-
