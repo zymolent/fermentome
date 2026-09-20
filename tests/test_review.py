@@ -256,12 +256,12 @@ def test_a_proposal_a_curator_already_rejected_is_flagged(atlas: sqlite3.Connect
 
 
 def test_a_kind_nothing_can_promote_is_flagged_once_accepted(atlas: sqlite3.Connection) -> None:
-    """Accepting a bottleneck today leaves it in the queue. Better to know while deciding."""
+    """Accepting a condition today leaves it in the queue. Better to know while deciding."""
     _add_task(
         atlas,
         "YAA:CTASK:bn",
-        "bottlenecks",
-        "bottlenecks[0]",
+        "conditions",
+        "conditions[0]",
         {
             "zone": "I",
             "confidence": "unverified",

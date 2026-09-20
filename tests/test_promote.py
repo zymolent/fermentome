@@ -220,14 +220,12 @@ def test_an_agent_may_not_promote(atlas: sqlite3.Connection) -> None:
 
 
 def test_a_kind_with_no_promoter_says_so(atlas: sqlite3.Connection) -> None:
-    """23 of the 55 real proposals are kinds this module does not handle yet.
+    """Some real proposals are kinds this module does not handle yet.
 
     Reporting them as "no promoter" rather than skipping them silently is what keeps a batch run
     from looking complete while doing less than half the work.
     """
-    atlas.execute(
-        "UPDATE curation_task SET record_kind = 'bottlenecks' WHERE id = 'YAA:CTASK:meas'"
-    )
+    atlas.execute("UPDATE curation_task SET record_kind = 'conditions' WHERE id = 'YAA:CTASK:meas'")
     plan = _plan(atlas, "YAA:CTASK:meas")
     assert plan.target_table is None
     assert "no promoter" in plan.note
@@ -319,9 +317,7 @@ def test_the_batch_promotes_strains_before_measurements(atlas: sqlite3.Connectio
 def test_nothing_is_skipped_silently(atlas: sqlite3.Connection) -> None:
     """Every task that did not promote comes back with a reason, so a partial run cannot pass
     for a complete one."""
-    atlas.execute(
-        "UPDATE curation_task SET record_kind = 'bottlenecks' WHERE id = 'YAA:CTASK:meas'"
-    )
+    atlas.execute("UPDATE curation_task SET record_kind = 'conditions' WHERE id = 'YAA:CTASK:meas'")
     done, blocked = P.promote_ready(
         atlas, curator=HUMAN, reason="batch", supplied={"organism_id": "YAA:ORG:scer"}
     )

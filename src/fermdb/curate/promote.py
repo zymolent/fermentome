@@ -506,18 +506,213 @@ def _write_measurement(
     return conn.total_changes > 0
 
 
+#: `data/vocabularies/modification_types.tsv` defines 16 types; `modification.type`'s CHECK
+#: accepts 9, and they are not the same 9. The curated file is the richer of the two and, per
+#: CONVENTIONS.md, is the source of truth for a vocabulary -- so the table is the one that is
+#: wrong, and widening it is a migration plus a curation decision that belongs to the owner.
+#:
+#: Only unambiguous pairs are mapped here. The rest are refused by name rather than collapsed
+#: into 'other': a `type` column where 'other' covers nine different kinds of change is a
+#: controlled vocabulary that has stopped controlling anything, and what was lost would survive
+#: only in a free-text `details` nobody can query.
+_MODIFICATION_TYPES: Final[Mapping[str, str]] = {
+    "knockout": "deletion",
+    "knockdown": "downregulation",
+    "overexpression": "overexpression",
+    "promoter_replacement": "promoter_swap",
+    "heterologous_expression": "heterologous_insertion",
+    "localization_change": "localization_change",
+    "other": "other",
+}
+
+#: `bottleneck.observation_type` is NOT NULL and closed. The extraction records a free-text
+#: `support` instead, so the two are bridged for the values the vocabulary actually defines.
+_OBSERVATION_TYPES: Final[frozenset[str]] = frozenset(
+    {
+        "metabolite_accumulation",
+        "flux_measurement",
+        "overexpression_relieved",
+        "deletion_worsened",
+        "in_vitro_kinetics",
+        "inferred",
+    }
+)
+
+
+def _modification_details(payload: Mapping[str, Any], reported_type: str) -> str:
+    """The paper's own words for what changed, including its term for the change itself.
+
+    The reported type travels even when it mapped cleanly: 'deletion' and 'knockout' are the same
+    fact in two vocabularies, and only one of them is the paper's.
+    """
+    bits = [f"as reported: {reported_type}"] if reported_type else []
+    for key in ("detail_as_reported", "compartment", "encoding_genome"):
+        value = payload.get(key)
+        if value:
+            bits.append(f"{key}: {value}")
+    return "; ".join(bits)
+
+
+def _plan_modification(
+    conn: sqlite3.Connection, task: Task, supplied: Mapping[str, Any]
+) -> PromotionPlan:
+    payload = _payload_of(task)
+    missing: list[Requirement] = []
+    blockers: list[str] = []
+
+    reported_type = str(payload.get("modification_type") or "").strip()
+    mapped = _MODIFICATION_TYPES.get(reported_type) or supplied.get("type")
+    if not reported_type:
+        missing.append(Requirement("type", "the record does not say what kind of change it is"))
+    elif mapped is None:
+        missing.append(
+            Requirement(
+                "type",
+                f"the extraction vocabulary has {reported_type!r} and the table's CHECK does "
+                "not; mapping it to 'other' would hide it, so this needs either a widened CHECK "
+                "or an explicit type from a curator",
+            )
+        )
+
+    target = str(payload.get("target_as_reported") or "").strip()
+    if not target:
+        missing.append(Requirement("target_locus", "the record names nothing that was changed"))
+
+    strain_name = str(payload.get("strain_name_as_reported") or "").strip()
+    strain_id: str | None = supplied.get("strain_id")
+    if strain_id is None and strain_name:
+        row = conn.execute(
+            "SELECT id FROM strain WHERE id = ?", (_strain_id(strain_name),)
+        ).fetchone()
+        if row is not None:
+            strain_id = str(row["id"])
+        else:
+            blockers.append(
+                f"strain {strain_name!r} is not promoted yet (would be {_strain_id(strain_name)})"
+            )
+
+    row_id = f"YAA:MOD:{task.proposal_hash[:16]}"
+    existing = conn.execute("SELECT id FROM modification WHERE id = ?", (row_id,)).fetchone()
+    return PromotionPlan(
+        task_id=task.id,
+        record_kind=task.record_kind,
+        target_table="modification",
+        row={
+            "id": row_id,
+            "strain_id": strain_id,
+            "type": mapped,
+            "target_locus": target,
+            "details": _modification_details(payload, reported_type),
+            "publication_id": task.publication_id,
+        },
+        missing=tuple(missing),
+        blockers=tuple(blockers),
+        already=str(existing["id"]) if existing is not None else None,
+    )
+
+
+def _plan_bottleneck(
+    conn: sqlite3.Connection, task: Task, supplied: Mapping[str, Any]
+) -> PromotionPlan:
+    payload = _payload_of(task)
+    missing: list[Requirement] = []
+
+    node = str(payload.get("node_as_reported") or "").strip()
+    if not node:
+        missing.append(
+            Requirement(
+                "node",
+                "`bottleneck` needs a reaction, a transport step or a node, and the record "
+                "names none",
+            )
+        )
+
+    support = str(payload.get("support") or "").strip()
+    observation = support if support in _OBSERVATION_TYPES else supplied.get("observation_type")
+    if observation is None:
+        missing.append(
+            Requirement(
+                "observation_type",
+                f"NOT NULL and closed; the record's support is {support or 'absent'!r}, which is "
+                "not one of the six. A curator picks, because 'inferred' and 'flux_measurement' "
+                "are very different evidence and the choice sets the level downstream",
+            )
+        )
+
+    row_id = f"YAA:BNK:{task.proposal_hash[:16]}"
+    existing = conn.execute("SELECT id FROM bottleneck WHERE id = ?", (row_id,)).fetchone()
+    return PromotionPlan(
+        task_id=task.id,
+        record_kind=task.record_kind,
+        target_table="bottleneck",
+        row={
+            "id": row_id,
+            "node": node,
+            "observation_type": observation,
+            "claim": str(payload.get("claim") or ""),
+            "intervention": str(payload.get("intervention_as_reported") or ""),
+        },
+        missing=tuple(missing),
+        already=str(existing["id"]) if existing is not None else None,
+    )
+
+
+def _write_modification(
+    conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
+) -> bool:
+    before = conn.total_changes
+    conn.execute(
+        "INSERT INTO modification (id, strain_id, type, target_locus, details, publication_id, "
+        "zone, evidence, confidence) VALUES (?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        (
+            plan.row["id"],
+            plan.row["strain_id"],
+            plan.row["type"],
+            plan.row["target_locus"],
+            plan.row["details"],
+            plan.row["publication_id"],
+            evidence,
+            confidence,
+        ),
+    )
+    return conn.total_changes > before
+
+
+def _write_bottleneck(
+    conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
+) -> bool:
+    before = conn.total_changes
+    detail = f"{evidence}; claim: {plan.row['claim']}"
+    if plan.row["intervention"]:
+        detail += f"; intervention: {plan.row['intervention']}"
+    conn.execute(
+        "INSERT INTO bottleneck (id, node, observation_type, zone, evidence, confidence) "
+        "VALUES (?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        (plan.row["id"], plan.row["node"], plan.row["observation_type"], detail, confidence),
+    )
+    return conn.total_changes > before
+
+
 Planner = Callable[[sqlite3.Connection, Task, Mapping[str, Any]], PromotionPlan]
 Writer = Callable[..., bool]
 
 #: Record kinds that can become rows today, with the functions that do it.
 #:
-#: The four that are absent -- conditions, modifications, bottlenecks, pathway_configurations --
-#: are listed nowhere on purpose: :func:`plan_promotion` reports "no promoter for this kind yet"
-#: rather than succeeding quietly, so a batch run cannot look complete while skipping 23 of 55
-#: proposals.
+#: The two still absent are listed nowhere on purpose. :func:`plan_promotion` reports "no promoter
+#: for this kind yet" rather than succeeding quietly, so a batch run cannot look complete while
+#: skipping proposals.
+#:
+#: `conditions` is absent for a reason worth stating: the extraction emits **one record per
+#: facet** ("carbon_sources: 2% glucose or galactose"), while `condition_context` is one immutable
+#: row per *whole context*, deduplicated by a hash over its facets. Turning N facet records into
+#: one context means deciding which facets belong together, and nothing in a payload says --
+#: grouping by strain is a guess, and a wrong grouping produces a context that never existed and
+#: that measurements would then be compared across. That is a curation decision, not a mapping.
 PROMOTERS: Final[Mapping[str, tuple[Planner, Writer]]] = {
     "strains": (_plan_strain, _write_strain),
     "measurements": (_plan_measurement, _write_measurement),
+    "modifications": (_plan_modification, _write_modification),
+    "bottlenecks": (_plan_bottleneck, _write_bottleneck),
 }
 
 PROMOTABLE_KINDS: Final[tuple[str, ...]] = tuple(PROMOTERS)
