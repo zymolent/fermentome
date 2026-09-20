@@ -231,6 +231,22 @@ def _history(conn: sqlite3.Connection, task: Task) -> tuple[int, int]:
     return int(row["n"] or 1), int(row["rejected"] or 0)
 
 
+def _proposed_strain_names(conn: sqlite3.Connection, publication_id: str) -> frozenset[str]:
+    """Every strain name this publication has proposed, in any task state."""
+    rows = conn.execute(
+        "SELECT payload FROM curation_task WHERE publication_id = ? AND record_kind = 'strains'",
+        (publication_id,),
+    ).fetchall()
+    names: set[str] = set()
+    for row in rows:
+        loaded: Any = json.loads(str(row["payload"]))
+        if isinstance(loaded, dict):
+            reported = loaded.get("name_as_reported")
+            if isinstance(reported, str):
+                names.add(reported.strip())
+    return frozenset(names)
+
+
 def _strain_warning(
     conn: sqlite3.Connection, task: Task, record: Mapping[str, Any]
 ) -> Warning_ | None:
@@ -244,17 +260,7 @@ def _strain_warning(
     name = str(record.get("strain_name_as_reported") or "").strip()
     if not name:
         return None
-    rows = conn.execute(
-        "SELECT payload FROM curation_task WHERE publication_id = ? AND record_kind = 'strains'",
-        (task.publication_id,),
-    ).fetchall()
-    proposed = set()
-    for row in rows:
-        loaded: Any = json.loads(str(row["payload"]))
-        if isinstance(loaded, dict):
-            reported = loaded.get("name_as_reported")
-            if isinstance(reported, str):
-                proposed.add(reported.strip())
+    proposed = _proposed_strain_names(conn, task.publication_id)
     if name in proposed:
         return None
     return Warning_(
@@ -263,6 +269,50 @@ def _strain_warning(
         f"({len(proposed)} strain(s) were proposed) -- this measurement has no subject to "
         "attach to, and reviewing cannot create one",
     )
+
+
+def _better_anchored(
+    conn: sqlite3.Connection, task: Task, record: Mapping[str, Any]
+) -> Warning_ | None:
+    """Another pending proposal reporting the same number against a strain that *was* proposed.
+
+    This is the companion to `strain_never_proposed`, and it exists because that warning on its
+    own leaves a curator stuck: the measurement cannot acquire a subject, but rejecting it might
+    lose the number. If the same value is already proposed elsewhere with a real strain name, the
+    number is not at risk and rejecting is the clean move.
+
+    Matched on (product, quantity kind, value, unit) within one publication -- the same number
+    reported twice about the same product in the same paper is the same result, whatever sentence
+    it was read from. It is reported as an alternative to look at, never as an instruction: which
+    of two records is better evidenced is the curator's call, not this function's.
+    """
+    value, unit = record.get("value"), record.get("unit")
+    if value is None or unit is None:
+        return None
+    rows = conn.execute(
+        "SELECT id, payload FROM curation_task WHERE publication_id = ? AND record_kind = ? "
+        "AND status = 'pending' AND id <> ?",
+        (task.publication_id, task.record_kind, task.id),
+    ).fetchall()
+    proposed = _proposed_strain_names(conn, task.publication_id)
+    for row in rows:
+        loaded: Any = json.loads(str(row["payload"]))
+        if not isinstance(loaded, dict):
+            continue
+        if (loaded.get("value"), loaded.get("unit")) != (value, unit):
+            continue
+        if loaded.get("product_id") != record.get("product_id"):
+            continue
+        if loaded.get("quantity_kind") != record.get("quantity_kind"):
+            continue
+        other = str(loaded.get("strain_name_as_reported") or "").strip()
+        if other and other in proposed:
+            return Warning_(
+                "alternative_with_known_strain",
+                f"{row['id']} reports the same {value} {unit} against {other!r}, a strain this "
+                "publication did propose -- so the number is not lost if this record is rejected",
+            )
+    return None
 
 
 def _warnings(
@@ -288,6 +338,9 @@ def _warnings(
         strain = _strain_warning(conn, task, record)
         if strain is not None:
             found.append(strain)
+            alternative = _better_anchored(conn, task, record)
+            if alternative is not None:
+                found.append(alternative)
     if plan.target_table is None and task.status in {"accepted", "edited"}:
         found.append(
             Warning_(

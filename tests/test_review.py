@@ -362,3 +362,74 @@ def test_the_queue_view_takes_no_lease(atlas: sqlite3.Connection) -> None:
 def test_the_queue_can_be_filtered_by_kind(atlas: sqlite3.Connection) -> None:
     packets = R.review_queue(atlas, limit=10, kinds=("measurements",))
     assert {p.record_kind for p in packets} == {"measurements"}
+
+
+def test_an_orphan_measurement_points_at_the_better_anchored_alternative(
+    atlas: sqlite3.Connection,
+) -> None:
+    """`strain_never_proposed` on its own leaves a curator stuck.
+
+    The measurement cannot acquire a subject, but rejecting it might lose the number. If the same
+    value is already proposed against a strain that exists, the number is safe and rejecting is
+    the clean move -- which is a fact the atlas holds and nobody was asking it for.
+    """
+    atlas.execute(
+        "INSERT INTO extraction (id, publication_id, extractor, extractor_version, model, "
+        "prompt_version, input_hash, review_state, zone) VALUES ('YAA:EXTR:fix', 'YAA:PUB:test', "
+        "'test', '1', 'test-model', 'v2', 'h3', 'proposed', 'I')"
+    )
+    # The synthesised label nothing will ever match...
+    _add_task(
+        atlas,
+        "YAA:CTASK:synth",
+        "measurements",
+        "measurements[7]",
+        _measurement(strain="BSW191 + gpd1/2", value=7.77),
+    )
+    # ...and the same number, properly attributed, from a second extraction. A distinct value, so
+    # the alternative found is unambiguously this one and not the fixture's own BSW191 record.
+    _add_task(
+        atlas,
+        "YAA:CTASK:anchored",
+        "measurements",
+        "measurements[7]",
+        _measurement(strain="BSW191", value=7.77),
+        extraction_id="YAA:EXTR:fix",
+    )
+    packet = R.review_packet(atlas, "YAA:CTASK:synth")
+    codes = {w.code for w in packet.warnings}
+    assert "strain_never_proposed" in codes
+    alt = next(w for w in packet.warnings if w.code == "alternative_with_known_strain")
+    assert "YAA:CTASK:anchored" in alt.message
+    assert "not lost if this record is rejected" in alt.message
+
+    # The well-formed one draws neither warning.
+    assert R.review_packet(atlas, "YAA:CTASK:anchored").warnings == ()
+
+
+def test_a_different_number_is_not_offered_as_an_alternative(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The match is on the value, so an unrelated measurement is not proposed as a replacement."""
+    atlas.execute(
+        "INSERT INTO extraction (id, publication_id, extractor, extractor_version, model, "
+        "prompt_version, input_hash, review_state, zone) VALUES ('YAA:EXTR:other', "
+        "'YAA:PUB:test', 'test', '1', 'test-model', 'v2', 'h4', 'proposed', 'I')"
+    )
+    _add_task(
+        atlas,
+        "YAA:CTASK:synth2",
+        "measurements",
+        "measurements[8]",
+        _measurement(strain="BSW191 + gpd1/2", value=8.88),
+    )
+    _add_task(
+        atlas,
+        "YAA:CTASK:different",
+        "measurements",
+        "measurements[8]",
+        _measurement(strain="BSW191", value=9.99),
+        extraction_id="YAA:EXTR:other",
+    )
+    codes = {w.code for w in R.review_packet(atlas, "YAA:CTASK:synth2").warnings}
+    assert "alternative_with_known_strain" not in codes
