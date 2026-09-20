@@ -53,6 +53,24 @@ metabolites:
   - {id: nadh,                  name: "NADH",                          carbons: 0, carrier: true, redox: reduced, pair: nad}
   - {id: nad_plus,              name: "NAD+",                          carbons: 0, carrier: true, redox: oxidized, pair: nad}
 
+# 2026-09-21, A FOURTH COMPETING DRAIN, NOT YET MODELLED HERE.
+#
+# 10.1038/s41467-021-27852-x deletes TMA29, describing it as "an enzyme with acetolactate
+# reductase activity that competes with KARI, producing the by-product 2,3-dihydroxy-2-methyl
+# butanoate (DH2MB)".
+#
+# That is a drain on **(S)-2-acetolactate**, one step earlier than the three drains modelled
+# below, which all act on 2-ketoisovalerate. It is the same class of omission that the
+# 2026-09-20 amendment fixed for ECM31: the competing set was incomplete rather than
+# abbreviated.
+#
+# NOT ADDED AS A REACTION YET, deliberately. DH2MB is not in the metabolite list, the
+# stoichiometry and cofactor of the reductase are not recorded here, and every reaction in this
+# file must balance on carbon, redox and adenylates before `fermdb atlas pathways` will load it.
+# Writing an unbalanced guess would be worse than recording the gap. This comment is the record
+# until someone curates the reaction properly -- CONVENTIONS.md: "Comments explaining why a row
+# is absent are part of the data and are preserved."
+
 reactions:
   # ---- the route proper -----------------------------------------------------------------------
   - id: ahas

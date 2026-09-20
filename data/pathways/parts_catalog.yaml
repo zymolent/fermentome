@@ -106,6 +106,53 @@ parts:
       removes the requirement for matrix NADPH altogether, and with it the Pos5 dependency that
       the expression baseline shows is the thinnest link in strategy C. Route enumeration must be
       able to see that as an option rather than only as a footnote.
+
+      2026-09-21: SUPERSEDED IN PRACTICE by the two named variants below, which are cited rather
+      than recalled. Kept because it is what the enumerator has been ranking, and removing it
+      would silently change every route id that contains it.
+    confidence: unverified
+
+  # Two NAMED engineered NADH-dependent KARIs, found by reading the stored corpus rather than
+  # from background knowledge. Both are E. coli ilvC variants, and both are used in yeast
+  # isobutanol strains in papers this atlas holds -- which is a different evidential position
+  # from the generic entry above.
+  - id: ilvc6e6_ecoli
+    step_role: KARI
+    source_organism: "Escherichia coli"
+    genes: [ilvC]
+    variant_of: ilvc_ecoli
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    engineered_switch: true
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      Named in 10.1016/j.synbio.2022.02.007 as "the E. coli KARI variant, ilvC6E6, that was
+      previously engineered with improved specificity towards NADH". That paper is the most
+      useful experimental design in this corpus for DUET: it builds the 2x2 of localization x
+      cofactor -- mIBAILV5, mIBAIlvC6E6, cIBAILV5, cIBAIlvC6E6 -- so "does the matrix help" and
+      "does an NADH KARI help" are separated rather than confounded. The same variant appears as
+      plasmid pRS62N-IlvC6E6 in 10.1186/s13068-019-1486-8 (Wess et al.), so it is in use across
+      the corpus. Cofactor preference is the paper's claim, not an independent measurement.
+    confidence: unverified
+
+  - id: ilvc_p2d1a1_ecoli
+    step_role: KARI
+    source_organism: "Escherichia coli"
+    genes: [ilvC]
+    variant_of: ilvc_ecoli
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    engineered_switch: true
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      "Ec_ilvC(P2D1-A1), encoding an engineered NADH-dependent KARI from E. coli", integrated as
+      a single copy in a cytosolic isobutanol strain in 10.1038/s41467-021-27852-x. The same
+      construction deletes TMA29 (see the note on the acetolactate drain in
+      isobutanol_valine_ehrlich.yaml) and overexpresses AFT1 for iron utilisation, because the
+      Lactococcus DHAD alongside it needs Fe-S clusters. Cofactor preference is the paper's
+      claim, not an independent measurement.
     confidence: unverified
 
   # ---- DHAD: 2,3-dihydroxyisovalerate -> 2-ketoisovalerate ------------------------------------
