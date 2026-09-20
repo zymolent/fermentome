@@ -473,6 +473,33 @@ def _measurement_fields(vocabulary: PayloadVocabulary) -> tuple[FieldSpec, ...]:
                 ),
             },
         ),
+        # The `measurement` table has carried is_upper_bound and is_below_lod since the schema was
+        # written, but the extraction payload had no way to set either -- so a paper saying
+        # "not exceeding 6.4 mg/L" or "below the limit of quantification" could only be recorded
+        # as a plain value, asserting an equality the paper does not claim. Found on the third
+        # real extraction (10.1016/j.btre.2026.e00959).
+        FieldSpec(
+            "is_upper_bound",
+            {
+                "type": "boolean",
+                "description": (
+                    "True when the paper states a ceiling rather than a value -- 'not exceeding "
+                    "6.4 mg/L', '<0.1 g/L'. The number is then the bound, not the measurement, "
+                    "and a comparison that treats it as a measurement overstates the strain."
+                ),
+            },
+        ),
+        FieldSpec(
+            "is_below_lod",
+            {
+                "type": "boolean",
+                "description": (
+                    "True when the paper reports the value as below its detection or "
+                    "quantification limit. Distinct from zero and from absent: the assay ran and "
+                    "could not see it, which is evidence, where a missing number is not."
+                ),
+            },
+        ),
     )
 
 
@@ -845,6 +872,10 @@ class MeasurementRecord:
     time_h: float | None
     source_locator: str
     is_digitized: bool
+    #: A ceiling, not a value. A comparison treating it as a measurement overstates the strain.
+    is_upper_bound: bool
+    #: The assay ran and could not see it -- distinct from zero and from absent.
+    is_below_lod: bool
     span: ExtractedSpan
 
     @classmethod
@@ -862,6 +893,8 @@ class MeasurementRecord:
             time_h=_optional_float(data, "time_h"),
             source_locator=_require_str(data, "source_locator"),
             is_digitized=data.get("is_digitized") is True,
+            is_upper_bound=data.get("is_upper_bound") is True,
+            is_below_lod=data.get("is_below_lod") is True,
             span=_span_of(data),
         )
 
