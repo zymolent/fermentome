@@ -630,10 +630,15 @@ def test_nothing_partial_is_stored_when_one_record_fails(
     conn: sqlite3.Connection, settings: Settings, config: LlmConfig
 ) -> None:
     """Six good records and one bad one store nothing. Half-validated output must not look
-    like validated output once it is in the same table."""
+    like validated output once it is in the same table.
+
+    The bad record fabricates its quote. A merely *misplaced* quote no longer fails -- offsets are
+    recomputed from the text now, because models cannot count characters -- so the failure this
+    test needs is the one that still matters: text that is not in the paper at all.
+    """
     excerpt = excerpt_of()
     payload = truthful_payload(excerpt)
-    payload["bottlenecks"][0]["span"]["char_start"] += 3  # offsets no longer match the quote
+    payload["bottlenecks"][0]["span"]["quote"] = "a sentence the authors never wrote"
     with pytest.raises(LlmValidationError):
         extract(conn, settings, config, provider_returning(payload))
     assert conn.execute("SELECT COUNT(*) FROM extraction").fetchone()[0] == 0
@@ -902,3 +907,154 @@ def test_split_rejects_nonsense_bounds() -> None:
         excerpt.split(0)
     with pytest.raises(ValueError, match="overlap must be in"):
         excerpt.split(100, overlap=100)
+
+
+def test_a_long_document_is_extracted_window_by_window_and_merged(
+    conn: sqlite3.Connection, settings: Settings, config: LlmConfig
+) -> None:
+    """Every window's records land in one payload, renumbered against it.
+
+    The provider answers each window with whatever truthful records that window can support, so
+    this also pins the property that matters: a record found in window 3 carries *document*
+    offsets, indistinguishable from one found in window 1.
+    """
+    excerpt = excerpt_of()
+    windows = excerpt.split(200, overlap=60)
+    assert len(windows) >= 3
+
+    quote = "The engineered strain IBA-7"
+
+    def reply(prompt: str, _model: str, _schema: Mapping[str, Any] | None) -> str:
+        # Offsets must be into the window the model was shown, so identify it by its own text.
+        payload = empty_payload()
+        shown = next((w.text for w in windows if w.text and w.text in prompt), None)
+        if shown is not None and quote in shown:
+            start = shown.index(quote)
+            payload["strains"] = [
+                {
+                    "name_as_reported": "IBA-7",
+                    "role": "engineered",
+                    "span": {"quote": quote, "char_start": start, "char_end": start + len(quote)},
+                }
+            ]
+        return json.dumps(payload)
+
+    outcome = extract_publication(
+        conn,
+        publication_id=PUBLICATION_ID,
+        source_text=DOCUMENT,
+        provider=MockProvider(handler=reply),
+        config=config,
+        settings=settings,
+        max_excerpt_chars=200,
+        window_overlap=60,
+        write=False,
+    )
+
+    strains = outcome.payload["strains"]
+    # Seen twice through the overlap, stored once.
+    assert len(strains) == 1
+    span = strains[0]["span"]
+    assert DOCUMENT[span["char_start"] : span["char_end"]] == "The engineered strain IBA-7"
+    # One RunStats covering every window, not just the last.
+    assert outcome.stats.attempts >= len(windows)
+
+
+def test_merged_records_are_renumbered_against_the_merged_payload() -> None:
+    """record_path must mean the same thing on the span row, the task and the payload."""
+    from fermdb.extract.harness import _normalized_payload
+
+    records = [("strains", 0, {"a": 1}), ("strains", 1, {"a": 2}), ("measurements", 0, {"b": 3})]
+    payload = _normalized_payload({"self_confidence": "low"}, records)
+    assert [r["a"] for r in payload["strains"]] == [1, 2]
+    assert len(payload["measurements"]) == 1
+
+
+def test_a_papers_confidence_is_its_least_confident_window() -> None:
+    """A paper is extracted as well as its worst window, not its best."""
+    from fermdb.extract.harness import _least_confident
+
+    class _R:
+        def __init__(self, value: str | None) -> None:
+            self.value = {"self_confidence": value} if value else {}
+
+    assert _least_confident([_R("high"), _R("low"), _R("medium")]) == "low"
+    assert _least_confident([_R("high"), _R("high")]) == "high"
+    assert _least_confident([_R(None)]) is None
+    # An unrecognized value is not evidence of confidence.
+    assert _least_confident([_R("high"), _R("certain")]) == "certain"
+
+
+# ---------------------------------------------------------------------------------------------
+# Span repair.
+#
+# Measured on a real paper with a 7B local model: all 22 records came back with verbatim,
+# genuinely-present quotes and offsets wrong by a handful of characters. verify_span rejected
+# every one while its own message read "the quote does occur at [2912]". The extraction was
+# correct; only the arithmetic was not.
+# ---------------------------------------------------------------------------------------------
+
+
+def test_a_misplaced_but_real_quote_is_relocated_and_stored(
+    conn: sqlite3.Connection, settings: Settings, config: LlmConfig
+) -> None:
+    excerpt = excerpt_of()
+    payload = truthful_payload(excerpt)
+    payload["measurements"][0]["span"]["char_start"] += 7
+    payload["measurements"][0]["span"]["char_end"] += 7
+
+    outcome = extract(conn, settings, config, provider_returning(payload))
+
+    span = outcome.payload["measurements"][0]["span"]
+    assert DOCUMENT[span["char_start"] : span["char_end"]] == "22.6 g/L isobutanol after 72 h"
+    # The repair is recorded, not silent: a curator must see the position was computed.
+    codes = [note.code for note in outcome.notes]
+    assert "span_offsets_repaired" in codes
+
+
+def test_a_fabricated_quote_is_still_rejected(
+    conn: sqlite3.Connection, settings: Settings, config: LlmConfig
+) -> None:
+    """The check that stops an invented measurement is untouched by the repair."""
+    excerpt = excerpt_of()
+    payload = truthful_payload(excerpt)
+    payload["measurements"][0]["span"] = {
+        "quote": "produced 999 g/L isobutanol",
+        "char_start": 100,
+        "char_end": 127,
+    }
+    with pytest.raises(LlmValidationError, match="does not occur"):
+        extract(conn, settings, config, provider_returning(payload))
+    assert conn.execute("SELECT COUNT(*) FROM extraction").fetchone()[0] == 0
+
+
+def test_relocate_span_prefers_the_occurrence_nearest_the_claim() -> None:
+    from fermdb.llm import relocate_span
+    from fermdb.llm.validate import Span
+
+    text = "the titer rose. the titer rose. the titer rose."
+    moved = relocate_span(text, Span(quote="the titer rose", char_start=30, char_end=44))
+    assert moved is not None
+    span, note = moved
+    assert span.char_start == 32  # the third occurrence, nearest to the claimed 30
+    assert text[span.char_start : span.char_end] == "the titer rose"
+    assert "occurs 3 times" in note
+
+
+def test_relocate_span_reports_an_unambiguous_move() -> None:
+    from fermdb.llm import relocate_span
+    from fermdb.llm.validate import Span
+
+    text = "the strain produced 22.6 g/L isobutanol"
+    moved = relocate_span(text, Span(quote="22.6 g/L", char_start=0, char_end=8))
+    assert moved is not None
+    span, note = moved
+    assert text[span.char_start : span.char_end] == "22.6 g/L"
+    assert "exactly once" in note
+
+
+def test_relocate_span_refuses_a_quote_that_is_not_there() -> None:
+    from fermdb.llm import relocate_span
+    from fermdb.llm.validate import Span
+
+    assert relocate_span("real text", Span(quote="invented", char_start=0, char_end=8)) is None

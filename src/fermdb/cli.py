@@ -319,6 +319,7 @@ def cmd_extract_run(args: argparse.Namespace) -> int:
             cache=_extract_cache(config),
             run_id=args.run_id,
             write=not args.dry_run,
+            max_excerpt_chars=args.max_excerpt_chars,
         )
         _print_extraction_outcome(outcome, dry_run=args.dry_run)
 
@@ -560,6 +561,17 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "comma-separated sections to send; default "
             f"{','.join(DEFAULT_EXTRACTION_SECTIONS)} (PLAN.md V.4: whole text costs ~13x more)"
+        ),
+    )
+    p_ex_run.add_argument(
+        "--max-excerpt-chars",
+        type=int,
+        default=None,
+        help=(
+            "split the excerpt into overlapping windows of at most this many characters and "
+            "extract from each, merging the results. A real paper's methods and results run to "
+            "~60,000 characters, which a local model answers in minutes or not at all "
+            "(MODEL_ROUTING.md 7c). Offsets stay document-absolute either way"
         ),
     )
     p_ex_run.add_argument(

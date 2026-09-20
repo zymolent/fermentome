@@ -67,6 +67,7 @@ __all__ = [
     "check_json_schema",
     "load_theoretical_yields",
     "load_units",
+    "relocate_span",
     "resolver_from_ids",
     "validate_records",
     "verify_span",
@@ -526,6 +527,53 @@ def verify_span(source_text: str, span: Span, *, max_alternatives: int = 3) -> S
     )
 
 
+def relocate_span(source_text: str, span: Span) -> tuple[Span, str] | None:
+    """Put a span where its quote really is, or None if the quote is not in the source.
+
+    Models cannot count characters. Measured on a real paper with a 7B local model, every
+    one of 22 records came back with a verbatim, genuinely-present quote and offsets wrong by a
+    handful of characters -- ``verify_span`` rejected all 22 while its own message said "the quote
+    does occur at [2912]". The extraction was correct and the arithmetic was not.
+
+    **This does not weaken the guarantee.** The model must still produce a quote that occurs in
+    the source, and one that does not is still rejected; that check is what stops a fabricated
+    measurement, and it is untouched. What changes is that the offsets are *derived from the
+    text* rather than taken from the model -- which makes them strictly more reliable, since the
+    text cannot be mistaken about where it is. ``verify_span`` stays exact and is still what
+    decides; this runs only after it has refused, and every repair is recorded so a curator sees
+    that the position was computed rather than reported.
+
+    Returns ``(relocated span, human-readable note)``, or None when the quote is absent. An
+    ambiguous quote -- one occurring more than once -- is moved to the occurrence nearest the
+    model's claim, because every occurrence is the same words and therefore the same evidence;
+    the claim is treated as the hint it is, not as a measurement.
+    """
+    if not span.quote:
+        return None
+    occurrences = tuple(_find_all(source_text, span.quote, limit=_RELOCATE_SEARCH_LIMIT))
+    if not occurrences:
+        return None
+
+    start = min(occurrences, key=lambda index: abs(index - span.char_start))
+    moved = Span(quote=span.quote, char_start=start, char_end=start + len(span.quote))
+    if len(occurrences) == 1:
+        note = (
+            f"offsets repaired: the model claimed [{span.char_start}, {span.char_end}) and the "
+            f"quote occurs exactly once, at [{start}, {moved.char_end})"
+        )
+    else:
+        note = (
+            f"offsets repaired: the model claimed [{span.char_start}, {span.char_end}); the quote "
+            f"occurs {len(occurrences)} times and the nearest is [{start}, {moved.char_end})"
+        )
+    return moved, note
+
+
+#: How far to look for a quote when repairing. Higher than `verify_span`'s reporting limit because
+#: this one has to know whether an occurrence is unique, not just show a few examples.
+_RELOCATE_SEARCH_LIMIT: Final[int] = 64
+
+
 def _find_all(haystack: str, needle: str, *, limit: int) -> Iterator[int]:
     start = 0
     for _ in range(limit):
@@ -746,6 +794,7 @@ ISSUE_CODES: Final[tuple[str, ...]] = (
     "basis_defaulted_to_unknown",
     "basis_not_in_vocabulary",
     "confidence_overridden",
+    "span_offsets_repaired",
 )
 
 

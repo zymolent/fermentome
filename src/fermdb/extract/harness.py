@@ -55,6 +55,7 @@ from ..llm import (
     Span,
     load_theoretical_yields,
     load_units,
+    relocate_span,
     resolver_from_ids,
     run,
     validate_records,
@@ -703,6 +704,57 @@ def _normalized_payload(
     return payload
 
 
+def _repair_spans(
+    records: Sequence[JsonObject], source_text: str
+) -> tuple[list[JsonObject], list[str | None]]:
+    """Move each record's span onto the place its quote really occurs, before validation.
+
+    Models cannot count characters. Measured on a real paper with a 7B local model, all 22
+    records came back with verbatim, genuinely-present quotes and offsets wrong by a few
+    characters; `verify_span` rejected every one while its own message read "the quote does occur
+    at [2912]". The extraction was right and only the arithmetic was wrong.
+
+    So the offsets are recomputed from the text rather than taken from the model. This is not a
+    relaxation: a quote that does not occur in the source is still rejected, by the same exact
+    check as before, and that is the check which stops a fabricated measurement. Repairs are
+    returned alongside so each one is recorded as a note against the record -- a curator can see
+    that a position was computed, not reported.
+
+    Returns ``(records to validate, one note-or-None per record, in order)``.
+    """
+    out: list[JsonObject] = []
+    notes: list[str | None] = []
+    for record in records:
+        raw = record.get("span")
+        if not isinstance(raw, Mapping):
+            out.append(dict(record))
+            notes.append(None)
+            continue
+        quote, start, end = raw.get("quote"), raw.get("char_start"), raw.get("char_end")
+        if not isinstance(quote, str) or not isinstance(start, int) or not isinstance(end, int):
+            out.append(dict(record))
+            notes.append(None)
+            continue
+        if source_text[start:end] == quote:
+            out.append(dict(record))
+            notes.append(None)
+            continue
+        moved = relocate_span(source_text, Span(quote=quote, char_start=start, char_end=end))
+        if moved is None:
+            # The quote is not in the source at all. Leave it exactly as the model gave it so
+            # `verify_span` reports 'quote_absent_from_source' -- the hallucination signal, which
+            # must not be softened into a repair failure.
+            out.append(dict(record))
+            notes.append(None)
+            continue
+        span, note = moved
+        updated = dict(record)
+        updated["span"] = {**dict(raw), **span.as_dict()}
+        out.append(updated)
+        notes.append(note)
+    return out, notes
+
+
 def _validate_payload(
     payload: Mapping[str, Any],
     *,
@@ -719,8 +771,9 @@ def _validate_payload(
     line: "quote from inside a single section", not "span translation failed".
     """
     flattened = iter_payload_records(payload)
+    repaired, repairs = _repair_spans([record for _, _, record in flattened], excerpt.text)
     report = validate_records(
-        [record for _, _, record in flattened],
+        repaired,
         source_text=excerpt.text,
         units=units,
         yields=yields,
@@ -731,8 +784,12 @@ def _validate_payload(
     notes: list[RecordNote] = []
     accepted: list[tuple[str, int, JsonObject]] = []
 
-    for (kind, index, _), verdict in zip(flattened, report.verdicts, strict=True):
+    for position, ((kind, index, _), verdict) in enumerate(
+        zip(flattened, report.verdicts, strict=True)
+    ):
         path = record_path(kind, index)
+        if repairs[position] is not None:
+            notes.append(RecordNote(path, "span_offsets_repaired", str(repairs[position])))
         for issue in verdict.issues:
             if issue.fatal:
                 errors.append(f"{path}: {issue.message}")
@@ -749,6 +806,53 @@ def _validate_payload(
         accepted.append((kind, index, translated))
 
     return errors, notes, accepted
+
+
+#: Ordered least to most confident, so a merge can take the lowest without inventing a scale.
+_CONFIDENCE_ORDER: Final[tuple[str, ...]] = ("low", "medium", "high")
+
+
+def _least_confident(results: Sequence[Any]) -> str | None:
+    """The most cautious ``self_confidence`` any window reported.
+
+    A paper is extracted as well as its worst window, not its best: if the model was unsure about
+    the section holding the titers, the extraction as a whole deserves that caution. An
+    unrecognized value is treated as the most cautious of all — it is not evidence of confidence.
+    """
+    claims = [
+        value
+        for value in (result.value.get("self_confidence") for result in results)
+        if isinstance(value, str)
+    ]
+    if not claims:
+        return None
+    if any(claim not in _CONFIDENCE_ORDER for claim in claims):
+        return min(claims)
+    return min(claims, key=_CONFIDENCE_ORDER.index)
+
+
+def _merge_stats(parts: Sequence[RunStats]) -> RunStats:
+    """One :class:`RunStats` covering every window: tokens and seconds summed, attempts summed.
+
+    ``cache_hit`` is true only when *every* window was served from cache, because a run that
+    called the model even once was not a cache hit — reporting otherwise would understate cost.
+    ``input_hash`` is taken from the first window and is no longer a key that reproduces the whole
+    run; that is what makes a chunked extraction not byte-reproducible from the cache alone, and
+    it is recorded here rather than papered over.
+    """
+    if len(parts) == 1:
+        return parts[0]
+    first = parts[0]
+    prompt_tokens = [part.prompt_tokens for part in parts if part.prompt_tokens is not None]
+    completion = [part.completion_tokens for part in parts if part.completion_tokens is not None]
+    return replace(
+        first,
+        attempts=sum(part.attempts for part in parts),
+        cache_hit=all(part.cache_hit for part in parts),
+        prompt_tokens=sum(prompt_tokens) if prompt_tokens else None,
+        completion_tokens=sum(completion) if completion else None,
+        duration_s=sum(part.duration_s for part in parts),
+    )
 
 
 # ------------------------------------------------------------------------------------ the runs
@@ -890,6 +994,8 @@ def extract_publication(
     run_id: str | None = None,
     write: bool = True,
     now: datetime | None = None,
+    max_excerpt_chars: int | None = None,
+    window_overlap: int = 1500,
 ) -> ExtractionOutcome:
     """Extract one publication into a proposed Zone I ``extraction`` row.
 
@@ -934,69 +1040,111 @@ def extract_publication(
     )
 
     prompt_file = load_prompt("extraction", directory=prompt_directory)
-    prompt = prompt_file.render(
-        {
-            "publication_id": publication_id,
-            "section_names": ", ".join(excerpt.section_names),
-            "excerpt": excerpt.text,
-            "schema_json": json.dumps(schema, indent=2, sort_keys=True),
-        }
+    windows = (
+        excerpt.split(max_excerpt_chars, overlap=window_overlap)
+        if max_excerpt_chars is not None
+        else (excerpt,)
     )
 
-    def check(candidate: JsonObject) -> list[str]:
-        errors, _, _ = _validate_payload(
-            candidate,
+    merged: list[tuple[str, JsonObject]] = []
+    seen: set[tuple[str, str]] = set()
+    notes: list[RecordNote] = []
+    results: list[Any] = []
+
+    for number, window in enumerate(windows, start=1):
+        prompt = prompt_file.render(
+            {
+                "publication_id": publication_id,
+                "section_names": ", ".join(window.section_names),
+                "excerpt": window.text,
+                # Compact, not indented. The schema is 27,629 characters pretty-printed and
+                # 16,736 compact -- 39% of it was whitespace, ~3,100 tokens of a local model's
+                # context, repeated in every window of every paper. Nothing reads this but the
+                # model, and it is still valid JSON for anyone who wants to pretty-print a
+                # logged prompt. `sort_keys` stays, because the prompt is part of the cache key
+                # and must not change with dict ordering.
+                "schema_json": json.dumps(schema, sort_keys=True, separators=(",", ":")),
+            }
+        )
+
+        def check(candidate: JsonObject, _window: Excerpt = window) -> list[str]:
+            errors, _, _ = _validate_payload(
+                candidate,
+                document=document,
+                excerpt=_window,
+                units=units,
+                yields=yields,
+                resolve_entity=resolver,
+            )
+            return errors
+
+        result = run(
+            prompt,
+            schema,
+            provider=provider,
+            model=config.model_for("extraction"),
+            prompt_version=prompt_file.version,
+            options=config.options,
+            timeout_s=config.timeout_s,
+            cache=cache,
+            post_validate=check,
+        )
+        results.append(result)
+
+        # Re-validated after the run rather than reusing what `check` computed, so that a value
+        # served from cache — which skips `post_validate` entirely — is still checked against this
+        # source text before it is written down. The cost is a few microseconds of deterministic
+        # work against a model call that has already happened.
+        errors, window_notes, accepted = _validate_payload(
+            result.value,
             document=document,
-            excerpt=excerpt,
+            excerpt=window,
             units=units,
             yields=yields,
             resolve_entity=resolver,
         )
-        return errors
+        if errors:
+            raise ExtractionError(
+                f"{publication_id}: a validated result failed re-validation before storage, which "
+                f"means the cached entry was produced against different source text or this code "
+                f"changed under it: {'; '.join(errors[:5])}"
+            )
 
-    result = run(
-        prompt,
-        schema,
-        provider=provider,
-        model=config.model_for("extraction"),
-        prompt_version=prompt_file.version,
-        options=config.options,
-        timeout_s=config.timeout_s,
-        cache=cache,
-        post_validate=check,
-    )
+        for kind, _, record in accepted:
+            # Spans are already in *document* coordinates here, so a record seen twice through the
+            # window overlap serialises identically both times. That is what makes the overlap
+            # free: it costs a duplicate, and the duplicate is exactly detectable.
+            key = (kind, json.dumps(record, sort_keys=True, default=str))
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append((kind, record))
+        for note in window_notes:
+            path = note.record_path if len(windows) == 1 else f"w{number}:{note.record_path}"
+            notes.append(RecordNote(path, note.code, note.message))
 
-    # Re-validated after the run rather than reusing what `check` computed, so that a value served
-    # from cache — which skips `post_validate` entirely — is still checked against this source
-    # text before it is written down. The cost is a few microseconds of deterministic work against
-    # a model call that has already happened.
-    errors, notes, accepted = _validate_payload(
-        result.value,
-        document=document,
-        excerpt=excerpt,
-        units=units,
-        yields=yields,
-        resolve_entity=resolver,
-    )
-    if errors:
-        raise ExtractionError(
-            f"{publication_id}: a validated result failed re-validation before storage, which "
-            f"means the cached entry was produced against different source text or this code "
-            f"changed under it: {'; '.join(errors[:5])}"
-        )
+    # Renumbered against the merged payload, because `record_path` has to mean the same thing on
+    # the span row, the curation task and the stored payload — and after merging, a record's
+    # position is its position here, not in whichever window happened to report it.
+    counters: dict[str, int] = {}
+    records: list[tuple[str, int, JsonObject]] = []
+    for kind, record in merged:
+        index = counters.get(kind, 0)
+        counters[kind] = index + 1
+        records.append((kind, index, record))
 
-    self_confidence = result.value.get("self_confidence")
+    stats = _merge_stats([result.stats for result in results])
     outcome = ExtractionOutcome(
         publication_id=publication_id,
         extraction_id=None,
-        payload=_normalized_payload(result.value, accepted),
-        records=tuple(accepted),
+        payload=_normalized_payload({"self_confidence": _least_confident(results)}, records),
+        records=tuple(records),
         notes=tuple(notes),
         excerpt=excerpt,
-        stats=result.stats,
+        stats=stats,
         prompt_version=prompt_file.version,
-        self_confidence=self_confidence if isinstance(self_confidence, str) else None,
-        failed_attempts=result.failed_attempts,
+        self_confidence=_least_confident(results),
+        failed_attempts=tuple(attempt for result in results for attempt in result.failed_attempts),
     )
     if not write:
         return outcome
