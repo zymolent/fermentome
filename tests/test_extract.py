@@ -37,9 +37,11 @@ from fermdb.extract import (
     Excerpt,
     ExtractionError,
     MeasurementRecord,
+    NotPrimaryResearchError,
     PayloadVocabulary,
     PromptError,
     SchemaBuildError,
+    Section,
     SectioningError,
     build_excerpt,
     extract_publication,
@@ -47,6 +49,7 @@ from fermdb.extract import (
     load_prompt,
     load_source_text,
     load_vocabulary,
+    looks_like_review,
     payload_schema,
     payload_sections,
     record_path,
@@ -770,3 +773,54 @@ def test_the_cli_requires_a_reason_for_a_verdict() -> None:
 
     with pytest.raises(SystemExit):
         build_parser().parse_args(["curate", "reject", "--task", "t", "--curator", "me"])
+
+
+# ---------------------------------------------------------------------------------------------
+# Reviews.
+#
+# 21 of the 279 open-access articles acquisition fetched (7.5%) are reviews: the discovery
+# queries match them on topic exactly as well as they match primary papers. A review has no
+# methods and no results, so it already failed sectioning -- but it failed with advice to resend
+# it whole, which is the one thing that must not happen to a review.
+# ---------------------------------------------------------------------------------------------
+
+
+def _sections_named(*names: str) -> list[Section]:
+    """Sections with the given names over a throwaway document."""
+    return [
+        Section(name=name, char_start=index * 10, char_end=index * 10 + 10)
+        for index, name in enumerate(names)
+    ]
+
+
+def test_looks_like_review_needs_narrative_sections_and_no_findings() -> None:
+    assert looks_like_review(_sections_named("abstract", "introduction", "conclusion")) is True
+    # A research paper is not a review, even when only some of its findings sections parsed.
+    assert looks_like_review(_sections_named("abstract", "introduction", "results")) is False
+    # Neither is a fragment: no narrative sections either, so the remedy is re-reading it.
+    assert looks_like_review(_sections_named("front_matter", "references")) is False
+
+
+def test_build_excerpt_refuses_a_review_without_offering_a_way_round() -> None:
+    """The generic failure suggests resending the whole text; for a review that is the hazard.
+
+    The message still names `unsectioned` -- an operator who knows the flag exists will reach for
+    it, so saying "deliberately not offering it" pre-empts that, where silence would not.
+    """
+    sections = _sections_named("front_matter", "abstract", "introduction", "conclusion")
+    with pytest.raises(NotPrimaryResearchError) as raised:
+        build_excerpt("x" * 100, sections, DEFAULT_EXTRACTION_SECTIONS)
+
+    message = str(raised.value)
+    assert "review" in message
+    assert f"not offering '{UNSECTIONED}'" in message
+    # Why it is refused, not just that it is: the span would verify and still be false.
+    assert "cites" in message
+
+
+def test_build_excerpt_still_suggests_unsectioned_for_a_genuine_fragment() -> None:
+    """A document whose headings were lost has the opposite remedy, and keeps the old advice."""
+    with pytest.raises(SectioningError) as raised:
+        build_excerpt("x" * 100, _sections_named("front_matter"), DEFAULT_EXTRACTION_SECTIONS)
+    assert not isinstance(raised.value, NotPrimaryResearchError)
+    assert UNSECTIONED in str(raised.value)

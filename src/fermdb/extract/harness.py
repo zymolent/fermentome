@@ -81,6 +81,7 @@ __all__ = [
     "ExcerptPiece",
     "ExtractionError",
     "ExtractionOutcome",
+    "NotPrimaryResearchError",
     "PromptError",
     "PromptFile",
     "RecordNote",
@@ -93,6 +94,7 @@ __all__ = [
     "find_publication",
     "load_prompt",
     "load_source_text",
+    "looks_like_review",
     "split_sections",
     "triage_publication",
     "write_extraction",
@@ -119,6 +121,15 @@ class ExtractionError(RuntimeError):
 
 class SectioningError(ExtractionError):
     """The document could not be split into the sections extraction needs."""
+
+
+class NotPrimaryResearchError(SectioningError):
+    """The document is a review or commentary, so its numbers are other papers' numbers.
+
+    Separated from a plain :class:`SectioningError` because the remedy is opposite. A document
+    whose headings were lost should be re-read or sent whole; a review must not be, however it is
+    sectioned -- extracting from one attributes a cited result to the authors reviewing it.
+    """
 
 
 class SourceTextError(ExtractionError):
@@ -325,6 +336,30 @@ class Excerpt:
         return None
 
 
+#: What a primary research report has and a review does not. The discriminator is structural, so
+#: it costs nothing and cannot be talked out of its answer by a persuasive abstract.
+_PRIMARY_RESEARCH_SECTIONS: Final[frozenset[str]] = frozenset(
+    {"methods", "results", "results_and_discussion"}
+)
+
+#: A review still has these, which is how "a review" is told apart from "a fragment".
+_NARRATIVE_SECTIONS: Final[frozenset[str]] = frozenset(
+    {"abstract", "introduction", "conclusion", "discussion"}
+)
+
+
+def looks_like_review(sections: Sequence[Section]) -> bool:
+    """Whether this document reads as a review or commentary rather than a research report.
+
+    True when it has narrative sections but no methods and no results. Measured over the acquired
+    open-access corpus, 21 of 279 articles (7.5%) are this shape -- Frontiers, MDPI and Biotech
+    reviews of isobutanol production, which the discovery queries match on topic exactly as well
+    as primary papers do.
+    """
+    names = {section.name for section in sections}
+    return not (names & _PRIMARY_RESEARCH_SECTIONS) and bool(names & _NARRATIVE_SECTIONS)
+
+
 def build_excerpt(document: str, sections: Sequence[Section], wanted: Sequence[str]) -> Excerpt:
     """Stitch the wanted sections into the text the model will be shown.
 
@@ -336,6 +371,18 @@ def build_excerpt(document: str, sections: Sequence[Section], wanted: Sequence[s
     chosen = [section for section in sections if section.name in wanted]
     if not chosen:
         found = sorted({section.name for section in sections})
+        if looks_like_review(sections):
+            raise NotPrimaryResearchError(
+                f"this document has no methods and no results ({found}): it is a review, "
+                f"commentary or perspective, not a research report. Refusing to extract "
+                f"measurements from it, and deliberately not offering '{UNSECTIONED}' as a way "
+                f"round -- every number in a review belongs to a paper it cites, so extracting "
+                f"here would attribute someone else's titer to these authors and produce a span "
+                f"that verifies perfectly while asserting something false. fermdb takes those "
+                f"measurements from the cited papers, which discovery finds on their own terms. "
+                f"A review is still worth reading for its route claims; that is a different "
+                f"record kind, not this one."
+            )
         raise SectioningError(
             f"none of the wanted sections {list(wanted)} are in this document; it has {found}. "
             f"Either the full text is a fragment, or the text conversion lost the headings. "
