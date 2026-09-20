@@ -96,24 +96,68 @@ Nothing is hard-coded: `read_pathway` asks the database what columns and roles e
 loader is fixed the reader picks the facts up and the gap list shrinks on its own. Tests cover
 both branches.
 
-## The decision this needs
+## Resolved: schema v6, applied
 
-Fixing the loader means a schema change — `reaction.competing`, a `reaction_gene` junction,
-`metabolite.carrier` — and therefore a `SCHEMA_VERSION` bump. `open_db` refuses to migrate
-implicitly, by design, so an existing database is *refused*, not upgraded.
+Authorised and done — commit `7b5ce4c`.
 
-That matters here because the cost is asymmetric:
+**Widened beyond the three above.** Reading the loader properly showed `metabolite` also dropping
+`carbons`, `redox`, `pair` and `adenylate` — the same defect on the same line. A second migration
+would have meant a second version bump and a second refusal of a database holding 5,164
+publications, so batching was strictly cheaper than being narrowly faithful to what I had already
+reported. `redox`/`pair` is also what makes the DUET argument expressible: without it NADH and
+NADPH are two unrelated strings.
 
-- The pathway tables are **cheap to rebuild** — `fermdb atlas pathways` reloads them from
-  committed YAML.
-- The same database holds **5,164 publications, 1,308 stored full texts, 172 SRA runs and 55
-  curation tasks**, none of which is cheap to rebuild.
+### The migration mechanism
 
-So this wants a real migration (add columns, re-run the pathway load, stamp the new version), not
-a recreate. That is a call for the owner and not a side effect of building a read layer, which is
-why this report exists rather than a fourth commit.
+There wasn't one. `open_db` has always refused to migrate and said why, but there was no reviewed
+path either, so the only route past a version bump was delete-and-rebuild. `db/migrations.py` is
+that path, and it is add-only: no `DROP`, no lossy `UPDATE`, enforced by a test on each
+statement's leading verb. It backs up to a timestamped copy that takes the `-wal` with it, and
+runs the whole chain in one transaction.
 
-## Next, without that decision
+**Two bugs the tests caught before the real database saw them:**
+
+1. **`with conn:` does not roll back DDL.** Python's `sqlite3` opens its implicit transaction only
+   before `INSERT`/`UPDATE`/`DELETE`/`REPLACE` — not before DDL — so every `ALTER` was
+   autocommitting and surviving the rollback. A failure on statement five would have left four
+   applied and the version stamp unchanged: a database matching no schema at all. Fixed with
+   `isolation_level = None` and an explicit `BEGIN`.
+2. **SQLite has no `ADD CONSTRAINT`.** The table-level CHECKs I first wrote on `metabolite` were
+   unreachable by `ALTER`, so a *migrated* database would have ended up with weaker constraints
+   than a *fresh* one — and `PRAGMA table_info` does not report CHECKs, so no shape comparison
+   would have caught it. Rewritten as column CHECKs referring to sibling columns, which do
+   survive. Column order in the migration is now load-bearing and says so.
+
+`tests/test_migrations.py` builds the v5 tables verbatim, migrates them, and compares against what
+`schema.sql` produces today — shape by PRAGMA, constraints by behaviour. A future migration that
+forgets to mirror an edit to `schema.sql` fails there rather than in production.
+
+### Applied to the live database
+
+```
+60 tables identical row for row · 1 new empty table
+integrity_check ok · 0 foreign-key violations
+backup: fermdb.sqlite3.pre-v6.20260920T123452Z.bak
+```
+
+Backfilled by `fermdb atlas pathways`:
+
+| | |
+|---|---|
+| competing reactions | **6** — including the three 2-KIV drains |
+| `reaction_gene` rows | **29** — 22 resolved, **7 unresolved** |
+| unresolved symbols | ADH1, ADH6, ADH7, GPD2, GPP1, GPP2 — none in `gene`, none guessed at |
+| carriers with redox pools | **8** — NADPH `pair=nadp`, NADH `pair=nad` |
+
+Those seven are the point of the three-state `resolution` column. LEU4 sits right beside LEU9 in
+the same table; a similarity heuristic would have linked ADH1 to ADH2 and the row would have
+rendered exactly as confidently as a correct one.
+
+The Pathway page now reports **no gaps** and is renderable as P.2 specifies it. `PathwayRead.gaps`
+stays, computed from the schema rather than hard-coded, so it shrank on its own and will grow
+again by itself if a pathway arrives without these facts.
+
+## Next
 
 - Readers for the other renderable pages: **Publication** (5,164 rows, with extraction spans —
   P.2's *"click a value, see the sentence"*) and **Gene** (36 resolved, 675 annotations).
