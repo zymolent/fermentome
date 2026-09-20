@@ -22,7 +22,7 @@ from __future__ import annotations
 import gzip
 import re
 import statistics
-from collections.abc import Container, Mapping
+from collections.abc import Container, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -32,6 +32,9 @@ from ..config import Settings
 __all__ = [
     "DETECTION_TPM",
     "MITOCHONDRIAL_PROTEIN_GENES",
+    "MITOCHONDRION_RETAINING_SELECTIONS",
+    "MitochondrialReadout",
+    "mitochondrial_readout",
     "missing_mitochondrial_proteins",
     "BaselineReport",
     "GeneProfile",
@@ -50,6 +53,16 @@ DETECTION_TPM: Final[float] = 1.0
 _MITOCHONDRIAL_PREFIX: Final[str] = "Q"
 
 _BRACKET: Final[re.Pattern[str]] = re.compile(r"\[([a-z_]+)=([^\]]*)\]")
+
+#: Library selections that retain mitochondrial mRNA. Yeast mt transcripts are not
+#: polyadenylated the way nuclear ones are, so a poly(A)-selected library depletes them: measured
+#: on the requantified corpus, a `cDNA` run puts 0.01% of its reads on mitochondrial CDS. A
+#: mitochondrial TPM averaged over such runs is a fact about the library preparation, not about
+#: the organelle, and reporting the two together would be worse than not measuring at all --
+#: it would put a number where "cannot be answered by this library" belongs.
+MITOCHONDRION_RETAINING_SELECTIONS: Final[frozenset[str]] = frozenset(
+    {"RANDOM", "cDNA_randomPriming"}
+)
 
 #: The mtDNA protein-coding complement of S. cerevisiae. Checked for explicitly, because their
 #: **absence** from the quantification is the single most consequential fact this module reports
@@ -117,6 +130,37 @@ class GeneProfile:
 
 
 @dataclass(frozen=True)
+class MitochondrialReadout:
+    """What the corpus can and cannot say about mitochondrial expression.
+
+    Split by library selection because averaging across the two would answer a question nobody
+    asked. `usable_samples` is the honest denominator for any mitochondrial claim.
+    """
+
+    usable_samples: tuple[str, ...]
+    depleted_samples: tuple[str, ...]
+    usable_selection_names: tuple[str, ...]
+
+    @property
+    def answerable(self) -> bool:
+        return bool(self.usable_samples)
+
+    def caveat(self) -> str:
+        total = len(self.usable_samples) + len(self.depleted_samples)
+        if not self.answerable:
+            return (
+                f"No mitochondrial claim is supportable: all {total} samples are "
+                f"poly(A)-selected, which depletes yeast mitochondrial mRNA."
+            )
+        return (
+            f"Mitochondrial values are read from {len(self.usable_samples)} of {total} samples. "
+            f"The other {len(self.depleted_samples)} are poly(A)-selected, which depletes yeast "
+            f"mitochondrial mRNA, and their mitochondrial TPMs describe the library preparation "
+            f"rather than the organelle."
+        )
+
+
+@dataclass(frozen=True)
 class BaselineReport:
     profiles: tuple[GeneProfile, ...]
     samples: int
@@ -126,6 +170,8 @@ class BaselineReport:
     #: Non-empty means mitochondrial gene expression was never measured, however many
     #: ``Q``-prefixed rows the matrix happens to have.
     missing_mitochondrial_proteins: tuple[str, ...] = ()
+    #: None when no library metadata was supplied, which is different from "no usable samples".
+    mitochondrial: MitochondrialReadout | None = None
 
     @property
     def absent(self) -> tuple[GeneProfile, ...]:
@@ -182,6 +228,32 @@ def transcriptome_features(path: Path) -> dict[str, tuple[str | None, str]]:
             if locus:
                 features[locus] = (fields.get("gene"), fields.get("gbkey", "unknown"))
     return features
+
+
+def mitochondrial_readout(
+    samples: Sequence[str], selection_by_run: Mapping[str, str | None]
+) -> MitochondrialReadout:
+    """Split samples into those whose library retains mitochondrial mRNA and those that deplete it.
+
+    A run with no recorded selection counts as depleted, not as usable: an unknown library is not
+    evidence that it retained anything, and the conservative direction here keeps a claim from
+    resting on metadata nobody checked.
+    """
+    usable: list[str] = []
+    depleted: list[str] = []
+    names: set[str] = set()
+    for sample in samples:
+        selection = selection_by_run.get(sample)
+        if selection in MITOCHONDRION_RETAINING_SELECTIONS:
+            usable.append(sample)
+            names.add(selection)
+        else:
+            depleted.append(sample)
+    return MitochondrialReadout(
+        usable_samples=tuple(usable),
+        depleted_samples=tuple(depleted),
+        usable_selection_names=tuple(sorted(names)),
+    )
 
 
 def build_baseline(

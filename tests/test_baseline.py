@@ -147,3 +147,40 @@ def test_the_real_transcriptome_has_no_mitochondrial_protein_genes() -> None:
         f"the transcriptome now contains {present}; mitochondrial expression may be measurable, "
         f"so docs/reports/2026-09-20-duet-expression-baseline.md needs revisiting"
     )
+
+
+# ---------------------------------------------------------------------------------------------
+# Library selection.
+#
+# Measured on the requantified corpus: a poly(A)-selected run puts 0.01% of its reads on
+# mitochondrial CDS, because yeast mitochondrial transcripts are not polyadenylated the way
+# nuclear ones are. Only 8 of the 99 S. cerevisiae runs are RANDOM-primed. Averaging the two
+# together would answer a question about library preparation while looking like an answer about
+# the organelle -- which is worse than the original gap, because the original gap was visible.
+# ---------------------------------------------------------------------------------------------
+
+
+def test_only_random_primed_libraries_count_toward_a_mitochondrial_claim() -> None:
+    readout = B.mitochondrial_readout(
+        ["ERR1", "ERR2", "SRR1", "SRR2", "SRR3"],
+        {"ERR1": "RANDOM", "ERR2": "RANDOM", "SRR1": "cDNA", "SRR2": "cDNA", "SRR3": "cDNA"},
+    )
+    assert readout.usable_samples == ("ERR1", "ERR2")
+    assert readout.depleted_samples == ("SRR1", "SRR2", "SRR3")
+    assert readout.answerable is True
+    assert "2 of 5 samples" in readout.caveat()
+
+
+def test_an_unknown_library_counts_as_depleted_not_usable() -> None:
+    """An unrecorded selection is not evidence that the library retained anything, and the
+    conservative direction keeps a claim off metadata nobody checked."""
+    readout = B.mitochondrial_readout(["A", "B"], {"A": None})
+    assert readout.usable_samples == ()
+    assert set(readout.depleted_samples) == {"A", "B"}
+
+
+def test_an_all_polya_corpus_says_the_claim_is_unsupportable() -> None:
+    """Not a low number -- no number. The distinction is the whole point."""
+    readout = B.mitochondrial_readout(["S1", "S2"], {"S1": "cDNA", "S2": "cDNA"})
+    assert readout.answerable is False
+    assert "No mitochondrial claim is supportable" in readout.caveat()
