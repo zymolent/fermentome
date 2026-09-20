@@ -77,6 +77,7 @@ from .llm import (
 from .metabolic.cli import add_atlas_subcommand
 from .omics import add_omics_subcommand
 from .paths import PathsConfigError
+from .query.cli import add_query_subcommand
 from .recode import RecodeError, check_compartment_safety, recode
 
 
@@ -562,6 +563,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_omics_subcommand(sub)
     add_atlas_subcommand(sub)
+    add_query_subcommand(sub)
 
     p_extract = sub.add_parser(
         "extract", help="LLM extraction of one publication into a proposed Zone I row"
