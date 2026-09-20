@@ -51,7 +51,9 @@ __all__ = [
     "load_all",
     "load_matrices",
     "load_reference_genomes",
+    "load_samples",
     "load_sra_runs",
+    "load_yeast_reference_sequences",
     "matrix_shape",
     "sha256_of",
 ]
@@ -473,10 +475,12 @@ class LoadReport:
     references: dict[str, int]
     runs: dict[str, int]
     matrices: dict[str, int]
+    samples: dict[str, int] = field(default_factory=dict)
+    sequences: dict[str, int] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, int]:
         merged: dict[str, int] = {}
-        for part in (self.references, self.runs, self.matrices):
+        for part in (self.references, self.runs, self.matrices, self.samples, self.sequences):
             merged.update(part)
         return merged
 
@@ -486,5 +490,134 @@ def load_all(conn: sqlite3.Connection, settings: Settings) -> LoadReport:
     references = load_reference_genomes(conn, settings)
     runs = load_sra_runs(conn, settings)
     matrices = load_matrices(conn, settings)
+    # After the runs, because a sample points at the dataset a run belongs to.
+    samples = load_samples(conn)
+    sequences = load_yeast_reference_sequences(conn, settings)
     conn.commit()
-    return LoadReport(references=references, runs=runs, matrices=matrices)
+    return LoadReport(
+        references=references,
+        runs=runs,
+        matrices=matrices,
+        samples=samples,
+        sequences=sequences,
+    )
+
+
+# ------------------------------------------------------------------- samples and yeast sequences
+
+
+def _sample_evidence(run_accession: str, organism: str | None) -> str:
+    suffix = f" ({organism})" if organism else ""
+    return f"one sample per SRA run; run {run_accession}{suffix}"
+
+
+def load_samples(conn: sqlite3.Connection) -> dict[str, int]:
+    """One ``sample`` per SRA run, so a measurement has something to attach to.
+
+    ``measurement`` requires a sample, strain or experiment -- the table's own CHECK says so --
+    and all three were empty, which made a measurement unstorable however good the extraction.
+    This closes the cheapest of the three.
+
+    ``strain_id`` and ``condition_context_id`` stay NULL, and that is the honest state rather
+    than an omission: which strain a run used and under what conditions are curation questions
+    (PLAN.md F.3 blocks a contrast until a condition context is *approved*), and a guessed value
+    here would be indistinguishable from a curated one.
+    """
+    rows = conn.execute(
+        "SELECT id, run_accession, dataset_id, organism FROM sra_run ORDER BY run_accession"
+    ).fetchall()
+    for row in rows:
+        conn.execute(
+            "INSERT INTO sample (id, dataset_id, zone, evidence, confidence) "
+            "VALUES (?,?,'R',?,'high') "
+            "ON CONFLICT(id) DO UPDATE SET dataset_id=excluded.dataset_id",
+            (
+                f"YAA:SAMPLE:{row['run_accession']}",
+                row["dataset_id"],
+                _sample_evidence(row["run_accession"], row["organism"]),
+            ),
+        )
+    conn.commit()
+    return {"sample": len(rows)}
+
+
+def load_yeast_reference_sequences(conn: sqlite3.Connection, settings: Settings) -> dict[str, int]:
+    """Register the S288C nuclear and mitochondrial references in ``reference_sequence``.
+
+    Separate from ``reference_genome_asset`` on purpose, and only for yeast. That table's
+    ``encoding_genome`` foreign key and its nuclear/mitochondrial ``kind`` vocabulary are
+    yeast-specific; a bacterial replicon reading under table 11 has no place in either, which is
+    why ``load_reference_genomes`` deliberately does not write here.
+
+    ``translation_verified`` is set on the mitochondrial row only if the CDS in the GenBank record
+    actually reproduce NCBI's own ``/translation`` under table 3. It is a claim about this
+    reference agreeing with `fermdb.genetic_code`, so it is earned per load rather than assumed
+    from a previous one.
+    """
+    from .mito_transcripts import MITOCHONDRIAL_ACCESSION, parse_mitochondrial_cds
+
+    genomes = Path(settings.genomes_dir)
+    organism = "YAA:ORG:s288c-r64"
+    written = 0
+
+    nuclear = genomes / "s288c.fna.gz"
+    if not nuclear.is_file():
+        raise OmicsLoadError(f"{nuclear} is missing; it is the nuclear reference")
+    accessions, bases, _ = fasta_identity(nuclear)
+    conn.execute(
+        "INSERT INTO reference_sequence (id, kind, organism_id, assembly_accession, "
+        "sequence_accession, encoding_genome, file_path, checksum_sha256, size_bytes, source_url, "
+        "translation_verified, retrieved_at, zone, evidence, confidence) "
+        "VALUES (?,'nuclear_genome',?,?,?,'nuclear',?,?,?,?,0,?,'R',?,'high') "
+        "ON CONFLICT(sequence_accession, kind) DO UPDATE SET "
+        "checksum_sha256=excluded.checksum_sha256",
+        (
+            "YAA:REFSEQ:s288c-nuclear",
+            organism,
+            "GCF_000146045.2",
+            # The whole assembly rather than one chromosome; the accession column names what the
+            # file is, and this file is every nuclear chromosome plus the mitochondrion.
+            "GCF_000146045.2",
+            str(nuclear),
+            sha256_of(nuclear),
+            nuclear.stat().st_size,
+            "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/146/045/GCF_000146045.2_R64/",
+            _utc_now(),
+            f"R64 assembly, {len(accessions)} sequences, {bases} bases. Read under NCBI table 1.",
+        ),
+    )
+    written += 1
+
+    genbank = genomes / "nc_001224.gb"
+    if genbank.is_file():
+        records, _ = parse_mitochondrial_cds(genbank.read_text(encoding="utf-8"))
+        # Every returned CDS has already reproduced NCBI's /translation under table 3, and at
+        # least one exercises a codon table 1 reads differently -- otherwise the reference does
+        # not demonstrate the disagreement it is kept to prove.
+        verified = bool(records) and any(record.table_1_would_differ for record in records)
+        conn.execute(
+            "INSERT INTO reference_sequence (id, kind, organism_id, assembly_accession, "
+            "sequence_accession, encoding_genome, file_path, checksum_sha256, size_bytes, "
+            "source_url, translation_verified, retrieved_at, zone, evidence, confidence) "
+            "VALUES (?,'mitochondrial_genome',?,?,?,'mitochondrial',?,?,?,?,?,?,'R',?,'high') "
+            "ON CONFLICT(sequence_accession, kind) DO UPDATE SET "
+            "translation_verified=excluded.translation_verified",
+            (
+                "YAA:REFSEQ:s288c-mitochondrial",
+                organism,
+                "GCF_000146045.2",
+                MITOCHONDRIAL_ACCESSION,
+                str(genbank),
+                sha256_of(genbank),
+                genbank.stat().st_size,
+                f"https://www.ncbi.nlm.nih.gov/nuccore/{MITOCHONDRIAL_ACCESSION}",
+                1 if verified else 0,
+                _utc_now(),
+                f"{len(records)} CDS reproduce NCBI's own /translation under table 3; "
+                f"{sum(1 for r in records if r.table_1_would_differ)} of them read differently "
+                f"under table 1, which is the disagreement this reference exists to demonstrate.",
+            ),
+        )
+        written += 1
+    conn.commit()
+    return {"reference_sequence": written}

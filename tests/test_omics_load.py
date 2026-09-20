@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import gzip
 import json
+import os
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -203,3 +205,99 @@ def test_no_reference_genome_is_smaller_than_its_own_n50() -> None:
             f"{entry['accession']}: manifest records {entry['bases']} bases but the catalog's "
             f"n50 is {cataloged.n50_bp}"
         )
+
+
+# ---------------------------------------------------------------------------------------------
+# Samples and the yeast reference sequences.
+#
+# measurement's own CHECK requires a sample, strain or experiment, and all three were empty --
+# which made a measurement unstorable however good the extraction. These close the cheapest one
+# and register the two references whose translation table the whole project turns on.
+# ---------------------------------------------------------------------------------------------
+
+
+def _conn_with_runs() -> sqlite3.Connection:
+    connection = open_db(IN_MEMORY)
+    connection.execute(
+        "INSERT INTO dataset (id, accession, repository, zone, evidence, confidence) "
+        "VALUES ('YAA:DATASET:s1','SRP1','SRA','R','t','high')"
+    )
+    for accession in ("SRR1", "ERR2"):
+        connection.execute(
+            "INSERT INTO sra_run (id, run_accession, dataset_id, organism, acquisition_status, "
+            "priority_rank, retrieved_at, zone, evidence, confidence, relevance_uncertain) "
+            "VALUES (?,?,'YAA:DATASET:s1','S. cerevisiae','discovered',0,'2026-01-01','R','t',"
+            "'high',0)",
+            (f"YAA:SRARUN:{accession}", accession),
+        )
+    return connection
+
+
+def test_one_sample_per_run_with_strain_and_conditions_left_null() -> None:
+    """NULL is the honest state, not an omission: which strain a run used and under what
+    conditions are curation questions, and a guess here would be indistinguishable from a
+    curated answer."""
+    connection = _conn_with_runs()
+    try:
+        assert L.load_samples(connection)["sample"] == 2
+        rows = connection.execute(
+            "SELECT id, dataset_id, strain_id, condition_context_id, zone FROM sample"
+        ).fetchall()
+        assert {row["id"] for row in rows} == {"YAA:SAMPLE:SRR1", "YAA:SAMPLE:ERR2"}
+        assert all(row["strain_id"] is None for row in rows)
+        assert all(row["condition_context_id"] is None for row in rows)
+        assert all(row["dataset_id"] == "YAA:DATASET:s1" for row in rows)
+        assert all(row["zone"] == "R" for row in rows)
+    finally:
+        connection.close()
+
+
+def test_sample_loading_is_idempotent() -> None:
+    connection = _conn_with_runs()
+    try:
+        L.load_samples(connection)
+        L.load_samples(connection)
+        assert connection.execute("SELECT COUNT(*) FROM sample").fetchone()[0] == 2
+    finally:
+        connection.close()
+
+
+def test_a_measurement_can_attach_to_a_loaded_sample(settings: Settings) -> None:
+    """The reason load_samples exists. Before it, measurement's CHECK had nothing to satisfy."""
+    from fermdb.db.vocabularies import load_vocabularies
+
+    connection = _conn_with_runs()
+    try:
+        L.load_samples(connection)
+        load_vocabularies(connection, settings)
+        connection.execute(
+            "INSERT INTO measurement (id, sample_id, quantity_kind, product_id, "
+            "value_as_reported, unit_as_reported, is_fraction, is_below_lod, is_upper_bound, "
+            "is_digitized, source_locator, zone, evidence, confidence) "
+            "VALUES ('YAA:M:1','YAA:SAMPLE:SRR1','titer','YAA:PRODUCT:isobutanol','22.6','g/L',"
+            "0,0,0,0,'text','I','t','unverified')"
+        )
+        assert connection.execute("SELECT COUNT(*) FROM measurement").fetchone()[0] == 1
+    finally:
+        connection.close()
+
+
+@pytest.mark.skipif(
+    not Path(os.path.expanduser("~/fermdb-data/genomes/nc_001224.gb")).is_file(),
+    reason="the mitochondrial GenBank record lives in the derived tier",
+)
+def test_mitochondrial_translation_verified_is_earned_not_assumed() -> None:
+    """The flag means 'this reference's CDS reproduce NCBI's own translation under table 3', and
+    it is recomputed per load. Carrying it forward from a previous run would let a replaced file
+    inherit a verification it never passed."""
+    from fermdb.omics.mito_transcripts import parse_mitochondrial_cds
+
+    text = Path(os.path.expanduser("~/fermdb-data/genomes/nc_001224.gb")).read_text(
+        encoding="utf-8"
+    )
+    records, _ = parse_mitochondrial_cds(text)
+    assert records
+    assert any(record.table_1_would_differ for record in records), (
+        "a mitochondrial reference that reads identically under table 1 does not demonstrate the "
+        "disagreement it is kept to prove"
+    )
