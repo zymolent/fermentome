@@ -60,3 +60,85 @@ The honest read: **the project is ahead on everything a machine can do alone and
 the part that needs you.** The 20-paper calibration PLAN.md calls for — measuring the real
 curation rate before sizing later phases — has not been run, and it is the next thing that would
 turn these week estimates into something grounded.
+
+---
+
+# Update — later the same day
+
+Eleven commits since the section above. **No phase acceptance criterion has moved**, and that is
+the most important sentence here: `measurement` 0, `strain` 0, `pathway_configuration` 0, exactly
+as before. Phase 1 is still ~15%.
+
+What changed is not progress through the plan but the discovery that **the plan had a hole in it,
+and the hole was load-bearing.**
+
+## The hole
+
+`accept` writes nothing into Zone R — correctly, since collapsing accept and promote would mean
+accepting silently created canonical data. It defers to a separate curator action. **That action
+did not exist.** Nothing in `src/` wrote `measurement`, `strain`, `modification`,
+`condition_context`, `bottleneck` or `experiment`; only tests did.
+
+So this morning's "what remains" list was wrong in its ordering. It said extraction, then
+curation, then phase 1 content falls out. It does not fall out. A curator could have reviewed all
+55 proposals perfectly and every one of those tables would still have read zero, with nothing
+anywhere reporting that the work had not landed.
+
+That is now built, with 69 of 76 proposals leading somewhere.
+
+## What the machinery found on the way
+
+Each of these was invisible until something tried to read the data back.
+
+| found | how |
+|---|---|
+| `competing`, `genes`, `carrier` never reached the database | building the Pathway page; `data/pathways/*.yaml` recorded them and the INSERT named none |
+| `carbons`, `redox`, `pair`, `adenylate` likewise | reading the loader properly after the first three |
+| No migration path existed at all | needing one; the only route past a version bump was delete-and-rebuild |
+| `strains` had no genotype field | Wess et al.'s 17 genotypes going in as 17 bare names |
+| `modification_types.tsv` has 16 types, the table's CHECK accepts 9 | writing the modification promoter |
+| Wess: 6 of 17 strains extracted | a measurement referencing a strain nobody proposed |
+| Watanabe: 3 of 22 strains, and the best numbers missed (230/221 mg/L against 94/83) | the same check |
+| My own deletion series was wrong | reading the results section instead of the abstract |
+
+The last one is worth keeping. I reported `JWY04 + gpd1/2 → 1.32` and `+ ald6 → 2.09` as if added
+straight to JWY04. Both strains carry **Δadh1**, and the paper is explicit that deleting *ADH1*
+alone did not increase isobutanol — it enhanced glycerol formation, which is *why* gpd1/2
+followed. I made the same error the extraction did: reading the abstract's prose as a lineage.
+With genotypes now parsed, that question is a set membership test rather than a reading of
+English.
+
+## Where today's work sits in the plan
+
+Mostly **nowhere**, which is worth being plain about:
+
+* The query layer is a prerequisite for Q.5's deferred "Web UI", not a phase.
+* Promotion is phase-0/1 infrastructure the plan assumed and never listed.
+* The migration mechanism is not in the plan at all.
+
+None of it is scope creep — each was blocking the step in front of it — but none of it advances a
+phase either. The phase table above still stands.
+
+## The revised dependency order
+
+1. **Curation.** 76 proposals, every span verifying. Now the only thing between here and phase 1
+   content, because the step after it exists.
+2. **Phase 1 content**, which now genuinely does fall out of 1.
+3. **Phase 3's recall test**, once there are configurations to recall.
+4. Condition annotation, phase 1b, phase 2 — unchanged.
+
+## Two decisions waiting on you
+
+* **`modification.type`'s CHECK** accepts 9 values; the curated vocabulary defines 16. The
+  curated file is the source of truth, so the table is wrong — but which nine more to model is
+  curation, not mechanics. 2 of 12 queued modifications are blocked on it.
+* **`conditions` → `condition_context`.** The extraction emits one record per facet;
+  `condition_context` is one immutable hash-deduplicated row per whole context. Nothing in a
+  payload says which facets belong together, and a wrong grouping invents a context that
+  measurements would then be compared across. 6 proposals blocked.
+
+## The estimate, unchanged and now better grounded
+
+Still ahead on everything a machine can do alone, still not started on the part that needs a
+person. The 20-paper calibration — measuring the real curation rate before sizing later phases —
+has still not been run, and it is still the thing that would turn week estimates into numbers.
