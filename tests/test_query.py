@@ -651,3 +651,62 @@ def test_every_join_condition_is_still_checked(conn: sqlite3.Connection) -> None
         B.Select("thing").join("other", ("a = b", "c; DROP TABLE thing = d"))
     with pytest.raises(B.QueryError):
         B.Select("thing").join("other", [])
+
+
+# --------------------------------------------------------------------------- genes
+
+
+def test_a_gene_is_findable_by_any_of_its_three_names(atlas_v6: sqlite3.Connection) -> None:
+    """Internal id, systematic name and standard name are all how a person refers to a gene.
+
+    Accepting only the atlas's own identifier would make the page usable only by someone who
+    already knows the atlas.
+    """
+    from fermdb.query import genes as G
+
+    by_id = G.read_gene(atlas_v6, "YAA:GENE:leu4")
+    by_standard = G.read_gene(atlas_v6, "leu4")  # case-insensitive
+    assert by_id is not None and by_standard is not None
+    assert by_id.id == by_standard.id
+    assert G.read_gene(atlas_v6, "NOSUCHGENE") is None
+
+
+def test_the_gene_page_names_the_sections_it_cannot_fill(atlas_v6: sqlite3.Connection) -> None:
+    """P.2 lists nine sections; this reader serves four. A page that drops five looks complete."""
+    from fermdb.query import genes as G
+
+    read = G.read_gene(atlas_v6, "LEU4")
+    assert read is not None
+    absent = read.absent_sections
+    assert {"expression", "interactions", "regulators", "variants_across_strains"} <= set(absent)
+    assert "matrices" in absent["expression"]  # says where the numbers actually are
+    assert all(why for why in absent.values())  # every absence carries a reason
+    assert absent["engineering_history"].startswith("no modification rows")
+
+
+def test_a_competing_reaction_is_visible_on_the_gene(atlas_v6: sqlite3.Connection) -> None:
+    """The field schema v6 recovered, surfacing where a reader would look for it.
+
+    "LEU4 is in the pathway" and "LEU4 takes carbon out of it" are different facts, and before
+    `reaction.competing` existed the page could only say the first.
+    """
+    from fermdb.query import genes as G
+
+    atlas_v6.execute("UPDATE reaction SET competing = 1 WHERE id = 'YAA:RXN:leu'")
+    read = G.read_gene(atlas_v6, "LEU4")
+    assert read is not None
+    assert len(read.reactions) == 1
+    assert read.reactions[0].competing.unwrap() is True
+    assert len(read.competing_reactions) == 1
+    assert read.as_json()["counts"]["competing_reactions"] == 1
+
+
+def test_an_unset_competing_flag_is_absent_not_false(atlas_v6: sqlite3.Connection) -> None:
+    """An imported reaction nobody assessed must not read as "known not to compete"."""
+    from fermdb.query import genes as G
+
+    atlas_v6.execute("UPDATE reaction SET competing = NULL WHERE id = 'YAA:RXN:leu'")
+    read = G.read_gene(atlas_v6, "LEU4")
+    assert read is not None
+    assert read.reactions[0].competing.is_known is False
+    assert read.competing_reactions == ()  # not known to compete is not the same as not competing

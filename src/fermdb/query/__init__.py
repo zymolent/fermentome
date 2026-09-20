@@ -25,6 +25,8 @@ What is here:
   it would write. The curation queue's read side.
 * :mod:`~fermdb.query.publications` -- one paper, what is held of it, and every finding with
   the sentence it came from read back out of the document.
+* :mod:`~fermdb.query.genes` -- one gene, its pathway role, and the P.2 sections the atlas
+  cannot fill, named rather than omitted.
 
 What is deliberately **not** here yet: graph traversal, lexical and semantic search (PLAN.md O.1
 lists four modalities; this package implements the first). They are additive and are listed as
@@ -45,6 +47,7 @@ from .coverage import (
     page_readiness,
     read_coverage,
 )
+from .genes import AnnotationRead, GeneRead, ReactionRoleRead, list_genes, read_gene
 from .publications import (
     Finding,
     FullTextAvailability,
@@ -80,12 +83,14 @@ __all__ = [
     "MAX_ROWS",
     "PAGES",
     "Absence",
+    "AnnotationRead",
     "CONTEXT_CHARS",
     "Cited",
     "Coverage",
     "EntityCoverage",
     "EvidenceLevel",
     "Finding",
+    "GeneRead",
     "FullTextAvailability",
     "Page",
     "PageReadiness",
@@ -94,6 +99,7 @@ __all__ = [
     "Quantity",
     "QueryError",
     "QueryValueError",
+    "ReactionRoleRead",
     "ReviewPacket",
     "Select",
     "ScreeningRead",
@@ -103,11 +109,13 @@ __all__ = [
     "corpus_shape",
     "count_of",
     "read_coverage",
+    "read_gene",
     "read_publication",
     "review_packet",
     "review_queue",
     "search_publications",
     "from_state_column",
+    "list_genes",
     "from_text_column",
     "page_readiness",
 ]

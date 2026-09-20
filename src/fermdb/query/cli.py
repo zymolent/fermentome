@@ -19,6 +19,7 @@ import sys
 from ..config import Settings
 from ..db import open_db
 from .coverage import page_readiness, read_coverage
+from .genes import list_genes, read_gene
 from .pathways import list_pathways, read_pathway
 from .publications import corpus_shape, read_publication, search_publications
 from .review import ReviewPacket, review_packet, review_queue
@@ -276,6 +277,52 @@ def cmd_query_publication(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_query_gene(args: argparse.Namespace) -> int:
+    """One gene: identity, function, pathway role, and the sections the atlas cannot fill."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        if args.gene is None:
+            for gene_id, name in list_genes(conn, limit=args.limit):
+                print(f"{name:<12}{gene_id}")
+            return 0
+        read = read_gene(conn, args.gene)
+    finally:
+        conn.close()
+
+    if read is None:
+        print(f"no gene matching {args.gene!r}", file=sys.stderr)
+        return 2
+    if args.json:
+        json.dump(read.as_json(), sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    print(f"{read.standard_name.display}  ({read.systematic_name.display})")
+    print(f"  group      {read.gene_group_id.display}   anchor {read.gene_group_anchor.display}")
+    print(f"  assembly   {read.assembly_accession.display}")
+    print()
+    print(f"  {len(read.reactions)} reaction(s), {len(read.competing_reactions)} competing")
+    for role in read.reactions:
+        mark = "drain" if role.competing.or_none() is True else "     "
+        print(f"    {mark} {role.reaction_name.display[:46]:<48}{role.compartment.display}")
+    print()
+    print(f"  {len(read.annotations)} functional annotation(s)")
+    by_source: dict[str, int] = {}
+    for ann in read.annotations:
+        by_source[ann.source] = by_source.get(ann.source, 0) + 1
+    for source, count in sorted(by_source.items()):
+        print(f"    {source:<16}{count:>4}")
+    for ann in read.annotations[: args.terms]:
+        print(f"      {ann.term_id:<16}{ann.term_label.display[:56]}")
+    print()
+    print("  not held by this page:")
+    for section, why in read.absent_sections.items():
+        print(f"    {section:<26}{why}")
+    return 0
+
+
 def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add ``fermdb query ...`` to an existing top-level subparsers action."""
     p_query = sub.add_parser(
@@ -344,3 +391,14 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_pub.set_defaults(func=cmd_query_publication)
+
+    p_gene = query_sub.add_parser(
+        "gene", help="one gene: function, pathway role, and what the atlas cannot fill (P.2)"
+    )
+    p_gene.add_argument("gene", nargs="?", help="id, systematic name (YLR355C) or standard (ILV5)")
+    p_gene.add_argument("--limit", type=int, default=50, help="how many to list")
+    p_gene.add_argument("--terms", type=int, default=6, help="how many annotation terms to show")
+    p_gene.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_gene.set_defaults(func=cmd_query_gene)

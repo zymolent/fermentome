@@ -1,0 +1,102 @@
+# The translational activator map — which nuclear-encoded proteins license translation of each
+# mitochondrial mRNA, and therefore where a heterologous ORF can be put.
+#
+# MITOCHONDRIAL_PROGRAM.md §2.1 calls this "the binding constraint" and §3 budgets it as ~10 loci
+# of phase-1b curation. Its own table was marked ⚠ throughout — background knowledge, never
+# checked. This file is that table checked against the stored corpus, and it CORRECTS §2.1 in
+# three places.
+#
+# WHY IT DECIDES CONSTRUCT DESIGN. Yeast mitochondrial mRNAs are not translated generically: each
+# needs activators that recognise its own 5′ UTR. So a heterologous ORF has to sit behind an
+# existing gene's leader, at that gene's locus, driven by the resident activator — and inserting
+# there costs you the gene whose leader you borrowed, unless it is re-provided.
+#
+# CONFIDENCE. 'medium' means the mapping is quoted from a paper in this corpus, named in
+# `evidence`. 'unverified' means it is carried over from MITOCHONDRIAL_PROGRAM.md §2.1 and was
+# NOT found in the stored full texts — which is a statement about this corpus, not about the
+# biology. CONVENTIONS.md: never write high confidence from memory.
+
+version: 1
+zone: R
+
+loci:
+
+  - locus: COX1
+    encodes: "cytochrome c oxidase subunit 1"
+    activators: [Pet309, Mss51, Mam33]
+    displaced_if_used: COX1
+    respiration_retained_if_used: false
+    evidence: >-
+      "translation of COX1, COX2, COX3 and CYTB mRNAs requires specific nuclear-encoded proteins:
+      Pet309/Mss51/Mam33 for COX1" — doi:10.1093/nar/gkx127. Pet309's action via the COX1 5′-UTR
+      is demonstrated directly in doi:10.4161/rna.29780: "Mitochondrial synthesis of Cox1 ... is
+      controlled by Mss51 and Pet309, two mRNA-specific translational activators that act via the
+      COX1 mRNA 5′-UTR", with RNA coimmunoprecipitation showing Pet309 binds COX1 mRNA in vivo.
+      CORRECTS §2.1, which lists only Pet309 and Mss51: Mam33 is a third.
+    confidence: medium
+
+  - locus: COX2
+    encodes: "cytochrome c oxidase subunit 2"
+    activators: [Pet111]
+    displaced_if_used: COX2
+    respiration_retained_if_used: false
+    evidence: >-
+      "Pet111 for COX2" — doi:10.1093/nar/gkx127. This is the locus the ARG8ᵐ marker is inserted
+      at in the classical workflow (see the strain table in doi:10.1091/mbc.e17-09-0560, where
+      EHW154 carries cox2-208::ARG8m), so it is the best-precedented insertion site.
+    confidence: medium
+
+  - locus: COX3
+    encodes: "cytochrome c oxidase subunit 3"
+    activators: [Pet54, Pet122, Pet494]
+    displaced_if_used: COX3
+    respiration_retained_if_used: false
+    evidence: >-
+      "Pet54/Pet122/Pet494 for COX3" — doi:10.1093/nar/gkx127. Three activators for one leader,
+      which matters for design: a construct at this locus depends on all three being present.
+    confidence: medium
+
+  - locus: COB
+    encodes: "cytochrome b (CYTB)"
+    activators: [Cbs1, Cbs2, Cbp1]
+    displaced_if_used: COB
+    respiration_retained_if_used: false
+    evidence: >-
+      "the TAs of COB mRNA (Cbs1, Cbs2, and Cbp1)" — doi:10.1093/nar/gkaf634. The same corpus
+      paper doi:10.1093/nar/gkx127 names "Cbp3/Cbp6 for CYTB", which is assembly rather than
+      translational activation ⚠ and is not merged in here. CORRECTS §2.1, which lists only
+      Cbs1 and Cbs2: Cbp1 is a third.
+    confidence: medium
+
+  - locus: ATP9
+    encodes: "ATP synthase subunit 9 (OLI1)"
+    activators: [Aep1, Aep2, Atp25]
+    displaced_if_used: ATP9
+    respiration_retained_if_used: false
+    evidence: >-
+      "the ATP9–Aep1–Aep2–Atp25C complex" — doi:10.1093/nar/gkaf634. CORRECTS §2.1, which lists
+      only Aep1 and Aep2: Atp25 participates. Note the synonym recorded elsewhere in this atlas:
+      ATP9 is OLI1 (src/fermdb/omics/baseline.py).
+    confidence: medium
+
+  - locus: ATP6
+    encodes: "ATP synthase subunit 6"
+    activators: [Atp22]
+    displaced_if_used: ATP6
+    respiration_retained_if_used: false
+    evidence: >-
+      Carried over from MITOCHONDRIAL_PROGRAM.md §2.1 and NOT found in the 1,308 stored full
+      texts. That is a statement about this corpus, not about the biology: the mapping may well
+      be correct and simply is not in a paper held here. Treated as unverified until a source in
+      hand says otherwise.
+    confidence: unverified
+
+# WHAT THIS MAP DOES NOT YET ANSWER, and both are MITOCHONDRIAL_PROGRAM.md §5 questions:
+#
+#   * Which locus a DUET insert should take. Every locus above costs respiration if used, and the
+#     owner's M3 answer (2026-09-21) makes respiration "preferred for the final industrial
+#     production strain unless a respiration-deficient strain demonstrates a compelling and
+#     scalable process advantage". So every one of these is a conditional burden, not a free
+#     choice — which is exactly what metabolic/chassis.py now gates strategy E on.
+#   * Whether a soluble heterologous enzyme has ever been made from yeast mtDNA. §2.3 expects the
+#     answer to be thin, and "the size of the gap is the size of the risk". Not yet searched.
