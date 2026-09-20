@@ -100,9 +100,22 @@ def no_network(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def settings() -> Settings:
-    """Settings pinned to the repo's own env/paths.yaml, isolated from the real environment."""
-    return Settings.load(paths_file=PATHS_FILE, env={})
+def settings(tmp_path: Path) -> Settings:
+    """Settings pinned to the repo's own env/paths.yaml, with the *derived tier* under tmp_path.
+
+    `env={}` alone isolates from environment variables, not from the paths themselves -- it still
+    resolves `data_dir` to the developer's real `~/fermdb-data`, so
+    `test_load_source_text_refuses_a_pdf` was writing its fixture PDF into live data (it was found
+    there, as `fulltext/aa/aa.pdf`, sitting beside genuinely acquired papers). Same isolation as
+    `tests/test_acquire.py::settings`.
+    """
+    return Settings.load(
+        paths_file=PATHS_FILE,
+        env={
+            "FERMDB_DATA_DIR": str(tmp_path / "derived"),
+            "FERMDB_SOURCE_ROOT": str(tmp_path / "source"),
+        },
+    )
 
 
 @pytest.fixture
