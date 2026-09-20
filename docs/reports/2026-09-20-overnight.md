@@ -187,3 +187,66 @@ added after each.
 **~$0.85 total.** 172 objects staged for ~$0 (server-side), one c7i.4xlarge at $0.714/h.
 Instances verified at every step; the first instance proved the safety design by terminating
 itself rather than idling.
+
+---
+
+# Final: quantification complete
+
+## 109/109 runs quantified, 0 failures
+
+The instance terminated itself on completion. Final safety sweep: **0 instances in any state**
+across us-east-1, ap-south-1, us-west-2, eu-west-1, eu-central-1; **0 orphaned volumes**.
+
+## Expression matrices
+
+In `~/fermdb-data/matrices/` and mirrored to `s3://fermdb-raw-211125789985/matrices/`:
+
+| reference | genes | samples | median genes detected |
+|---|---|---|---|
+| **S288C** | 6,187 | **99** | 5,808 |
+| *E. coli* K-12 MG1655 | 4,440 | 6 | 4,044 |
+| *L. cremoris* KW2 | 2,325 | 4 | 1,928 |
+
+Counts and TPM are written **separately per organism and never concatenated** — they are
+different reference spaces, and a combined matrix would be a category error.
+
+## QC: the gate earned its place
+
+Median mapping **78.6%**, 105/109 at or above the 50% accept floor.
+
+| band | runs | |
+|---|---|---|
+| **< 35% — reject** | 2 | `SRR29711605` (9.6%), `SRR29711606` (9.7%), both *E. coli* |
+| 35–50% — flag | 2 | `SRR16481348` (47.1%), `SRR16481350` (49.9%), yeast |
+| ≥ 50% — accept | 105 | |
+
+Per reference: *L. cremoris* median 88.0%, S288C 78.6% (47.1–94.4), *E. coli* 54.4% (9.6–55.0).
+
+**The two rejects are worth a human look rather than a silent drop.** They are consecutive
+accessions from one study, 18.8M reads each, and map at 9.6% against *E. coli* MG1655 while the
+other four *E. coli* runs sit at 54–55%. A tenfold gap within one organism is not a quality
+gradient — it suggests those two are a different organism, a different strain, or not the library
+type their metadata claims (unverified). Recorded in `qc.tsv`, excluded from analyses, not deleted.
+
+*E. coli*'s 54% median is itself lower than yeast's and is expected: bacterial total-RNA libraries
+without rRNA depletion map poorly onto a CDS+ncRNA reference (unverified). Not a defect, but it
+means *E. coli* and yeast mapping rates are not comparable to each other.
+
+## One more latent bug, found while assembling
+
+The matrix build failed part-way with `Could not connect to the endpoint URL:
+...s3.ap-south-1.amazonaws.com`. The bucket is in **us-east-1**; the CLI default profile is
+**ap-south-1**; with no explicit `--region`, the CLI built a wrong-region endpoint. Earlier calls
+had survived on S3 redirects, which is what makes this the bad kind of bug — it works most of the
+time. Region is now pinned explicitly and every call retries with backoff.
+
+## Final cost
+
+| | |
+|---|---|
+| EC2 | ~3 h `c7i.4xlarge` @ $0.714/h + a 35-min failed first attempt ≈ **$2.10** |
+| S3 storage, 112 GB Intelligent-Tiering | ~$0.14/month once tiered |
+| Transfer, requests | pennies |
+| **Total spent** | **≈ $2.10** against a $10 ceiling |
+
+Nothing left running.
