@@ -1,0 +1,153 @@
+{
+ "results": [
+  {
+   "entryType": "UniProtKB reviewed (Swiss-Prot)",
+   "primaryAccession": "P07246",
+   "uniProtkbId": "ADH3_YEAST",
+   "proteinDescription": {
+    "recommendedName": {
+     "fullName": {
+      "evidences": [
+       {
+        "evidenceCode": "ECO:0000305"
+       }
+      ],
+      "value": "Alcohol dehydrogenase 3, mitochondrial"
+     },
+     "ecNumbers": [
+      {
+       "evidences": [
+        {
+         "evidenceCode": "ECO:0000269",
+         "source": "PubMed",
+         "id": "3546317"
+        }
+       ],
+       "value": "1.1.1.1"
+      }
+     ]
+    },
+    "alternativeNames": [
+     {
+      "fullName": {
+       "value": "Alcohol dehydrogenase III"
+      },
+      "shortNames": [
+       {
+        "value": "ADHIII"
+       }
+      ]
+     },
+     {
+      "fullName": {
+       "value": "YADH-3"
+      }
+     }
+    ],
+    "flag": "Precursor"
+   },
+   "genes": [
+    {
+     "geneName": {
+      "value": "ADH3"
+     },
+     "orderedLocusNames": [
+      {
+       "value": "YMR083W"
+      }
+     ],
+     "orfNames": [
+      {
+       "value": "YM9582.08"
+      }
+     ]
+    }
+   ],
+   "uniProtKBCrossReferences": [
+    {
+     "database": "GO",
+     "id": "GO:0005737",
+     "properties": [
+      {
+       "key": "GoTerm",
+       "value": "C:cytoplasm"
+      },
+      {
+       "key": "GoEvidenceType",
+       "value": "IBA:GO_Central"
+      }
+     ]
+    },
+    {
+     "database": "GO",
+     "id": "GO:0005743",
+     "properties": [
+      {
+       "key": "GoTerm",
+       "value": "C:mitochondrial inner membrane"
+      },
+      {
+       "key": "GoEvidenceType",
+       "value": "EXP:UniProtKB"
+      }
+     ],
+     "evidences": [
+      {
+       "evidenceCode": "ECO:0000269",
+       "source": "PubMed",
+       "id": "2937632"
+      }
+     ]
+    },
+    {
+     "database": "GO",
+     "id": "GO:0005759",
+     "properties": [
+      {
+       "key": "GoTerm",
+       "value": "C:mitochondrial matrix"
+      },
+      {
+       "key": "GoEvidenceType",
+       "value": "IDA:SGD"
+      }
+     ],
+     "evidences": [
+      {
+       "evidenceCode": "ECO:0000314",
+       "source": "PubMed",
+       "id": "3550419"
+      }
+     ]
+    },
+    {
+     "database": "InterPro",
+     "id": "IPR013149",
+     "properties": [
+      {
+       "key": "EntryName",
+       "value": "ADH-like_C"
+      }
+     ]
+    },
+    {
+     "database": "Pfam",
+     "id": "PF08240",
+     "properties": [
+      {
+       "key": "EntryName",
+       "value": "ADH_N"
+      },
+      {
+       "key": "MatchStatus",
+       "value": "1"
+      }
+     ]
+    }
+   ],
+   "extraAttributes": {
+    "uniParcId": "UPI0000125584"
+   }
+  }
+ ]
+}
