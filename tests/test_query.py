@@ -20,6 +20,7 @@ import pytest
 
 from fermdb.query import builder as B
 from fermdb.query import coverage as C
+from fermdb.query import pathways as P
 from fermdb.query import values as V
 
 # --------------------------------------------------------------------------- the three states
@@ -372,3 +373,137 @@ def test_coverage_entities_are_real_tables() -> None:
         connection.close()
     listed = {table for table, _ in C.ENTITIES}
     assert listed <= present, f"not in the schema: {sorted(listed - present)}"
+
+
+# --------------------------------------------------------------------------- pathways
+
+
+@pytest.fixture()
+def atlas_pathway() -> sqlite3.Connection:
+    """A pathway shaped like the real one: no `competing` column, genes inside the evidence."""
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.executescript(
+        """
+        CREATE TABLE pathway (
+            id TEXT PRIMARY KEY, name TEXT, evidence TEXT, confidence TEXT, zone TEXT
+        );
+        CREATE TABLE reaction (
+            id TEXT PRIMARY KEY, name TEXT, ec_number TEXT, equation TEXT,
+            compartment_id TEXT, reversible INTEGER, evidence TEXT, confidence TEXT, zone TEXT
+        );
+        CREATE TABLE pathway_reaction (
+            pathway_id TEXT, reaction_id TEXT, step_order INTEGER, step_role_id TEXT
+        );
+        CREATE TABLE metabolite (
+            id TEXT PRIMARY KEY, name TEXT, formula TEXT, zone TEXT
+        );
+        CREATE TABLE reaction_participant (
+            reaction_id TEXT, metabolite_id TEXT, role TEXT, coefficient REAL
+        );
+        INSERT INTO pathway VALUES ('YAA:PWY:test', 'test', 'curated', 'high', 'R');
+        INSERT INTO reaction VALUES (
+            'YAA:RXN:leu', '2-isopropylmalate synthase', '2.3.3.13',
+            'kiv + accoa -> ipm + coa', 'mitochondrial_matrix', 0,
+            'The leucine branch. LEU4 is the major isozyme, LEU9 minor. [genes: LEU4, LEU9]',
+            'high', 'R'
+        );
+        INSERT INTO pathway_reaction VALUES ('YAA:PWY:test', 'YAA:RXN:leu', 1, 'transporter');
+        INSERT INTO metabolite VALUES ('kiv', '2-ketoisovalerate', 'C5H7O3', 'R');
+        INSERT INTO metabolite VALUES ('nadh', 'NADH', NULL, 'R');
+        INSERT INTO reaction_participant VALUES ('YAA:RXN:leu', 'kiv', 'substrate', 1);
+        -- NADH as the real loader stores it: a plain substrate, carrier flag dropped.
+        INSERT INTO reaction_participant VALUES ('YAA:RXN:leu', 'nadh', 'substrate', 1);
+        """
+    )
+    return connection
+
+
+def test_competing_is_absent_rather_than_false(atlas_pathway: sqlite3.Connection) -> None:
+    """The loader never writes `competing`, so the reader must not invent a value for it.
+
+    Reporting `competing: false` for the valine branch would not be a missing fact but a false
+    one -- and one a route ranker would act on.
+    """
+    read = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert read is not None
+    branch = read.reactions[0]
+    assert branch.competing.is_known is False
+    assert branch.competing.absence is V.Absence.NOT_RECORDED
+    assert "value" not in branch.competing.as_json()
+    assert branch.competing.display == "not recorded"
+
+
+def test_the_page_says_it_cannot_be_rendered_as_specified(
+    atlas_pathway: sqlite3.Connection,
+) -> None:
+    """PLAN.md P.3: a diagram that can disagree with the database is decoration."""
+    read = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert read is not None
+    assert read.is_renderable_as_specified is False
+    assert any("competing branches" in gap for gap in read.gaps)
+    assert any("genes" in gap for gap in read.gaps)
+
+
+def test_genes_are_not_parsed_back_out_of_the_evidence_string(
+    atlas_pathway: sqlite3.Connection,
+) -> None:
+    """The names are sitting right there in the evidence text. Recovering them would be a lie.
+
+    A structured gene link the atlas cannot defend is worse than a reported absence, and it would
+    hide the loader bug behind a page that looks complete.
+    """
+    read = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert read is not None
+    reaction = read.reactions[0]
+    assert "LEU4" in reaction.evidence  # the names ARE present, as free text
+    assert reaction.genes.is_known is False  # and are still not claimed as a link
+
+
+def test_the_reader_picks_up_a_competing_column_if_the_schema_grows_one(
+    atlas_pathway: sqlite3.Connection,
+) -> None:
+    """So fixing the loader needs no change here, and the gap list shrinks on its own."""
+    atlas_pathway.execute("ALTER TABLE reaction ADD COLUMN competing INTEGER")
+    atlas_pathway.execute("UPDATE reaction SET competing = 1 WHERE id = 'YAA:RXN:leu'")
+    read = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert read is not None
+    assert read.reactions[0].competing.unwrap() is True
+    assert not any("competing branches" in gap for gap in read.gaps)
+
+
+def test_a_carrier_stored_as_a_substrate_is_not_reported_as_a_non_carrier(
+    atlas_pathway: sqlite3.Connection,
+) -> None:
+    """P.2 wants "cofactors on the edges" and the atlas cannot say which participants are edges.
+
+    The loader never writes role 'cofactor' and `metabolite` has no `carrier` column, so NADH sits
+    in `reaction_participant` as a plain substrate. Reporting `is_carrier: false` would be the
+    quiet kind of wrong -- every carrier in the atlas confidently drawn as backbone carbon.
+    """
+    read = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert read is not None
+    reaction = read.reactions[0]
+    nadh = next(p for p in reaction.participants if p.metabolite_id == "nadh")
+    assert nadh.is_carrier.is_known is False
+    assert nadh.is_carrier.absence is V.Absence.NOT_RECORDED
+    assert reaction.cofactors == ()  # nothing is *known* to be a carrier
+    assert any("cofactors" in gap for gap in read.gaps)
+
+
+def test_an_explicit_cofactor_role_settles_it(atlas_pathway: sqlite3.Connection) -> None:
+    """A loader that does use the role the CHECK already permits needs no other change."""
+    atlas_pathway.execute(
+        "UPDATE reaction_participant SET role = 'cofactor' WHERE metabolite_id = 'nadh'"
+    )
+    read = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert read is not None
+    reaction = read.reactions[0]
+    assert [p.metabolite_id for p in reaction.cofactors] == ["nadh"]
+    assert [p.metabolite_id for p in reaction.substrates] == ["kiv"]
+    assert not any("cofactors" in gap for gap in read.gaps)
+
+
+def test_an_unknown_pathway_is_none_not_an_empty_graph(atlas_pathway: sqlite3.Connection) -> None:
+    """An empty reaction list would read as "a pathway with no reactions", which is a claim."""
+    assert P.read_pathway(atlas_pathway, "YAA:PWY:nope") is None

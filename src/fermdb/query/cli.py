@@ -19,6 +19,7 @@ import sys
 from ..config import Settings
 from ..db import open_db
 from .coverage import page_readiness, read_coverage
+from .pathways import list_pathways, read_pathway
 
 __all__ = ["add_query_subcommand"]
 
@@ -88,6 +89,47 @@ def cmd_query_pages(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_query_pathway(args: argparse.Namespace) -> int:
+    """One pathway's reaction graph, and what a diagram of it could not honestly show."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        if args.pathway is None:
+            for pathway_id, name in list_pathways(conn):
+                print(f"{pathway_id:<40}{name}")
+            return 0
+        read = read_pathway(conn, args.pathway)
+    finally:
+        conn.close()
+
+    if read is None:
+        print(f"no pathway with id {args.pathway!r}", file=sys.stderr)
+        return 2
+
+    if args.json:
+        json.dump(read.as_json(), sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    print(f"{read.name}  [{read.id}]  zone {read.zone.value if read.zone else '?'}")
+    print()
+    for reaction in read.reactions:
+        competing = reaction.competing.display
+        print(
+            f"{reaction.step_order:>3}. {reaction.step_role.display:<16}"
+            f"{reaction.name.display:<42}competing: {competing}"
+        )
+        print(f"     {reaction.equation.display}")
+        print(f"     compartment {reaction.compartment.display}")
+    if read.gaps:
+        print()
+        print("This page cannot be rendered as PLAN.md P.2 specifies it:")
+        for gap in read.gaps:
+            print(f"  - {gap}")
+    return 0
+
+
 def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add ``fermdb query ...`` to an existing top-level subparsers action."""
     p_query = sub.add_parser(
@@ -113,3 +155,15 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_pages.set_defaults(func=cmd_query_pages)
+
+    p_pathway = query_sub.add_parser(
+        "pathway",
+        help="one pathway's reaction graph, with what a diagram of it could not honestly show",
+    )
+    p_pathway.add_argument(
+        "pathway", nargs="?", help="pathway id; omit to list the curated pathways"
+    )
+    p_pathway.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_pathway.set_defaults(func=cmd_query_pathway)
