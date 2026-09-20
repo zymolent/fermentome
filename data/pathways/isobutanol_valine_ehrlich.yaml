@@ -203,6 +203,18 @@ reactions:
       Draws 2-KIV into pantothenate and thence CoA (unverified). NOT interchangeable with the
       other two as a deletion candidate: pantothenate is a CoA precursor and the pathway is
       plausibly essential (unverified), so a proposal here must be an attenuation unless an
-      essentiality check says otherwise. The atlas has no measured split of 2-KIV between the
-      three drains in any chassis -- that is a seeded knowledge_gap, not one found later.
+      essentiality check says otherwise.
+
+      2026-09-20, FIRST EVIDENCE AGAINST THE DRAIN BEING MATERIAL: 10.1186/s13068-019-1486-8
+      deleted ECM31 in a CEN.PK113-7D background already carrying ilv2, bdh1/2 and leu4/9
+      deletions, and reports "no statistically significant effect on isobutanol production"
+      (0.52 g/L against 0.50 g/L before it). That is one background, one deletion order and one
+      paper, and the extraction carrying it is Zone I awaiting curation -- so this does not
+      settle the question, and ECM31 stays in the competing set. But the atlas is no longer in
+      the state the next sentence described, and a route ranker proposing an ecm31 deletion
+      should see this number before costing the work.
+
+      The measured split of 2-KIV between the three drains is still unknown in any chassis --
+      what is now measured is the *effect of removing one of them*, which is a different and
+      weaker thing. That remains a seeded knowledge_gap.
     confidence: unverified

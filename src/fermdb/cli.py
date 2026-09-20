@@ -292,6 +292,28 @@ def _resolve_publication_id(conn: object, args: argparse.Namespace) -> str:
     return str(row["id"])
 
 
+def cmd_extract_brief(args: argparse.Namespace) -> int:
+    """Print only the passages of one paper that could support a record."""
+    from .extract.brief import build_brief
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    try:
+        publication_id = _resolve_publication_id(conn, args)
+        excerpt, sections = build_brief(conn, settings, publication_id=publication_id)
+    finally:
+        conn.close()
+    print(f"{publication_id}  [{len(excerpt):,} characters of methods and results]")
+    for section in sections:
+        print()
+        print(f"===== {section.title} =====")
+        if not section.passages:
+            print("  (nothing matched)")
+        for passage in section.passages:
+            print(f"  - {passage[: args.width]}")
+    return 0
+
+
 def cmd_extract_run(args: argparse.Namespace) -> int:
     settings = Settings.load()
     conn = open_db(settings.db_file)
@@ -545,6 +567,16 @@ def build_parser() -> argparse.ArgumentParser:
         "extract", help="LLM extraction of one publication into a proposed Zone I row"
     )
     ex_sub = p_extract.add_subparsers(dest="extract_command", required=True)
+
+    p_ex_brief = ex_sub.add_parser(
+        "brief", help="print only the passages that could support a record, for reading"
+    )
+    brief_target = p_ex_brief.add_mutually_exclusive_group(required=True)
+    brief_target.add_argument("--pmid", default=None)
+    brief_target.add_argument("--doi", default=None)
+    brief_target.add_argument("--publication-id", dest="publication_id", default=None)
+    p_ex_brief.add_argument("--width", type=int, default=300, help="characters per passage")
+    p_ex_brief.set_defaults(func=cmd_extract_brief)
 
     p_ex_run = ex_sub.add_parser(
         "run", help="extract one publication's methods and results (PLAN.md H.5, V.4)"
