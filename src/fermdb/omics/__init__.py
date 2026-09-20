@@ -490,6 +490,80 @@ def cmd_omics_status(_args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_omics_load(_args: argparse.Namespace) -> int:
+    """Load the reference genomes, SRA runs and expression matrices already on disk."""
+    from .load import load_all
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        report = load_all(conn, settings)
+    finally:
+        conn.close()
+    for table, count in report.as_dict().items():
+        print(f"{table:<26}{count:>7}")
+    return 0
+
+
+def cmd_omics_genes(_args: argparse.Namespace) -> int:
+    """Resolve the DUET gene set from the transcript FASTA and verify it against the matrix."""
+    from . import genes as genes_mod
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        report = genes_mod.build(settings, conn)
+    finally:
+        conn.close()
+    check = report.matrix_check
+    for table, count in report.written.items():
+        print(f"{table:<26}{count:>7}")
+    print()
+    print(
+        f"matrix cross-check: {len(check.present)} of "
+        f"{len(check.present) + len(check.missing)} resolved genes present "
+        f"among {check.matrix_rows} matrix rows"
+    )
+    if check.missing:
+        print(f"  MISSING from the matrix: {', '.join(check.missing)}")
+    if report.resolution.gaps:
+        print(f"  not found in the FASTA: {[g.symbol for g in report.resolution.gaps]}")
+    if report.panel_path:
+        print(f"panel written to {report.panel_path}")
+    return 0
+
+
+def cmd_omics_baseline(args: argparse.Namespace) -> int:
+    """Print the DUET expression baseline. No contrasts -- see PLAN.md F.3."""
+    from .baseline import build_baseline
+
+    settings = Settings.load()
+    report = build_baseline(settings)
+    print(
+        f"{report.samples} samples | {report.matrix_genes} matrix genes | "
+        f"{len(report.profiles)} profiled"
+    )
+    if report.missing_mitochondrial_proteins:
+        print()
+        print(
+            "WARNING: the transcriptome behind this matrix contains no mtDNA protein-coding "
+            "genes, so mitochondrial gene expression was never measured:"
+        )
+        print("  " + ", ".join(report.missing_mitochondrial_proteins))
+    print()
+    print(f"{'gene':10}{'systematic':11}{'kind':7}{'median':>10}{'detected':>11}  role")
+    rows = sorted(report.profiles, key=lambda p: -p.median_tpm)
+    for profile in rows[: args.limit] if args.limit else rows:
+        print(
+            f"{(profile.standard_name or '-'):10}{profile.systematic_name:11}"
+            f"{profile.feature_kind:7}{profile.median_tpm:10.1f}"
+            f"{profile.detected_in:>6}/{profile.samples:<4}  {profile.role or ''}"
+        )
+    return 0
+
+
 def add_omics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add `fermdb omics ...` to an existing top-level subparsers action.
 
@@ -540,3 +614,21 @@ def add_omics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "status", help="sra_run/dataset/reference_sequence counts against dataset_families.yaml"
     )
     p_status.set_defaults(func=cmd_omics_status)
+
+    p_load = omics_sub.add_parser(
+        "load", help="load the reference genomes, SRA runs and matrices already on disk"
+    )
+    p_load.set_defaults(func=cmd_omics_load)
+
+    p_genes = omics_sub.add_parser(
+        "genes", help="resolve the DUET gene set and cross-check it against the expression matrix"
+    )
+    p_genes.set_defaults(func=cmd_omics_genes)
+
+    p_baseline = omics_sub.add_parser(
+        "baseline", help="DUET expression baseline across the S288C corpus (no contrasts; F.3)"
+    )
+    p_baseline.add_argument(
+        "--limit", type=int, default=0, help="show only the N highest-expressed genes"
+    )
+    p_baseline.set_defaults(func=cmd_omics_baseline)

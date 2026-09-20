@@ -7,6 +7,7 @@ it produces routes that score perfectly well and cannot happen.
 
 from __future__ import annotations
 
+from .cli import add_atlas_subcommand
 from .curated import (
     PATHWAYS_DIR,
     CuratedPathway,
@@ -25,6 +26,7 @@ from .curated import (
 
 __all__ = [
     "PATHWAYS_DIR",
+    "add_atlas_subcommand",
     "CuratedPathway",
     "Metabolite",
     "Part",

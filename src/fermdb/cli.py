@@ -20,6 +20,13 @@ grows past this.
     python -m fermdb.cli omics discover
     python -m fermdb.cli omics references fetch
     python -m fermdb.cli omics status
+    python -m fermdb.cli omics load
+    python -m fermdb.cli omics genes
+    python -m fermdb.cli omics baseline --limit 15
+    python -m fermdb.cli atlas pathways
+    python -m fermdb.cli atlas routes --limit 10 --write
+    python -m fermdb.cli atlas explain E_mtdna
+    python -m fermdb.cli atlas annotate
     python -m fermdb.cli extract run --pmid 12345678
     python -m fermdb.cli extract run --pmid 12345678 --dry-run
     python -m fermdb.cli curate next
@@ -67,6 +74,7 @@ from .llm import (
     ResultCache,
     build_provider,
 )
+from .metabolic.cli import add_atlas_subcommand
 from .omics import add_omics_subcommand
 from .paths import PathsConfigError
 from .recode import RecodeError, check_compartment_safety, recode
@@ -531,6 +539,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_mq_ingest.set_defaults(func=cmd_literature_manual_queue_ingest)
 
     add_omics_subcommand(sub)
+    add_atlas_subcommand(sub)
 
     p_extract = sub.add_parser(
         "extract", help="LLM extraction of one publication into a proposed Zone I row"
