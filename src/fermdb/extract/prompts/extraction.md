@@ -16,21 +16,29 @@ Sections you were given, in order: {{section_names}}
 
 ## The one rule that matters
 
-Every record you emit carries a `span`: a quote copied **character for character** from the text
-below, plus the 0-based half-open offsets where it sits, so that
+Every record you emit carries a `span`: a quote copied **character for character** out of the
+text below, plus the offsets where you believe it sits.
 
-    excerpt[char_start:char_end] == quote
+**The quote is the requirement. The offsets are a hint.** A deterministic program searches the
+excerpt for your quote and records the position it finds; if your offsets are a little out, that
+costs nothing. So spend no effort counting characters, and never adjust a quote to make an offset
+work -- that trades the one thing that is checked for the one thing that is not.
 
-is exactly true. Offsets count characters of the text between the `<<<EXCERPT` and `EXCERPT>>>`
-markers, starting at 0 on the first character after the newline that follows `<<<EXCERPT`. The
-section markers in the excerpt are part of that text and count toward the offsets, but a quote must
-never cross one.
+What that program will not do is find a quote that is not there. It does not normalize
+whitespace, it does not accept a near match, and it does not accept a paraphrase. A record whose
+quote does not occur in the excerpt is discarded -- not flagged, not corrected, discarded -- and
+the value it carried is lost with it.
 
-A deterministic program re-reads the excerpt at your offsets and compares the result to your quote.
-It does not normalize whitespace, it does not search nearby, and it does not accept a paraphrase. A
-record whose span does not resolve is discarded — not flagged, not corrected, discarded — so an
-approximate quote loses the value it was attached to. If you cannot point at the exact text that
-states a value, do not report the value.
+So: **copy, never compose.** Select the characters with your eyes on the text and reproduce them
+exactly, including capitalisation, hyphens, symbols and spacing. A summary of what a sentence
+means is not a quote, however accurate it is. If you find yourself writing a phrase that reads
+more smoothly than the paper does, you are composing, and that record will be thrown away.
+
+This applies to every record kind equally. A pathway configuration and a culture condition need a
+quote copied from the text exactly as much as a titer does; those are the two that are most often
+described in the model's own words rather than the paper's, and they are discarded for it.
+
+If you cannot point at exact text that states a value, do not report the value.
 
 Choose the shortest quote that contains the fact, usually the clause or table cell it is stated in.
 
