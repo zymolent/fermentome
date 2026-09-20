@@ -1,0 +1,12 @@
+{
+  "doi": "10.9999/fixture-gold-twin",
+  "is_oa": true,
+  "oa_status": "gold",
+  "title": "Fixture: a different paper whose OA location serves the same file as another",
+  "best_oa_location": {
+    "url": "https://fixture.example.org/twin/landing",
+    "url_for_pdf": "https://fixture.example.org/twin/fulltext.pdf",
+    "license": "cc-by",
+    "host_type": "publisher"
+  }
+}

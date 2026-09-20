@@ -168,7 +168,13 @@ def test_resolve_oa_status_prefers_europepmc_when_it_has_a_url() -> None:
 
     assert resolution.resolved_via == "europepmc"
     assert resolution.oa_status == "gold"
-    assert resolution.best_oa_url == "https://europepmc.example.org/PMC1000001/fulltext.pdf"
+    # Structured JATS outranks the PDF: it keeps section and paragraph boundaries, so the
+    # character offsets span verification records stay stable. The PDF is not discarded, it is
+    # the next candidate -- a landing page at the top must never cost us the copy underneath.
+    assert resolution.best_oa_url == (
+        "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC1000001/fullTextXML"
+    )
+    assert "https://europepmc.example.org/PMC1000001/fulltext.pdf" in resolution.candidate_urls
     assert resolution.text_mining_allowed == "yes"
     # Unpaywall is only consulted when Europe PMC did not already yield a URL.
     assert not any("unpaywall" in call for call in transport.calls)
@@ -204,7 +210,13 @@ def test_resolve_oa_status_falls_back_to_pmc_oa_service() -> None:
     resolution = acquire.resolve_oa_status(doi=None, pmid="10000003", transport=transport)
 
     assert resolution.resolved_via == "pmc"
-    assert resolution.best_oa_url == "ftp://fixture.example.org/PMC1000003.pdf"
+    # Europe PMC named a PMCID but listed no full-text URLs, so its derived fullTextXML endpoint
+    # is the only thing it offered. That is not enough on its own -- if it 404s the paper has
+    # nowhere else to go -- so PMC's OA service is still consulted and its locations appended.
+    assert "ftp://fixture.example.org/PMC1000003.pdf" in resolution.candidate_urls
+    assert resolution.best_oa_url == (
+        "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC1000003/fullTextXML"
+    )
     assert resolution.oa_status == "gold"
     assert resolution.pmid == "10000003"
 
@@ -212,7 +224,12 @@ def test_resolve_oa_status_falls_back_to_pmc_oa_service() -> None:
 def test_resolve_oa_status_falls_back_to_europepmc_when_pmc_oa_says_not_open() -> None:
     # Europe PMC named a PMCID but no direct URL, and the PMC OA web service itself then says
     # that id is not open access: resolve_oa_status must not crash or fabricate a URL, and falls
-    # back to Europe PMC's own (URL-less) result rather than PMC's negative one.
+    # back to Europe PMC's own result rather than PMC's negative one.
+    #
+    # The two services disagree here, and that disagreement is not resolvable without trying:
+    # Europe PMC flags the record open access, PMC OA says no. Europe PMC serves the fullTextXML
+    # endpoint itself, so its own opinion governs it -- the URL is offered, and acquisition finds
+    # out by fetching. What must not happen is a *fabricated* PMC location, and none is produced.
     transport = FakeTransport(
         json_by_substring={"ebi.ac.uk": _load_json("europepmc_pmcid_only.json")},
         bytes_by_substring={
@@ -226,7 +243,11 @@ def test_resolve_oa_status_falls_back_to_europepmc_when_pmc_oa_says_not_open() -
 
     assert resolution.resolved_via == "europepmc"
     assert resolution.oa_status == "green"
-    assert resolution.best_oa_url is None
+    assert resolution.candidate_urls == (
+        "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC1000003/fullTextXML",
+    )
+    # Nothing from PMC's negative answer leaked into the result.
+    assert not any("ftp://" in url for url in resolution.candidate_urls)
 
 
 def test_resolve_oa_status_returns_unknown_when_every_source_is_unreachable() -> None:
@@ -398,6 +419,198 @@ def test_acquire_fulltext_records_a_failed_fetch_without_fabricating_one(
         "SELECT * FROM manual_download_queue WHERE doi = ?", ("10.9999/fixture-gold",)
     ).fetchone()
     assert queue_row["why_unavailable"] == "fetch_failed"
+
+
+# ---------------------------------------------------------------------------------------------
+# Payload validation.
+#
+# An HTTP 200 is not evidence that a paper came back. In the first real run over the corpus,
+# three of four "stored" papers were HTML: a 2.7 kB <meta refresh> stub, a Nature consent page
+# served from a URL ending .pdf, and a repository record page carrying only an abstract. All
+# three looked acquired, so none reached the manual queue, and extraction would have run against
+# them. Two papers answering with the *same* interstitial is what tripped the checksum index and
+# exposed it -- the constraint was the only thing that noticed.
+# ---------------------------------------------------------------------------------------------
+
+
+def test_classify_payload_identifies_a_pdf_by_its_magic_bytes() -> None:
+    check = acquire.classify_payload(b"%PDF-1.4 body", "application/pdf")
+    assert check.usable is True
+    assert check.kind == "pdf"
+
+
+def test_classify_payload_trusts_bytes_over_a_mislabelled_content_type() -> None:
+    # Servers mislabel in both directions; the bytes are evidence, the header is a claim.
+    assert acquire.classify_payload(b"%PDF-1.4 body", "text/html").usable is True
+    assert acquire.classify_payload(b"<!DOCTYPE html><html>", "application/pdf").usable is False
+
+
+def test_classify_payload_rejects_a_redirect_stub() -> None:
+    stub = b'<!DOCTYPE HTML><html><head><meta HTTP-EQUIV="REFRESH" content="0; url=...">'
+    check = acquire.classify_payload(stub, "text/html;charset=UTF-8")
+    assert check.usable is False
+    assert check.kind == "html"
+    assert check.reason and "landing page" in check.reason
+
+
+def test_classify_payload_accepts_europe_pmc_jats() -> None:
+    jats = b'<?xml version="1.0"?><article><front/><body><sec><p>Text.</p></sec></body></article>'
+    check = acquire.classify_payload(jats, "application/xml")
+    assert check.usable is True
+    assert check.kind == "jats_xml"
+
+
+def test_classify_payload_rejects_xml_that_is_not_an_article() -> None:
+    # Europe PMC answers fullTextXML for a non-OA article with an error document, not a 404.
+    check = acquire.classify_payload(b"<error>not open access</error>", "application/xml")
+    assert check.usable is False
+    assert check.reason and "not a JATS article" in check.reason
+
+
+def test_classify_payload_rejects_an_empty_body() -> None:
+    assert acquire.classify_payload(b"", "application/pdf").kind == "empty"
+
+
+def test_acquire_fulltext_refuses_a_landing_page_and_queues_the_paper(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """The regression this whole section exists for: HTML 200 must not count as full text."""
+    transport = FakeTransport(
+        json_by_substring={
+            "ebi.ac.uk": _load_json("europepmc_empty.json"),
+            "api.unpaywall.org": _load_json("unpaywall_gold.json"),
+        },
+        bytes_by_substring={
+            "fixture.example.org": FetchedContent(
+                data=b"<!DOCTYPE html><html><body>Verifying you are human</body></html>",
+                content_type="text/html; charset=utf-8",
+                status=200,
+            )
+        },
+    )
+
+    outcome = acquire.acquire_fulltext(
+        doi="10.9999/fixture-gold", pmid=None, conn=conn, settings=settings, transport=transport
+    )
+
+    assert outcome.stored is False
+    # Not 'fetch_failed': the network worked fine. Retrying returns the same page; a human is
+    # the only way past it, which is exactly what the manual queue is for.
+    assert outcome.why_unavailable == "no_pdf_found"
+
+    asset = conn.execute(
+        "SELECT * FROM fulltext_asset WHERE doi = ?", ("10.9999/fixture-gold",)
+    ).fetchone()
+    assert asset["storage_state"] == "not_found"
+    assert asset["content_path"] is None
+    assert "not a PDF" in asset["fetch_error"]
+
+    queue_row = conn.execute(
+        "SELECT * FROM manual_download_queue WHERE doi = ?", ("10.9999/fixture-gold",)
+    ).fetchone()
+    assert queue_row["why_unavailable"] == "no_pdf_found"
+    # The owner downloads these by hand, so the link must survive the rejection.
+    assert queue_row["best_known_link"]
+
+    assert not list((settings.data_dir / "fulltext").rglob("*.html"))
+
+
+def test_acquire_fulltext_falls_through_to_the_next_candidate(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """A consent wall on the publisher copy must not cost us the repository copy."""
+    pdf_bytes = b"%PDF-1.4 the repository deposit"
+    transport = FakeTransport(
+        json_by_substring={
+            "ebi.ac.uk": _load_json("europepmc_empty.json"),
+            "api.unpaywall.org": _load_json("unpaywall_gold_two_locations.json"),
+        },
+        bytes_by_substring={
+            "consent-wall.pdf": FetchedContent(
+                data=b"<!DOCTYPE html><html><body>Accept cookies</body></html>",
+                content_type="text/html",
+                status=200,
+            ),
+            "deposit.pdf": FetchedContent(
+                data=pdf_bytes, content_type="application/pdf", status=200
+            ),
+        },
+    )
+
+    outcome = acquire.acquire_fulltext(
+        doi="10.9999/fixture-two-locations",
+        pmid=None,
+        conn=conn,
+        settings=settings,
+        transport=transport,
+    )
+
+    assert outcome.stored is True
+    asset = conn.execute(
+        "SELECT * FROM fulltext_asset WHERE doi = ?", ("10.9999/fixture-two-locations",)
+    ).fetchone()
+    assert asset["source_url"] == "https://repository.example.org/record/4242/deposit.pdf"
+    assert asset["checksum_sha256"] == hashlib.sha256(pdf_bytes).hexdigest()
+    # The rejected location is still recorded -- a success that had to step over a failure says so.
+    assert "consent-wall.pdf" in asset["fetch_error"]
+    assert conn.execute("SELECT COUNT(*) FROM manual_download_queue").fetchone()[0] == 0
+
+
+def test_acquire_fulltext_refuses_bytes_already_stored_for_another_paper(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """Two papers cannot be the same document; the second must queue, not crash.
+
+    Before this, the `fulltext_asset_checksum_uq` IntegrityError escaped `acquire_fulltext`
+    after the bytes were already on disk, so the paper got neither an asset row nor a queue row
+    -- invisible to both accounting paths, and retried into the same failure on every resume.
+    """
+    shared = b"%PDF-1.4 one document served for two different DOIs"
+    served = {
+        "fulltext.pdf": FetchedContent(data=shared, content_type="application/pdf", status=200)
+    }
+    first = acquire.acquire_fulltext(
+        doi="10.9999/fixture-gold",
+        pmid=None,
+        conn=conn,
+        settings=settings,
+        transport=FakeTransport(
+            json_by_substring={
+                "ebi.ac.uk": _load_json("europepmc_empty.json"),
+                "api.unpaywall.org": _load_json("unpaywall_gold.json"),
+            },
+            bytes_by_substring=served,
+        ),
+    )
+    assert first.stored is True
+
+    # A genuinely different paper -- Unpaywall resolves it to its own DOI -- whose OA location
+    # happens to answer with the very same file.
+    second = acquire.acquire_fulltext(
+        doi="10.9999/fixture-gold-twin",
+        pmid=None,
+        conn=conn,
+        settings=settings,
+        transport=FakeTransport(
+            json_by_substring={
+                "ebi.ac.uk": _load_json("europepmc_empty.json"),
+                "api.unpaywall.org": _load_json("unpaywall_gold_twin.json"),
+            },
+            bytes_by_substring=served,
+        ),
+    )
+
+    assert second.stored is False
+    assert second.why_unavailable == "no_pdf_found"
+    asset = conn.execute(
+        "SELECT * FROM fulltext_asset WHERE doi = ?", ("10.9999/fixture-gold-twin",)
+    ).fetchone()
+    assert "byte-identical" in asset["fetch_error"]
+    assert asset["checksum_sha256"] is None
+    queue_row = conn.execute(
+        "SELECT * FROM manual_download_queue WHERE doi = ?", ("10.9999/fixture-gold-twin",)
+    ).fetchone()
+    assert queue_row is not None
 
 
 def test_repeat_failed_acquisition_updates_rather_than_duplicates(

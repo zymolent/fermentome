@@ -36,7 +36,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
@@ -49,10 +49,12 @@ __all__ = [
     "AcquisitionOutcome",
     "FetchedContent",
     "OaResolution",
+    "PayloadCheck",
     "Transport",
     "TransportError",
     "UrllibTransport",
     "acquire_fulltext",
+    "classify_payload",
     "classify_topic",
     "compute_priority",
     "enqueue_manual_download",
@@ -213,6 +215,14 @@ class OaResolution:
     best_oa_url: str | None
     resolved_via: str
     checked_at: str
+    #: Every location worth trying, best first; `best_oa_url` is the first of them. A source
+    #: usually names more than one (Unpaywall lists an `oa_location` per repository; Europe PMC
+    #: lists a PDF, an HTML view and, for the OA subset, a structured `fullTextXML`), and trying
+    #: only one is why open-access papers were landing in the manual queue: the single URL chosen
+    #: happened to answer with a redirect stub or a consent page. Defaults to empty so callers
+    #: (and tests) that build a resolution by hand keep working -- `acquire_fulltext` then falls
+    #: back to `(best_oa_url,)`.
+    candidate_urls: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -266,6 +276,82 @@ def _infer_text_mining_allowed(license_: str | None) -> str:
     return "yes"
 
 
+@dataclass(frozen=True)
+class PayloadCheck:
+    """Whether fetched bytes are actually a document we can extract from."""
+
+    usable: bool
+    kind: str  # 'pdf' | 'jats_xml' | 'html' | 'empty' | 'other'
+    reason: str | None  # why it is unusable; None when it is usable
+
+
+_PDF_MAGIC = b"%PDF-"
+
+
+def classify_payload(data: bytes, content_type: str | None = None) -> PayloadCheck:
+    """Decide whether `data` is a document worth storing as full text.
+
+    This exists because an HTTP 200 is not evidence that a paper came back. Publishers answer a
+    PDF URL with a consent wall, a bot check, a `<meta http-equiv="refresh">` stub or a landing
+    page carrying only the abstract -- all of them 200, all of them HTML, and one of them 2.7 kB.
+    Stored unchecked they look acquired, so the paper never reaches `manual_download_queue` and
+    extraction later runs against a redirect stub. Two different papers answering with the *same*
+    interstitial is what tripped `fulltext_asset_checksum_uq` and exposed this.
+
+    Recognized as usable:
+
+    * **PDF** -- identified by the `%PDF-` magic bytes, not by `Content-Type`, because servers
+      mislabel both ways (a real PDF served as `text/html`, and an HTML error page served as
+      `application/pdf`). The bytes are the evidence; the header is a claim.
+    * **JATS XML** -- Europe PMC's `fullTextXML` for the OA subset. Structured sections and
+      verbatim text, so it is the *better* source where it exists, not a fallback.
+
+    Everything else is unusable **for now**, HTML included. That is a statement about fermdb's
+    parsers (`extract` reads PDFs and JATS; there is no HTML full-text reader yet), not about the
+    paper: the URL is preserved on the queue row either way, so relaxing this later costs nothing
+    and loses nothing. Under-claiming acquisition is the safe direction -- a paper wrongly queued
+    costs the owner one download, a landing page wrongly stored corrupts what is extracted from it.
+    """
+    if not data:
+        return PayloadCheck(usable=False, kind="empty", reason="empty response body")
+    if data[:1024].lstrip()[: len(_PDF_MAGIC)] == _PDF_MAGIC:
+        return PayloadCheck(usable=True, kind="pdf", reason=None)
+
+    declared = (content_type or "").split(";", 1)[0].strip().lower()
+    head = data[:2048].lstrip().lower()
+
+    looks_xml = declared in {"application/xml", "text/xml"} or head.startswith(
+        (b"<?xml", b"<!doctype article")
+    )
+    if looks_xml:
+        try:
+            root = ElementTree.fromstring(data)
+        except ElementTree.ParseError as exc:
+            return PayloadCheck(usable=False, kind="other", reason=f"XML did not parse: {exc}")
+        tag = root.tag.rsplit("}", 1)[-1].lower()
+        if tag == "article" or root.find(".//{*}article") is not None:
+            return PayloadCheck(usable=True, kind="jats_xml", reason=None)
+        return PayloadCheck(
+            usable=False, kind="other", reason=f"XML root <{tag}> is not a JATS article"
+        )
+
+    if declared.startswith("text/html") or head.startswith((b"<!doctype html", b"<html")):
+        return PayloadCheck(
+            usable=False,
+            kind="html",
+            reason=(
+                f"served HTML ({len(data)} bytes), not a PDF -- landing page, consent wall or "
+                "redirect stub; no HTML full-text parser yet"
+            ),
+        )
+
+    return PayloadCheck(
+        usable=False,
+        kind="other",
+        reason=f"unrecognized payload ({declared or 'no content-type'}, {len(data)} bytes)",
+    )
+
+
 def _pick_fulltext_url(entries: list[Any]) -> str | None:
     def _url_of(entry: Any) -> str | None:
         if not isinstance(entry, dict):
@@ -290,6 +376,43 @@ def _pick_fulltext_url(entries: list[Any]) -> str | None:
     if any_open:
         return _url_of(any_open[0])
     return None
+
+
+def _fulltext_candidates(entries: list[Any]) -> list[str]:
+    """Every open-access location Europe PMC names, PDFs first, deduplicated in order.
+
+    `_pick_fulltext_url` returns only the winner; this returns the whole ranked list so a
+    landing page at the top does not cost us the working PDF underneath it.
+    """
+
+    def _open(entry: Any) -> bool:
+        return isinstance(entry, dict) and str(entry.get("availability", "")).lower().startswith(
+            "open access"
+        )
+
+    ranked: list[str] = []
+    for style in ("pdf", "html", None):
+        for entry in entries:
+            if not _open(entry):
+                continue
+            if style is not None and entry.get("documentStyle") != style:
+                continue
+            url = entry.get("url")
+            if url and str(url) not in ranked:
+                ranked.append(str(url))
+    return ranked
+
+
+def _europepmc_xml_url(pmcid: str) -> str:
+    """Europe PMC's structured full text for an OA-subset article.
+
+    Preferred over the PDF when it exists: JATS keeps sections, captions and paragraph
+    boundaries that PDF extraction has to reconstruct, and character offsets taken from it are
+    stable -- which is what span verification (`fermdb.llm.validate`) needs.
+    """
+    return (
+        f"https://www.ebi.ac.uk/europepmc/webservices/rest/{urllib.parse.quote(pmcid)}/fullTextXML"
+    )
 
 
 def _license_from_fulltext_urls(entries: list[Any]) -> str | None:
@@ -350,7 +473,6 @@ def _try_europepmc(
     fulltext_urls = fulltext_list.get("fullTextUrl") if isinstance(fulltext_list, dict) else None
     fulltext_urls = fulltext_urls if isinstance(fulltext_urls, list) else []
 
-    best_url = _pick_fulltext_url(fulltext_urls)
     license_raw = record.get("license")
     license_ = str(license_raw) if license_raw else _license_from_fulltext_urls(fulltext_urls)
 
@@ -360,6 +482,18 @@ def _try_europepmc(
         oa_status = "gold"
     else:
         oa_status = "green"
+
+    pmcid_raw = record.get("pmcid")
+    pmcid = str(pmcid_raw) if pmcid_raw else None
+
+    # Structured JATS first where the article is in the OA subset, then the ranked URL list.
+    candidates: list[str] = []
+    if is_open and pmcid:
+        candidates.append(_europepmc_xml_url(pmcid))
+    for url in _fulltext_candidates(fulltext_urls):
+        if url not in candidates:
+            candidates.append(url)
+    best_url = candidates[0] if candidates else _pick_fulltext_url(fulltext_urls)
 
     resolved_doi = record.get("doi")
     resolved_pmid = record.get("pmid")
@@ -372,9 +506,9 @@ def _try_europepmc(
         best_oa_url=best_url,
         resolved_via="europepmc",
         checked_at=_utc_now_iso(),
+        candidate_urls=tuple(candidates),
     )
-    pmcid = record.get("pmcid")
-    return _EuropePmcLookup(resolution=resolution, pmcid=str(pmcid) if pmcid else None)
+    return _EuropePmcLookup(resolution=resolution, pmcid=pmcid)
 
 
 def _try_unpaywall(
@@ -395,11 +529,25 @@ def _try_unpaywall(
 
     best_location = payload.get("best_oa_location")
     best_location = best_location if isinstance(best_location, dict) else {}
-    url_for_pdf = best_location.get("url_for_pdf")
-    plain_url = best_location.get("url")
-    best_url = str(url_for_pdf) if url_for_pdf else (str(plain_url) if plain_url else None)
     license_raw = best_location.get("license")
     license_ = str(license_raw) if license_raw else None
+
+    # Unpaywall's `best_oa_location` is one of possibly several `oa_locations`, and its
+    # `url_for_pdf` is frequently a publisher page that answers with a consent wall. Keep the
+    # ranking (best location first, PDFs before landing pages) but keep the alternatives too --
+    # the repository copy further down the list is usually the one that actually serves bytes.
+    locations = payload.get("oa_locations")
+    locations = locations if isinstance(locations, list) else []
+    ordered = [best_location, *(loc for loc in locations if loc is not best_location)]
+    candidates: list[str] = []
+    for key in ("url_for_pdf", "url"):
+        for location in ordered:
+            if not isinstance(location, dict):
+                continue
+            located = location.get(key)
+            if located and str(located) not in candidates:
+                candidates.append(str(located))
+    best_url = candidates[0] if candidates else None
 
     resolved_doi = payload.get("doi")
     return OaResolution(
@@ -411,6 +559,7 @@ def _try_unpaywall(
         best_oa_url=best_url,
         resolved_via="unpaywall",
         checked_at=_utc_now_iso(),
+        candidate_urls=tuple(candidates),
     )
 
 
@@ -445,9 +594,12 @@ def _try_pmc_oa(
 
     license_ = record.get("license")
     links = record.findall("link")
-    best_url = next((link.get("href") for link in links if link.get("format") == "pdf"), None)
-    if best_url is None and links:
-        best_url = links[0].get("href")
+    candidates: list[str] = []
+    for link in sorted(links, key=lambda element: element.get("format") != "pdf"):
+        href = link.get("href")
+        if href and href not in candidates:
+            candidates.append(href)
+    best_url = candidates[0] if candidates else None
 
     return OaResolution(
         doi=doi,
@@ -458,6 +610,7 @@ def _try_pmc_oa(
         best_oa_url=best_url,
         resolved_via="pmc",
         checked_at=_utc_now_iso(),
+        candidate_urls=tuple(candidates),
     )
 
 
@@ -482,6 +635,23 @@ def resolve_oa_status(
 
     europepmc = _try_europepmc(doi=doi, pmid=pmid, transport=transport)
     if europepmc is not None and europepmc.resolution.best_oa_url is not None:
+        # One exception to "Europe PMC wins": when the *only* location it offered is the
+        # derived `fullTextXML` URL -- i.e. it named a PMCID but listed no actual full-text
+        # links -- that endpoint is the sole candidate, and if it 404s the paper has nowhere
+        # else to go. Consult PMC's OA service as well and append what it names, so the
+        # fallback that existed before `candidate_urls` is preserved rather than shadowed.
+        only_derived = europepmc.resolution.candidate_urls == (
+            (_europepmc_xml_url(europepmc.pmcid),) if europepmc.pmcid else ()
+        )
+        if only_derived and europepmc.pmcid is not None:
+            pmc = _try_pmc_oa(pmcid=europepmc.pmcid, doi=doi, pmid=pmid, transport=transport)
+            if pmc is not None and pmc.candidate_urls:
+                merged = europepmc.resolution.candidate_urls + tuple(
+                    url
+                    for url in pmc.candidate_urls
+                    if url not in europepmc.resolution.candidate_urls
+                )
+                return replace(pmc, candidate_urls=merged, best_oa_url=merged[0])
         return europepmc.resolution
 
     unpaywall = (
@@ -620,6 +790,26 @@ def find_fulltext_asset(
         ).fetchone()
         return by_pmid
     return None
+
+
+def _checksum_owner(
+    conn: sqlite3.Connection, checksum: str, *, excluding_id: str | None
+) -> str | None:
+    """The DOI/PMID of another `fulltext_asset` row already holding `checksum`, if any.
+
+    Consulted *before* storing rather than catching the `IntegrityError` afterwards, because by
+    then the bytes are on disk and the exception aborts the whole record -- leaving the paper with
+    neither an asset row nor a manual-queue row, invisible to both accounting paths and retried
+    into the same failure on every resume. That is how this was originally found.
+    """
+    row = conn.execute(
+        "SELECT doi, pmid, publication_id FROM fulltext_asset "
+        "WHERE checksum_sha256 = ? AND id IS NOT ?",
+        (checksum, excluding_id),
+    ).fetchone()
+    if row is None:
+        return None
+    return str(row["doi"] or row["pmid"] or row["publication_id"] or "another publication")
 
 
 def write_fulltext_asset(
@@ -842,7 +1032,16 @@ def acquire_fulltext(
     retrieved_at: str | None = None
     fetch_error: str | None = None
 
-    if resolution.best_oa_url is None:
+    effective_doi = resolution.doi or doi
+    effective_pmid = resolution.pmid or pmid
+    existing = find_fulltext_asset(conn, doi=effective_doi, pmid=effective_pmid)
+    existing_id = str(existing["id"]) if existing is not None else None
+
+    candidates = resolution.candidate_urls or (
+        (resolution.best_oa_url,) if resolution.best_oa_url else ()
+    )
+
+    if not candidates:
         storage_state = "not_found"
         why_unavailable = "paywalled" if resolution.oa_status == "closed" else "no_pdf_found"
     elif resolution.oa_status not in _STORABLE_OA_STATUSES:
@@ -850,28 +1049,70 @@ def acquire_fulltext(
         source_url = resolution.best_oa_url
         why_unavailable = "licence_forbids"
     else:
-        try:
-            fetched = transport.get_bytes(resolution.best_oa_url)
-        except TransportError as exc:
-            storage_state = "not_found"
-            fetch_error = str(exc)
-            why_unavailable = "fetch_failed"
-        else:
+        # Walk the candidates in rank order and keep the first payload that is actually a
+        # document. Every rejection is recorded: `fetch_error` ends up holding the reason each
+        # location failed, so a paper in the manual queue says *why* rather than just appearing.
+        attempts: list[str] = []
+        # 'transport' = never got bytes; 'payload' = got bytes that were not a document. The
+        # distinction decides why_unavailable, so it is tracked rather than recovered by reading
+        # the message text back out (an earlier cut of this sniffed for the word "failed", which
+        # is a property of the wording, not of what happened).
+        failure_kinds: list[str] = []
+        for candidate in candidates:
+            try:
+                fetched = transport.get_bytes(candidate)
+            except TransportError as exc:
+                attempts.append(f"{candidate}: {exc}")
+                failure_kinds.append("transport")
+                continue
+
+            check = classify_payload(fetched.data, fetched.content_type)
+            if not check.usable:
+                attempts.append(f"{candidate}: {check.reason}")
+                failure_kinds.append("payload")
+                continue
+
+            # A content hash already on another paper's row means this URL served a document
+            # that is not this paper -- a shared interstitial, or a publisher answering every
+            # request with the same file. Storing it would attribute one document to two
+            # publications, which is exactly what `fulltext_asset_checksum_uq` exists to refuse.
+            candidate_checksum = hashlib.sha256(fetched.data).hexdigest()
+            clash = _checksum_owner(conn, candidate_checksum, excluding_id=existing_id)
+            if clash is not None:
+                attempts.append(
+                    f"{candidate}: byte-identical to the copy already stored for {clash}"
+                )
+                failure_kinds.append("payload")
+                continue
+
             content_path, checksum = store_bytes_content_addressed(
                 settings, fetched.data, media_type=fetched.content_type
             )
             media_type = fetched.content_type
-            source_url = resolution.best_oa_url
+            source_url = candidate
             retrieved_at = _utc_now_iso()
+            break
+
+        if checksum is not None:
             storage_state = "stored_fulltext"
             why_unavailable = None
+            # Still worth keeping when an earlier location failed before a later one worked.
+            fetch_error = "; ".join(attempts) or None
+        else:
+            storage_state = "not_found"
+            fetch_error = "; ".join(attempts) or "no candidate location returned a document"
+            # Nothing was reachable at all -> 'fetch_failed' (worth retrying; the network was the
+            # problem). Something answered but was not a document -> 'no_pdf_found' (retrying the
+            # same URLs will return the same landing page; this one needs a human).
+            why_unavailable = (
+                "fetch_failed"
+                if failure_kinds and all(kind == "transport" for kind in failure_kinds)
+                else "no_pdf_found"
+            )
 
-    effective_doi = resolution.doi or doi
-    effective_pmid = resolution.pmid or pmid
-    existing = find_fulltext_asset(conn, doi=effective_doi, pmid=effective_pmid)
     asset_id = write_fulltext_asset(
         conn,
-        existing_id=str(existing["id"]) if existing is not None else None,
+        existing_id=existing_id,
         doi=effective_doi,
         pmid=effective_pmid,
         publication_id=publication_id,

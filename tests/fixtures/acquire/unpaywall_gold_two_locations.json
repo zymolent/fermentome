@@ -1,0 +1,26 @@
+{
+  "doi": "10.9999/fixture-two-locations",
+  "is_oa": true,
+  "oa_status": "gold",
+  "title": "Fixture: an OA paper whose publisher copy is behind a consent wall",
+  "best_oa_location": {
+    "url": "https://publisher.example.org/article/landing",
+    "url_for_pdf": "https://publisher.example.org/article/consent-wall.pdf",
+    "license": "cc-by",
+    "host_type": "publisher"
+  },
+  "oa_locations": [
+    {
+      "url": "https://publisher.example.org/article/landing",
+      "url_for_pdf": "https://publisher.example.org/article/consent-wall.pdf",
+      "license": "cc-by",
+      "host_type": "publisher"
+    },
+    {
+      "url": "https://repository.example.org/record/4242",
+      "url_for_pdf": "https://repository.example.org/record/4242/deposit.pdf",
+      "license": "cc-by",
+      "host_type": "repository"
+    }
+  ]
+}
