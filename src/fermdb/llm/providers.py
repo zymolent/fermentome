@@ -114,6 +114,53 @@ DEFAULT_TIMEOUT_S: Final[float] = DEFAULT_LLM_TIMEOUT_S
 DEFAULT_MODELS: Final[Mapping[str, str]] = DEFAULT_LLM_MODELS
 DEFAULT_OPTIONS: Final[Mapping[str, Any]] = DEFAULT_LLM_OPTIONS
 
+#: Characters per token, for the context-window check below. English prose runs about 4 and dense
+#: JSON rather less, so 3.5 errs toward *over*-estimating the prompt -- the safe direction, since
+#: the failure this guards against is silent.
+_CHARS_PER_TOKEN: Final[float] = 3.5
+
+#: Room left for the reply when checking whether a prompt fits. The extraction payload is the
+#: largest thing this project asks a model to write.
+_RESERVED_COMPLETION_TOKENS: Final[int] = 2048
+
+
+def _check_fits_context(
+    prompt: str,
+    schema: Mapping[str, Any] | None,
+    options: Mapping[str, Any],
+    *,
+    model: str,
+) -> None:
+    """Refuse a prompt that cannot fit in ``num_ctx`` rather than letting it be truncated.
+
+    Ollama silently drops whatever does not fit, keeping the *end* of the prompt. Every prompt in
+    this project puts its instructions first and the excerpt last (``extraction.md`` ends with
+    ``{{excerpt}}``), so an over-long prompt loses precisely the instructions and leaves the model
+    staring at an unlabelled wall of article text. What comes back is empty or shapeless, which is
+    indistinguishable from "this paper reports nothing" -- a false negative that reaches the
+    database as a real result.
+
+    The estimate is crude on purpose: the exact tokenizer is the model's, and asking for it is a
+    round-trip per call. Over-estimating costs an error message that names the number to raise.
+    """
+    num_ctx = options.get("num_ctx")
+    if not isinstance(num_ctx, int) or num_ctx <= 0:
+        return  # No declared window: the daemon's own default applies and we cannot check it.
+
+    chars = len(prompt) + (len(json.dumps(dict(schema))) if schema is not None else 0)
+    estimated = int(chars / _CHARS_PER_TOKEN) + _RESERVED_COMPLETION_TOKENS
+    if estimated <= num_ctx:
+        return
+    raise ProviderConfigError(
+        f"prompt for {model} needs about {estimated:,} tokens ({chars:,} characters of prompt "
+        f"and schema, plus {_RESERVED_COMPLETION_TOKENS:,} reserved for the reply) but num_ctx is "
+        f"{num_ctx:,}. Ollama would truncate it silently, keeping the end -- which is the excerpt "
+        f"-- and discarding the instructions, and the reply would come back empty or shapeless "
+        f"rather than erroring. Raise FERMDB_LLM_NUM_CTX to at least {estimated:,}, or send fewer "
+        f"sections."
+    )
+
+
 #: The escalation model is a role like any other, so :meth:`LlmConfig.model_for` stays the single
 #: way to learn a model name — but it is *not* one of the local roles, so it is kept out of
 #: :data:`DEFAULT_MODELS`, where every entry is a model the Ollama daemon is expected to serve.
@@ -172,6 +219,10 @@ class Completion:
     completion_tokens: int | None = None
     duration_s: float = 0.0
     finish_reason: str | None = None
+    #: True when the backend answered a schema-constrained request with an empty string and the
+    #: call was retried unconstrained (MODEL_ROUTING.md section 7b). Recorded rather than hidden:
+    #: the reply's shape was then vouched for by the validator alone, not by the decoder.
+    schema_constraint_dropped: bool = False
 
     @property
     def total_tokens(self) -> int | None:
@@ -477,6 +528,7 @@ class OllamaProvider:
         merged: dict[str, Any] = dict(self._options)
         if options:
             merged.update(options)
+        _check_fits_context(prompt, schema, merged, model=model)
         payload: JsonObject = {
             "model": model,
             "prompt": prompt,
@@ -501,6 +553,26 @@ class OllamaProvider:
                 f"{self._base_url}/api/generate returned no 'response' string "
                 f"(keys: {sorted(document)})"
             )
+
+        if not text.strip() and "format" in payload:
+            # MODEL_ROUTING.md section 7b: some models answer a schema-constrained request with
+            # an empty string instead of erroring. An empty completion is never a valid answer to
+            # a constrained request, so this is unambiguous -- and it is the single worst failure
+            # this module can have, because an empty extraction is indistinguishable from "the
+            # paper reports nothing". The constraint is a convenience (see above), so dropping it
+            # and asking once more costs only latency and recovers the whole run. The retry is
+            # reported rather than hidden: a caller reading `schema_constraint_dropped` knows the
+            # answer came back unconstrained and that the validator, not the decoder, is what
+            # vouches for its shape.
+            del payload["format"]
+            started = time.monotonic()
+            document = self._post("/api/generate", payload, effective_timeout)
+            elapsed = time.monotonic() - started
+            retried = document.get("response")
+            text = retried if isinstance(retried, str) else ""
+            schema_constraint_dropped = True
+        else:
+            schema_constraint_dropped = False
         reported_model = document.get("model")
         served_model = reported_model if isinstance(reported_model, str) else model
         return Completion(
@@ -512,6 +584,7 @@ class OllamaProvider:
             completion_tokens=_as_int(document.get("eval_count")),
             duration_s=elapsed,
             finish_reason=_as_str(document.get("done_reason")),
+            schema_constraint_dropped=schema_constraint_dropped,
         )
 
     def _post(self, route: str, payload: JsonObject, timeout_s: float) -> JsonObject:

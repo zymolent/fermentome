@@ -329,6 +329,53 @@ def test_ollama_reports_a_missing_response_field_rather_than_returning_empty_tex
         provider.complete("hello", model="configured-model:27b")
 
 
+def test_ollama_retries_unconstrained_when_a_constrained_request_answers_empty() -> None:
+    """MODEL_ROUTING.md section 7b, made self-healing.
+
+    Some models answer a schema-constrained request with an empty string rather than erroring.
+    That is the worst failure this module can have: an empty extraction is indistinguishable from
+    "the paper reports nothing", so it reads as a real, negative result.
+    """
+    replies = iter(["", '{"titer_g_per_l": 22.6}'])
+    seen: list[dict[str, Any]] = []
+
+    def _transport(request: HttpRequest) -> bytes:
+        if request.url.endswith("/api/show"):
+            return b"{}"
+        seen.append(json.loads(request.body))
+        return json.dumps({"response": next(replies), "model": "m"}).encode("utf-8")
+
+    provider = OllamaProvider(transport=_transport)
+    completion = provider.complete("extract", model="m", schema=OBJECT_SCHEMA)
+
+    assert completion.text == '{"titer_g_per_l": 22.6}'
+    # First attempt constrained, second identical but without the constraint.
+    assert "format" in seen[0]
+    assert "format" not in seen[1]
+    assert seen[1]["prompt"] == seen[0]["prompt"]
+    # And it says so, because the decoder no longer vouches for the shape -- the validator does.
+    assert completion.schema_constraint_dropped is True
+
+
+def test_ollama_does_not_retry_when_the_first_answer_is_usable() -> None:
+    transport = ollama_transport({"response": '{"ok": true}', "model": "m"})
+    completion = OllamaProvider(transport=transport).complete(
+        "extract", model="m", schema=OBJECT_SCHEMA
+    )
+    assert completion.schema_constraint_dropped is False
+    generate_calls = [r for r in transport.seen if r.url.endswith("/api/generate")]
+    assert len(generate_calls) == 1
+
+
+def test_ollama_does_not_retry_an_unconstrained_empty_answer() -> None:
+    """Without a constraint there is nothing to drop, so an empty reply is the model's answer."""
+    transport = ollama_transport({"response": "", "model": "m"})
+    completion = OllamaProvider(transport=transport).complete("hello", model="m")
+    assert completion.text == ""
+    assert completion.schema_constraint_dropped is False
+    assert len([r for r in transport.seen if r.url.endswith("/api/generate")]) == 1
+
+
 def test_a_down_daemon_produces_an_actionable_error(monkeypatch: pytest.MonkeyPatch) -> None:
     def _refused(*args: object, **kwargs: object) -> None:
         raise urllib.error.URLError(ConnectionRefusedError(61, "Connection refused"))
@@ -1387,3 +1434,45 @@ def test_canonical_source_text_makes_a_pdf_quote_verifiable() -> None:
     # Strictness is unchanged: a fabricated quote is still rejected against canonical text.
     fake = "isobutanol production reached 99.9 g/L in shake flasks"
     assert verify_span(source, Span(quote=fake, char_start=0, char_end=len(fake))).ok is False
+
+
+def test_ollama_refuses_a_prompt_that_cannot_fit_in_num_ctx() -> None:
+    """Truncation is silent and keeps the end of the prompt, which is the excerpt.
+
+    Every prompt here puts instructions first and `{{excerpt}}` last, so an over-long prompt loses
+    exactly the instructions. The reply then comes back empty or shapeless, which reads as "this
+    paper reports nothing" -- a false negative that reaches the database as a real result.
+    """
+    provider = OllamaProvider(
+        transport=ollama_transport({"response": "{}"}), options={"num_ctx": 4096}
+    )
+    with pytest.raises(ProviderError) as raised:
+        provider.complete("x" * 60_000, model="m", schema=OBJECT_SCHEMA)
+
+    message = str(raised.value)
+    assert "num_ctx is 4,096" in message
+    assert "truncate it silently" in message
+    # The message names the number to raise it to, so the remedy needs no arithmetic.
+    assert "FERMDB_LLM_NUM_CTX" in message
+
+
+def test_ollama_counts_the_schema_toward_the_context_budget() -> None:
+    """The extraction schema is 17 kB on its own -- about 5,000 tokens of the window."""
+    big_schema = {"type": "object", "properties": {f"f{i}": {"type": "string"} for i in range(900)}}
+    provider = OllamaProvider(
+        transport=ollama_transport({"response": "{}"}), options={"num_ctx": 4096}
+    )
+    with pytest.raises(ProviderError, match="characters of prompt and schema"):
+        provider.complete("short prompt", model="m", schema=big_schema)
+
+
+def test_ollama_allows_a_prompt_that_fits() -> None:
+    transport = ollama_transport({"response": "{}"})
+    provider = OllamaProvider(transport=transport, options={"num_ctx": 32768})
+    assert provider.complete("x" * 1000, model="m", schema=OBJECT_SCHEMA).text == "{}"
+
+
+def test_ollama_skips_the_check_when_no_window_is_declared() -> None:
+    """With no num_ctx the daemon's own default applies and there is nothing to compare against."""
+    provider = OllamaProvider(transport=ollama_transport({"response": "{}"}), options={})
+    assert provider.complete("x" * 60_000, model="m").text == "{}"
