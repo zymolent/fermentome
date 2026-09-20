@@ -59,7 +59,7 @@ from typing import Final
 #:    The rule for the next parallel round, so this does not recur: a bump is per *round*, not per
 #:    agent. An agent that finds the version already ahead of the last released one adds its note
 #:    under that same integer instead of incrementing again.
-SCHEMA_VERSION: Final[int] = 4  # v4: functional annotation + omics acquisition (one round)
+SCHEMA_VERSION: Final[int] = 5  # v5: manual_download_queue.reports_titer_or_yield is tri-state
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

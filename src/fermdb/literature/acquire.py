@@ -718,6 +718,10 @@ def enqueue_manual_download(
     'skipped' by the owner is left alone -- a fresh failure to re-fetch the same paper must never
     silently undo a curator's decision.
     """
+    # Tri-state, not boolean. NULL means "nobody has looked yet"; 0 means "looked, and it
+    # reports no titer or yield". int(None) collapses the first into the second -- the exact
+    # coercion CONVENTIONS.md "Missing values" forbids. It matters here because priority
+    # ordering ranks titer-reporting papers higher, so "unknown" must not sort as "no".
     if doi is None and pmid is None:
         raise ValueError("enqueue_manual_download requires a doi or a pmid")
     if why_unavailable not in _QUEUE_WHY_UNAVAILABLE:
@@ -756,7 +760,9 @@ def enqueue_manual_download(
                 "why_unavailable": why_unavailable,
                 "priority": priority,
                 "priority_topic": resolved_topic,
-                "reports_titer_or_yield": int(reports_titer_or_yield),
+                "reports_titer_or_yield": (
+                    None if reports_titer_or_yield is None else int(reports_titer_or_yield)
+                ),
                 "updated_at": now,
                 "id": existing["id"],
             },
@@ -784,7 +790,9 @@ def enqueue_manual_download(
             "why_unavailable": why_unavailable,
             "priority": priority,
             "priority_topic": resolved_topic,
-            "reports_titer_or_yield": int(reports_titer_or_yield),
+            "reports_titer_or_yield": (
+                None if reports_titer_or_yield is None else int(reports_titer_or_yield)
+            ),
             "added_at": now,
         },
     )

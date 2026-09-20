@@ -1613,8 +1613,14 @@ CREATE TABLE manual_download_queue (
     priority_topic         TEXT NOT NULL
                            CHECK (priority_topic IN ('isobutanol', 'isobutanol_mitochondria',
                                                      'mtdna_engineering', 'ethanol', 'other')),
-    reports_titer_or_yield INTEGER NOT NULL DEFAULT 0
-                           CHECK (reports_titer_or_yield IN (0, 1)),
+    -- Tri-state, deliberately nullable: NULL is "nobody has read the paper yet", 0 is
+    -- "read, and it reports no titer or yield". NOT NULL DEFAULT 0 collapsed those into
+    -- one, which CONVENTIONS.md "Missing values" forbids -- and it is load-bearing here,
+    -- because priority ranks titer-reporting papers higher and "unknown" must not be
+    -- silently ranked as "no". At enqueue time the paper has by definition not been read.
+    reports_titer_or_yield INTEGER
+                           CHECK (reports_titer_or_yield IS NULL
+                                  OR reports_titer_or_yield IN (0, 1)),
     status                 TEXT NOT NULL DEFAULT 'pending'
                            CHECK (status IN ('pending', 'provided', 'skipped')),
     -- Set once `manual-queue ingest` matches a dropped-in file back to this row.
