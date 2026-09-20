@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from ..config import Settings
 from ..db import open_db
@@ -23,6 +24,7 @@ from .genes import list_genes, read_gene
 from .pathways import list_pathways, read_pathway
 from .publications import corpus_shape, read_publication, search_publications
 from .review import ReviewPacket, review_packet, review_queue
+from .reviewhtml import build_review_page
 
 __all__ = ["add_query_subcommand"]
 
@@ -179,6 +181,16 @@ def cmd_query_review(args: argparse.Namespace) -> int:
     conn.execute("PRAGMA busy_timeout=60000")
     supplied = {"organism_id": args.organism} if args.organism else None
     try:
+        if args.html:
+            page = build_review_page(
+                conn, settings=settings, curator=args.curator, supplied=supplied
+            )
+            target = Path(args.html)
+            target.write_text(page, encoding="utf-8")
+            print(f"wrote {target}  ({len(page) / 1024:.0f} KB)")
+            print("Open it in a browser. Decisions stay in that browser and come out as")
+            print("`fermdb curate` commands -- the page never writes to the atlas.")
+            return 0
         packets: tuple[ReviewPacket, ...]
         if args.task:
             packets = (review_packet(conn, args.task, settings=settings, supplied=supplied),)
@@ -371,6 +383,12 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
     p_review.add_argument("--organism", help="organism id, to plan strain promotion against")
     p_review.add_argument(
         "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_review.add_argument(
+        "--html", metavar="PATH", help="write a self-contained review page for the whole queue"
+    )
+    p_review.add_argument(
+        "--curator", default="curator", help="name written into the generated commands"
     )
     p_review.set_defaults(func=cmd_query_review)
 

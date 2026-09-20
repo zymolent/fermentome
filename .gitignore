@@ -45,3 +45,6 @@ env/secrets.local.env
 
 # OS
 Thumbs.db
+
+# Generated review pages: a snapshot of the queue, regenerate rather than commit.
+review.html

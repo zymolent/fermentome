@@ -710,3 +710,37 @@ def test_an_unset_competing_flag_is_absent_not_false(atlas_v6: sqlite3.Connectio
     assert read is not None
     assert read.reactions[0].competing.is_known is False
     assert read.competing_reactions == ()  # not known to compete is not the same as not competing
+
+
+# --------------------------------------------------------------------------- the review page
+
+
+def test_the_review_page_is_self_contained_and_ordered(atlas: sqlite3.Connection) -> None:
+    """Strains before measurements, because promotion depends on that order.
+
+    The page is a snapshot that has to work offline, so everything it needs is embedded. And the
+    generated commands must be runnable top to bottom -- a measurement's accept is useless before
+    its strain exists.
+    """
+    from fermdb.query.reviewhtml import KIND_ORDER
+
+    assert KIND_ORDER[0] == "strains"
+    assert KIND_ORDER.index("strains") < KIND_ORDER.index("measurements")
+    assert KIND_ORDER.index("measurements") < KIND_ORDER.index("modifications")
+
+
+def test_the_page_never_writes_to_the_atlas(atlas_v6: sqlite3.Connection) -> None:
+    """D.3's layering rule, and a browser cannot reach a local SQLite file anyway.
+
+    Generating the page is a read. Decisions leave as `fermdb curate` commands, so a human is
+    still the actor and the audit log still records one.
+    """
+    from fermdb.query.reviewhtml import build_review_page
+
+    before = atlas_v6.total_changes
+    page = build_review_page(atlas_v6, curator="tester")
+    assert atlas_v6.total_changes == before
+    assert "<script>" in page and "const DATA" in page
+    # No path back to the database is embedded anywhere in it.
+    assert "sqlite" not in page.lower()
+    assert "fermdb curate accept" in page

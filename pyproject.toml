@@ -40,6 +40,13 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# This module embeds a complete web page as a template string. Its CSS, HTML and JavaScript are
+# not Python and do not benefit from Python's line-length rule -- wrapping a template literal or a
+# CSS selector list to 100 columns makes it harder to read, not easier. The Python around the
+# template is still held to the same standard by every other rule.
+"src/fermdb/query/reviewhtml.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
