@@ -234,6 +234,34 @@ excludes, and the paired-comparison test above as a gate on promoting such a rou
 candidate. Flagged so this does not become another curated fact that was written down and never
 wired up.
 
+## M5 — The 8 *Fusarium graminearum* runs *(RESOLVED 2026-09-21 — excluded)*
+
+**The owner's decision:** remove them.
+
+`PRJEB27245` / `ERP109305` — *"RNA-seq of Fusarium graminearum under predation by the springtail
+Folsomia candida against untreated controls"*, 4 control and 4 treated, NextSeq 500 paired-end,
+22.4 GB. They entered through an SRA text search for "isobutanol"; the fungus plausibly emits
+isobutanol among its defence volatiles ⚠, which is why the metadata matched. It is a
+chemical-ecology experiment, not a production study: no titre, no engineered strain, no chassis
+relevance, and PLAN.md B.4 admits organisms by their role in the isobutanol programme.
+
+**Implemented as exclusion, not deletion.** `acquisition_status = 'excluded'`,
+`relevance_uncertain = 0`, the reason appended to each row's `evidence` beside its original
+provenance, and eight `curation_event` rows with action `reject`. The rows stay so that
+re-running discovery does not re-open a settled question, and so the decision is auditable —
+CONVENTIONS.md: *"Comments explaining why a row is absent are part of the data and are
+preserved."*
+
+Corpus after: **162 runs eligible**, 10 excluded (these 8 plus two *E. coli* runs excluded on
+2026-09-20 for a tenfold mapping-rate gap).
+
+**Still outstanding:** the 22.4 GB of `.sra` objects are in S3 (`raw/sra/ERR26249*`) and were
+not touched. Deleting them is irreversible and outward-facing, so it waits for an explicit
+instruction. PLAN.md V/§6 keeps raw archives permanently because re-quantification is expected —
+a rationale that no longer applies to an excluded organism.
+
+---
+
 ## M4 — Analytical capability for the higher-alcohol panel *(ANSWERED 2026-09-21)*
 
 **The owner's answer:** not measured.
