@@ -120,12 +120,60 @@ no chassis at all — a generic answer to a specific question. Needed, in rough 
 | xylose utilisation today | DUET's whole substrate partition is C5 → isobutanol; whether the strain already ferments xylose is a large fork |
 | transformation efficiency, markers | whether a 15-edit campaign is weeks or quarters |
 
-## M2 — ρ⁰ derivatives and *kar1-1* partners: in hand, or to be made?
+## M2 — ρ⁰ derivatives and *kar1-1* partners *(ANSWERED 2026-09-21)*
 
-Strategy E needs a ρ⁰ recipient for biolistic transformation and a karyogamy-deficient mating
-partner for cytoduction ⚠. Whether these exist in your strain background, or must be constructed
-in it, is the difference between weeks and months — and it changes strategy E's feasibility rating
-from `available_here` to `available_after_strain_construction`.
+**The owner's answer:** not available now, but will purchase if required.
+
+That is a better position than "must be constructed", and the corpus can already say what to ask
+for. `doi:10.1091/mbc.e17-09-0560` (Mol Biol Cell, 2018) documents the full classical workflow and
+names every strain in it, with provenance:
+
+| strain | genotype as published | role |
+|---|---|---|
+| **DFS160** | `D273-10B; MATα, arg8Δ::ura3, ura3-52, leu2Δ, ade2-101, kar1-1, [rho0]` | the bombardment recipient — **ρ⁰ and *kar1-1* in one strain** |
+| SCS188A | `D273-10B; MATa, ade2-101, ura3-52, kar1-1, [rho+] cox2-75c` | *kar1-1* tester carrying a *cox2* deletion, for selecting transformants by respiratory rescue |
+| EHW154 | `D273-10B; MATa, … [rho+] cox2-208::ARG8m` | the *ARG8ᵐ* marker at the *COX2* locus — exactly the construct §2.1 of `MITOCHONDRIAL_PROGRAM.md` predicts |
+
+All are attributed to **Thomas D. Fox, Cornell University**. So this is a request to a named
+academic source for an identified strain set, not an open procurement question.
+
+The workflow, in the paper's own words: biolistic *"high-velocity micro projectile bombardment
+into the ρ0 strain DFS160"*, then transformants *"selected by their ability to rescue respiratory
+growth when mated with the strain SCS188"*, then *"mated with the EHW154 strain and cytoductants
+were selected"*.
+
+### What purchasing does and does not solve
+
+**Solves:** the hard half. A strain that is simultaneously ρ⁰ and *kar1-1* is the difficult thing
+to construct, and DFS160 already is one.
+
+**Does not solve:** delivery into the production strain. Every strain above is in the **D273-10B
+laboratory background**. Cytoduction moves mtDNA *into* a recipient, and for the recipient to
+become homoplasmic it must itself be ρ⁰ ⚠ — so putting an engineered mitochondrial genome into
+the owner's industrial polyploid needs a **ρ⁰ derivative of that strain**, which cannot be bought
+and must be made. Making a ρ⁰ derivative is the easier of the two operations ⚠, but it is
+construction, not procurement, and in a polyploid industrial isolate it is not routine ⚠.
+
+**Consequence for the route model:** strategy E's `available_here` is not a single boolean.
+Discovery in a lab background is `available_after_acquisition` (buy the Fox strains). Delivery
+into the production chassis is `available_after_strain_construction`. Those are different
+timelines and the ranker should not average them.
+
+### A phase-1b status correction
+
+`MITOCHONDRIAL_PROGRAM.md` §3 budgets the mitochondrial-genetics corpus as work to be acquired.
+Searching the 1,308 stored full texts shows much of it is **already in hand**:
+
+| §3 content type | est. size | stored full texts mentioning it |
+|---|---|---|
+| Transformation methods | ~30–60 papers | **43** (biolistic / microprojectile / bombardment) |
+| Marker systems | ~10 | **34** (*ARG8ᵐ*) |
+| Stability and heteroplasmy | ~10 | **61** (heteroplasmy / homoplasmy) |
+| ρ⁰/ρ⁻ physiology | ~10 | **35** |
+| Cytoduction / *kar1-1* technique | — | **30** |
+
+These are keyword matches, not curated records, so the real yield will be lower. But phase 1b is
+closer to a curation task than an acquisition task, which is a materially different cost.
 
 ## M3 — Does the production chassis need to respire? *(ANSWERED 2026-09-20)*
 
@@ -186,12 +234,33 @@ excludes, and the paired-comparison test above as a gate on promoting such a rou
 candidate. Flagged so this does not become another curated fact that was written down and never
 wired up.
 
-## M4 — Analytical capability for the higher-alcohol panel
+## M4 — Analytical capability for the higher-alcohol panel *(ANSWERED 2026-09-21)*
 
-The adjacent-product tier (PLAN.md B.1) treats the isobutanol : isoamyl alcohol :
-2-methyl-1-butanol ratio as diagnostic of decarboxylase specificity and of which ketoacid pool is
-draining. That only pays off if your GC method resolves and quantifies all three.
+**The owner's answer:** not measured.
 
-**If it does not**, say so early: the atlas will still record co-reported ratios from the
-literature, but your own strains will not contribute to that axis, and route diagnosis loses one
-of its better signals.
+So the panel is untested rather than unavailable — the method may well resolve
+isobutanol : isoamyl alcohol : 2-methyl-1-butanol and nobody has checked. Recorded as
+`not_measured`, which is distinct from `no`: one is a gap, the other is a limitation, and they
+imply different actions.
+
+**Consequence while it stays untested.** Every deletion the programme makes reports an *outcome*
+and not a *mechanism*. `BAT1`/`BAT2` send 2-KIV to valine, `LEU4`/`LEU9` toward leucine and thence
+isoamyl alcohol, `ECM31` toward pantothenate. Delete one, measure isobutanol alone, and a null
+result is ambiguous between "no flux change" and "flux moved to a product not being measured".
+The Wess series now in the curation queue is the worked example: eleven successive deletions whose
+published rationale turns on by-product measurements, not on the isobutanol number alone.
+
+**Consequence for the DUET claim specifically.** DUET's novelty is a *compartment* claim — that
+the Ehrlich pathway run in the matrix beats the cytosolic version. The strongest evidence for a
+compartment claim is a **shifted product ratio**, because the matrix ketoacid pool differs from
+the cytosolic one ⚠. Without the panel the claim rests on titre alone, which is a weaker argument
+in front of a reviewer or a patent examiner.
+
+**Recommendation:** a half-day on a standard mix of the three alcohols, before the first strain is
+built rather than after. If it resolves them, the ratio axis is available for every subsequent
+experiment at no extra cost. If it does not, that is worth knowing before the deletion campaign
+starts, not during it.
+
+Until then the atlas records co-reported ratios from the literature as usual, and the owner's own
+strains simply do not contribute to that axis. Seeded as a `chassis_profile` field rather than
+left implicit.
