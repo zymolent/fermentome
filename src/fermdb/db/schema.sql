@@ -440,12 +440,40 @@ CREATE TABLE product_theoretical_yield (
     CHECK (mol_per_mol_state <> 'recorded' OR (mol_per_mol IS NOT NULL AND mol_per_mol > 0))
 );
 
+-- v6 added `carbons`, `carrier`, `redox`, `pair` and `adenylate`. They were in
+-- data/pathways/*.yaml and on metabolic/curated.py's dataclass from the start, were used by its
+-- balance checks in memory, and were then dropped on the way in -- so the database could not tell
+-- NADPH from acetolactate, and the reaction graph a UI reads could not put carriers on the edges
+-- (PLAN.md P.2) or state the cofactor argument the DUET design turns on.
+--
+-- All five are nullable. A metabolite whose carrier status was never assessed is a different
+-- thing from one known not to be a carrier, and an imported metabolite will have neither.
 CREATE TABLE metabolite (
     id         TEXT PRIMARY KEY,
     name       TEXT NOT NULL,
     inchikey   TEXT,
     chebi_id   TEXT,
     formula    TEXT,
+    -- Carbons contributed to the *skeleton being tracked*, not the molecular formula: a carrier
+    -- is 0 because it conserves its own carbon. See the header of the curated pathway files.
+    carbons    INTEGER CHECK (carbons IS NULL OR carbons >= 0),
+    carrier    INTEGER CHECK (carrier IN (0, 1)),
+    -- The pool a redox carrier belongs to ('nad', 'nadp'), so the two halves of a couple can be
+    -- matched. Declared before `redox`, which checks it -- see below.
+    pair       TEXT,
+    -- These two conditions are written as *column* CHECKs referring to sibling columns, rather
+    -- than as separate table-level CHECKs, for one reason: SQLite has no ADD CONSTRAINT, so a
+    -- table-level CHECK can never be reached by `ALTER TABLE ... ADD COLUMN`. A migrated database
+    -- would have silently ended up with weaker constraints than a freshly created one, and
+    -- `PRAGMA table_info` does not report CHECKs, so no shape comparison would have caught it.
+    -- Column CHECKs may reference other columns of the same table and do survive the ALTER, so
+    -- both routes now produce the same schema. tests/test_migrations.py checks this by behaviour.
+    redox      TEXT CHECK (redox IS NULL
+                           OR (redox IN ('reduced', 'oxidized')
+                               AND pair IS NOT NULL
+                               AND carrier = 1)),
+    adenylate  TEXT CHECK (adenylate IS NULL
+                           OR (adenylate IN ('charged', 'discharged') AND carrier = 1)),
     zone       TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
     evidence   TEXT NOT NULL,
     confidence TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
@@ -461,10 +489,52 @@ CREATE TABLE reaction (
     -- that makes route enumeration meaningful (PLAN.md G.7).
     compartment_id TEXT REFERENCES compartment(id),
     reversible     INTEGER CHECK (reversible IN (0, 1)),
+    -- v6. Whether this reaction competes with the pathway it sits in for a shared intermediate.
+    -- data/pathways/*.yaml has carried it from the start and nothing wrote it, so which reactions
+    -- drain the 2-ketoisovalerate pool -- the valine branch, the leucine branch, ECM31 -- was not
+    -- a fact the database held. It is the most decision-relevant property of a curated pathway
+    -- and a route ranker reads it.
+    --
+    -- Nullable on purpose: a reaction nobody has assessed is not a reaction known to be
+    -- non-competing, and an imported reaction will be the former.
+    competing      INTEGER CHECK (competing IN (0, 1)),
     zone           TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
     evidence       TEXT NOT NULL,
     confidence     TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
 );
+
+-- v6. Which genes encode the enzyme that runs a reaction.
+--
+-- Before this, metabolic/curated.py appended them to the reaction's evidence sentence as
+-- "[genes: LEU4, LEU9]" -- readable by a person, invisible to a query, and unjoinable to `gene`,
+-- whose 36 resolved rows include most of them.
+--
+-- A junction row: it inherits the zone of its parent `reaction` and does not repeat the column.
+--
+-- `resolution` is a three-state column rather than an inference from `gene_id IS NULL`, because
+-- NULL alone is ambiguous between "looked up and not found" and "never looked up". The
+-- distinction is load-bearing here: CONVENTIONS.md forbids mapping an unresolved identifier to
+-- the nearest plausible match, and the pathway files name ADH1, ADH6 and ADH7, none of which are
+-- in `gene`. Recording those as unresolved is correct; quietly resolving them to ADH2 is the
+-- exact failure the rule exists to prevent.
+CREATE TABLE reaction_gene (
+    reaction_id   TEXT NOT NULL REFERENCES reaction(id) ON DELETE CASCADE,
+    -- Exactly as the curated file wrote it, and kept even when resolution succeeds: the
+    -- as-written form is Zone R and the resolution is not.
+    gene_symbol   TEXT NOT NULL,
+    gene_id       TEXT REFERENCES gene(id),
+    gene_group_id TEXT REFERENCES gene_group(id),
+    resolution    TEXT NOT NULL
+                  CHECK (resolution IN ('resolved', 'unresolved', 'not_attempted')),
+    PRIMARY KEY (reaction_id, gene_symbol),
+    -- 'resolved' must name something, and anything else must not, so a stale id cannot survive a
+    -- downgrade to 'unresolved'.
+    CHECK (resolution <> 'resolved' OR gene_id IS NOT NULL),
+    CHECK (resolution = 'resolved' OR gene_id IS NULL)
+);
+
+CREATE INDEX reaction_gene_by_gene ON reaction_gene(gene_id);
+CREATE INDEX reaction_gene_by_symbol ON reaction_gene(gene_symbol);
 
 -- A junction row: it inherits the zone of its parent `reaction` and does not repeat the column.
 CREATE TABLE reaction_participant (

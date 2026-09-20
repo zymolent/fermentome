@@ -59,7 +59,25 @@ from typing import Final
 #:    The rule for the next parallel round, so this does not recur: a bump is per *round*, not per
 #:    agent. An agent that finds the version already ahead of the last released one adds its note
 #:    under that same integer instead of incrementing again.
-SCHEMA_VERSION: Final[int] = 5  # v5: manual_download_queue.reports_titer_or_yield is tri-state
+#: 5: `manual_download_queue.reports_titer_or_yield` became tri-state.
+#: 6: the curated pathway facts that were parsed and then dropped on the way into storage.
+#:    `data/pathways/*.yaml` recorded every one of them, `metabolic/curated.py` parsed them into
+#:    its dataclasses and its balance checks used them -- and then the INSERT statements named
+#:    none of them. Nothing ever failed, because a column that is never written raises nothing.
+#:
+#:    Added: `reaction.competing` (which reactions drain a shared intermediate -- the valine
+#:    branch, the leucine branch, ECM31 -- the most decision-relevant property of a curated
+#:    pathway, and absent from the database until now); `reaction_gene`, replacing the
+#:    "[genes: LEU4, LEU9]" suffix the loader appended to the evidence sentence, with a
+#:    three-state `resolution` because the pathway files name ADH1/ADH6/ADH7 and `gene` does not
+#:    hold them; and `metabolite.carbons/carrier/redox/pair/adenylate`, without which NADPH is
+#:    structurally identical to acetolactate.
+#:
+#:    **This is the first version with a migration.** `db/migrations.py` carries it, and
+#:    `fermdb db migrate` applies it after taking a timestamped backup. Before v6 the only route
+#:    past a bump was to delete and rebuild, which stopped being reasonable once the same file
+#:    held 5,164 publications and 55 pending curation tasks.
+SCHEMA_VERSION: Final[int] = 6
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

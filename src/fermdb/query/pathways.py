@@ -6,38 +6,37 @@ makes the page worth building at all:
 
     **if a diagram can disagree with the database, it is decoration.**
 
-Taking that rule seriously is what this module is for, and what it turned up is that **three of
-the facts P.2 requires do not survive the load.** `data/pathways/*.yaml` records all three and
-`metabolic/curated.py` parses all three into its dataclasses, and then:
+Taking that rule seriously is what this module is for, and the first thing it turned up was that
+**three of the facts P.2 requires did not survive the load.** `data/pathways/*.yaml` recorded all
+three, `metabolic/curated.py` parsed all three into its dataclasses and its balance checks used
+them -- and then the INSERT statements named none of them:
 
-* ``competing`` is never written. The `reaction` table has no such column and the INSERT does not
-  mention one. Which reactions drain the 2-ketoisovalerate pool -- the valine branch, the leucine
-  branch, ECM31 -- is the single most decision-relevant fact in the isobutanol pathway, and the
-  database does not know it. `fermdb atlas pathways` prints "(3 competing)" from the in-memory
-  YAML objects, so the CLI looks like it knows and the atlas does not.
-* ``genes`` are concatenated into the evidence sentence as ``[genes: LEU4, LEU9]`` rather than
-  joined to the `gene` table, whose 36 resolved rows include most of them.
-* ``carrier`` is dropped. `reaction_participant.role` permits 'cofactor' and the loader never
-  writes it -- 32 products, 29 substrates, zero cofactors -- and `metabolite` has no `carrier`
-  column to hold the YAML's flag. NADPH is stored as an ordinary substrate of KARI, structurally
+* ``competing`` was never written, so which reactions drain the 2-ketoisovalerate pool -- the
+  valine branch, the leucine branch, ECM31 -- was not a fact the database held. `fermdb atlas
+  pathways` printed "(3 competing)" from the in-memory YAML objects, so the CLI looked like it
+  knew while the atlas did not.
+* ``genes`` were concatenated into the evidence sentence as ``[genes: LEU4, LEU9]`` rather than
+  joined to `gene`, whose 36 resolved rows include most of them.
+* ``carrier`` was dropped, so NADPH was stored as an ordinary substrate of KARI, structurally
   identical to acetolactate.
 
-So a diagram drawn from this database today would show the three drains as ordinary reactions and
-NADPH as backbone carbon. It could not do otherwise: nothing in the atlas says they are anything
-else. Under P.3's rule that diagram is decoration.
+Schema v6 fixed all three (`db/migrations.py`), and the atlas now answers each of them. What is
+worth keeping from how this module was written *before* that, because the next such gap will
+arrive the same way:
 
-**This module papers over none of the three, and specifically does not parse the genes back out
-of the evidence string.** Recovering a structured fact from free text is how a UI starts asserting
-things the atlas cannot defend, and it would hide the loader bug behind an apparently-working
-page. Each is reported as absent with a reason, through the same `Value` machinery that carries
-any other missing datum, and :attr:`PathwayRead.gaps` names them in the payload so an interface
-can say *why* the picture is incomplete instead of rendering a confident, wrong one.
+**It papered over none of them, and specifically refused to parse the genes back out of the
+evidence string** even though the names were sitting right there. Recovering a structured fact
+from free text is how a UI starts asserting things the atlas cannot defend, and it would have
+hidden the loader bug behind a page that appeared to work. Each missing fact was an absent
+`Value` with a reason, never a default -- ``competing: false`` on the valine branch would not
+have been a missing fact but a false one, and ``is_carrier: false`` would have reported every
+carrier in the atlas as backbone carbon.
 
-The absence is deliberately ``not recorded`` and never ``False``. Writing ``competing: false`` for
-the valine branch would not be a missing fact; it would be a false one.
-
-When the schema does grow the column, :func:`read_pathway` picks it up on its own -- it asks the
-database what columns exist rather than carrying a hard-coded list that would go stale.
+:attr:`PathwayRead.gaps` remains, and is computed rather than hard-coded: :func:`read_pathway`
+asks the database which columns and tables exist, so the list shrank to nothing on its own when
+the migration landed, and will grow again by itself if a future schema regresses or an imported
+pathway arrives without these facts. A gap list that has to be edited by hand is a gap list that
+goes stale, and a stale one is worse than none because it is believed.
 """
 
 from __future__ import annotations
@@ -51,6 +50,7 @@ from .builder import Select
 from .values import Absence, Value, Zone
 
 __all__ = [
+    "GeneRead",
     "PathwayRead",
     "ParticipantRead",
     "ReactionRead",
@@ -72,19 +72,23 @@ def _zone_of(raw: Any) -> Zone | None:
 class ParticipantRead:
     """One metabolite on one side of a reaction.
 
-    ``is_carrier`` is what would let a renderer put NAD(H) and ATP on the edge rather than in the
-    backbone (P.2: "cofactors on the edges"), and in this atlas it is usually **not knowable**.
+    ``is_carrier`` is what lets a renderer put NAD(H) and ATP on the edge rather than in the
+    backbone (P.2: "cofactors on the edges"). It is answered two ways, in order: role 'cofactor'
+    on the participation, then `metabolite.carrier`, which v6 added.
 
-    `reaction_participant.role` has 'cofactor' in its CHECK constraint and the curated loader
-    never writes it: 32 products, 29 substrates, zero cofactors. NADPH is stored as an ordinary
-    substrate of the KARI reaction, indistinguishable from acetolactate. The YAML says
-    ``carrier: true`` and `metabolite` has no column to put it in, so the flag is dropped on load
-    along with ``competing``.
+    It stays a `Value` rather than a bool even now that the column exists. Before v6 there was no
+    way to tell a carrier from a substrate -- `metabolite` had no flag and the loader never wrote
+    role 'cofactor' (32 products, 29 substrates, zero cofactors), so NADPH sat in the KARI
+    reaction indistinguishable from acetolactate. Returning ``False`` there would have been the
+    quiet kind of wrong: every carrier in the atlas confidently reported as backbone carbon.
 
-    Hence a `Value` rather than a bool. Role 'cofactor' settles the question; anything else leaves
-    it open, because with the loader as it stands "stored as a substrate" and "is a substrate" are
-    the same row. Returning False there would have been the quiet kind of wrong -- every carrier
-    in the atlas confidently reported as backbone carbon.
+    An imported metabolite that nobody has classified is in exactly that position again, so the
+    third state has to survive. ``carrier = 0`` means assessed and not a carrier; NULL means
+    nobody looked, and those are not the same answer.
+
+    Note that carrier and role are **independent**: NADPH is both a substrate of KARI and a
+    carrier. Role says which side of the arrow; carrier says whether the skeleton is being
+    tracked through it. Collapsing them into role 'cofactor' would lose the direction.
     """
 
     metabolite_id: str
@@ -106,6 +110,38 @@ class ParticipantRead:
 
 
 @dataclass(frozen=True)
+class GeneRead:
+    """One gene a reaction names, and whether the atlas could say which gene that is.
+
+    ``symbol`` is Zone R -- exactly what the curated file wrote -- and survives whether or not
+    resolution succeeded. ``gene_id`` is the resolution, and is present only when ``resolution``
+    is 'resolved'.
+
+    The pathway files name ADH1, ADH6, ADH7, GPD2, GPP1 and GPP2, none of which are in `gene`.
+    Those come back unresolved rather than matched to ADH2 or GPD1, which is CONVENTIONS.md's
+    rule and not a limitation: a wrong gene link renders exactly as confidently as a right one.
+    """
+
+    symbol: str
+    gene_id: Value[str]
+    gene_group_id: Value[str]
+    resolution: str
+
+    @property
+    def is_resolved(self) -> bool:
+        return self.resolution == "resolved"
+
+    def as_json(self) -> dict[str, Any]:
+        return {
+            "symbol": self.symbol,
+            "gene_id": self.gene_id.as_json(),
+            "gene_group_id": self.gene_group_id.as_json(),
+            "resolution": self.resolution,
+            "is_resolved": self.is_resolved,
+        }
+
+
+@dataclass(frozen=True)
 class ReactionRead:
     """One reaction with everything the atlas structurally knows about it, and nothing more."""
 
@@ -116,7 +152,7 @@ class ReactionRead:
     compartment: Value[str]
     reversible: Value[bool]
     competing: Value[bool]
-    genes: Value[tuple[str, ...]]
+    genes: Value[tuple[GeneRead, ...]]
     step_role: Value[str]
     step_order: int
     evidence: str
@@ -150,7 +186,14 @@ class ReactionRead:
             "compartment": self.compartment.as_json(),
             "reversible": self.reversible.as_json(),
             "competing": self.competing.as_json(),
-            "genes": self.genes.as_json(),
+            "genes": (
+                {
+                    "display": self.genes.display,
+                    "value": [g.as_json() for g in self.genes.unwrap()],
+                }
+                if self.genes.is_known
+                else self.genes.as_json()
+            ),
             "step_role": self.step_role.as_json(),
             "step_order": self.step_order,
             "evidence": self.evidence,
@@ -245,6 +288,31 @@ def _participants(
             )
         )
     return tuple(participants)
+
+
+def _genes(conn: sqlite3.Connection, reaction_id: str) -> tuple[GeneRead, ...]:
+    """The genes a reaction names, resolved where the atlas could resolve them.
+
+    An empty tuple is a real answer -- "this reaction names no genes" -- and is distinct from the
+    absent Value returned when `reaction_gene` does not exist at all, which means "this atlas has
+    nowhere to record them". The caller sees those as `[]` and as an absence respectively.
+    """
+    page = (
+        Select("reaction_gene")
+        .columns("gene_symbol", "gene_id", "gene_group_id", "resolution")
+        .where("reaction_id = ?", reaction_id)
+        .order_by("gene_symbol")
+        .page(conn)
+    )
+    return tuple(
+        GeneRead(
+            symbol=str(row["gene_symbol"]),
+            gene_id=_optional_text(row["gene_id"], None),
+            gene_group_id=_optional_text(row["gene_group_id"], None),
+            resolution=str(row["resolution"]),
+        )
+        for row in page
+    )
 
 
 def _any_cofactor_role(conn: sqlite3.Connection, pathway_id: str) -> bool:
@@ -362,7 +430,11 @@ def read_pathway(conn: sqlite3.Connection, pathway_id: str) -> PathwayRead | Non
                     else Value.absent(Absence.NOT_RECORDED, zone=zone)
                 ),
                 competing=competing,
-                genes=Value.absent(Absence.NOT_RECORDED, zone=zone),
+                genes=(
+                    Value.known(_genes(conn, str(row["id"])), zone=zone)
+                    if has_gene_link
+                    else Value.absent(Absence.NOT_RECORDED, zone=zone)
+                ),
                 step_role=_optional_text(row["step_role_id"], zone),
                 step_order=int(row["step_order"]),
                 evidence=str(row["evidence"]),

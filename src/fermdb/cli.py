@@ -46,6 +46,7 @@ from . import curate
 from .config import Settings
 from .curate.queue import CurationError, Curator
 from .db import open_db
+from .db.cli import add_db_subcommand
 from .extract import (
     DEFAULT_EXTRACTION_SECTIONS,
     ExtractionError,
@@ -564,6 +565,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_omics_subcommand(sub)
     add_atlas_subcommand(sub)
     add_query_subcommand(sub)
+    add_db_subcommand(sub)
 
     p_extract = sub.add_parser(
         "extract", help="LLM extraction of one publication into a proposed Zone I row"

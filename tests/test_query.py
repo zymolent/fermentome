@@ -507,3 +507,108 @@ def test_an_explicit_cofactor_role_settles_it(atlas_pathway: sqlite3.Connection)
 def test_an_unknown_pathway_is_none_not_an_empty_graph(atlas_pathway: sqlite3.Connection) -> None:
     """An empty reaction list would read as "a pathway with no reactions", which is a claim."""
     assert P.read_pathway(atlas_pathway, "YAA:PWY:nope") is None
+
+
+# ------------------------------------------------------- pathways, against the real v6 schema
+
+
+@pytest.fixture()
+def atlas_v6() -> sqlite3.Connection:
+    """A pathway in the live schema, so these tests break if `schema.sql` moves under them.
+
+    The `atlas_pathway` fixture above is deliberately v5-shaped and still earns its keep: it is
+    the "schema has no such column" case, which an imported pathway or a future regression puts
+    the reader back into. This one is the fixed case.
+    """
+    from fermdb.db import IN_MEMORY, open_db
+
+    conn = open_db(IN_MEMORY)
+    conn.executescript(
+        """
+        INSERT INTO gene_group (id, scope, membership_method, zone, evidence, confidence)
+            VALUES ('YAA:GG:ynl104c', 'species', 'anchor', 'R', 'test', 'high');
+        INSERT INTO organism (id, name, zone, evidence, confidence)
+            VALUES ('YAA:ORG:scer', 'S. cerevisiae', 'R', 'test', 'high');
+        INSERT INTO gene (id, organism_id, assembly_accession, standard_name, gene_group_id,
+                          zone, evidence, confidence)
+            VALUES ('YAA:GENE:leu4', 'YAA:ORG:scer', 'GCF_000146045.2', 'LEU4',
+                    'YAA:GG:ynl104c', 'R', 'test', 'high');
+        INSERT INTO pathway (id, name, zone, evidence, confidence)
+            VALUES ('YAA:PWY:test', 'test', 'R', 'curated', 'high');
+        INSERT INTO reaction (id, name, equation, reversible, competing, zone, evidence,
+                              confidence)
+            VALUES ('YAA:RXN:leu', '2-isopropylmalate synthase', 'kiv + accoa -> ipm + coa',
+                    0, 1, 'R', 'the leucine branch', 'high');
+        INSERT INTO pathway_reaction (pathway_id, reaction_id, step_order)
+            VALUES ('YAA:PWY:test', 'YAA:RXN:leu', 1);
+        INSERT INTO reaction_gene (reaction_id, gene_symbol, gene_id, gene_group_id, resolution)
+            VALUES ('YAA:RXN:leu', 'LEU4', 'YAA:GENE:leu4', 'YAA:GG:ynl104c', 'resolved');
+        INSERT INTO reaction_gene (reaction_id, gene_symbol, gene_id, gene_group_id, resolution)
+            VALUES ('YAA:RXN:leu', 'LEU9', NULL, NULL, 'unresolved');
+        INSERT INTO metabolite (id, name, carbons, carrier, zone, evidence, confidence)
+            VALUES ('kiv', '2-ketoisovalerate', 5, 0, 'R', 'test', 'high');
+        INSERT INTO metabolite (id, name, carbons, carrier, pair, redox, zone, evidence,
+                                confidence)
+            VALUES ('nadh', 'NADH', 0, 1, 'nad', 'reduced', 'R', 'test', 'high');
+        INSERT INTO reaction_participant (reaction_id, metabolite_id, role, coefficient)
+            VALUES ('YAA:RXN:leu', 'kiv', 'substrate', 1);
+        INSERT INTO reaction_participant (reaction_id, metabolite_id, role, coefficient)
+            VALUES ('YAA:RXN:leu', 'nadh', 'substrate', 1);
+        """
+    )
+    yield conn
+    conn.close()
+
+
+def test_the_page_is_renderable_once_the_facts_are_stored(atlas_v6: sqlite3.Connection) -> None:
+    read = P.read_pathway(atlas_v6, "YAA:PWY:test")
+    assert read is not None
+    assert read.gaps == ()
+    assert read.is_renderable_as_specified is True
+
+
+def test_competing_is_read_as_the_curator_set_it(atlas_v6: sqlite3.Connection) -> None:
+    read = P.read_pathway(atlas_v6, "YAA:PWY:test")
+    assert read is not None
+    assert read.reactions[0].competing.unwrap() is True
+
+
+def test_an_unresolved_gene_keeps_its_symbol_and_claims_no_identity(
+    atlas_v6: sqlite3.Connection,
+) -> None:
+    """LEU9 is named by the curated file and absent from `gene`. It must stay LEU9.
+
+    CONVENTIONS.md forbids mapping it to the nearest plausible match, and LEU4 is sitting right
+    there -- a wrong link would render exactly as confidently as the right one beside it.
+    """
+    read = P.read_pathway(atlas_v6, "YAA:PWY:test")
+    assert read is not None
+    genes = {g.symbol: g for g in read.reactions[0].genes.unwrap()}
+    assert genes["LEU4"].is_resolved
+    assert genes["LEU4"].gene_id.unwrap() == "YAA:GENE:leu4"
+    assert not genes["LEU9"].is_resolved
+    assert genes["LEU9"].symbol == "LEU9"
+    assert "value" not in genes["LEU9"].gene_id.as_json()
+
+
+def test_a_carrier_that_is_also_a_substrate_is_both(atlas_v6: sqlite3.Connection) -> None:
+    """Role says which side of the arrow; carrier says whether the skeleton runs through it."""
+    read = P.read_pathway(atlas_v6, "YAA:PWY:test")
+    assert read is not None
+    reaction = read.reactions[0]
+    assert [p.metabolite_id for p in reaction.cofactors] == ["nadh"]
+    assert {p.metabolite_id for p in reaction.substrates} == {"kiv", "nadh"}
+    kiv = next(p for p in reaction.participants if p.metabolite_id == "kiv")
+    assert kiv.is_carrier.unwrap() is False  # assessed, and not a carrier
+
+
+def test_no_genes_named_is_not_the_same_as_nowhere_to_record_them(
+    atlas_v6: sqlite3.Connection, atlas_pathway: sqlite3.Connection
+) -> None:
+    """An empty list and an absence answer two different questions."""
+    atlas_v6.execute("DELETE FROM reaction_gene WHERE reaction_id = 'YAA:RXN:leu'")
+    with_table = P.read_pathway(atlas_v6, "YAA:PWY:test")
+    without_table = P.read_pathway(atlas_pathway, "YAA:PWY:test")
+    assert with_table is not None and without_table is not None
+    assert with_table.reactions[0].genes.unwrap() == ()  # looked, found none
+    assert without_table.reactions[0].genes.is_known is False  # nowhere to look

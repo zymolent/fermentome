@@ -308,24 +308,96 @@ def _reaction_id(pathway: str, local: str) -> str:
     return f"YAA:RXN:{pathway.replace('_', '-')}-{local.replace('_', '-')}"
 
 
+def _gene_symbols(conn: sqlite3.Connection) -> dict[str, tuple[str, str | None]]:
+    """``{STANDARD_NAME: (gene_id, gene_group_id)}`` for every gene the atlas has resolved.
+
+    Read once per pathway rather than queried per symbol: there are 36 genes, and a dict lookup
+    that cannot accidentally become a LIKE is worth more here than the saved memory.
+
+    Keyed on the standard name upper-cased, because that is the only form the curated pathway
+    files use and an exact match is the only match permitted -- see :func:`_write_reaction_genes`.
+    """
+    rows = conn.execute(
+        "SELECT id, standard_name, gene_group_id FROM gene WHERE standard_name IS NOT NULL"
+    ).fetchall()
+    return {
+        str(row["standard_name"]).upper(): (str(row["id"]), _optional(row["gene_group_id"]))
+        for row in rows
+    }
+
+
+def _optional(value: object) -> str | None:
+    return None if value is None else str(value)
+
+
+def _write_reaction_genes(
+    conn: sqlite3.Connection,
+    reaction_id: str,
+    reaction: Reaction,
+    symbols: Mapping[str, tuple[str, str | None]],
+) -> int:
+    """Write one `reaction_gene` row per gene the curated file names.
+
+    **Resolution is an exact, case-insensitive match on `gene.standard_name` and nothing else.**
+    CONVENTIONS.md: *"An identifier that cannot be resolved is recorded as UNRESOLVED:<as-written>,
+    never mapped to the nearest plausible match."* That rule earns its keep immediately here --
+    the pathway files name ADH1, ADH6 and ADH7, and `gene` holds ADH2 and ADH3. Any similarity
+    heuristic would attach the cytosolic isobutyraldehyde reductase to the wrong enzyme, and the
+    resulting row would look exactly as trustworthy as a correct one.
+
+    So an unmatched symbol is stored with the symbol intact, a NULL `gene_id` and
+    ``resolution = 'unresolved'``. The name is still there to search on and to fix later; what is
+    absent is any claim about which gene it is.
+    """
+    written = 0
+    for symbol in reaction.genes:
+        match = symbols.get(symbol.upper())
+        gene_id, group_id = match if match is not None else (None, None)
+        conn.execute(
+            "INSERT INTO reaction_gene (reaction_id, gene_symbol, gene_id, gene_group_id, "
+            "resolution) VALUES (?,?,?,?,?) "
+            "ON CONFLICT(reaction_id, gene_symbol) DO UPDATE SET gene_id=excluded.gene_id, "
+            "gene_group_id=excluded.gene_group_id, resolution=excluded.resolution",
+            (
+                reaction_id,
+                symbol,
+                gene_id,
+                group_id,
+                "resolved" if gene_id is not None else "unresolved",
+            ),
+        )
+        written += 1
+    return written
+
+
 def write_pathway(conn: sqlite3.Connection, pathway: CuratedPathway) -> dict[str, int]:
     """Write one curated pathway and everything it references. Idempotent."""
     counts = {
         "metabolite": 0,
         "reaction": 0,
+        "reaction_gene": 0,
         "pathway": 0,
         "pathway_reaction": 0,
         "reaction_participant": 0,
     }
+    symbols = _gene_symbols(conn)
 
     for metabolite in pathway.metabolites.values():
         conn.execute(
-            "INSERT INTO metabolite (id, name, formula, zone, evidence, confidence) "
-            "VALUES (?,?,?,'R',?,'high') ON CONFLICT(id) DO UPDATE SET formula=excluded.formula",
+            "INSERT INTO metabolite (id, name, formula, carbons, carrier, redox, pair, "
+            "adenylate, zone, evidence, confidence) VALUES (?,?,?,?,?,?,?,?,'R',?,'high') "
+            "ON CONFLICT(id) DO UPDATE SET formula=excluded.formula, carbons=excluded.carbons, "
+            "carrier=excluded.carrier, redox=excluded.redox, pair=excluded.pair, "
+            "adenylate=excluded.adenylate",
             (
                 _metabolite_id(metabolite.id),
                 metabolite.name,
                 metabolite.formula,
+                metabolite.carbons,
+                1 if metabolite.carrier else 0,
+                metabolite.redox,
+                metabolite.pair,
+                metabolite.adenylate,
                 f"curated pathway {pathway.id} ({Path(pathway.source_path).name})",
             ),
         )
@@ -347,9 +419,10 @@ def write_pathway(conn: sqlite3.Connection, pathway: CuratedPathway) -> dict[str
         reaction_id = _reaction_id(pathway.id, reaction.id)
         conn.execute(
             "INSERT INTO reaction (id, name, ec_number, equation, compartment_id, reversible, "
-            "zone, evidence, confidence) VALUES (?,?,?,?,?,?,'R',?,?) "
+            "competing, zone, evidence, confidence) VALUES (?,?,?,?,?,?,?,'R',?,?) "
             "ON CONFLICT(id) DO UPDATE SET equation=excluded.equation, "
-            "evidence=excluded.evidence, confidence=excluded.confidence",
+            "competing=excluded.competing, evidence=excluded.evidence, "
+            "confidence=excluded.confidence",
             (
                 reaction_id,
                 reaction.name,
@@ -357,11 +430,16 @@ def write_pathway(conn: sqlite3.Connection, pathway: CuratedPathway) -> dict[str
                 reaction.equation,
                 reaction.compartment,
                 1 if reaction.reversible else 0,
-                f"{reaction.evidence} [genes: {', '.join(reaction.genes) or 'none named'}]",
+                1 if reaction.competing else 0,
+                # The "[genes: ...]" suffix this line used to append is gone: the genes are rows
+                # in `reaction_gene` below, and repeating them in free text would leave two
+                # copies to disagree. The evidence field is the curator's evidence again.
+                reaction.evidence,
                 reaction.confidence,
             ),
         )
         counts["reaction"] += 1
+        counts["reaction_gene"] += _write_reaction_genes(conn, reaction_id, reaction, symbols)
 
         conn.execute(
             "INSERT INTO pathway_reaction (pathway_id, reaction_id, step_order, step_role_id) "
