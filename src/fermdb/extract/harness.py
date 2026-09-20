@@ -61,6 +61,7 @@ from ..llm import (
     verify_span,
 )
 from ..llm.validate import EntityResolver, TheoreticalYields, UnitTable
+from .jats import JatsError, is_jats, jats_to_text
 from .schemas import (
     RECORD_KINDS,
     iter_payload_records,
@@ -951,6 +952,15 @@ def load_source_text(
 
 def _decode_text(path: Path, media_type: str, publication_id: str) -> str:
     data = path.read_bytes()
+    # JATS first: acquisition prefers Europe PMC's fullTextXML over the PDF, so this is the
+    # common case, and the raw markup must never reach a model (see fermdb.extract.jats).
+    if is_jats(data):
+        try:
+            return jats_to_text(data)
+        except JatsError as exc:
+            raise SourceTextError(
+                f"{publication_id}: {path} is JATS but unreadable: {exc}"
+            ) from exc
     if media_type == "application/pdf" or data[:5] == b"%PDF-":
         raise SourceTextError(
             f"{publication_id}: the stored full text is a PDF ({path}), and this build has no PDF "
