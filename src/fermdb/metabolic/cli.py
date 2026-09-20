@@ -14,10 +14,25 @@ from datetime import UTC, datetime
 from ..annotate.ontology import annotations_for, write_annotations
 from ..config import Settings
 from ..db import open_db
+from ..db.vocabularies import load_vocabularies
 from .curated import load_parts, load_pathways, write_parts, write_pathways
 from .routes import enumerate_routes, explain, rank, write_routes
 
 __all__ = ["add_atlas_subcommand"]
+
+
+def cmd_atlas_vocabularies(_args: argparse.Namespace) -> int:
+    """Load data/vocabularies/ into its tables. Nothing can reference a product until this runs."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        counts = load_vocabularies(conn, settings)
+    finally:
+        conn.close()
+    for table, count in sorted(counts.items()):
+        print(f"  {table:<28}{count:>7}")
+    return 0
 
 
 def cmd_atlas_pathways(_args: argparse.Namespace) -> int:
@@ -135,6 +150,12 @@ def add_atlas_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         help="curated pathways, parts catalog, annotations and route enumeration (G.6-G.7)",
     )
     atlas_sub = p_atlas.add_subparsers(dest="atlas_command", required=True)
+
+    p_vocab = atlas_sub.add_parser(
+        "vocabularies",
+        help="load data/vocabularies/ into product and product_theoretical_yield",
+    )
+    p_vocab.set_defaults(func=cmd_atlas_vocabularies)
 
     p_pathways = atlas_sub.add_parser(
         "pathways",
