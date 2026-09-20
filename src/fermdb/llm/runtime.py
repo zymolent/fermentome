@@ -419,7 +419,11 @@ def run(
         if not errors and value is not None:
             stats = RunStats(
                 provider=provider.name,
-                model=model,
+                # What ANSWERED, not what was asked for. A provider may legitimately serve a
+                # different model than the one configured -- SessionProvider does exactly that --
+                # and recording the request would attribute an extraction to a backend that was
+                # never involved. `model` is provenance, and provenance has to be what happened.
+                model=completion.model or model,
                 model_version=model_version,
                 prompt_version=prompt_version,
                 input_hash=digest,

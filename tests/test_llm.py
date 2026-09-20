@@ -1476,3 +1476,58 @@ def test_ollama_skips_the_check_when_no_window_is_declared() -> None:
     """With no num_ctx the daemon's own default applies and there is nothing to compare against."""
     provider = OllamaProvider(transport=ollama_transport({"response": "{}"}), options={})
     assert provider.complete("x" * 60_000, model="m").text == "{}"
+
+
+# ---------------------------------------------------------------------------------------------
+# The session provider: extraction by the model driving this Claude Code session.
+#
+# MODEL_ROUTING.md section 7a routes escalation to the subscription rather than the metered API.
+# That path needs the Agent SDK and an OAuth token, neither of which is present; the session is
+# itself a Claude model and can answer inline. The thing these tests hold down is that doing so
+# is recorded honestly and gets no special standing.
+# ---------------------------------------------------------------------------------------------
+
+
+def test_the_session_provider_reports_the_model_that_actually_answered() -> None:
+    """Not the one config asked for. Recording the configured local model would attribute the
+    extraction to a daemon that was never running."""
+    from fermdb.llm.session import SESSION_PROVIDER_NAME, SessionProvider
+
+    provider = SessionProvider(['{"ok": true}'])
+    completion = provider.complete("prompt", model="some-local-model:27b")
+    assert completion.provider == SESSION_PROVIDER_NAME
+    assert completion.model == DEFAULT_ESCALATION_MODEL
+    assert completion.model != "some-local-model:27b"
+    assert "inline" in completion.model_version
+
+
+def test_run_records_the_model_from_the_completion_not_the_request() -> None:
+    """The provenance bug this found: the stored row named a local model that was not involved."""
+    from fermdb.llm.session import SessionProvider
+
+    result = run(
+        "prompt",
+        OBJECT_SCHEMA,
+        provider=SessionProvider(['{"titer_g_per_l": 22.6}']),
+        model="some-local-model:27b",
+        prompt_version="v1",
+    )
+    assert result.stats.model == DEFAULT_ESCALATION_MODEL
+
+
+def test_the_session_provider_refuses_an_empty_queue() -> None:
+    """An empty queue would make the harness report 'the model produced nothing', which is a claim
+    about a paper rather than about a missing input."""
+    from fermdb.llm.session import SessionProvider
+
+    with pytest.raises(ProviderError, match="no payloads"):
+        SessionProvider([])
+
+
+def test_running_out_of_payloads_names_the_retry_as_the_reason() -> None:
+    from fermdb.llm.session import SessionProvider
+
+    provider = SessionProvider(['{"a": 1}'])
+    provider.complete("p", model="m")
+    with pytest.raises(ProviderError, match="retries once"):
+        provider.complete("p", model="m")
