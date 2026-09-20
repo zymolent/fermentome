@@ -258,6 +258,44 @@ false-negative failure §7 warns is invisible to review.
 `qwen3.6:27b` *without* `format`, parsing the JSON object out of the response and leaving
 `validate.py` as the safety layer — which is where the design puts it anyway.
 
+**Since 2026-09-20 this is no longer a configuration to get right by hand.** `OllamaProvider`
+detects the empty constrained reply and retries once without `format`, recording
+`Completion.schema_constraint_dropped`. An empty completion is never a valid answer to a
+constrained request, so the trigger is unambiguous, and the table above stays as the measurement
+that justified it rather than as an operating instruction.
+
+### 7c. Prompt size, measured on a real paper — 2026-09-20
+
+Extraction was run end to end against a stored Europe PMC article
+(`10.1038/s41467-021-27852-x`, JATS, 73,013 characters of text). Methods + results came to a
+**60,087-character excerpt**, and the rendered prompt with the 17,619-character payload schema to
+**81,748 characters — about 20,400 tokens**.
+
+| `num_ctx` | result |
+|---|---|
+| 8,192 (the default) | 4,502 characters of **English prose** summarising the paper, ~73 s |
+| 32,768 | **empty string**, ~256 s |
+
+The prose at 8,192 is the informative one. Ollama truncates a too-long prompt silently and keeps
+the *end*; `extraction.md` ends with `{{excerpt}}`, so truncation discards the instructions and
+leaves the model an unlabelled wall of article text, to which a summary is a perfectly reasonable
+answer. It would have been reported as "the model produced no JSON" — a diagnosis pointing at the
+model when the cause was the window. `OllamaProvider` now refuses such a prompt up front and names
+the `num_ctx` required.
+
+At 32,768 the prompt is not truncated and the model returns nothing at all, after four minutes.
+**So the excerpt, not the window, is the real limit**: 20k-token prompts against a 27B model on
+one RTX 4090 are both unreliable and far too slow — 912 stored articles at four minutes each is
+over 60 hours.
+
+**Open, and the next thing extraction needs:** chunk the excerpt into windows of a few thousand
+tokens, extract per window, and merge. `Excerpt.to_document` already translates offsets from a
+temporary coordinate space back to the document, which is the hard half of that problem and is
+built and tested. Whether the first pass should then run on `qwen2.5:7b-instruct` rather than
+`qwen3.6:27b` is a throughput question to settle by measurement, and §5's argument applies: the
+validator, not the model tier, is what makes a span safe, so a weaker model costs recall and not
+correctness.
+
 ### Spans must be recorded against canonical text
 
 Validated end to end on `avalos2013.pdf`: the model returned a genuinely verbatim sentence, and
