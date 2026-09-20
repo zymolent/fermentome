@@ -36,6 +36,7 @@ The three gates below come from the owner's own answers, recorded in
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
@@ -75,6 +76,7 @@ class ChassisProfile:
     organism_id: str | None = None
     strain_id: str | None = None
     ploidy: int | None = None
+    ploidy_candidates: tuple[int, ...] = ()
     marker_free_multiplex: bool | None = None
     rho_status: str | None = None
     pdc_status: str | None = None
@@ -95,21 +97,51 @@ class ChassisProfile:
         return self.rho_status != "rho_zero"
 
     @property
+    def ploidy_scenarios(self) -> tuple[tuple[int, str], ...]:
+        """``(ploidy, what it would mean)`` for every candidate not yet excluded.
+
+        Empty once ploidy is measured -- at that point there is one answer and no scenarios.
+        """
+        if self.ploidy is not None:
+            return ()
+        return tuple(
+            (
+                n,
+                "one allele per locus"
+                if n == 1
+                else (
+                    f"{n} alleles per locus; marker-free multiplex keeps the transformation "
+                    f"count flat but every locus must be verified {n} times"
+                    if self.marker_free_multiplex
+                    else f"{n} alleles per locus, each needing its own edit: roughly {n}x the work"
+                ),
+            )
+            for n in sorted(self.ploidy_candidates)
+        )
+
+    @property
     def edit_burden_note(self) -> str:
         """How the ploidy and editing answers combine, in one line for a route explanation."""
-        if self.ploidy is None:
-            return "edit burden unknown: ploidy not recorded"
-        if self.ploidy == 1:
-            return "haploid: one allele per locus"
-        if self.marker_free_multiplex:
+        if self.ploidy is not None:
+            if self.ploidy == 1:
+                return "haploid: one allele per locus"
+            if self.marker_free_multiplex:
+                return (
+                    f"ploidy {self.ploidy} with marker-free multiplex editing: transformation "
+                    f"count stays flat, verification burden scales {self.ploidy}x"
+                )
             return (
-                f"ploidy {self.ploidy} with marker-free multiplex editing: transformation count "
-                f"stays flat, verification burden scales {self.ploidy}x"
+                f"ploidy {self.ploidy} without marker-free multiplex: each locus needs every "
+                f"allele, so roughly {self.ploidy}x the edits"
             )
-        return (
-            f"ploidy {self.ploidy} without marker-free multiplex: each locus needs every "
-            f"allele, so roughly {self.ploidy}x the edits"
-        )
+        if self.ploidy_candidates:
+            low, high = min(self.ploidy_candidates), max(self.ploidy_candidates)
+            return (
+                f"ploidy not measured; candidates {low}-{high} remain open, so the verification "
+                f"burden across DUET's loci spans {low}x to {high}x. Measuring it narrows the "
+                f"estimate rather than changing the route"
+            )
+        return "edit burden unknown: ploidy not recorded and no candidate range given"
 
 
 @dataclass(frozen=True)
@@ -171,6 +203,7 @@ def load_profiles(settings: Settings) -> tuple[ChassisProfile, ...]:
                 organism_id=entry.get("organism_id"),
                 strain_id=entry.get("strain_id"),
                 ploidy=entry.get("ploidy"),
+                ploidy_candidates=tuple(int(x) for x in (entry.get("ploidy_candidates") or ())),
                 marker_free_multiplex=_optional_bool(entry.get("marker_free_multiplex")),
                 rho_status=entry.get("rho_status"),
                 pdc_status=entry.get("pdc_status"),
@@ -300,13 +333,15 @@ def write_profiles(conn: sqlite3.Connection, profiles: Sequence[ChassisProfile])
     for profile in profiles:
         conn.execute(
             "INSERT INTO chassis_profile (id, strain_id, name_as_reported, organism_id, ploidy, "
-            "ploidy_state, marker_free_multiplex, rho_status, pdc_status, ferments_xylose, "
+            "ploidy_state, ploidy_candidates, marker_free_multiplex, rho_status, pdc_status, "
+            "ferments_xylose, "
             "respiration_policy, resolves_higher_alcohol_panel, higher_alcohol_panel_state, "
             "isobutanol_tolerance_g_l, isobutanol_tolerance_state, tolerance_endpoint, "
             "mtdna_tooling, is_selected, zone, evidence, confidence) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'R',?,?) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'R',?,?) "
             "ON CONFLICT(id) DO UPDATE SET name_as_reported=excluded.name_as_reported, "
             "ploidy=excluded.ploidy, ploidy_state=excluded.ploidy_state, "
+            "ploidy_candidates=excluded.ploidy_candidates, "
             "rho_status=excluded.rho_status, pdc_status=excluded.pdc_status, "
             "respiration_policy=excluded.respiration_policy, "
             "isobutanol_tolerance_g_l=excluded.isobutanol_tolerance_g_l, "
@@ -319,7 +354,8 @@ def write_profiles(conn: sqlite3.Connection, profiles: Sequence[ChassisProfile])
                 profile.name_as_reported,
                 profile.organism_id,
                 profile.ploidy,
-                "recorded" if profile.ploidy is not None else None,
+                "recorded" if profile.ploidy is not None else "unknown",
+                json.dumps(list(profile.ploidy_candidates)) if profile.ploidy_candidates else None,
                 None
                 if profile.marker_free_multiplex is None
                 else int(profile.marker_free_multiplex),

@@ -60,6 +60,9 @@ from typing import Final
 #:    agent. An agent that finds the version already ahead of the last released one adds its note
 #:    under that same integer instead of incrementing again.
 #: 5: `manual_download_queue.reports_titer_or_yield` became tri-state.
+#: 8: `chassis_profile.ploidy_candidates` -- the ploidies not yet excluded, as JSON. A single
+#:    NULL says "unknown" and loses the costable half: the consequences differ per candidate and
+#:    can be priced before the measurement exists.
 #: 7: `chassis_profile`. ISOBUTANOL_PROGRAM.md §6 defined it and nothing implemented it, so all
 #:    360 enumerated routes were ranked against no chassis -- a generic answer to a specific
 #:    question. Carries §6's properties plus the two the owner's 2026-09-21 answers created:
@@ -82,7 +85,7 @@ from typing import Final
 #:    `fermdb db migrate` applies it after taking a timestamped backup. Before v6 the only route
 #:    past a bump was to delete and rebuild, which stopped being reasonable once the same file
 #:    held 5,164 publications and 55 pending curation tasks.
-SCHEMA_VERSION: Final[int] = 7
+SCHEMA_VERSION: Final[int] = 8
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

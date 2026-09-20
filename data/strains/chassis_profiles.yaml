@@ -34,6 +34,7 @@ chassis:
     is_selected: true
 
     # Recorded from the owner's own documents and answers.
+    rho_status: rho_plus                 # owner, 2026-09-21
     marker_free_multiplex: true          # DUET_TARGET.md §5.3
     pdc_status: intact                   # DUET_TARGET.md §5.1 requires Pdc-POSITIVE
     respiration_policy: preferred        # M3, 2026-09-21, verbatim answer in OPEN_QUESTIONS.md
@@ -41,18 +42,34 @@ chassis:
     resolves_higher_alcohol_panel: null  # M4, 2026-09-21
     higher_alcohol_panel_state: not_measured
 
-    # NOT RECORDED, and each one costs the ranker something specific:
-    #   ploidy            -- sets the verification burden across DUET's ~15 loci
-    #   rho_status        -- decides whether a matrix pathway is possible at all
+    # PLOIDY IS UNKNOWN, AND THE OPTIONS ARE KEPT OPEN.
+    #
+    # The owner asked (2026-09-21) to "keep all options in hand to choose in future" rather than
+    # record a bare unknown. So the candidates below are the ploidies nothing has excluded, and
+    # `metabolic/chassis.py` prices each one instead of collapsing them:
+    #
+    #   1  haploid           one allele per locus
+    #   2  diploid           the common industrial case (unverified)
+    #   3  triploid          seen in industrial isolates (unverified)
+    #   4  tetraploid        likewise (unverified)
+    #
+    # These are candidates, not measurements. Measuring ploidy narrows the estimate; it does not
+    # change which route is right, which is why this is a cost question and not a gate.
+    ploidy_candidates: [1, 2, 3, 4]
+
+    # STILL NOT RECORDED, and each costs the ranker something specific:
     #   ferments_xylose   -- DUET's entire substrate partition is C5 -> isobutanol
     #   isobutanol_tolerance_g_l -- while absent, no route's ceiling can be computed
 
     evidence: >-
       docs/design/DUET_TARGET.md §5.1 and §5.3 (the owner's concept note); M2, M3 and M4
       answered by the owner on 2026-09-21 and recorded verbatim in
-      docs/reference/OPEN_QUESTIONS.md. Ploidy, rho status, xylose utilisation and isobutanol
-      tolerance are not recorded because they have not been supplied, not because they are
-      absent from the strain.
+      docs/reference/OPEN_QUESTIONS.md. rho+ confirmed by the owner on 2026-09-21; the strain
+      runs a working ethanol plant at ~120 g/L, which is consistent with it, though the
+      confirmation is the owner's statement rather than a plate assay recorded here. Ploidy is
+      unknown and its candidates are kept open at the owner's request. Xylose utilisation and
+      isobutanol tolerance are not recorded because they have not been supplied, not because
+      they are absent from the strain.
     confidence: unverified
 
   # ---------------------------------------------------------------------------------------

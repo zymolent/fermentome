@@ -1186,6 +1186,17 @@ CREATE TABLE chassis_profile (
     -- this even where marker-free multiplex keeps the transformation count flat.
     ploidy              INTEGER CHECK (ploidy IS NULL OR ploidy >= 1),
     ploidy_state        TEXT CHECK (ploidy_state IN ('recorded', 'not_applicable', 'unknown')),
+    -- v8. The ploidies NOT YET EXCLUDED, as a JSON array, for a chassis whose ploidy is unknown.
+    --
+    -- Requested by the owner 2026-09-21: "for ploidy keep all options in hand to choose in
+    -- future". A single NULL would say only "unknown" and lose the useful half -- which is that
+    -- the consequences differ per candidate and can be costed now. So the range is carried and
+    -- the edit burden is reported as a span rather than a number.
+    --
+    -- These are candidates, not measurements: each is a value no evidence has ruled out. When
+    -- one is measured it goes in `ploidy` with ploidy_state='recorded' and this column stops
+    -- mattering.
+    ploidy_candidates   TEXT,
     marker_free_multiplex INTEGER CHECK (marker_free_multiplex IN (0, 1)),
     -- Whether mitochondrial work is possible at all. A rho-zero chassis disqualifies a matrix
     -- pathway outright rather than merely costing it.

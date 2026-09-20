@@ -181,8 +181,18 @@ _V6_TO_V7: Final[Migration] = Migration(
     ),
 )
 
+
+#: v7 -> v8. The ploidies not yet excluded, for a chassis whose ploidy is unknown. Requested so
+#: that "unknown" does not throw away the costable part: what each candidate would imply.
+_V7_TO_V8: Final[Migration] = Migration(
+    from_version=7,
+    to_version=8,
+    summary="chassis_profile.ploidy_candidates -- keep the options open and costed",
+    statements=("ALTER TABLE chassis_profile ADD COLUMN ploidy_candidates TEXT",),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
-MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6, _V6_TO_V7)
+MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6, _V6_TO_V7, _V7_TO_V8)
 
 
 def pending(conn: sqlite3.Connection, *, to: int = SCHEMA_VERSION) -> tuple[Migration, ...]:

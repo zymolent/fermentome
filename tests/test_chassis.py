@@ -158,9 +158,11 @@ def test_the_selected_chassis_matches_the_concept_note(settings: Settings) -> No
     assert selected.respiration_policy == "preferred"  # M3
     assert selected.mtdna_tooling == "available_after_acquisition"  # M2
     assert selected.higher_alcohol_panel_state == "not_measured"  # M4
-    # The properties still owed, which the ranker reports rather than guessing.
+    assert selected.rho_status == "rho_plus"  # owner, 2026-09-21
+    # Still owed, and the ranker reports each rather than guessing. Ploidy is unknown but its
+    # candidates are kept open, so "unknown" still carries a costed range.
     assert selected.ploidy is None
-    assert selected.rho_status is None
+    assert selected.ploidy_candidates == (1, 2, 3, 4)
     assert selected.isobutanol_tolerance_g_l is None
 
 
@@ -194,3 +196,46 @@ def test_an_entry_without_evidence_is_refused(
     )
     with pytest.raises(C.ChassisError, match="evidence"):
         C.load_profiles(Settings.load())
+
+
+def test_unknown_ploidy_keeps_its_candidates_priced() -> None:
+    """The owner asked to "keep all options in hand to choose in future".
+
+    A bare NULL would say only "unknown" and throw away the costable half: the consequences
+    differ per candidate and can be priced before the measurement exists.
+    """
+    profile = _profile(ploidy_candidates=(1, 2, 3, 4), marker_free_multiplex=True)
+    note = profile.edit_burden_note
+    assert "candidates 1-4" in note
+    assert "1x to 4x" in note
+    assert "narrows the estimate rather than changing the route" in note
+
+    scenarios = dict(profile.ploidy_scenarios)
+    assert set(scenarios) == {1, 2, 3, 4}
+    assert "one allele per locus" in scenarios[1]
+    assert "verified 4 times" in scenarios[4]
+
+
+def test_a_measured_ploidy_retires_the_scenarios() -> None:
+    """Once it is measured there is one answer, and offering alternatives would be noise."""
+    profile = _profile(ploidy=2, ploidy_candidates=(1, 2, 3, 4), marker_free_multiplex=True)
+    assert profile.ploidy_scenarios == ()
+    assert "ploidy 2" in profile.edit_burden_note
+
+
+def test_no_ploidy_and_no_candidates_says_so() -> None:
+    assert "no candidate range given" in _profile().edit_burden_note
+
+
+def test_rho_plus_clears_the_matrix_gate(settings: Settings) -> None:
+    """The owner confirmed rho+ on 2026-09-21; a matrix route should carry no rho gate."""
+    selected = C.selected_profile(C.load_profiles(settings))
+    assert selected is not None
+    assert selected.rho_status == "rho_plus"
+    assert selected.can_run_a_matrix_pathway is True
+    assert C.gates_for(selected, strategy=MATRIX) == ()
+    # Strategy E still carries its own, which are about tooling and respiration, not rho.
+    assert {g.kind for g in C.gates_for(selected, strategy=MTDNA)} == {
+        "mtdna_tooling",
+        "respiration",
+    }
