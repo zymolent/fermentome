@@ -20,6 +20,9 @@ What is here:
 * :mod:`~fermdb.query.builder` -- a read-only query builder. No writes, no interpolated values,
   and pages that report their own truncation.
 * :mod:`~fermdb.query.coverage` -- the Dashboard read, including why each empty table is empty.
+* :mod:`~fermdb.query.pathways` -- the Pathway read, with what the atlas cannot yet draw.
+* :mod:`~fermdb.query.review` -- one proposal with its re-resolved quote and what accepting
+  it would write. The curation queue's read side.
 
 What is deliberately **not** here yet: graph traversal, lexical and semantic search (PLAN.md O.1
 lists four modalities; this package implements the first). They are additive and are listed as
@@ -40,6 +43,14 @@ from .coverage import (
     page_readiness,
     read_coverage,
 )
+from .review import (
+    CONTEXT_CHARS,
+    ProposedField,
+    ReviewPacket,
+    SpanView,
+    review_packet,
+    review_queue,
+)
 from .values import (
     Absence,
     Cited,
@@ -58,20 +69,26 @@ __all__ = [
     "MAX_ROWS",
     "PAGES",
     "Absence",
+    "CONTEXT_CHARS",
     "Cited",
     "Coverage",
     "EntityCoverage",
     "EvidenceLevel",
     "Page",
     "PageReadiness",
+    "ProposedField",
     "Quantity",
     "QueryError",
     "QueryValueError",
+    "ReviewPacket",
     "Select",
+    "SpanView",
     "Value",
     "Zone",
     "count_of",
     "read_coverage",
+    "review_packet",
+    "review_queue",
     "from_state_column",
     "from_text_column",
     "page_readiness",

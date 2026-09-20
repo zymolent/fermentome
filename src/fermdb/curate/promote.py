@@ -68,9 +68,11 @@ __all__ = [
     "PromotionPlan",
     "PromotionResult",
     "Requirement",
+    "SpanVerdict",
     "plan_promotion",
     "promote",
     "promote_ready",
+    "verify_span",
 ]
 
 #: Statuses a task must be in before it may become a row. 'pending' means nobody has looked.
@@ -173,39 +175,101 @@ def _payload_of(task: Task) -> Mapping[str, Any]:
     return loaded if isinstance(loaded, dict) else {}
 
 
-def _verify_span(conn: sqlite3.Connection, settings: Settings, task: Task) -> tuple[bool, str]:
-    """``(ok, detail)``: does the payload's quote still sit at its recorded offsets?
+@dataclass(frozen=True)
+class SpanVerdict:
+    """Whether a proposal's quote still resolves against the source, and what went wrong if not.
 
-    Imported here rather than at module scope: `extract.harness` imports from `curate`, and a
-    top-level import would close the cycle.
+    One implementation, used both by promotion (which gates on ``ok``) and by the review packet
+    (which shows ``detail`` and the surrounding text). Two implementations would eventually
+    disagree, and that failure mode is the bad one: a reviewer told the span is fine, promotion
+    refusing it afterwards, and nobody able to see why.
+    """
+
+    ok: bool
+    status: str
+    detail: str
+    quote: str | None = None
+    start: int | None = None
+    end: int | None = None
+    found_at: int | None = None
+    source_text: str | None = None
+
+    @property
+    def is_anchored(self) -> bool:
+        """Whether there is a quote and offsets at all, whatever they resolve to."""
+        return self.quote is not None and self.start is not None
+
+
+def verify_span(conn: sqlite3.Connection, settings: Settings, task: Task) -> SpanVerdict:
+    """Does the payload's quote still sit at its recorded offsets?
+
+    ``load_source_text`` is imported inside the function rather than at module scope:
+    `extract.harness` imports from `curate`, and a top-level import would close the cycle.
     """
     from ..extract.harness import load_source_text
 
     span = _payload_of(task).get("span")
     if not isinstance(span, Mapping):
-        return False, "the record carries no span, so nothing anchors it to the source"
+        return SpanVerdict(
+            False, "unanchored", "the record carries no span, so nothing ties it to the source"
+        )
     quote = span.get("quote")
     start, end = span.get("char_start"), span.get("char_end")
     if not isinstance(quote, str) or not quote.strip():
-        return False, "the span has no quoted text"
+        return SpanVerdict(False, "unanchored", "the span has no quoted text")
     if not isinstance(start, int) or not isinstance(end, int):
-        return False, "the span has no character offsets"
+        return SpanVerdict(False, "unanchored", "the span has no character offsets", quote=quote)
 
     try:
         text, _ = load_source_text(conn, settings, publication_id=task.publication_id)
     except Exception as exc:  # the source may be absent, unreadable, or not stored at all
-        return False, f"the source text could not be read ({exc})"
+        return SpanVerdict(
+            False,
+            "unreadable",
+            f"the source text could not be read ({exc})",
+            quote=quote,
+            start=start,
+            end=end,
+        )
 
-    found = text[start:end]
-    if found == quote:
-        return True, f"quote re-resolved at [{start}, {end})"
+    if text[start:end] == quote:
+        return SpanVerdict(
+            True,
+            "verified",
+            f"quote re-resolved at [{start}, {end})",
+            quote=quote,
+            start=start,
+            end=end,
+            found_at=start,
+            source_text=text,
+        )
     if quote in text:
         where = text.index(quote)
-        return False, (
+        return SpanVerdict(
+            False,
+            "moved",
             f"the quote is in the source but at [{where}, {where + len(quote)}), "
-            f"not the recorded [{start}, {end}) -- the offsets are stale"
+            f"not the recorded [{start}, {end}) -- the offsets are stale",
+            quote=quote,
+            start=start,
+            end=end,
+            found_at=where,
+            source_text=text,
         )
-    return False, "the quoted text is not in the source document at all"
+    return SpanVerdict(
+        False,
+        "absent",
+        "the quoted text is not in the source document at all",
+        quote=quote,
+        start=start,
+        end=end,
+        source_text=text,
+    )
+
+
+def _verify_span(conn: sqlite3.Connection, settings: Settings, task: Task) -> tuple[bool, str]:
+    verdict = verify_span(conn, settings, task)
+    return verdict.ok, verdict.detail
 
 
 # ------------------------------------------------------------------------------------ id rules

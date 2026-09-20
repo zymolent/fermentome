@@ -20,6 +20,7 @@ from ..config import Settings
 from ..db import open_db
 from .coverage import page_readiness, read_coverage
 from .pathways import list_pathways, read_pathway
+from .review import ReviewPacket, review_packet, review_queue
 
 __all__ = ["add_query_subcommand"]
 
@@ -130,6 +131,80 @@ def cmd_query_pathway(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_packet(p: ReviewPacket) -> None:
+    """One proposal, laid out so the quote is the thing the eye lands on."""
+    print(f"{p.task_id}   {p.record_kind}  {p.record_path}   [{p.status}]")
+    print(
+        f"  source     {p.citation.source_id}"
+        + (f"  ({p.citation.locator})" if p.citation.locator else "")
+    )
+    print(f"  span       {p.span.status}: {p.span.verdict.detail}")
+    if p.span.context:
+        print()
+        for line in _wrap_text(p.span.context, 94):
+            print(f"      {line}")
+    print()
+    print("  proposed")
+    for field in p.fields:
+        print(f"      {field.name:<30}{field.value.display}")
+    print(f"      {'(model confidence)':<30}{p.model_confidence.display}")
+    print()
+    print(f"  on accept  {p.plan.note}")
+    if p.times_proposed > 1:
+        print(f"  history    proposed {p.times_proposed}x, rejected {p.times_rejected}x")
+    for warning in p.warnings:
+        print(f"  ! {warning.code:<24}{warning.message}")
+    print()
+
+
+def _wrap_text(text: str, width: int) -> list[str]:
+    words, lines, current = text.split(), [], ""
+    for word in words:
+        if len(current) + len(word) + 1 > width:
+            lines.append(current)
+            current = word
+        else:
+            current = f"{current} {word}".strip()
+    if current:
+        lines.append(current)
+    return lines
+
+
+def cmd_query_review(args: argparse.Namespace) -> int:
+    """Everything needed to judge a proposal, in one read."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    supplied = {"organism_id": args.organism} if args.organism else None
+    try:
+        packets: tuple[ReviewPacket, ...]
+        if args.task:
+            packets = (review_packet(conn, args.task, settings=settings, supplied=supplied),)
+        else:
+            kinds = (
+                tuple(k.strip() for k in args.kind.split(",") if k.strip()) if args.kind else None
+            )
+            packets = review_queue(
+                conn, limit=args.limit, kinds=kinds, settings=settings, supplied=supplied
+            )
+    finally:
+        conn.close()
+
+    if args.json:
+        json.dump([p.as_json() for p in packets], sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    if not packets:
+        print("nothing pending", file=sys.stderr)
+        return 0
+    for packet in packets:
+        _print_packet(packet)
+    flagged = sum(1 for p in packets if p.needs_attention)
+    print(f"{len(packets)} proposal(s), {flagged} with warnings")
+    return 0
+
+
 def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add ``fermdb query ...`` to an existing top-level subparsers action."""
     p_query = sub.add_parser(
@@ -167,3 +242,16 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_pathway.set_defaults(func=cmd_query_pathway)
+
+    p_review = query_sub.add_parser(
+        "review",
+        help="one proposal with its re-resolved quote, what accepting writes, and what to check",
+    )
+    p_review.add_argument("--task", help="one task id; omit for the next in the queue")
+    p_review.add_argument("--limit", type=int, default=5, help="how many to show")
+    p_review.add_argument("--kind", help="comma-separated record kinds, e.g. 'measurements'")
+    p_review.add_argument("--organism", help="organism id, to plan strain promotion against")
+    p_review.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_review.set_defaults(func=cmd_query_review)
