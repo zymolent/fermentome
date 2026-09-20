@@ -335,6 +335,78 @@ class Excerpt:
                 return piece.name
         return None
 
+    def split(self, max_chars: int, *, overlap: int = 2000) -> tuple[Excerpt, ...]:
+        """Cut this excerpt into windows small enough to send, each a valid ``Excerpt``.
+
+        Measured on a real paper (MODEL_ROUTING.md 7c), one article's methods and results come to
+        60,000 characters — about 20,000 tokens with the schema. A 27B model on one GPU answers
+        that in four minutes, or returns nothing at all; across the stored corpus that is days of
+        compute for an unreliable result. The excerpt, not the context window, is the limit.
+
+        Each window is returned as a full ``Excerpt`` with its pieces clipped and rebased, so
+        every caller — and :meth:`to_document` above all — works on a window exactly as it works
+        on the whole. Offsets that come back from a window are therefore already *document*
+        offsets: there is no second coordinate system to get wrong, which is the only reason
+        chunking is safe to do at all.
+
+        Windows overlap by ``overlap`` characters so that a sentence carrying a measurement is not
+        lost to a boundary. That makes duplicate records possible, and they are easy to remove
+        precisely because both copies translate to the same document span.
+
+        Cuts prefer a paragraph boundary within the last quarter of the window; ``jats_to_text``
+        separates blocks with a blank line, so in practice that is a clean break between
+        paragraphs or table rows rather than mid-sentence.
+        """
+        if max_chars <= 0:
+            raise ValueError(f"max_chars must be positive, got {max_chars}")
+        if overlap < 0 or overlap >= max_chars:
+            raise ValueError(f"overlap must be in [0, max_chars), got {overlap}")
+        if len(self.text) <= max_chars:
+            return (self,)
+
+        windows: list[Excerpt] = []
+        start = 0
+        while start < len(self.text):
+            end = min(start + max_chars, len(self.text))
+            if end < len(self.text):
+                # Prefer a paragraph break, but only a late one -- an early break would make the
+                # window far smaller than asked for and multiply the number of calls.
+                floor = start + (max_chars * 3) // 4
+                paragraph = self.text.rfind("\n\n", floor, end)
+                if paragraph > start:
+                    end = paragraph
+            windows.append(self._window(start, end))
+            if end >= len(self.text):
+                break
+            start = max(end - overlap, start + 1)
+        return tuple(windows)
+
+    def _window(self, start: int, end: int) -> Excerpt:
+        """One window as an Excerpt: pieces clipped to ``[start, end)`` and rebased onto it."""
+        clipped: list[ExcerptPiece] = []
+        for piece in self.pieces:
+            exc_start = max(piece.exc_start, start)
+            exc_end = min(piece.exc_end, end)
+            if exc_start >= exc_end:
+                continue
+            # A piece maps excerpt to document by a constant shift, so clipping one end of the
+            # excerpt range shifts the same end of the document range by the same amount.
+            lead = exc_start - piece.exc_start
+            clipped.append(
+                ExcerptPiece(
+                    name=piece.name,
+                    doc_start=piece.doc_start + lead,
+                    doc_end=piece.doc_start + lead + (exc_end - exc_start),
+                    exc_start=exc_start - start,
+                    exc_end=exc_end - start,
+                )
+            )
+        return Excerpt(
+            text=self.text[start:end],
+            pieces=tuple(clipped),
+            document_chars=self.document_chars,
+        )
+
 
 #: What a primary research report has and a review does not. The discriminator is structural, so
 #: it costs nothing and cannot be talked out of its answer by a persuasive abstract.

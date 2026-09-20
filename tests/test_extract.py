@@ -824,3 +824,81 @@ def test_build_excerpt_still_suggests_unsectioned_for_a_genuine_fragment() -> No
         build_excerpt("x" * 100, _sections_named("front_matter"), DEFAULT_EXTRACTION_SECTIONS)
     assert not isinstance(raised.value, NotPrimaryResearchError)
     assert UNSECTIONED in str(raised.value)
+
+
+# ---------------------------------------------------------------------------------------------
+# Chunking.
+#
+# One real paper's methods and results come to 60,000 characters, about 20,000 tokens with the
+# schema (MODEL_ROUTING.md 7c). A 27B model answers that in four minutes or not at all. The
+# property that makes chunking safe is that a window is itself an Excerpt, so offsets coming back
+# from one are already document offsets -- there is no second coordinate system.
+# ---------------------------------------------------------------------------------------------
+
+
+def test_split_returns_the_excerpt_itself_when_it_already_fits() -> None:
+    excerpt = excerpt_of()
+    assert excerpt.split(100_000) == (excerpt,)
+
+
+def test_every_window_translates_its_own_offsets_back_to_the_document() -> None:
+    """The load-bearing property: a quote found in a window resolves in the document."""
+    excerpt = excerpt_of()
+    windows = excerpt.split(400, overlap=100)
+    assert len(windows) > 1
+
+    checked = 0
+    for window in windows:
+        for piece in window.pieces:
+            # Take a real substring of this window and translate it.
+            quote = window.text[piece.exc_start : piece.exc_end][:40]
+            if len(quote) < 10:
+                continue
+            start = window.text.index(quote)
+            translated = window.to_document(start, start + len(quote))
+            assert translated is not None
+            doc_start, doc_end = translated
+            assert DOCUMENT[doc_start:doc_end] == quote
+            checked += 1
+    assert checked, "no window yielded a checkable span"
+
+
+def test_windows_cover_the_whole_excerpt() -> None:
+    """Nothing may fall between two windows -- a lost paragraph is a silent false negative."""
+    excerpt = excerpt_of()
+    windows = excerpt.split(300, overlap=80)
+    rebuilt = windows[0].text
+    for window in windows[1:]:
+        # Each window overlaps the previous, so its text must continue from somewhere inside it.
+        assert window.text[:20] in rebuilt[-200:] or rebuilt.endswith(window.text[:20])
+        overlap_at = rebuilt.rfind(window.text[:40])
+        rebuilt = rebuilt[:overlap_at] + window.text if overlap_at != -1 else rebuilt + window.text
+    assert rebuilt == excerpt.text
+
+
+def test_windows_overlap_so_a_boundary_sentence_survives() -> None:
+    excerpt = excerpt_of()
+    windows = excerpt.split(300, overlap=150)
+    assert len(windows) > 1
+    first, second = windows[0], windows[1]
+    # The tail of one window reappears at the head of the next, so a measurement sentence
+    # straddling the cut is seen whole at least once.
+    assert first.text[-100:] in second.text
+
+
+def test_a_window_keeps_only_the_sections_it_contains() -> None:
+    excerpt = excerpt_of()
+    windows = excerpt.split(300, overlap=0)
+    for window in windows:
+        assert window.pieces, "a window with no pieces can produce no translatable span"
+        for piece in window.pieces:
+            assert 0 <= piece.exc_start < piece.exc_end <= len(window.text)
+            assert piece.doc_end - piece.doc_start == piece.exc_end - piece.exc_start
+
+
+def test_split_rejects_nonsense_bounds() -> None:
+    excerpt = excerpt_of()
+    with pytest.raises(ValueError, match="max_chars must be positive"):
+        excerpt.split(0)
+    with pytest.raises(ValueError, match="overlap must be in"):
+        excerpt.split(100, overlap=100)
