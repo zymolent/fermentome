@@ -525,8 +525,14 @@ _MODIFICATION_TYPES: Final[Mapping[str, str]] = {
     "other": "other",
 }
 
-#: `bottleneck.observation_type` is NOT NULL and closed. The extraction records a free-text
-#: `support` instead, so the two are bridged for the values the vocabulary actually defines.
+#: `bottleneck.observation_type` is NOT NULL and closed, and **the extraction schema has no field
+#: that maps onto it**. The payload's `support` records how a *claim* is supported
+#: (stated_by_authors / inferred_from_data / NA / unknown); `observation_type` records what kind of
+#: *observation* the bottleneck rests on. Different axes, no overlap.
+#:
+#: An earlier version of this module tested `support in _OBSERVATION_TYPES` and would therefore
+#: have refused every bottleneck forever, with a message implying the payload could have supplied
+#: the value. It never could. Like `strain.organism_id`, this is a column only a curator can fill.
 _OBSERVATION_TYPES: Final[frozenset[str]] = frozenset(
     {
         "metabolite_accumulation",
@@ -627,15 +633,25 @@ def _plan_bottleneck(
             )
         )
 
+    # `support` travels into the evidence string rather than into observation_type: it says how
+    # the claim is supported, which is a different question from what kind of observation it is.
     support = str(payload.get("support") or "").strip()
-    observation = support if support in _OBSERVATION_TYPES else supplied.get("observation_type")
+    observation = supplied.get("observation_type")
     if observation is None:
         missing.append(
             Requirement(
                 "observation_type",
-                f"NOT NULL and closed; the record's support is {support or 'absent'!r}, which is "
-                "not one of the six. A curator picks, because 'inferred' and 'flux_measurement' "
-                "are very different evidence and the choice sets the level downstream",
+                "NOT NULL and closed to six values, and the extraction schema has no field that "
+                f"maps onto it -- the record's `support` is {support or 'absent'!r}, which says "
+                "how the claim is supported, not what kind of observation it rests on. A curator "
+                "picks, because 'inferred' and 'flux_measurement' are very different evidence "
+                "and the choice sets the level downstream",
+            )
+        )
+    elif observation not in _OBSERVATION_TYPES:
+        missing.append(
+            Requirement(
+                "observation_type", f"{observation!r} is not one of {sorted(_OBSERVATION_TYPES)}"
             )
         )
 
@@ -650,6 +666,7 @@ def _plan_bottleneck(
             "node": node,
             "observation_type": observation,
             "claim": str(payload.get("claim") or ""),
+            "support": support,
             "intervention": str(payload.get("intervention_as_reported") or ""),
         },
         missing=tuple(missing),
@@ -683,6 +700,8 @@ def _write_bottleneck(
 ) -> bool:
     before = conn.total_changes
     detail = f"{evidence}; claim: {plan.row['claim']}"
+    if plan.row.get("support"):
+        detail += f"; support as reported: {plan.row['support']}"
     if plan.row["intervention"]:
         detail += f"; intervention: {plan.row['intervention']}"
     conn.execute(
