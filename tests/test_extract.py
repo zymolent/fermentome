@@ -720,10 +720,16 @@ def test_a_cached_result_is_revalidated_before_it_is_stored(
 # -------------------------------------------------------------------------------- source text
 
 
-def test_load_source_text_refuses_a_pdf(
+def test_load_source_text_refuses_an_unreadable_pdf(
     conn: sqlite3.Connection, settings: Settings, tmp_path: Path
 ) -> None:
-    """No PDF text extractor is a dependency, and decoding one anyway produces quotable garbage."""
+    """Rewritten 2026-09-21: PDFs are now read, but an unreadable one is still refused.
+
+    This test used to assert that every PDF was refused, because no extractor was wired in.
+    `extract.pdf` changed that -- so the assertion it encoded is now the wrong behaviour, and the
+    failure was correct. What survives is the reason the old refusal existed: a PDF whose bytes
+    do not yield prose must never be decoded anyway, because the result is quotable garbage.
+    """
     relative = Path("fulltext") / "aa" / "aa.pdf"
     target = settings.data_dir / relative
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -739,7 +745,8 @@ def test_load_source_text_refuses_a_pdf(
     conn.commit()
     with pytest.raises(ExtractionError) as excinfo:
         load_source_text(conn, settings, publication_id=PUBLICATION_ID)
-    assert "PDF" in str(excinfo.value)
+    # The message names the publication, so a batch failure is actionable.
+    assert PUBLICATION_ID in str(excinfo.value)
 
 
 def test_load_source_text_says_what_to_do_when_there_is_none(
