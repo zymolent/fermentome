@@ -1,0 +1,200 @@
+# The ethanol route in S. cerevisiae, curated as the reference layer -- and as the DUET redox path.
+#
+# PLAN.md G.3. Ethanol is secondary to isobutanol in this atlas (B.1), but it is not decoration:
+# it is the drain the isobutanol route competes with at the pyruvate node, and in the DUET
+# architecture it is also the *carrier* that moves reducing equivalents into the mitochondrial
+# matrix. Both uses need the same curated reactions, so they are here once.
+#
+# Glycolysis upstream of pyruvate is deliberately not enumerated. It is well covered by Yeast9 and
+# the BiGG models (PLAN.md A.2), none of its steps is a decision this atlas makes, and transcribing
+# it would add ten reactions nothing here would ask about. The route begins where the branch point
+# is.
+#
+# Carbon accounting and confidence conventions are those of isobutanol_valine_ehrlich.yaml.
+
+version: 1
+zone: R
+
+pathway:
+  id: ethanol_reference
+  name: "Ethanol from pyruvate, with its competing drains and the mitochondrial redox branch"
+  product: ethanol
+  evidence: >-
+    PLAN.md G.3; stoichiometry is standard biochemistry. Begins at pyruvate because upstream
+    glycolysis is not a decision this atlas makes (PLAN.md A.2).
+  confidence: high
+
+metabolites:
+  - {id: pyruvate,     name: "pyruvate",      carbons: 3, formula: "C3H3O3"}
+  - {id: acetaldehyde, name: "acetaldehyde",  carbons: 2, formula: "C2H4O"}
+  - {id: ethanol,      name: "ethanol",       carbons: 2, formula: "C2H6O"}
+  - {id: acetate,      name: "acetate",       carbons: 2, formula: "C2H3O2"}
+  - {id: dhap,         name: "dihydroxyacetone phosphate", carbons: 3, formula: "C3H7O6P"}
+  - {id: g3p_glycerol, name: "sn-glycerol 3-phosphate",    carbons: 3, formula: "C3H9O6P"}
+  - {id: glycerol,     name: "glycerol",      carbons: 3, formula: "C3H8O3"}
+  - {id: phosphate,    name: "phosphate",     carbons: 0, formula: "HO4P"}
+  - {id: co2,          name: "CO2",           carbons: 1, formula: "CO2"}
+  - {id: h2o,          name: "water",         carbons: 0, formula: "H2O"}
+  - {id: nadh,      name: "NADH",   carbons: 0, carrier: true, redox: reduced,  pair: nad}
+  - {id: nad_plus,  name: "NAD+",   carbons: 0, carrier: true, redox: oxidized, pair: nad}
+  - {id: nadph,     name: "NADPH",  carbons: 0, carrier: true, redox: reduced,  pair: nadp}
+  - {id: nadp_plus, name: "NADP+",  carbons: 0, carrier: true, redox: oxidized, pair: nadp}
+  - {id: atp,       name: "ATP",    carbons: 0, carrier: true, adenylate: charged}
+  - {id: adp,       name: "ADP",    carbons: 0, carrier: true, adenylate: discharged}
+
+reactions:
+  - id: pdc
+    name: "pyruvate decarboxylase"
+    step_role: KDC
+    ec: "4.1.1.1"
+    compartment: cytosol
+    genes: [PDC1, PDC5, PDC6]
+    reversible: false
+    equation: "pyruvate -> acetaldehyde + CO2"
+    participants:
+      - {metabolite: pyruvate,     role: substrate, coefficient: 1}
+      - {metabolite: acetaldehyde, role: product,   coefficient: 1}
+      - {metabolite: co2,          role: product,   coefficient: 1}
+    evidence: >-
+      The branch point the isobutanol route competes at, and it is not a close contest in the
+      native cell: PDC1 sits at a median 3,028 TPM across the 99-run corpus against ARO10's 9.2,
+      a 330-fold difference (docs/reports/2026-09-20-duet-expression-baseline.md). PDC1 is the
+      major isozyme; PDC5 and PDC6 are conditional (unverified).
+    confidence: high
+
+  - id: adh1_forward
+    name: "alcohol dehydrogenase 1, acetaldehyde reduction"
+    step_role: ADH
+    ec: "1.1.1.1"
+    compartment: cytosol
+    genes: [ADH1]
+    reversible: true
+    equation: "acetaldehyde + NADH -> ethanol + NAD+"
+    participants:
+      - {metabolite: acetaldehyde, role: substrate, coefficient: 1}
+      - {metabolite: nadh,         role: substrate, coefficient: 1}
+      - {metabolite: ethanol,      role: product,   coefficient: 1}
+      - {metabolite: nad_plus,     role: product,   coefficient: 1}
+    evidence: "The fermentative direction; regenerates cytosolic NAD+ for glycolysis."
+    confidence: high
+
+  - id: adh2_reverse
+    name: "alcohol dehydrogenase 2, ethanol oxidation"
+    step_role: ADH
+    ec: "1.1.1.1"
+    compartment: cytosol
+    genes: [ADH2]
+    reversible: true
+    equation: "ethanol + NAD+ -> acetaldehyde + NADH"
+    participants:
+      - {metabolite: ethanol,      role: substrate, coefficient: 1}
+      - {metabolite: nad_plus,     role: substrate, coefficient: 1}
+      - {metabolite: acetaldehyde, role: product,   coefficient: 1}
+      - {metabolite: nadh,         role: product,   coefficient: 1}
+    evidence: >-
+      Glucose-repressed and induced on ethanol (unverified). The cytosolic half of the ethanol
+      redox cycle; measured at median 103 TPM in the corpus.
+    confidence: high
+
+  - id: adh3_matrix
+    name: "alcohol dehydrogenase 3, mitochondrial ethanol oxidation"
+    step_role: cofactor_cycle
+    ec: "1.1.1.1"
+    compartment: mitochondrial_matrix
+    genes: [ADH3]
+    reversible: true
+    equation: "ethanol + NAD+ -> acetaldehyde + NADH"
+    participants:
+      - {metabolite: ethanol,      role: substrate, coefficient: 1}
+      - {metabolite: nad_plus,     role: substrate, coefficient: 1}
+      - {metabolite: acetaldehyde, role: product,   coefficient: 1}
+      - {metabolite: nadh,         role: product,   coefficient: 1}
+    evidence: >-
+      The DUET architecture's first step: ethanol crosses the inner membrane freely, so oxidising
+      it inside the matrix delivers reducing equivalents there without a shuttle. ADH3 is
+      nuclear-encoded despite acting in the matrix -- it is translated on cytosolic ribosomes
+      under NCBI table 1 and imported, so a construct of it needs no recoding. Measured at median
+      232 TPM, the best-expressed member of the redox set.
+    confidence: high
+
+  - id: pos5_nadh_kinase
+    name: "mitochondrial NADH kinase"
+    step_role: cofactor_cycle
+    ec: "2.7.1.86"
+    compartment: mitochondrial_matrix
+    genes: [POS5]
+    reversible: false
+    transfers_redox_pool: true
+    equation: "NADH + ATP -> NADPH + ADP"
+    participants:
+      - {metabolite: nadh,  role: substrate, coefficient: 1}
+      - {metabolite: atp,   role: substrate, coefficient: 1}
+      - {metabolite: nadph, role: product,   coefficient: 1}
+      - {metabolite: adp,   role: product,   coefficient: 1}
+    evidence: >-
+      The coupling DUET depends on, and the weak link in it. Converts matrix NADH -- which ADH3
+      has just produced from ethanol -- into the NADPH that Ilv5 consumes. Measured at median
+      19.4 TPM against ILV5's 174, so the supplier is roughly nine-fold below the enzyme
+      depending on it (docs/reports/2026-09-20-duet-expression-baseline.md).
+    confidence: high
+
+  # ---- competing drains at and below pyruvate -------------------------------------------------
+  - id: ald6_acetate
+    name: "acetaldehyde dehydrogenase (NADP+)"
+    step_role: transporter
+    ec: "1.2.1.4"
+    compartment: cytosol
+    genes: [ALD6]
+    reversible: false
+    competing: true
+    equation: "acetaldehyde + NADP+ + H2O -> acetate + NADPH"
+    participants:
+      - {metabolite: acetaldehyde, role: substrate, coefficient: 1}
+      - {metabolite: nadp_plus,    role: substrate, coefficient: 1}
+      - {metabolite: h2o,          role: substrate, coefficient: 1}
+      - {metabolite: acetate,      role: product,   coefficient: 1}
+      - {metabolite: nadph,        role: product,   coefficient: 1}
+    evidence: >-
+      Diverts acetaldehyde to acetate and is a major cytosolic NADPH source (unverified) -- so
+      deleting it to protect the ethanol or isobutanol pool also removes NADPH supply, which is a
+      trade-off a route must carry rather than a free win. Measured at median 390 TPM.
+    confidence: high
+
+  - id: gpd_glycerol3p
+    name: "glycerol-3-phosphate dehydrogenase"
+    step_role: cofactor_cycle
+    ec: "1.1.1.8"
+    compartment: cytosol
+    genes: [GPD1, GPD2]
+    reversible: false
+    competing: true
+    equation: "dihydroxyacetone phosphate + NADH -> sn-glycerol 3-phosphate + NAD+"
+    participants:
+      - {metabolite: dhap,         role: substrate, coefficient: 1}
+      - {metabolite: nadh,         role: substrate, coefficient: 1}
+      - {metabolite: g3p_glycerol, role: product,   coefficient: 1}
+      - {metabolite: nad_plus,     role: product,   coefficient: 1}
+    evidence: >-
+      The principal anaerobic sink for surplus cytosolic NADH (unverified), which is why it is the
+      most-deleted competing pathway in the ethanol literature and why deleting it without
+      providing an alternative NADH sink impairs anaerobic growth (unverified). PLAN.md G.3 names
+      this intervention/consequence/compensation chain as the template for how the atlas
+      represents an engineering trade-off.
+    confidence: unverified
+
+  - id: gpp_glycerol
+    name: "glycerol-3-phosphatase"
+    step_role: transporter
+    ec: "3.1.3.21"
+    compartment: cytosol
+    genes: [GPP1, GPP2]
+    reversible: false
+    competing: true
+    equation: "sn-glycerol 3-phosphate + H2O -> glycerol + phosphate"
+    participants:
+      - {metabolite: g3p_glycerol, role: substrate, coefficient: 1}
+      - {metabolite: h2o,          role: substrate, coefficient: 1}
+      - {metabolite: glycerol,     role: product,   coefficient: 1}
+      - {metabolite: phosphate,    role: product,   coefficient: 1}
+    evidence: "Completes the glycerol branch; the committed, irreversible step."
+    confidence: high

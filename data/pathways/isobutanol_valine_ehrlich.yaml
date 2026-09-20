@@ -1,0 +1,208 @@
+# The valine/Ehrlich route to isobutanol in S. cerevisiae, and the reactions that compete with it.
+#
+# PLAN.md G.3 ("The two curated pathways"). Hand-curated rather than imported, because the details
+# that decide an engineering route -- which compartment a step runs in, which cofactor it uses,
+# which paralog carries flux -- are exactly what automated pathway imports omit or get wrong.
+#
+# CARBON ACCOUNTING. Each metabolite carries `carbons`: the number of carbon atoms it contributes
+# to the *skeleton being tracked*, not its molecular formula. Carriers are 0 and marked
+# `carrier: true` -- NAD(H), NADP(H), ATP/ADP, CoA, THF. They contain carbon but conserve it, so
+# counting their full formulae would balance trivially on both sides and obscure the thing worth
+# checking. Acetyl-CoA is the one to watch: it is `carbons: 2`, the acetyl group it donates, with
+# free CoA appearing as a 0-carbon carrier product. tests/test_curated_pathways.py asserts that
+# every reaction here balances on carbon, on redox pairs and on adenylates.
+#
+# CONFIDENCE. Stoichiometry and EC numbers are `high`: they are textbook biochemistry and the
+# equation either balances or does not. Claims about which paralog carries flux, or about relative
+# drain magnitudes, are `unverified` and say so per reaction -- they are this session's background
+# knowledge, never checked against a source in this session (CONVENTIONS.md, "Curation").
+
+version: 1
+zone: R
+
+pathway:
+  id: isobutanol_valine_ehrlich
+  name: "Isobutanol via valine biosynthesis and the Ehrlich pathway"
+  product: isobutanol
+  evidence: >-
+    PLAN.md G.3 and docs/design/ISOBUTANOL_PROGRAM.md; stoichiometry is standard biochemistry,
+    compartment assignment follows the native S. cerevisiae localisation.
+  confidence: high
+
+metabolites:
+  - {id: pyruvate,              name: "pyruvate",                      carbons: 3, formula: "C3H3O3"}
+  - {id: acetolactate_2,        name: "(S)-2-acetolactate",            carbons: 5, formula: "C5H7O4"}
+  - {id: dhiv,                  name: "2,3-dihydroxy-3-methylbutanoate", carbons: 5, formula: "C5H9O4"}
+  - {id: kiv_2,                 name: "2-ketoisovalerate",             carbons: 5, formula: "C5H7O3"}
+  - {id: isobutyraldehyde,      name: "isobutyraldehyde",              carbons: 4, formula: "C4H8O"}
+  - {id: isobutanol,            name: "isobutanol",                    carbons: 4, formula: "C4H10O"}
+  - {id: valine,                name: "L-valine",                      carbons: 5, formula: "C5H11NO2"}
+  - {id: glutamate,             name: "L-glutamate",                   carbons: 5, formula: "C5H9NO4"}
+  - {id: oxoglutarate_2,        name: "2-oxoglutarate",                carbons: 5, formula: "C5H4O5"}
+  - {id: isopropylmalate_2,     name: "2-isopropylmalate",             carbons: 7, formula: "C7H12O5"}
+  - {id: ketopantoate,          name: "2-dehydropantoate",             carbons: 6, formula: "C6H11O4"}
+  - {id: co2,                   name: "CO2",                           carbons: 1, formula: "CO2"}
+  - {id: h2o,                   name: "water",                         carbons: 0, formula: "H2O"}
+  # Carriers: carbon-bearing but carbon-conserving, so excluded from the skeleton balance.
+  - {id: acetyl_coa,            name: "acetyl-CoA",                    carbons: 2, carrier: false}
+  - {id: coa,                   name: "coenzyme A",                    carbons: 0, carrier: true}
+  - {id: methylene_thf,         name: "5,10-methylenetetrahydrofolate", carbons: 1, carrier: false}
+  - {id: thf,                   name: "tetrahydrofolate",              carbons: 0, carrier: true}
+  - {id: nadph,                 name: "NADPH",                         carbons: 0, carrier: true, redox: reduced, pair: nadp}
+  - {id: nadp_plus,             name: "NADP+",                         carbons: 0, carrier: true, redox: oxidized, pair: nadp}
+  - {id: nadh,                  name: "NADH",                          carbons: 0, carrier: true, redox: reduced, pair: nad}
+  - {id: nad_plus,              name: "NAD+",                          carbons: 0, carrier: true, redox: oxidized, pair: nad}
+
+reactions:
+  # ---- the route proper -----------------------------------------------------------------------
+  - id: ahas
+    name: "acetohydroxyacid synthase"
+    step_role: AHAS
+    ec: "2.2.1.6"
+    compartment: mitochondrial_matrix
+    genes: [ILV2, ILV6]
+    reversible: false
+    equation: "2 pyruvate -> (S)-2-acetolactate + CO2"
+    participants:
+      - {metabolite: pyruvate,       role: substrate, coefficient: 2}
+      - {metabolite: acetolactate_2, role: product,   coefficient: 1}
+      - {metabolite: co2,            role: product,   coefficient: 1}
+    evidence: "TPP-dependent; ILV6 is the regulatory subunit, ILV2 catalytic."
+    confidence: high
+
+  - id: kari
+    name: "ketol-acid reductoisomerase"
+    step_role: KARI
+    ec: "1.1.1.86"
+    compartment: mitochondrial_matrix
+    genes: [ILV5]
+    reversible: false
+    equation: "(S)-2-acetolactate + NADPH -> 2,3-dihydroxy-3-methylbutanoate + NADP+"
+    participants:
+      - {metabolite: acetolactate_2, role: substrate, coefficient: 1}
+      - {metabolite: nadph,          role: substrate, coefficient: 1}
+      - {metabolite: dhiv,           role: product,   coefficient: 1}
+      - {metabolite: nadp_plus,      role: product,   coefficient: 1}
+    evidence: >-
+      The NADPH dependence here is why the DUET architecture exists: the reductive step of the
+      pathway runs in the matrix on NADPH, while the alcohol dehydrogenase at the far end runs on
+      NADH, and the two pools are not freely interconvertible across the inner membrane.
+    confidence: high
+
+  - id: dhad
+    name: "dihydroxyacid dehydratase"
+    step_role: DHAD
+    ec: "4.2.1.9"
+    compartment: mitochondrial_matrix
+    genes: [ILV3]
+    reversible: false
+    equation: "2,3-dihydroxy-3-methylbutanoate -> 2-ketoisovalerate + H2O"
+    participants:
+      - {metabolite: dhiv,  role: substrate, coefficient: 1}
+      - {metabolite: kiv_2, role: product,   coefficient: 1}
+      - {metabolite: h2o,   role: product,   coefficient: 1}
+    evidence: >-
+      Carries a [4Fe-4S] cluster, which is why the Fe-S machinery genes (NFS1, ISU1, YFH1) are in
+      the DUET set: a cytosolically relocalized Ilv3 depends on cytosolic cluster assembly
+      (unverified).
+    confidence: high
+
+  - id: kdc
+    name: "2-ketoacid decarboxylase"
+    step_role: KDC
+    ec: "4.1.1.72"
+    compartment: cytosol
+    genes: [ARO10, PDC1, PDC5, PDC6]
+    reversible: false
+    equation: "2-ketoisovalerate -> isobutyraldehyde + CO2"
+    participants:
+      - {metabolite: kiv_2,            role: substrate, coefficient: 1}
+      - {metabolite: isobutyraldehyde, role: product,   coefficient: 1}
+      - {metabolite: co2,              role: product,   coefficient: 1}
+    evidence: >-
+      Natively cytosolic while its substrate is made in the matrix -- this compartment boundary is
+      the engineering problem the whole route turns on. The decarboxylases are promiscuous, which
+      is why isoamyl alcohol and 2-methyl-1-butanol appear as by-products (unverified). Measured
+      here: ARO10 is the least-expressed pathway gene in the 99-run corpus, median 9.2 TPM and
+      undetected in 21 samples (docs/reports/2026-09-20-duet-expression-baseline.md).
+    confidence: high
+
+  - id: adh_isobutanol
+    name: "alcohol dehydrogenase, isobutyraldehyde reduction"
+    step_role: ADH
+    ec: "1.1.1.1"
+    compartment: cytosol
+    genes: [ADH1, ADH2, ADH6, ADH7]
+    reversible: true
+    equation: "isobutyraldehyde + NADH -> isobutanol + NAD+"
+    participants:
+      - {metabolite: isobutyraldehyde, role: substrate, coefficient: 1}
+      - {metabolite: nadh,             role: substrate, coefficient: 1}
+      - {metabolite: isobutanol,       role: product,   coefficient: 1}
+      - {metabolite: nad_plus,         role: product,   coefficient: 1}
+    evidence: >-
+      NADH-dependent for the Adh1-type enzymes; ADH6 is NADPH-preferring (unverified). The
+      cofactor mismatch against Ilv5's NADPH is the redox problem a route must solve.
+    confidence: high
+
+  # ---- the three drains on the 2-KIV pool -----------------------------------------------------
+  - id: bat_transamination
+    name: "branched-chain aminotransferase"
+    step_role: transporter
+    ec: "2.6.1.42"
+    compartment: mitochondrial_matrix
+    genes: [BAT1, BAT2]
+    reversible: true
+    competing: true
+    equation: "2-ketoisovalerate + L-glutamate -> L-valine + 2-oxoglutarate"
+    participants:
+      - {metabolite: kiv_2,          role: substrate, coefficient: 1}
+      - {metabolite: glutamate,      role: substrate, coefficient: 1}
+      - {metabolite: valine,         role: product,   coefficient: 1}
+      - {metabolite: oxoglutarate_2, role: product,   coefficient: 1}
+    evidence: >-
+      The valine branch, and the largest drain on 2-KIV (unverified). BAT1 is mitochondrial and
+      BAT2 cytosolic, so the pair also moves the carbon skeleton across the compartment boundary
+      in the form of valine -- which is why a route may prefer to attenuate rather than delete.
+    confidence: high
+
+  - id: leu_isopropylmalate
+    name: "2-isopropylmalate synthase"
+    step_role: transporter
+    ec: "2.3.3.13"
+    compartment: mitochondrial_matrix
+    genes: [LEU4, LEU9]
+    reversible: false
+    competing: true
+    equation: "2-ketoisovalerate + acetyl-CoA -> 2-isopropylmalate + CoA"
+    participants:
+      - {metabolite: kiv_2,             role: substrate, coefficient: 1}
+      - {metabolite: acetyl_coa,        role: substrate, coefficient: 1}
+      - {metabolite: isopropylmalate_2, role: product,   coefficient: 1}
+      - {metabolite: coa,               role: product,   coefficient: 1}
+    evidence: "The leucine branch. LEU4 is the major isozyme, LEU9 minor (unverified)."
+    confidence: high
+
+  - id: ecm31_ketopantoate
+    name: "ketopantoate hydroxymethyltransferase"
+    step_role: transporter
+    ec: "2.1.2.11"
+    compartment: mitochondrial_matrix
+    genes: [ECM31]
+    reversible: false
+    competing: true
+    equation: "2-ketoisovalerate + 5,10-methylene-THF -> 2-dehydropantoate + THF"
+    participants:
+      - {metabolite: kiv_2,         role: substrate, coefficient: 1}
+      - {metabolite: methylene_thf, role: substrate, coefficient: 1}
+      - {metabolite: ketopantoate,  role: product,   coefficient: 1}
+      - {metabolite: thf,           role: product,   coefficient: 1}
+    evidence: >-
+      PLAN.md G.3 AMENDMENT 2026-09-20. The third drain, added because the original competing set
+      listed only the valine and leucine branches and was incomplete rather than abbreviated.
+      Draws 2-KIV into pantothenate and thence CoA (unverified). NOT interchangeable with the
+      other two as a deletion candidate: pantothenate is a CoA precursor and the pathway is
+      plausibly essential (unverified), so a proposal here must be an attenuation unless an
+      essentiality check says otherwise. The atlas has no measured split of 2-KIV between the
+      three drains in any chassis -- that is a seeded knowledge_gap, not one found later.
+    confidence: unverified
