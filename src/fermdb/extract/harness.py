@@ -63,6 +63,7 @@ from ..llm import (
 )
 from ..llm.validate import EntityResolver, TheoreticalYields, UnitTable
 from .jats import JatsError, is_jats, jats_to_text
+from .pdf import PdfError, is_pdf, pdf_to_text
 from .schemas import (
     RECORD_KINDS,
     iter_payload_records,
@@ -1228,13 +1229,15 @@ def _decode_text(path: Path, media_type: str, publication_id: str) -> str:
             raise SourceTextError(
                 f"{publication_id}: {path} is JATS but unreadable: {exc}"
             ) from exc
-    if media_type == "application/pdf" or data[:5] == b"%PDF-":
-        raise SourceTextError(
-            f"{publication_id}: the stored full text is a PDF ({path}), and this build has no PDF "
-            f"text extractor. Convert it to text first, or pass --text-file. Reporting this "
-            f"rather than decoding the bytes anyway: a PDF read as text produces plausible "
-            f"garbage, and a model will happily quote from it."
-        )
+    # PDFs the owner supplied through the manual download queue. `extract.pdf` extracts the text
+    # layer and refuses a document that has none -- the original reason for refusing PDFs outright
+    # ("a PDF read as text produces plausible garbage") applies to a scan just as much, so the
+    # check moved rather than went away.
+    if media_type == "application/pdf" or is_pdf(data):
+        try:
+            return pdf_to_text(data, source=f"{publication_id} ({path.name})")
+        except PdfError as exc:
+            raise SourceTextError(str(exc)) from exc
     try:
         return data.decode("utf-8")
     except UnicodeDecodeError as exc:
