@@ -60,6 +60,11 @@ from typing import Final
 #:    agent. An agent that finds the version already ahead of the last released one adds its note
 #:    under that same integer instead of incrementing again.
 #: 5: `manual_download_queue.reports_titer_or_yield` became tri-state.
+#: 7: `chassis_profile`. ISOBUTANOL_PROGRAM.md §6 defined it and nothing implemented it, so all
+#:    360 enumerated routes were ranked against no chassis -- a generic answer to a specific
+#:    question. Carries §6's properties plus the two the owner's 2026-09-21 answers created:
+#:    `respiration_policy` (M3) and `resolves_higher_alcohol_panel` (M4, with a `not_measured`
+#:    state distinct from 0). One row may be `is_selected`, enforced by a partial unique index.
 #: 6: the curated pathway facts that were parsed and then dropped on the way into storage.
 #:    `data/pathways/*.yaml` recorded every one of them, `metabolic/curated.py` parsed them into
 #:    its dataclasses and its balance checks used them -- and then the INSERT statements named
@@ -77,7 +82,7 @@ from typing import Final
 #:    `fermdb db migrate` applies it after taking a timestamped backup. Before v6 the only route
 #:    past a bump was to delete and rebuild, which stopped being reasonable once the same file
 #:    held 5,164 publications and 55 pending curation tasks.
-SCHEMA_VERSION: Final[int] = 6
+SCHEMA_VERSION: Final[int] = 7
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

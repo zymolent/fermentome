@@ -36,6 +36,7 @@ from dataclasses import dataclass
 from typing import Final
 
 from ..genetic_code import table_for_compartment
+from .chassis import ChassisGate, ChassisProfile, gates_for
 from .curated import Part
 
 __all__ = [
@@ -189,6 +190,10 @@ class Route:
     score_feasibility: float | None
     score_evidence: float | None
     score_toxicity: float | None
+    # Defaulted, so it sorts last among the fields. What the selected chassis does to this route:
+    # empty when no chassis is selected, which the CLI reports as "ranked against none" rather
+    # than as "nothing stands in the way".
+    chassis_gates: tuple[ChassisGate, ...] = ()
 
     @property
     def viable(self) -> bool:
@@ -267,12 +272,19 @@ def _transport_gate(steps: Sequence[RouteStep]) -> list[str]:
 
 
 def enumerate_routes(
-    parts: Sequence[Part], *, strategies: Sequence[str] | None = None
+    parts: Sequence[Part],
+    *,
+    strategies: Sequence[str] | None = None,
+    chassis: ChassisProfile | None = None,
 ) -> list[Route]:
     """Every {step -> part} x strategy combination, gated and scored.
 
     Generative: it does not ask what has been published, which is the only way the complement --
     what has never been tried -- can be read off the result.
+
+    ``chassis`` applies `metabolic.chassis`'s per-strategy gates. Passing None ranks against no
+    chassis at all, which is what happened to all 360 routes before schema v7, and the CLI says
+    so rather than letting the ordering look considered.
     """
     by_role: dict[str, list[Part]] = {role: [] for role in STEP_ORDER}
     for part in parts:
@@ -303,6 +315,8 @@ def enumerate_routes(
             requirements = _code_gate(steps)
             gaps = _transport_gate(steps)
 
+            gates = gates_for(chassis, strategy=strategy)
+            disqualifying = tuple(g.message for g in gates if g.excludes)
             route_id = f"{strategy}:" + "+".join(part.id for part in combination)
             routes.append(
                 Route(
@@ -315,12 +329,15 @@ def enumerate_routes(
                     # stoichiometry follows. Cofactor SUPPLY is a separate question and
                     # is carried in cofactor_risks, not folded in here.
                     balance_status="pass",
-                    # Empty today, and that is itself a finding: the atlas cannot yet exclude any
-                    # route on evidence. Exclusion is reserved for a stoichiometric impossibility,
-                    # and every reaction in the curated pathways balances.
-                    excluded_because=(),
+                    # Stoichiometric impossibility was the only exclusion before v7, and there
+                    # are none: every curated reaction balances. A chassis can now exclude too,
+                    # but only for an impossibility -- a rho-zero strain cannot run a matrix
+                    # pathway at all. Everything the chassis merely makes *expensive* stays in
+                    # the list carrying its gate, because a cost is for the reader to weigh.
+                    excluded_because=disqualifying,
                     cofactor_risks=tuple(cofactor_risks),
                     construction_requirements=tuple(requirements),
+                    chassis_gates=gates,
                     transport_gaps=tuple(gaps),
                     score_balance=1.0 / (1 + len(cofactor_risks)),
                     score_transport=1.0 / (1 + len(gaps)),
@@ -349,6 +366,7 @@ def rank(routes: Sequence[Route]) -> list[Route]:
             len(r.transport_gaps),
             len(r.cofactor_risks),
             -(r.score_feasibility or 0.0),
+            len([g for g in r.chassis_gates if not g.excludes]),
             len(r.construction_requirements),
             r.id,
         ),

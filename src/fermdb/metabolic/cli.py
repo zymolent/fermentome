@@ -15,6 +15,7 @@ from ..annotate.ontology import annotations_for, write_annotations
 from ..config import Settings
 from ..db import open_db
 from ..db.vocabularies import load_vocabularies
+from .chassis import iter_context, load_profiles, selected_profile, write_profiles
 from .curated import load_parts, load_pathways, write_parts, write_pathways
 from .routes import enumerate_routes, explain, rank, write_routes
 
@@ -61,11 +62,47 @@ def cmd_atlas_pathways(_args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_atlas_chassis(_args: argparse.Namespace) -> int:
+    """Load the curated chassis profiles and show what is and is not recorded."""
+    settings = Settings.load()
+    profiles = load_profiles(settings)
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        counts = write_profiles(conn, profiles)
+    finally:
+        conn.close()
+    for profile in profiles:
+        mark = "*" if profile.is_selected else " "
+        print(f"{mark} {profile.name_as_reported}")
+        for line in iter_context(profile):
+            print(f"      {line}")
+        unknown = [
+            name
+            for name, value in (
+                ("ploidy", profile.ploidy),
+                ("rho_status", profile.rho_status),
+                ("ferments_xylose", profile.ferments_xylose),
+                ("isobutanol_tolerance_g_l", profile.isobutanol_tolerance_g_l),
+            )
+            if value is None
+        ]
+        if unknown:
+            print(f"      not recorded: {', '.join(unknown)}")
+        print()
+    for table, count in counts.items():
+        print(f"  {table:<26}{count:>7}")
+    print()
+    print("* = the chassis the route ranker scores against.")
+    return 0
+
+
 def cmd_atlas_routes(args: argparse.Namespace) -> int:
     """Enumerate, gate, rank and optionally store every route."""
     settings = Settings.load()
     parts = load_parts(settings)
-    routes = enumerate_routes(parts)
+    chassis = selected_profile(load_profiles(settings))
+    routes = enumerate_routes(parts, chassis=chassis)
     ordered = rank(routes)
     excluded = [route for route in routes if not route.viable]
 
@@ -84,6 +121,18 @@ def cmd_atlas_routes(args: argparse.Namespace) -> int:
         for route in excluded[:5]:
             print(f"  {route.strategy}: {'; '.join(route.excluded_because)}")
 
+    print()
+    for line in iter_context(chassis):
+        print(f"  {line}")
+    conditional = sum(1 for r in routes for g in r.chassis_gates if not g.excludes)
+    if conditional:
+        print(f"  {conditional} route-gate(s) are conditional on the chassis, not disqualifying:")
+        seen: set[str] = set()
+        for route in routes:
+            for gate in route.chassis_gates:
+                if not gate.excludes and gate.message not in seen:
+                    seen.add(gate.message)
+                    print(f"      [{gate.kind}] {gate.message}")
     print()
     print("Evidence and toxicity are NULL on every route: nothing has been extracted from the")
     print("literature and no tolerance has been measured. NULL is 'not yet looked', not 0.")
@@ -174,6 +223,11 @@ def add_atlas_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
     p_explain.add_argument("route", help="substring of a route id, e.g. 'E_mtdna' or 'kivd'")
     p_explain.add_argument("--limit", type=int, default=3, help="how many matches to explain")
     p_explain.set_defaults(func=cmd_atlas_explain)
+
+    p_chassis = atlas_sub.add_parser(
+        "chassis", help="load the curated chassis profiles and show what is not recorded"
+    )
+    p_chassis.set_defaults(func=cmd_atlas_chassis)
 
     p_annotate = atlas_sub.add_parser(
         "annotate", help="fetch GO/Pfam/InterPro/EC from UniProt for every resolved gene"

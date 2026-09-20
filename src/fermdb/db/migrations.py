@@ -119,8 +119,70 @@ _V5_TO_V6: Final[Migration] = Migration(
     ),
 )
 
+
+#: v6 -> v7. `chassis_profile`: the properties that make "which route should I build" a question
+#: about a particular strain rather than a generic one.
+_V6_TO_V7: Final[Migration] = Migration(
+    from_version=6,
+    to_version=7,
+    summary="chassis_profile -- ISOBUTANOL_PROGRAM.md §6, defined and never implemented",
+    statements=(
+        """CREATE TABLE chassis_profile (
+    id                  TEXT PRIMARY KEY,
+    -- A profile can exist before the strain row does: the owner knows their chassis long before
+    -- a curated `strain` row is promoted for it.
+    strain_id           TEXT REFERENCES strain(id),
+    name_as_reported    TEXT NOT NULL,
+    organism_id         TEXT REFERENCES organism(id),
+    -- Editing scale. DUET names ~15 loci; in a polyploid the verification burden scales with
+    -- this even where marker-free multiplex keeps the transformation count flat.
+    ploidy              INTEGER CHECK (ploidy IS NULL OR ploidy >= 1),
+    ploidy_state        TEXT CHECK (ploidy_state IN ('recorded', 'not_applicable', 'unknown')),
+    marker_free_multiplex INTEGER CHECK (marker_free_multiplex IN (0, 1)),
+    -- Whether mitochondrial work is possible at all. A rho-zero chassis disqualifies a matrix
+    -- pathway outright rather than merely costing it.
+    rho_status          TEXT CHECK (rho_status IN ('rho_plus', 'rho_zero', 'rho_minus',
+                                                   'unknown')),
+    -- DUET requires Pdc-POSITIVE (DUET_TARGET.md §5.1): the ethanol-acetaldehyde shuttle is the
+    -- mechanism, not the competition.
+    pdc_status          TEXT CHECK (pdc_status IN ('intact', 'attenuated', 'minus', 'unknown')),
+    ferments_xylose     INTEGER CHECK (ferments_xylose IN (0, 1)),
+    -- M3, 2026-09-21. 'preferred' is the owner's answer: not required for discovery, preferred
+    -- for production, overridable by a demonstrated and scalable process advantage.
+    respiration_policy  TEXT CHECK (respiration_policy IN ('required', 'preferred',
+                                                           'not_required', 'unknown')),
+    -- M4, 2026-09-21. 'not_measured' is distinct from 0: a gap, not a limitation.
+    resolves_higher_alcohol_panel INTEGER
+                        CHECK (resolves_higher_alcohol_panel IN (0, 1)),
+    higher_alcohol_panel_state TEXT
+                        CHECK (higher_alcohol_panel_state IN ('recorded', 'not_measured')),
+    -- Caps the useful titre. While NULL, every route's ceiling line reads "toxicity-limited ~X".
+    isobutanol_tolerance_g_l REAL CHECK (isobutanol_tolerance_g_l IS NULL
+                                         OR isobutanol_tolerance_g_l >= 0),
+    isobutanol_tolerance_state TEXT
+                        CHECK (isobutanol_tolerance_state IN ('recorded', 'not_applicable',
+                                                              'unknown')),
+    tolerance_endpoint  TEXT,            -- 'growth rate 50% of control' | 'viability' | ...
+    -- Strategy E tooling. M2: not in hand, purchasable in a lab background only.
+    mtdna_tooling       TEXT CHECK (mtdna_tooling IN ('available_here',
+                                                      'available_after_acquisition',
+                                                      'available_after_strain_construction',
+                                                      'unavailable', 'unknown')),
+    is_selected         INTEGER NOT NULL DEFAULT 0 CHECK (is_selected IN (0, 1)),
+    zone                TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence            TEXT NOT NULL,
+    confidence          TEXT NOT NULL
+                        CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    CHECK (ploidy IS NULL OR ploidy_state = 'recorded'),
+    CHECK (isobutanol_tolerance_g_l IS NULL OR isobutanol_tolerance_state = 'recorded')
+);""",
+        "CREATE UNIQUE INDEX chassis_profile_one_selected "
+        "ON chassis_profile(is_selected) WHERE is_selected = 1",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
-MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6,)
+MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6, _V6_TO_V7)
 
 
 def pending(conn: sqlite3.Connection, *, to: int = SCHEMA_VERSION) -> tuple[Migration, ...]:

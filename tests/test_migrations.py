@@ -207,7 +207,11 @@ def test_the_version_is_stamped() -> None:
     try:
         assert schema_version(old) == 5
         ran = M.migrate(old)
-        assert [m.label for m in ran] == ["v5 -> v6"]
+        # Asserted as a chain reaching the current version rather than a fixed list, so adding a
+        # migration does not break this test -- only a broken chain should.
+        assert ran[0].from_version == 5
+        assert ran[-1].to_version == SCHEMA_VERSION
+        assert [m.to_version for m in ran] == [m.from_version for m in ran[1:]] + [SCHEMA_VERSION]
         assert schema_version(old) == SCHEMA_VERSION
     finally:
         old.close()

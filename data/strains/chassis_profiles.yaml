@@ -1,0 +1,77 @@
+# Candidate chassis backgrounds, as properties rather than names.
+#
+# ISOBUTANOL_PROGRAM.md §6: "`chassis_profile` per candidate strain, so 'which background' is
+# answerable rather than habitual". Nothing implemented it until schema v7, which is why all 360
+# enumerated routes carried host_strain_id = NULL and were ranked against no chassis at all.
+#
+# ABSENCE IS A STATE. Almost every field here may be omitted, and an omitted field means "not
+# recorded" -- never "no" and never zero. `metabolic/chassis.py` reads a missing rho_status as
+# "whether this chassis can run a matrix pathway is unknown", not as "yes". That distinction is
+# the reason this file is mostly empty and says so, rather than being filled with plausible
+# defaults.
+#
+# CONFIDENCE. Every row carries evidence naming where the value came from and a confidence from
+# the closed set. 'unverified' means asserted but never checked against a source, which is a real
+# and common state here: several values below come from the owner's own design documents, which
+# are their prior work rather than an independently checkable source.
+
+version: 1
+
+chassis:
+
+  # ---------------------------------------------------------------------------------------
+  # The destination. DUET_TARGET.md §5.3 settles this: "an industrial polyploid strain the
+  # owner already holds, at ~120 g/L ethanol, with marker-free multiplex editing", and records
+  # that the earlier CEN.PK113-7D recommendation was wrong.
+  #
+  # Nearly every property is still unrecorded. That is the honest state and it is why the
+  # ranker reports "ranked against a chassis whose properties are mostly unknown" rather than
+  # producing a confident ordering from nothing.
+  # ---------------------------------------------------------------------------------------
+  - id: YAA:CHASSIS:duet-industrial-polyploid
+    name_as_reported: "industrial polyploid (owner's, ~120 g/L ethanol)"
+    organism_id: YAA:ORG:saccharomyces-cerevisiae-s288c
+    is_selected: true
+
+    # Recorded from the owner's own documents and answers.
+    marker_free_multiplex: true          # DUET_TARGET.md §5.3
+    pdc_status: intact                   # DUET_TARGET.md §5.1 requires Pdc-POSITIVE
+    respiration_policy: preferred        # M3, 2026-09-21, verbatim answer in OPEN_QUESTIONS.md
+    mtdna_tooling: available_after_acquisition   # M2, 2026-09-21 -- and lab background only
+    resolves_higher_alcohol_panel: null  # M4, 2026-09-21
+    higher_alcohol_panel_state: not_measured
+
+    # NOT RECORDED, and each one costs the ranker something specific:
+    #   ploidy            -- sets the verification burden across DUET's ~15 loci
+    #   rho_status        -- decides whether a matrix pathway is possible at all
+    #   ferments_xylose   -- DUET's entire substrate partition is C5 -> isobutanol
+    #   isobutanol_tolerance_g_l -- while absent, no route's ceiling can be computed
+
+    evidence: >-
+      docs/design/DUET_TARGET.md §5.1 and §5.3 (the owner's concept note); M2, M3 and M4
+      answered by the owner on 2026-09-21 and recorded verbatim in
+      docs/reference/OPEN_QUESTIONS.md. Ploidy, rho status, xylose utilisation and isobutanol
+      tolerance are not recorded because they have not been supplied, not because they are
+      absent from the strain.
+    confidence: unverified
+
+  # ---------------------------------------------------------------------------------------
+  # The comparator, not the chassis. DUET_TARGET.md §5.3 is explicit about the demotion.
+  # It earns its place because the published isobutanol record clusters here -- Wess et al.'s
+  # 17-strain deletion series, now in the curation queue, is in this background.
+  # ---------------------------------------------------------------------------------------
+  - id: YAA:CHASSIS:cen-pk113-7d
+    name_as_reported: CEN.PK113-7D
+    organism_id: YAA:ORG:saccharomyces-cerevisiae-s288c
+    is_selected: false
+    ploidy: 1
+    rho_status: rho_plus
+    pdc_status: intact
+    marker_free_multiplex: false
+    respiration_policy: not_required
+    evidence: >-
+      Laboratory haploid; the metabolic-engineering standard and the background of
+      10.1186/s13068-019-1486-8 (Wess et al.), whose Table 2 gives the genotype as
+      "MATa; MAL2-8c; SUC2". Ploidy and rho status are the standard properties of this strain
+      and have not been independently re-verified in this session.
+    confidence: unverified
