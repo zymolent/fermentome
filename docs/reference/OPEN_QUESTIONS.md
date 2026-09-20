@@ -89,15 +89,36 @@ product-neutral name ages better. Costs nothing to change before the package exi
 None of these block phase 0. All four should be answered **before phase 1b ends**, because they
 determine what strategy E's ranking actually means.
 
-## M1 — Which chassis strain, concretely?
+## M1 — Which chassis strain, concretely? *(STALE — superseded by DUET_TARGET.md §5.3)*
 
-CEN.PK113-7D has the best quantitative physiology and is the metabolic-engineering standard ⚠;
-BY4741 has the tool ecosystem and the deletion collection; an industrial background has the
-robustness. They are not interchangeable, and published isobutanol comparators cluster in
+**This question is answered and the answer is not the one below.** `docs/design/DUET_TARGET.md`
+§5.3 records that the chassis is **an industrial polyploid the owner already holds, ~120 g/L
+ethanol, marker-free multiplex editing**, and states in terms that the earlier CEN.PK113-7D
+recommendation was wrong. CEN.PK113-7D is a **comparator for quantitative physiology**, not the
+chassis. This section was never updated to match, and a reader taking it at face value would
+re-open a settled decision.
+
+*Superseded text, kept because the trade it describes is still the right trade for choosing a
+comparator:* CEN.PK113-7D has the best quantitative physiology and is the metabolic-engineering
+standard ⚠; BY4741 has the tool ecosystem and the deletion collection; an industrial background
+has the robustness. They are not interchangeable, and published isobutanol comparators cluster in
 particular backgrounds.
 
-**Why it matters now:** the route ranker scores against a chassis profile (`ISOBUTANOL_PROGRAM.md`
-§6). Ranking without one produces a generic answer.
+### What actually remains open
+
+Not *which* strain, but *what its properties are*. `ISOBUTANOL_PROGRAM.md` §6 defines
+`chassis_profile` and every field of it is empty, so the 360 enumerated routes are ranked against
+no chassis at all — a generic answer to a specific question. Needed, in rough order of value:
+
+| field | why the ranker needs it |
+|---|---|
+| **ploidy** | DUET names ~15 loci. That is 15 edits in a haploid and 15 x ploidy otherwise, unless editing is genuinely marker-free and multiplex. This single number converts the build into an estimate. |
+| ρ⁺/ρ⁰ status | DUET is a matrix pathway; a ρ⁰ chassis would be disqualifying, not inconvenient |
+| Pdc status | DUET requires Pdc-**positive** (DUET_TARGET §5.1); confirming it closes the largest determinant of pyruvate availability |
+| existing deletions | how much of the competing set is already gone |
+| measured isobutanol tolerance | caps the useful titre; without it every route's ceiling line reads "toxicity-limited ~X g/L" |
+| xylose utilisation today | DUET's whole substrate partition is C5 → isobutanol; whether the strain already ferments xylose is a large fork |
+| transformation efficiency, markers | whether a 15-edit campaign is weeks or quarters |
 
 ## M2 — ρ⁰ derivatives and *kar1-1* partners: in hand, or to be made?
 
@@ -106,23 +127,64 @@ partner for cytoduction ⚠. Whether these exist in your strain background, or m
 in it, is the difference between weeks and months — and it changes strategy E's feasibility rating
 from `available_here` to `available_after_strain_construction`.
 
-## M3 — Does the production chassis need to respire?
+## M3 — Does the production chassis need to respire? *(ANSWERED 2026-09-20)*
 
-The sharp one, and it is a genuine design fork.
+**The owner's answer, verbatim:**
 
-Inserting into *COX2* or *COX3* displaces that gene and costs respiration unless it is rescued
-(`MITOCHONDRIAL_PROGRAM.md` §2.1). Whether that is acceptable depends on the process:
+> Respiration is not an absolute biological requirement for pathway discovery, but functional
+> respiration is the preferred requirement for the final industrial production strain unless a
+> respiration-deficient strain demonstrates a compelling and scalable process advantage.
 
-* Under **anaerobic or strongly fermentative** production, losing respiration may cost little
-  directly — but note that mitochondrial protein **import requires an inner-membrane potential**,
-  which respiration-deficient cells maintain by other means ⚠, and that **Ilv3 is an
-  [Fe-S] enzyme** whose cluster assembly depends on mitochondrial Fe-S biogenesis ⚠. A
-  respiration-deficient matrix is not automatically a functional one for this route.
-* Under **aerobic or respiro-fermentative** production, displacing a *COX* gene is likely
-  disqualifying without rescue.
+A conditional default with an explicit escape clause, and it separates two phases the atlas was
+treating as one. **Discovery may use respiration-deficient backgrounds freely. Production defaults
+to respiring.** Neither is a prohibition.
 
-**This question should be answered before any locus is chosen**, because it determines which loci
-are available and therefore which leaders and activators are in play.
+### Making the escape clause checkable
+
+"A compelling and scalable process advantage" has to be testable or every route author will claim
+it. The atlas requires all four of these before a respiration-deficient chassis may be proposed
+for production:
+
+1. **A paired comparison.** Same route, same parent background, respiring versus deficient. Not
+   "the respiration-deficient route beat a different route" — that is exactly the counterfactual
+   error PLAN.md B.3.1 already names for *PDC* deletion.
+2. **A named metric**, recorded with its `condition_context`: titre, yield, or volumetric
+   productivity. "Better" without a metric does not count.
+3. **Evidence at scale.** The programme targets TRL 5 at 5,000 L. A shake-flask advantage is a
+   discovery result, not a scalable one, and does not clear the bar alone.
+4. **Survival of the process conditions.** DUET recovers by CO2 stripping, and an advantage
+   measured in a sealed vessel may not survive continuous stripping ⚠. The comparison must run
+   under ISPR, or be flagged explicitly as untested under it.
+
+What does **not** clear the bar: an unpaired comparison, a flask-only result, or an advantage in a
+metric the 5,000 L process does not preserve.
+
+### What this settles, and what it opens
+
+* **Strategy E is not excluded.** Displacing *COX2*/*COX3* to host an mtDNA insert stays available
+  for discovery. `mtdna_insertion.respiration_retained = false` becomes a route property carrying a
+  conditional burden, not a disqualification. `MITOCHONDRIAL_PROGRAM.md` §2.1's `rescue_strategy`
+  field is how a route discharges that burden.
+* **Two questions become live**, and neither is the owner's to answer:
+  - Does the matrix NADH that Adh3 generates actually reach Pos5, or is it competed for by the
+    respiratory chain? The corpus can probably answer this — 24 stored full texts mention POS5 or
+    mitochondrial NADH kinase, 29 mention *NDI1* or internal NADH dehydrogenase.
+  - Does a presequence-targeted matrix pathway still import, and does Ilv3 still acquire its
+    [4Fe-4S] cluster, under the chosen regime? No precedent found so far; expect this to be a real
+    gap and possibly a bench measurement.
+* **A cost correction.** `doi:10.1093/femsyr/foae006` states that Pos5 converts NADH to NADPH *by
+  consuming ATP*. The redox loop is not free, which makes the NADH-preferring KARI alternative
+  (removing the NADPH requirement entirely) more attractive than the DUET note's §7 sketch implies,
+  not less.
+
+### Not yet enforced in code
+
+Recorded here, and **nothing reads it yet**. The route ranker has no respiration term and
+`chassis_profile` has no loader, so this policy cannot currently change a ranking. To enforce it:
+a `respiration_retained` property on the route model, a penalty term that flags rather than
+excludes, and the paired-comparison test above as a gate on promoting such a route to production
+candidate. Flagged so this does not become another curated fact that was written down and never
+wired up.
 
 ## M4 — Analytical capability for the higher-alcohol panel
 
