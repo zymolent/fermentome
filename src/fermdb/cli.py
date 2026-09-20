@@ -445,6 +445,78 @@ def cmd_curate_reject(args: argparse.Namespace) -> int:
     return _curate_resolve(args, "reject")
 
 
+def cmd_curate_promote(args: argparse.Namespace) -> int:
+    """Write the rows that accepted proposals describe, or say precisely why each cannot."""
+    from .curate.promote import NotPromotable, plan_promotion, promote, promote_ready
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    supplied = {k: v for k, v in (("organism_id", args.organism), ("basis", args.basis)) if v}
+    curator = Curator(name=args.curator, kind="human")
+    try:
+        if args.task:
+            task = curate.get_task(conn, args.task)
+            if args.dry_run:
+                print(plan_promotion(conn, task, settings=settings, supplied=supplied).note)
+                return 0
+            try:
+                result = promote(
+                    conn,
+                    args.task,
+                    curator=curator,
+                    reason=args.reason,
+                    settings=settings,
+                    supplied=supplied,
+                )
+            except NotPromotable as exc:
+                print(str(exc), file=sys.stderr)
+                return 1
+            verb = "wrote" if result.created else "already present:"
+            print(f"{verb} {result.target_table} {result.row_id}")
+            return 0
+
+        if args.dry_run:
+            rows = conn.execute(
+                "SELECT id FROM curation_task WHERE status IN ('accepted','edited') ORDER BY id"
+            ).fetchall()
+            ready = 0
+            for row in rows:
+                plan = plan_promotion(
+                    conn,
+                    curate.get_task(conn, str(row["id"])),
+                    settings=settings,
+                    supplied=supplied,
+                )
+                ready += plan.ready
+                print(
+                    f"  {'READY ' if plan.ready else 'blocked'} {plan.record_kind:<24}{plan.note}"
+                )
+            print()
+            print(f"{ready} of {len(rows)} resolved task(s) would promote")
+            return 0
+
+        done, blocked = promote_ready(
+            conn,
+            curator=curator,
+            reason=args.reason,
+            settings=settings,
+            supplied=supplied,
+        )
+    finally:
+        conn.close()
+
+    for result in done:
+        print(f"  wrote {result.target_table:<16}{result.row_id}")
+    if blocked:
+        print()
+        print(f"{len(blocked)} not promoted:")
+        for plan in blocked:
+            print(f"  {plan.record_kind:<24}{plan.note}")
+    print()
+    print(f"{len(done)} promoted, {len(blocked)} not")
+    return 0
+
+
 def cmd_curate_stats(args: argparse.Namespace) -> int:
     settings = Settings.load()
     conn = open_db(settings.db_file)
@@ -678,6 +750,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_verdict_args(p_cu_reject)
     p_cu_reject.set_defaults(func=cmd_curate_reject)
+
+    p_cu_promote = cu_sub.add_parser(
+        "promote",
+        help="write the rows accepted proposals describe (the step after accept)",
+    )
+    p_cu_promote.add_argument("--task", help="one task id; omit to promote every ready task")
+    p_cu_promote.add_argument("--curator", required=True, help="who is promoting")
+    p_cu_promote.add_argument(
+        "--reason", default="reviewed and promoted", help="why, for the audit log"
+    )
+    p_cu_promote.add_argument(
+        "--organism", help="organism id for strains; the extraction schema has no organism field"
+    )
+    p_cu_promote.add_argument("--basis", help="'consumed' or 'supplied', for a yield")
+    p_cu_promote.add_argument(
+        "--dry-run", action="store_true", help="show what would be written and change nothing"
+    )
+    p_cu_promote.set_defaults(func=cmd_curate_promote)
 
     p_cu_stats = cu_sub.add_parser(
         "stats", help="queue health, plus proposals a curator rejected and the model repeated"
