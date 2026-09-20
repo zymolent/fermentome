@@ -1,0 +1,1045 @@
+{
+  "staged_at_utc": "2026-09-19T21:16:38Z",
+  "source": "s3://sra-pub-run-odp/sra/",
+  "destination": "s3://fermdb-raw-211125789985/raw/sra/",
+  "runs_requested": 172,
+  "copied": 172,
+  "already_present": 0,
+  "failed": 0,
+  "total_bytes": 111893392481,
+  "elapsed_seconds": 339.3,
+  "results": [
+    {
+      "run": "ERR2624980",
+      "status": "copied",
+      "bytes": 2823311248,
+      "seconds": 29.801068544387817
+    },
+    {
+      "run": "ERR2624981",
+      "status": "copied",
+      "bytes": 2679927337,
+      "seconds": 31.54812526702881
+    },
+    {
+      "run": "ERR2624982",
+      "status": "copied",
+      "bytes": 2516690918,
+      "seconds": 31.525516033172607
+    },
+    {
+      "run": "ERR2624983",
+      "status": "copied",
+      "bytes": 1601833876,
+      "seconds": 25.27199697494507
+    },
+    {
+      "run": "ERR2624984",
+      "status": "copied",
+      "bytes": 4165628837,
+      "seconds": 37.77684545516968
+    },
+    {
+      "run": "ERR2624985",
+      "status": "copied",
+      "bytes": 4041680439,
+      "seconds": 35.09406590461731
+    },
+    {
+      "run": "ERR2624986",
+      "status": "copied",
+      "bytes": 1922664363,
+      "seconds": 21.719189882278442
+    },
+    {
+      "run": "ERR2624987",
+      "status": "copied",
+      "bytes": 2683414662,
+      "seconds": 28.120021104812622
+    },
+    {
+      "run": "ERR3450094",
+      "status": "copied",
+      "bytes": 238652323,
+      "seconds": 12.124024629592896
+    },
+    {
+      "run": "ERR3450095",
+      "status": "copied",
+      "bytes": 161450274,
+      "seconds": 11.475783109664917
+    },
+    {
+      "run": "ERR3450096",
+      "status": "copied",
+      "bytes": 96303254,
+      "seconds": 10.119281530380249
+    },
+    {
+      "run": "ERR3450097",
+      "status": "copied",
+      "bytes": 283540939,
+      "seconds": 12.27246379852295
+    },
+    {
+      "run": "ERR3450098",
+      "status": "copied",
+      "bytes": 109364805,
+      "seconds": 11.414477109909058
+    },
+    {
+      "run": "ERR3450099",
+      "status": "copied",
+      "bytes": 187282059,
+      "seconds": 11.262947082519531
+    },
+    {
+      "run": "ERR3450100",
+      "status": "copied",
+      "bytes": 128901881,
+      "seconds": 10.926760196685791
+    },
+    {
+      "run": "ERR3450101",
+      "status": "copied",
+      "bytes": 118790306,
+      "seconds": 11.9523184299469
+    },
+    {
+      "run": "SRR064642",
+      "status": "copied",
+      "bytes": 469638945,
+      "seconds": 12.993700981140137
+    },
+    {
+      "run": "SRR064643",
+      "status": "copied",
+      "bytes": 347126372,
+      "seconds": 12.36509656906128
+    },
+    {
+      "run": "SRR12265250",
+      "status": "copied",
+      "bytes": 296063342,
+      "seconds": 13.657717227935791
+    },
+    {
+      "run": "SRR12265251",
+      "status": "copied",
+      "bytes": 106600079,
+      "seconds": 13.332414627075195
+    },
+    {
+      "run": "SRR12265252",
+      "status": "copied",
+      "bytes": 46473224,
+      "seconds": 10.829649925231934
+    },
+    {
+      "run": "SRR12265253",
+      "status": "copied",
+      "bytes": 90151223,
+      "seconds": 11.273147583007812
+    },
+    {
+      "run": "SRR12265254",
+      "status": "copied",
+      "bytes": 113881427,
+      "seconds": 12.820082664489746
+    },
+    {
+      "run": "SRR12265256",
+      "status": "copied",
+      "bytes": 11572538,
+      "seconds": 11.24669885635376
+    },
+    {
+      "run": "SRR12265257",
+      "status": "copied",
+      "bytes": 41579949,
+      "seconds": 11.952436923980713
+    },
+    {
+      "run": "SRR12265258",
+      "status": "copied",
+      "bytes": 24758269,
+      "seconds": 11.011230945587158
+    },
+    {
+      "run": "SRR12265259",
+      "status": "copied",
+      "bytes": 14040228,
+      "seconds": 12.159451484680176
+    },
+    {
+      "run": "SRR12265260",
+      "status": "copied",
+      "bytes": 32549186,
+      "seconds": 11.227158308029175
+    },
+    {
+      "run": "SRR12265261",
+      "status": "copied",
+      "bytes": 105672900,
+      "seconds": 15.942126512527466
+    },
+    {
+      "run": "SRR12265262",
+      "status": "copied",
+      "bytes": 106625477,
+      "seconds": 11.738757848739624
+    },
+    {
+      "run": "SRR12265263",
+      "status": "copied",
+      "bytes": 115615302,
+      "seconds": 12.072734117507935
+    },
+    {
+      "run": "SRR12265264",
+      "status": "copied",
+      "bytes": 85719477,
+      "seconds": 10.953338861465454
+    },
+    {
+      "run": "SRR12265265",
+      "status": "copied",
+      "bytes": 103485697,
+      "seconds": 11.929457902908325
+    },
+    {
+      "run": "SRR12265267",
+      "status": "copied",
+      "bytes": 7366967,
+      "seconds": 9.374337673187256
+    },
+    {
+      "run": "SRR12265268",
+      "status": "copied",
+      "bytes": 5740362,
+      "seconds": 9.15451169013977
+    },
+    {
+      "run": "SRR12265269",
+      "status": "copied",
+      "bytes": 14322361,
+      "seconds": 9.929105520248413
+    },
+    {
+      "run": "SRR12265270",
+      "status": "copied",
+      "bytes": 6392068,
+      "seconds": 9.273736000061035
+    },
+    {
+      "run": "SRR12265271",
+      "status": "copied",
+      "bytes": 6401798,
+      "seconds": 9.041906595230103
+    },
+    {
+      "run": "SRR12265272",
+      "status": "copied",
+      "bytes": 93813869,
+      "seconds": 10.931520223617554
+    },
+    {
+      "run": "SRR12265273",
+      "status": "copied",
+      "bytes": 117468740,
+      "seconds": 11.377012491226196
+    },
+    {
+      "run": "SRR12265274",
+      "status": "copied",
+      "bytes": 138128836,
+      "seconds": 12.783388376235962
+    },
+    {
+      "run": "SRR12265275",
+      "status": "copied",
+      "bytes": 154713502,
+      "seconds": 12.256650447845459
+    },
+    {
+      "run": "SRR12265276",
+      "status": "copied",
+      "bytes": 88732117,
+      "seconds": 13.035361289978027
+    },
+    {
+      "run": "SRR12265278",
+      "status": "copied",
+      "bytes": 82103591,
+      "seconds": 11.516605138778687
+    },
+    {
+      "run": "SRR12265279",
+      "status": "copied",
+      "bytes": 170709018,
+      "seconds": 11.365326642990112
+    },
+    {
+      "run": "SRR12265280",
+      "status": "copied",
+      "bytes": 98231189,
+      "seconds": 10.629103183746338
+    },
+    {
+      "run": "SRR12265281",
+      "status": "copied",
+      "bytes": 98752925,
+      "seconds": 11.696985244750977
+    },
+    {
+      "run": "SRR14687189",
+      "status": "copied",
+      "bytes": 189603936,
+      "seconds": 11.15073037147522
+    },
+    {
+      "run": "SRR14687190",
+      "status": "copied",
+      "bytes": 193007467,
+      "seconds": 11.530592441558838
+    },
+    {
+      "run": "SRR14687191",
+      "status": "copied",
+      "bytes": 193034473,
+      "seconds": 11.743337154388428
+    },
+    {
+      "run": "SRR14687192",
+      "status": "copied",
+      "bytes": 196657334,
+      "seconds": 11.321150541305542
+    },
+    {
+      "run": "SRR14687193",
+      "status": "copied",
+      "bytes": 190073972,
+      "seconds": 18.19296669960022
+    },
+    {
+      "run": "SRR14687194",
+      "status": "copied",
+      "bytes": 193399395,
+      "seconds": 31.569296836853027
+    },
+    {
+      "run": "SRR14687195",
+      "status": "copied",
+      "bytes": 199263425,
+      "seconds": 11.032355308532715
+    },
+    {
+      "run": "SRR14687196",
+      "status": "copied",
+      "bytes": 202765221,
+      "seconds": 11.544761180877686
+    },
+    {
+      "run": "SRR14687197",
+      "status": "copied",
+      "bytes": 186738806,
+      "seconds": 12.963891983032227
+    },
+    {
+      "run": "SRR14687198",
+      "status": "copied",
+      "bytes": 190256360,
+      "seconds": 11.752755403518677
+    },
+    {
+      "run": "SRR14687199",
+      "status": "copied",
+      "bytes": 182949231,
+      "seconds": 14.987183094024658
+    },
+    {
+      "run": "SRR14687200",
+      "status": "copied",
+      "bytes": 185850903,
+      "seconds": 15.743112802505493
+    },
+    {
+      "run": "SRR14687201",
+      "status": "copied",
+      "bytes": 194277037,
+      "seconds": 13.587348461151123
+    },
+    {
+      "run": "SRR14687202",
+      "status": "copied",
+      "bytes": 197965963,
+      "seconds": 13.434009552001953
+    },
+    {
+      "run": "SRR14687203",
+      "status": "copied",
+      "bytes": 185550136,
+      "seconds": 12.165147066116333
+    },
+    {
+      "run": "SRR14687204",
+      "status": "copied",
+      "bytes": 188876665,
+      "seconds": 12.274584770202637
+    },
+    {
+      "run": "SRR14687205",
+      "status": "copied",
+      "bytes": 143532584,
+      "seconds": 12.784997701644897
+    },
+    {
+      "run": "SRR14687206",
+      "status": "copied",
+      "bytes": 146181558,
+      "seconds": 10.901226997375488
+    },
+    {
+      "run": "SRR14687207",
+      "status": "copied",
+      "bytes": 154746233,
+      "seconds": 11.234148025512695
+    },
+    {
+      "run": "SRR14687208",
+      "status": "copied",
+      "bytes": 157410958,
+      "seconds": 11.721415281295776
+    },
+    {
+      "run": "SRR14687209",
+      "status": "copied",
+      "bytes": 153453354,
+      "seconds": 11.270350217819214
+    },
+    {
+      "run": "SRR14687210",
+      "status": "copied",
+      "bytes": 156137807,
+      "seconds": 11.52123236656189
+    },
+    {
+      "run": "SRR14687211",
+      "status": "copied",
+      "bytes": 143719691,
+      "seconds": 11.272717237472534
+    },
+    {
+      "run": "SRR14687212",
+      "status": "copied",
+      "bytes": 146247471,
+      "seconds": 12.307119846343994
+    },
+    {
+      "run": "SRR14687213",
+      "status": "copied",
+      "bytes": 141492065,
+      "seconds": 11.67133378982544
+    },
+    {
+      "run": "SRR14687214",
+      "status": "copied",
+      "bytes": 143986564,
+      "seconds": 11.441954851150513
+    },
+    {
+      "run": "SRR14687215",
+      "status": "copied",
+      "bytes": 142338152,
+      "seconds": 11.37122917175293
+    },
+    {
+      "run": "SRR14687216",
+      "status": "copied",
+      "bytes": 144201066,
+      "seconds": 10.990131855010986
+    },
+    {
+      "run": "SRR14687217",
+      "status": "copied",
+      "bytes": 677587752,
+      "seconds": 15.015584468841553
+    },
+    {
+      "run": "SRR14687218",
+      "status": "copied",
+      "bytes": 725237476,
+      "seconds": 14.111579895019531
+    },
+    {
+      "run": "SRR14687219",
+      "status": "copied",
+      "bytes": 166093021,
+      "seconds": 12.392360210418701
+    },
+    {
+      "run": "SRR14687220",
+      "status": "copied",
+      "bytes": 169311135,
+      "seconds": 12.522579669952393
+    },
+    {
+      "run": "SRR14687221",
+      "status": "copied",
+      "bytes": 159288001,
+      "seconds": 12.403286457061768
+    },
+    {
+      "run": "SRR14687222",
+      "status": "copied",
+      "bytes": 161089848,
+      "seconds": 11.625982999801636
+    },
+    {
+      "run": "SRR14687223",
+      "status": "copied",
+      "bytes": 166023370,
+      "seconds": 11.872663974761963
+    },
+    {
+      "run": "SRR14687224",
+      "status": "copied",
+      "bytes": 168888732,
+      "seconds": 12.99659538269043
+    },
+    {
+      "run": "SRR14687225",
+      "status": "copied",
+      "bytes": 153308288,
+      "seconds": 12.385718584060669
+    },
+    {
+      "run": "SRR14687226",
+      "status": "copied",
+      "bytes": 156075494,
+      "seconds": 13.248700380325317
+    },
+    {
+      "run": "SRR14687227",
+      "status": "copied",
+      "bytes": 156824962,
+      "seconds": 12.556196928024292
+    },
+    {
+      "run": "SRR14687228",
+      "status": "copied",
+      "bytes": 159782258,
+      "seconds": 18.647003173828125
+    },
+    {
+      "run": "SRR14687229",
+      "status": "copied",
+      "bytes": 150265255,
+      "seconds": 14.191230535507202
+    },
+    {
+      "run": "SRR14687230",
+      "status": "copied",
+      "bytes": 152884347,
+      "seconds": 14.150298595428467
+    },
+    {
+      "run": "SRR14687231",
+      "status": "copied",
+      "bytes": 142351743,
+      "seconds": 14.20700192451477
+    },
+    {
+      "run": "SRR14687232",
+      "status": "copied",
+      "bytes": 145111887,
+      "seconds": 14.160549640655518
+    },
+    {
+      "run": "SRR14687233",
+      "status": "copied",
+      "bytes": 155638950,
+      "seconds": 14.237621307373047
+    },
+    {
+      "run": "SRR14687234",
+      "status": "copied",
+      "bytes": 158734313,
+      "seconds": 14.161328554153442
+    },
+    {
+      "run": "SRR16481343",
+      "status": "copied",
+      "bytes": 870876849,
+      "seconds": 18.23918342590332
+    },
+    {
+      "run": "SRR16481344",
+      "status": "copied",
+      "bytes": 591242489,
+      "seconds": 15.809650182723999
+    },
+    {
+      "run": "SRR16481345",
+      "status": "copied",
+      "bytes": 728907448,
+      "seconds": 15.917629480361938
+    },
+    {
+      "run": "SRR16481346",
+      "status": "copied",
+      "bytes": 699590321,
+      "seconds": 17.055782794952393
+    },
+    {
+      "run": "SRR16481347",
+      "status": "copied",
+      "bytes": 1063312208,
+      "seconds": 17.62138819694519
+    },
+    {
+      "run": "SRR16481348",
+      "status": "copied",
+      "bytes": 560576892,
+      "seconds": 15.869784593582153
+    },
+    {
+      "run": "SRR16481349",
+      "status": "copied",
+      "bytes": 917128086,
+      "seconds": 17.142144918441772
+    },
+    {
+      "run": "SRR16481350",
+      "status": "copied",
+      "bytes": 639294581,
+      "seconds": 15.836328506469727
+    },
+    {
+      "run": "SRR16481351",
+      "status": "copied",
+      "bytes": 825869084,
+      "seconds": 16.53988766670227
+    },
+    {
+      "run": "SRR16481352",
+      "status": "copied",
+      "bytes": 746650317,
+      "seconds": 15.78607964515686
+    },
+    {
+      "run": "SRR16481353",
+      "status": "copied",
+      "bytes": 965617286,
+      "seconds": 16.58500051498413
+    },
+    {
+      "run": "SRR16481354",
+      "status": "copied",
+      "bytes": 1131402603,
+      "seconds": 18.208062648773193
+    },
+    {
+      "run": "SRR16481355",
+      "status": "copied",
+      "bytes": 624812936,
+      "seconds": 15.374621868133545
+    },
+    {
+      "run": "SRR16481356",
+      "status": "copied",
+      "bytes": 618620510,
+      "seconds": 14.664517641067505
+    },
+    {
+      "run": "SRR16481357",
+      "status": "copied",
+      "bytes": 837748464,
+      "seconds": 14.908121109008789
+    },
+    {
+      "run": "SRR16481358",
+      "status": "copied",
+      "bytes": 1104732304,
+      "seconds": 17.78524684906006
+    },
+    {
+      "run": "SRR16481359",
+      "status": "copied",
+      "bytes": 808259159,
+      "seconds": 15.684598684310913
+    },
+    {
+      "run": "SRR16481360",
+      "status": "copied",
+      "bytes": 1069396105,
+      "seconds": 17.969291925430298
+    },
+    {
+      "run": "SRR16481361",
+      "status": "copied",
+      "bytes": 675757540,
+      "seconds": 20.28200340270996
+    },
+    {
+      "run": "SRR16481362",
+      "status": "copied",
+      "bytes": 691554145,
+      "seconds": 24.277791023254395
+    },
+    {
+      "run": "SRR16481363",
+      "status": "copied",
+      "bytes": 724530629,
+      "seconds": 14.84050965309143
+    },
+    {
+      "run": "SRR16481364",
+      "status": "copied",
+      "bytes": 705087247,
+      "seconds": 15.98234486579895
+    },
+    {
+      "run": "SRR16481365",
+      "status": "copied",
+      "bytes": 805903315,
+      "seconds": 28.636181116104126
+    },
+    {
+      "run": "SRR16481366",
+      "status": "copied",
+      "bytes": 1012740061,
+      "seconds": 16.600454092025757
+    },
+    {
+      "run": "SRR16481367",
+      "status": "copied",
+      "bytes": 785481186,
+      "seconds": 16.454874992370605
+    },
+    {
+      "run": "SRR16481368",
+      "status": "copied",
+      "bytes": 1132740340,
+      "seconds": 17.00433039665222
+    },
+    {
+      "run": "SRR16481369",
+      "status": "copied",
+      "bytes": 844574809,
+      "seconds": 20.229897499084473
+    },
+    {
+      "run": "SRR16481370",
+      "status": "copied",
+      "bytes": 1015093959,
+      "seconds": 16.808227062225342
+    },
+    {
+      "run": "SRR16481371",
+      "status": "copied",
+      "bytes": 807815526,
+      "seconds": 14.648454427719116
+    },
+    {
+      "run": "SRR16481372",
+      "status": "copied",
+      "bytes": 935853335,
+      "seconds": 15.640769481658936
+    },
+    {
+      "run": "SRR16481373",
+      "status": "copied",
+      "bytes": 749571652,
+      "seconds": 16.412232637405396
+    },
+    {
+      "run": "SRR16481374",
+      "status": "copied",
+      "bytes": 1408820620,
+      "seconds": 18.873671531677246
+    },
+    {
+      "run": "SRR16481375",
+      "status": "copied",
+      "bytes": 880784955,
+      "seconds": 16.182658910751343
+    },
+    {
+      "run": "SRR16642818",
+      "status": "copied",
+      "bytes": 47455103,
+      "seconds": 10.331652402877808
+    },
+    {
+      "run": "SRR16642820",
+      "status": "copied",
+      "bytes": 51636080,
+      "seconds": 10.394814252853394
+    },
+    {
+      "run": "SRR16642822",
+      "status": "copied",
+      "bytes": 60204181,
+      "seconds": 9.768332958221436
+    },
+    {
+      "run": "SRR18678323",
+      "status": "copied",
+      "bytes": 64614340,
+      "seconds": 10.24885892868042
+    },
+    {
+      "run": "SRR18678324",
+      "status": "copied",
+      "bytes": 59128656,
+      "seconds": 11.193880081176758
+    },
+    {
+      "run": "SRR18678325",
+      "status": "copied",
+      "bytes": 63338275,
+      "seconds": 10.366327047348022
+    },
+    {
+      "run": "SRR18678326",
+      "status": "copied",
+      "bytes": 8701331,
+      "seconds": 9.775757074356079
+    },
+    {
+      "run": "SRR29711603",
+      "status": "copied",
+      "bytes": 1473929468,
+      "seconds": 18.895034551620483
+    },
+    {
+      "run": "SRR29711604",
+      "status": "copied",
+      "bytes": 1673601084,
+      "seconds": 21.352863550186157
+    },
+    {
+      "run": "SRR29711605",
+      "status": "copied",
+      "bytes": 1793754197,
+      "seconds": 22.16846513748169
+    },
+    {
+      "run": "SRR29711606",
+      "status": "copied",
+      "bytes": 1764935498,
+      "seconds": 22.216684579849243
+    },
+    {
+      "run": "SRR29711607",
+      "status": "copied",
+      "bytes": 1569052333,
+      "seconds": 20.06342601776123
+    },
+    {
+      "run": "SRR29711608",
+      "status": "copied",
+      "bytes": 1184715312,
+      "seconds": 17.560657739639282
+    },
+    {
+      "run": "SRR33767555",
+      "status": "copied",
+      "bytes": 430636982,
+      "seconds": 14.836244106292725
+    },
+    {
+      "run": "SRR33767556",
+      "status": "copied",
+      "bytes": 400696835,
+      "seconds": 13.380008220672607
+    },
+    {
+      "run": "SRR33767557",
+      "status": "copied",
+      "bytes": 570001278,
+      "seconds": 13.875940322875977
+    },
+    {
+      "run": "SRR33767558",
+      "status": "copied",
+      "bytes": 529732897,
+      "seconds": 13.268651962280273
+    },
+    {
+      "run": "SRR33767559",
+      "status": "copied",
+      "bytes": 578190558,
+      "seconds": 13.474056720733643
+    },
+    {
+      "run": "SRR33767560",
+      "status": "copied",
+      "bytes": 388759659,
+      "seconds": 12.26712441444397
+    },
+    {
+      "run": "SRR33767561",
+      "status": "copied",
+      "bytes": 608486674,
+      "seconds": 15.457701444625854
+    },
+    {
+      "run": "SRR33767563",
+      "status": "copied",
+      "bytes": 410571930,
+      "seconds": 12.940118074417114
+    },
+    {
+      "run": "SRR33968977",
+      "status": "copied",
+      "bytes": 3266692683,
+      "seconds": 31.20781397819519
+    },
+    {
+      "run": "SRR33968978",
+      "status": "copied",
+      "bytes": 3837761039,
+      "seconds": 35.52385902404785
+    },
+    {
+      "run": "SRR33969001",
+      "status": "copied",
+      "bytes": 3132304356,
+      "seconds": 30.26018452644348
+    },
+    {
+      "run": "SRR33969006",
+      "status": "copied",
+      "bytes": 3378868433,
+      "seconds": 33.12458920478821
+    },
+    {
+      "run": "SRR33969011",
+      "status": "copied",
+      "bytes": 3434121697,
+      "seconds": 32.43560862541199
+    },
+    {
+      "run": "SRR33969016",
+      "status": "copied",
+      "bytes": 3092007425,
+      "seconds": 32.586567878723145
+    },
+    {
+      "run": "SRR6370305",
+      "status": "copied",
+      "bytes": 1609330495,
+      "seconds": 20.10296607017517
+    },
+    {
+      "run": "SRR6370306",
+      "status": "copied",
+      "bytes": 2045957363,
+      "seconds": 22.68620228767395
+    },
+    {
+      "run": "SRR6370307",
+      "status": "copied",
+      "bytes": 707642327,
+      "seconds": 14.064276933670044
+    },
+    {
+      "run": "SRR6903496",
+      "status": "copied",
+      "bytes": 1691136598,
+      "seconds": 22.433037757873535
+    },
+    {
+      "run": "SRR7009342",
+      "status": "copied",
+      "bytes": 2444941941,
+      "seconds": 26.636876106262207
+    },
+    {
+      "run": "SRR7009349",
+      "status": "copied",
+      "bytes": 1424908450,
+      "seconds": 20.462544441223145
+    },
+    {
+      "run": "SRR7642934",
+      "status": "copied",
+      "bytes": 341480578,
+      "seconds": 12.014051914215088
+    },
+    {
+      "run": "SRR7642935",
+      "status": "copied",
+      "bytes": 327007952,
+      "seconds": 13.46034574508667
+    },
+    {
+      "run": "SRR7642940",
+      "status": "copied",
+      "bytes": 394591081,
+      "seconds": 12.950546741485596
+    },
+    {
+      "run": "SRR7642941",
+      "status": "copied",
+      "bytes": 281295620,
+      "seconds": 14.292115688323975
+    },
+    {
+      "run": "SRR7642952",
+      "status": "copied",
+      "bytes": 442519433,
+      "seconds": 12.821845769882202
+    },
+    {
+      "run": "SRR7642953",
+      "status": "copied",
+      "bytes": 410266531,
+      "seconds": 13.828004360198975
+    },
+    {
+      "run": "SRR7642954",
+      "status": "copied",
+      "bytes": 348697114,
+      "seconds": 13.185861349105835
+    },
+    {
+      "run": "SRR7642959",
+      "status": "copied",
+      "bytes": 294978439,
+      "seconds": 12.346102714538574
+    },
+    {
+      "run": "SRR7642962",
+      "status": "copied",
+      "bytes": 328083887,
+      "seconds": 13.519026756286621
+    },
+    {
+      "run": "SRR7642965",
+      "status": "copied",
+      "bytes": 295735539,
+      "seconds": 14.331051349639893
+    },
+    {
+      "run": "SRR7642966",
+      "status": "copied",
+      "bytes": 408178176,
+      "seconds": 13.991997241973877
+    },
+    {
+      "run": "SRR7642967",
+      "status": "copied",
+      "bytes": 361253426,
+      "seconds": 14.114328622817993
+    },
+    {
+      "run": "SRR7892090",
+      "status": "copied",
+      "bytes": 159059108,
+      "seconds": 11.51746916770935
+    }
+  ]
+}

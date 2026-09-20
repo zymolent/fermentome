@@ -1,0 +1,24 @@
+{
+  "dropped": [
+    {
+      "run": "SRR29711605",
+      "reference": "ecoli",
+      "percent_mapped": 9.62,
+      "num_processed": 18801268,
+      "reason": "mapping 9.6% against E. coli MG1655 where the other four E. coli runs in this corpus map at 54-55%. A tenfold gap inside one organism is not a quality gradient; the organism, strain or library type is probably not what the SRA metadata says (unverified).",
+      "decided_by": "project owner",
+      "decided_on": "2026-09-20",
+      "action": "excluded from matrices; raw .sra and quant output retained in S3"
+    },
+    {
+      "run": "SRR29711606",
+      "reference": "ecoli",
+      "percent_mapped": 9.71,
+      "num_processed": 18511521,
+      "reason": "as SRR29711605 - consecutive accession from the same study, same signature.",
+      "decided_by": "project owner",
+      "decided_on": "2026-09-20",
+      "action": "excluded from matrices; raw .sra and quant output retained in S3"
+    }
+  ]
+}

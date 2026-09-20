@@ -1,0 +1,70 @@
+[
+  {
+    "accession": "GCF_000146045.2",
+    "label": "S288C",
+    "role": "anchor: coordinate system + gene_group anchor; incl. mitochondrion",
+    "path": "C:\\Users\\kangk\\fermdb-data\\genomes\\s288c.fna.gz",
+    "status": "downloaded",
+    "bytes": 3843460,
+    "url": "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/146/045/GCF_000146045.2_R64/GCF_000146045.2_R64_genomic.fna.gz",
+    "sha256": "1ec41f951b35f2752d5065edeafe6972455609d4383fb36dae12519a60b27a73",
+    "sequences": 17,
+    "bases": 12157105
+  },
+  {
+    "accession": "GCA_002571405.2",
+    "label": "CEN.PK113-7D",
+    "role": "physiology comparator (Delft, chromosome-level)",
+    "path": "C:\\Users\\kangk\\fermdb-data\\genomes\\cenpk113-7d.fna.gz",
+    "status": "downloaded",
+    "bytes": 3817193,
+    "url": "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/571/405/GCA_002571405.2_ASM257140v2/GCA_002571405.2_ASM257140v2_genomic.fna.gz",
+    "sha256": "8b3047dcfdc6ff80f8a0fa226c660205ebea901e3e2358e678a33ca7115af6c1",
+    "sequences": 18,
+    "bases": 12077893
+  },
+  {
+    "accession": "GCA_029255905.1",
+    "label": "Ethanol Red",
+    "role": "industrial proxy for the real chassis (scaffold-level)",
+    "path": "C:\\Users\\kangk\\fermdb-data\\genomes\\ethanol-red.fna.gz",
+    "status": "downloaded",
+    "bytes": 3662606,
+    "url": "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/029/255/905/GCA_029255905.1_ASM2925590v1/GCA_029255905.1_ASM2925590v1_genomic.fna.gz",
+    "sha256": "5578869a5177c84564912bb318f9a49b36d43ff0317954f368e656a8f63a9d3a",
+    "sequences": 157,
+    "bases": 11524943
+  },
+  {
+    "accession": "GCF_000005845.2",
+    "label": "E. coli K-12 MG1655",
+    "role": "43 SRA runs; where the ketoacid route was assembled",
+    "path": "C:\\Users\\kangk\\fermdb-data\\genomes\\e-coli-k-12-mg1655.fna.gz",
+    "status": "downloaded",
+    "bytes": 1379902,
+    "url": "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz",
+    "sha256": "a96d3cfa58c88d477013c768f90a11d2386d42a70d566abfb6d9013dcbd24255",
+    "sequences": 1,
+    "bases": 4641652
+  },
+  {
+    "accession": "GCF_000007105.1",
+    "label": "Z. mobilis ZM4",
+    "role": "14 SRA runs incl. the Tn-Seq fitness screens",
+    "path": "C:\\Users\\kangk\\fermdb-data\\genomes\\z-mobilis-zm4.fna.gz",
+    "status": "downloaded",
+    "bytes": 650196,
+    "url": "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/007/105/GCF_000007105.1_ASM710v1/GCF_000007105.1_ASM710v1_genomic.fna.gz",
+    "sha256": "ec24819198e7bdcdac15e3fa7533a4521871ca70d4c0da7f1e661c6541f9d234",
+    "sequences": 5,
+    "bases": 2197925,
+    "sequence_accessions": [
+      "NZ_CP035711.1",
+      "NZ_CP036458.1",
+      "NZ_CP036459.1",
+      "NZ_CP036460.1",
+      "NZ_CP036461.1"
+    ],
+    "correction": "2026-09-20: this entry recorded GCF_000092685.1 with 1 sequence and 1,042,810 bases. That accession is Chlamydia trachomatis, not Zymomonas mobilis, and the numbers were self-contradicting against the catalog's n50_bp of 2,056,363 -- an N50 cannot exceed a genome's total length. The file actually on disk is genuine Z. mobilis ZM4 (5 sequences, 2,197,925 bases, headers naming 'Zymomonas mobilis subsp. mobilis ZM4 = ATCC 31821'), so only this manifest's metadata was wrong. Identity, size and checksum here are now measured from that file; the accession is taken from data/omics/reference_genomes.yaml, which is the curated intent. The sequence accessions present are recorded above because they were not verified against that assembly offline."
+  }
+]

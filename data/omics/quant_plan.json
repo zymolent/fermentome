@@ -1,0 +1,765 @@
+[
+ {
+  "run": "SRR14687229",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "143"
+ },
+ {
+  "run": "SRR14687230",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "145"
+ },
+ {
+  "run": "SRR14687231",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "135"
+ },
+ {
+  "run": "SRR14687232",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "138"
+ },
+ {
+  "run": "SRR14687233",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "148"
+ },
+ {
+  "run": "SRR14687234",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "151"
+ },
+ {
+  "run": "SRR16481343",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "830"
+ },
+ {
+  "run": "SRR16481344",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "563"
+ },
+ {
+  "run": "SRR16481345",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "695"
+ },
+ {
+  "run": "SRR16481346",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "667"
+ },
+ {
+  "run": "SRR16481347",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "1014"
+ },
+ {
+  "run": "SRR16481348",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "534"
+ },
+ {
+  "run": "SRR16481349",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "874"
+ },
+ {
+  "run": "SRR16481350",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "609"
+ },
+ {
+  "run": "SRR16481351",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "787"
+ },
+ {
+  "run": "SRR16481352",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "712"
+ },
+ {
+  "run": "SRR16481353",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "920"
+ },
+ {
+  "run": "SRR16481354",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "1078"
+ },
+ {
+  "run": "SRR16481355",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "595"
+ },
+ {
+  "run": "SRR16481356",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "589"
+ },
+ {
+  "run": "SRR16481357",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "798"
+ },
+ {
+  "run": "SRR16481358",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "1053"
+ },
+ {
+  "run": "SRR16481359",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "770"
+ },
+ {
+  "run": "SRR16481360",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "1019"
+ },
+ {
+  "run": "SRR16481361",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "644"
+ },
+ {
+  "run": "SRR16481362",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "659"
+ },
+ {
+  "run": "SRR16481363",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "690"
+ },
+ {
+  "run": "SRR16481364",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "672"
+ },
+ {
+  "run": "SRR16481365",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "768"
+ },
+ {
+  "run": "SRR16481366",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "965"
+ },
+ {
+  "run": "SRR16481367",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "749"
+ },
+ {
+  "run": "SRR16481368",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "1080"
+ },
+ {
+  "run": "SRR16481369",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "805"
+ },
+ {
+  "run": "SRR16481370",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "968"
+ },
+ {
+  "run": "SRR16481371",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "770"
+ },
+ {
+  "run": "SRR16481372",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "892"
+ },
+ {
+  "run": "SRR16481373",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "714"
+ },
+ {
+  "run": "SRR16481374",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "1343"
+ },
+ {
+  "run": "SRR16481375",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "839"
+ },
+ {
+  "run": "SRR29711604",
+  "org": "Escherichia coli str. K-12 substr. MG1655",
+  "ref": "ecoli",
+  "layout": "PAIRED",
+  "mb": "1596"
+ },
+ {
+  "run": "SRR29711603",
+  "org": "Escherichia coli str. K-12 substr. MG1655",
+  "ref": "ecoli",
+  "layout": "PAIRED",
+  "mb": "1405"
+ },
+ {
+  "run": "SRR29711608",
+  "org": "Escherichia coli str. K-12 substr. MG1655",
+  "ref": "ecoli",
+  "layout": "PAIRED",
+  "mb": "1129"
+ },
+ {
+  "run": "SRR29711607",
+  "org": "Escherichia coli str. K-12 substr. MG1655",
+  "ref": "ecoli",
+  "layout": "PAIRED",
+  "mb": "1496"
+ },
+ {
+  "run": "SRR29711606",
+  "org": "Escherichia coli str. K-12 substr. MG1655",
+  "ref": "ecoli",
+  "layout": "PAIRED",
+  "mb": "1683"
+ },
+ {
+  "run": "SRR29711605",
+  "org": "Escherichia coli str. K-12 substr. MG1655",
+  "ref": "ecoli",
+  "layout": "PAIRED",
+  "mb": "1710"
+ },
+ {
+  "run": "ERR3450094",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "227"
+ },
+ {
+  "run": "ERR3450095",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "153"
+ },
+ {
+  "run": "ERR3450096",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "91"
+ },
+ {
+  "run": "ERR3450097",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "270"
+ },
+ {
+  "run": "ERR3450098",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "104"
+ },
+ {
+  "run": "ERR3450099",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "178"
+ },
+ {
+  "run": "ERR3450100",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "122"
+ },
+ {
+  "run": "ERR3450101",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "PAIRED",
+  "mb": "113"
+ },
+ {
+  "run": "SRR7642967",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "344"
+ },
+ {
+  "run": "SRR14687189",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "180"
+ },
+ {
+  "run": "SRR14687190",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "184"
+ },
+ {
+  "run": "SRR14687191",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "184"
+ },
+ {
+  "run": "SRR14687192",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "187"
+ },
+ {
+  "run": "SRR14687193",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "181"
+ },
+ {
+  "run": "SRR14687194",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "184"
+ },
+ {
+  "run": "SRR14687195",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "190"
+ },
+ {
+  "run": "SRR14687196",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "193"
+ },
+ {
+  "run": "SRR14687197",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "178"
+ },
+ {
+  "run": "SRR14687198",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "181"
+ },
+ {
+  "run": "SRR14687199",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "174"
+ },
+ {
+  "run": "SRR14687200",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "177"
+ },
+ {
+  "run": "SRR14687201",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "185"
+ },
+ {
+  "run": "SRR14687202",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "188"
+ },
+ {
+  "run": "SRR14687203",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "176"
+ },
+ {
+  "run": "SRR14687204",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "180"
+ },
+ {
+  "run": "SRR14687205",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "136"
+ },
+ {
+  "run": "SRR14687206",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "139"
+ },
+ {
+  "run": "SRR14687207",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "147"
+ },
+ {
+  "run": "SRR14687208",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "150"
+ },
+ {
+  "run": "SRR14687209",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "146"
+ },
+ {
+  "run": "SRR14687210",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "148"
+ },
+ {
+  "run": "SRR14687211",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "137"
+ },
+ {
+  "run": "SRR14687212",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "139"
+ },
+ {
+  "run": "SRR14687213",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "134"
+ },
+ {
+  "run": "SRR14687214",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "137"
+ },
+ {
+  "run": "SRR14687215",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "135"
+ },
+ {
+  "run": "SRR14687216",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "137"
+ },
+ {
+  "run": "SRR14687217",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "646"
+ },
+ {
+  "run": "SRR14687218",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "691"
+ },
+ {
+  "run": "SRR14687219",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "158"
+ },
+ {
+  "run": "SRR14687220",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "161"
+ },
+ {
+  "run": "SRR14687221",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "151"
+ },
+ {
+  "run": "SRR14687222",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "153"
+ },
+ {
+  "run": "SRR14687223",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "158"
+ },
+ {
+  "run": "SRR14687224",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "161"
+ },
+ {
+  "run": "SRR14687225",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "146"
+ },
+ {
+  "run": "SRR14687226",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "148"
+ },
+ {
+  "run": "SRR14687227",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "149"
+ },
+ {
+  "run": "SRR14687228",
+  "org": "Saccharomyces cerevisiae S288C",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "152"
+ },
+ {
+  "run": "SRR6370305",
+  "org": "Lactococcus cremoris",
+  "ref": "lcremoris",
+  "layout": "PAIRED",
+  "mb": "1534"
+ },
+ {
+  "run": "SRR6370306",
+  "org": "Lactococcus cremoris",
+  "ref": "lcremoris",
+  "layout": "PAIRED",
+  "mb": "1951"
+ },
+ {
+  "run": "SRR6370307",
+  "org": "Lactococcus cremoris",
+  "ref": "lcremoris",
+  "layout": "PAIRED",
+  "mb": "674"
+ },
+ {
+  "run": "SRR6903496",
+  "org": "Lactococcus cremoris",
+  "ref": "lcremoris",
+  "layout": "PAIRED",
+  "mb": "1612"
+ },
+ {
+  "run": "SRR7642934",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "325"
+ },
+ {
+  "run": "SRR7642935",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "311"
+ },
+ {
+  "run": "SRR7642940",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "376"
+ },
+ {
+  "run": "SRR7642941",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "268"
+ },
+ {
+  "run": "SRR7642952",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "422"
+ },
+ {
+  "run": "SRR7642953",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "391"
+ },
+ {
+  "run": "SRR7642954",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "332"
+ },
+ {
+  "run": "SRR7642959",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "281"
+ },
+ {
+  "run": "SRR7642962",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "312"
+ },
+ {
+  "run": "SRR7642965",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "282"
+ },
+ {
+  "run": "SRR7642966",
+  "org": "Saccharomyces cerevisiae",
+  "ref": "s288c",
+  "layout": "SINGLE",
+  "mb": "389"
+ }
+]
