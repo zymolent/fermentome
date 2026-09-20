@@ -36,15 +36,19 @@ import yaml
 from ..config import Settings
 
 __all__ = [
+    "PARTS_FILE",
     "PATHWAYS_DIR",
     "CuratedPathway",
+    "Part",
     "Metabolite",
     "PathwayError",
     "Reaction",
     "load_pathway_file",
+    "load_parts",
     "load_pathways",
     "check_balance",
     "write_pathway",
+    "write_parts",
     "write_pathways",
 ]
 
@@ -287,9 +291,9 @@ def load_pathways(settings: Settings) -> tuple[CuratedPathway, ...]:
     directory = Path(settings.repo_root) / PATHWAYS_DIR
     if not directory.is_dir():
         raise PathwayError(f"{directory} does not exist; there are no curated pathways to load")
-    files = sorted(directory.glob("*.yaml"))
+    files = [path for path in sorted(directory.glob("*.yaml")) if path.name != PARTS_FILE]
     if not files:
-        raise PathwayError(f"{directory} holds no .yaml files")
+        raise PathwayError(f"{directory} holds no curated pathway files")
     return tuple(load_pathway_file(path) for path in files)
 
 
@@ -394,3 +398,81 @@ def write_pathways(
             totals[table] = totals.get(table, 0) + count
     conn.commit()
     return totals
+
+
+# --------------------------------------------------------------------------------------- parts
+
+PARTS_FILE: Final[str] = "parts_catalog.yaml"
+
+
+@dataclass(frozen=True)
+class Part:
+    """One candidate enzyme for a pathway step role."""
+
+    id: str
+    step_role: str
+    source_organism: str
+    genes: tuple[str, ...]
+    native_compartment: str
+    sequence_encoding_genome: str
+    cofactor_preference: str
+    oxygen_sensitivity: str
+    evidence: str
+    confidence: str
+    variant_of: str | None = None
+    engineered_switch: bool = False
+
+
+def load_parts(settings: Settings) -> tuple[Part, ...]:
+    """The parts catalog: candidate enzymes per step role, the first factor of G.7's product."""
+    path = Path(settings.repo_root) / PATHWAYS_DIR / PARTS_FILE
+    if not path.is_file():
+        raise PathwayError(f"{path} is missing; route enumeration has nothing to choose between")
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return tuple(
+        Part(
+            id=str(p["id"]),
+            step_role=str(p["step_role"]),
+            source_organism=str(p["source_organism"]),
+            genes=tuple(str(g) for g in p.get("genes", ())),
+            native_compartment=str(p["native_compartment"]),
+            sequence_encoding_genome=str(p["sequence_encoding_genome"]),
+            cofactor_preference=str(p["cofactor_preference"]),
+            oxygen_sensitivity=str(p["oxygen_sensitivity"]),
+            evidence=str(p["evidence"]),
+            confidence=str(p["confidence"]),
+            variant_of=str(p["variant_of"]) if p.get("variant_of") else None,
+            engineered_switch=bool(p.get("engineered_switch", False)),
+        )
+        for p in raw["parts"]
+    )
+
+
+def write_parts(conn: sqlite3.Connection, parts: Sequence[Part]) -> dict[str, int]:
+    """Write the parts catalog. Zone I throughout: every functional claim in it is background
+    knowledge that has never been checked against a source, and the catalog says so itself."""
+    written = 0
+    for part in parts:
+        conn.execute(
+            "INSERT INTO part (id, step_role_id, source_organism_id, sequence_compartment_id, "
+            "sequence_encoding_genome, variant_of, cofactor_preference, engineered_switch, "
+            "oxygen_sensitivity, zone, evidence, confidence) VALUES (?,?,?,?,?,?,?,?,?,'I',?,?) "
+            "ON CONFLICT(id) DO UPDATE SET evidence=excluded.evidence, "
+            "cofactor_preference=excluded.cofactor_preference",
+            (
+                f"YAA:PART:{part.id.replace('_', '-')}",
+                part.step_role,
+                None,
+                part.native_compartment,
+                part.sequence_encoding_genome,
+                f"YAA:PART:{part.variant_of.replace('_', '-')}" if part.variant_of else None,
+                part.cofactor_preference,
+                1 if part.engineered_switch else 0,
+                part.oxygen_sensitivity,
+                f"{part.evidence} [genes: {', '.join(part.genes)}; from {part.source_organism}]",
+                part.confidence,
+            ),
+        )
+        written += 1
+    conn.commit()
+    return {"part": written}

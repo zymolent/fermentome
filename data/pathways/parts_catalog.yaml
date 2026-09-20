@@ -1,0 +1,232 @@
+# The parts catalog: candidate enzymes for each step of the isobutanol route.
+#
+# PLAN.md G.6. A `part` in this schema is a candidate for a *step role*, not a promoter or a
+# terminator -- `part.step_role_id` is NOT NULL and draws from the seeded vocabulary (AHAS, KARI,
+# DHAD, KDC, ADH, transporter, cofactor_cycle). Route enumeration (G.7) is
+# `{step -> part} x compartment x cofactor strategy x host`, so this file is the first factor of
+# that product and nothing can be enumerated without it.
+#
+# THE FIELDS THAT DECIDE ROUTES, and why each is here rather than in prose:
+#
+#   cofactor_preference  NADPH vs NADH. The mismatch between Ilv5 (NADPH) and the alcohol
+#                        dehydrogenase (NADH) is the redox problem every route must solve, so it
+#                        has to be a queryable field, not a sentence in an evidence string.
+#   oxygen_sensitivity   The DHAD enzymes carry [4Fe-4S] clusters. A cytosolically relocalized
+#                        Ilv3 depends on cytosolic cluster assembly and is the step most often
+#                        reported as limiting in strategy B (unverified).
+#   engineered_switch    True for a variant whose cofactor specificity was deliberately changed.
+#                        An NADH-preferring KARI is a different route, not a different allele:
+#                        it removes the need for matrix NADPH entirely.
+#   sequence_encoding_genome
+#                        Which genome a deployment would carry the gene on. This decides the
+#                        genetic code the sequence must be read under -- nuclear/table 1,
+#                        mitochondrial/table 3 -- and is the single thing this project has been
+#                        wrong about before. It is recorded per part, never inferred from the
+#                        compartment the enzyme works in.
+#
+# CONFIDENCE. Every functional claim here -- which cofactor an enzyme prefers, whether it is
+# oxygen-sensitive, whether a variant works in yeast -- is `unverified`: asserted from background
+# knowledge and never checked against a source in this session. Identity claims (that kivD is
+# from Lactococcus lactis) are equally unverified. Nothing in this file may support an assertion
+# until it is checked against primary literature, which is what the literature layer is for.
+
+version: 1
+zone: I
+
+parts:
+  # ---- AHAS: 2 pyruvate -> 2-acetolactate -----------------------------------------------------
+  - id: ilv2_ilv6_native
+    step_role: AHAS
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ILV2, ILV6]
+    native_compartment: mitochondrial_matrix
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NA
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      The native yeast acetolactate synthase; ILV2 catalytic, ILV6 regulatory. TPP-dependent, no
+      redox cofactor, so cofactor_preference is 'NA' rather than 'unknown' -- it does not apply
+      (unverified). Measured at median 62 and 137 TPM.
+    confidence: unverified
+
+  - id: als_s_bacillus
+    step_role: AHAS
+    source_organism: "Bacillus subtilis"
+    genes: [alsS]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NA
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      The bacterial acetolactate synthase most often used when the route is relocalized to the
+      cytosol, because it is a single subunit and is not feedback-inhibited by valine the way the
+      yeast enzyme is (unverified). Deploying it in yeast means expressing it from the nuclear
+      genome, so it reads under table 1 and needs no recoding.
+    confidence: unverified
+
+  # ---- KARI: 2-acetolactate -> 2,3-dihydroxyisovalerate ---------------------------------------
+  - id: ilv5_native
+    step_role: KARI
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ILV5]
+    native_compartment: mitochondrial_matrix
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADPH
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      The reductive step, and the reason DUET exists: it consumes NADPH inside the matrix, where
+      the only local source is Pos5 acting on matrix NADH. Measured at median 174 TPM against
+      POS5's 19.4 (docs/reports/2026-09-20-duet-expression-baseline.md).
+    confidence: unverified
+
+  - id: ilvc_ecoli
+    step_role: KARI
+    source_organism: "Escherichia coli"
+    genes: [ilvC]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADPH
+    oxygen_sensitivity: insensitive
+    evidence: "The E. coli ketol-acid reductoisomerase; NADPH-dependent like the yeast enzyme."
+    confidence: unverified
+
+  - id: ilvc_nadh_variant
+    step_role: KARI
+    source_organism: "Escherichia coli"
+    genes: [ilvC]
+    variant_of: ilvc_ecoli
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    engineered_switch: true
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      An engineered cofactor switch: KARI variants with reversed specificity have been reported
+      (unverified). This is a different ROUTE, not a different allele -- an NADH-preferring KARI
+      removes the requirement for matrix NADPH altogether, and with it the Pos5 dependency that
+      the expression baseline shows is the thinnest link in strategy C. Route enumeration must be
+      able to see that as an option rather than only as a footnote.
+    confidence: unverified
+
+  # ---- DHAD: 2,3-dihydroxyisovalerate -> 2-ketoisovalerate ------------------------------------
+  - id: ilv3_native
+    step_role: DHAD
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ILV3]
+    native_compartment: mitochondrial_matrix
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NA
+    oxygen_sensitivity: sensitive
+    evidence: >-
+      Carries a [4Fe-4S] cluster. Relocalizing it to the cytosol makes the route depend on
+      cytosolic Fe-S cluster assembly, which is why NFS1, ISU1 and YFH1 are in the DUET gene set,
+      and it is the step most often reported as limiting in strategy B (unverified).
+    confidence: unverified
+
+  - id: ilvd_ecoli
+    step_role: DHAD
+    source_organism: "Escherichia coli"
+    genes: [ilvD]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NA
+    oxygen_sensitivity: sensitive
+    evidence: "Also [4Fe-4S]-dependent, so it carries the same cluster-assembly risk (unverified)."
+    confidence: unverified
+
+  # ---- KDC: 2-ketoisovalerate -> isobutyraldehyde ---------------------------------------------
+  - id: aro10_native
+    step_role: KDC
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ARO10]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NA
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      The native broad-specificity 2-ketoacid decarboxylase. Its promiscuity is why isoamyl
+      alcohol and 2-methyl-1-butanol appear as by-products (unverified). MEASURED: the weakest
+      pathway gene in the 99-run corpus, median 9.2 TPM and undetected in 21 of 99 samples -- so
+      a route using it natively is building on the least-expressed step of the whole path.
+    confidence: unverified
+
+  - id: kivd_lactococcus
+    step_role: KDC
+    source_organism: "Lactococcus lactis"
+    genes: [kivD]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NA
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      The bacterial ketoisovalerate decarboxylase used in most published isobutanol builds, and
+      the usual replacement for the natively weak Aro10 (unverified).
+    confidence: unverified
+
+  # ---- ADH: isobutyraldehyde -> isobutanol ----------------------------------------------------
+  - id: adh1_native
+    step_role: ADH
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ADH1]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    oxygen_sensitivity: insensitive
+    evidence: "The major fermentative alcohol dehydrogenase; NADH-dependent (unverified)."
+    confidence: unverified
+
+  - id: adh6_native
+    step_role: ADH
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ADH6]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADPH
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      NADPH-preferring (unverified), which makes it the cofactor-matched partner for a route that
+      already has NADPH available in the same compartment -- and the mismatched one for a route
+      relying on cytosolic NADH.
+    confidence: unverified
+
+  - id: adha_lactococcus
+    step_role: ADH
+    source_organism: "Lactococcus lactis"
+    genes: [adhA]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    oxygen_sensitivity: insensitive
+    evidence: "The bacterial alcohol dehydrogenase paired with kivD in published builds."
+    confidence: unverified
+
+  # ---- cofactor_cycle: the DUET coupling ------------------------------------------------------
+  - id: pos5_native
+    step_role: cofactor_cycle
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [POS5]
+    native_compartment: mitochondrial_matrix
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      Mitochondrial NADH kinase: the only local route from matrix NADH to matrix NADPH, and so the
+      coupling strategy C depends on. MEASURED at median 19.4 TPM against ILV5's 174, roughly
+      nine-fold below the enzyme consuming its product -- overexpression is an obvious route
+      intervention and the baseline is the argument for it.
+    confidence: unverified
+
+  - id: adh3_native
+    step_role: cofactor_cycle
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ADH3]
+    native_compartment: mitochondrial_matrix
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    oxygen_sensitivity: insensitive
+    evidence: >-
+      Oxidises ethanol inside the matrix, delivering reducing equivalents across the inner
+      membrane without a shuttle -- ethanol crosses freely, NADH does not. Nuclear-encoded despite
+      acting in the matrix, so it reads under table 1 and a presequence-targeted construct needs
+      no recoding. Measured at median 232 TPM, the best-expressed member of the redox set.
+    confidence: unverified

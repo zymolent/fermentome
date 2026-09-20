@@ -220,3 +220,54 @@ def test_writing_is_idempotent() -> None:
         assert connection.execute("SELECT COUNT(*) FROM pathway").fetchone()[0] == 2
     finally:
         connection.close()
+
+
+# --------------------------------------------------------------------------------------- parts
+
+
+def test_the_parts_catalog_covers_every_step_of_the_route() -> None:
+    """Route enumeration is {step -> part} x compartment x cofactor x host. A step role with no
+    candidate part makes the whole product empty, silently."""
+    parts = C.load_parts(_settings())
+    covered = {part.step_role for part in parts}
+    assert {"AHAS", "KARI", "DHAD", "KDC", "ADH"} <= covered
+
+
+def test_the_cofactor_switched_kari_is_marked_as_such() -> None:
+    """An NADH-preferring KARI is a different route, not a different allele: it removes the
+    requirement for matrix NADPH and with it the Pos5 dependency the expression baseline shows is
+    the thinnest link in strategy C. The ranker has to be able to see that."""
+    parts = {part.id: part for part in C.load_parts(_settings())}
+    switched = parts["ilvc_nadh_variant"]
+    assert switched.engineered_switch is True
+    assert switched.cofactor_preference == "NADH"
+    assert switched.variant_of == "ilvc_ecoli"
+    assert parts["ilvc_ecoli"].cofactor_preference == "NADPH"
+
+
+def test_the_iron_sulfur_steps_are_flagged_oxygen_sensitive() -> None:
+    """Both DHAD enzymes carry [4Fe-4S]. Relocalizing one to the cytosol makes the route depend on
+    cytosolic cluster assembly, which is a scored risk rather than a footnote."""
+    dhad = [p for p in C.load_parts(_settings()) if p.step_role == "DHAD"]
+    assert dhad and all(p.oxygen_sensitivity == "sensitive" for p in dhad)
+
+
+def test_every_part_declares_the_genome_its_sequence_would_be_carried_on() -> None:
+    """The one thing this project has been wrong about before. A part's encoding genome decides
+    which NCBI translation table its sequence reads under, and it is never inferred from the
+    compartment the enzyme works in -- Adh3 works in the matrix and is nuclear-encoded."""
+    for part in C.load_parts(_settings()):
+        assert part.sequence_encoding_genome in {"nuclear", "mitochondrial"}
+
+
+def test_the_whole_catalog_is_zone_i() -> None:
+    """Every functional claim in it is background knowledge never checked against a source."""
+    connection = open_db(IN_MEMORY)
+    try:
+        C.write_parts(connection, C.load_parts(_settings()))
+        zones = {row[0] for row in connection.execute("SELECT DISTINCT zone FROM part")}
+        assert zones == {"I"}
+        confidences = {row[0] for row in connection.execute("SELECT DISTINCT confidence FROM part")}
+        assert confidences == {"unverified"}
+    finally:
+        connection.close()
