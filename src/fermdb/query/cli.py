@@ -20,6 +20,7 @@ from ..config import Settings
 from ..db import open_db
 from .coverage import page_readiness, read_coverage
 from .pathways import list_pathways, read_pathway
+from .publications import corpus_shape, read_publication, search_publications
 from .review import ReviewPacket, review_packet, review_queue
 
 __all__ = ["add_query_subcommand"]
@@ -205,6 +206,76 @@ def cmd_query_review(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_query_publication(args: argparse.Namespace) -> int:
+    """One paper: what is held of it, and every finding with the sentence it came from."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        if args.publication is None:
+            if args.shape:
+                shape = corpus_shape(conn)
+                for key, count in shape.items():
+                    print(f"  {key:<20}{count:>6}")
+                return 0
+            page = search_publications(
+                conn,
+                query=args.query,
+                year=args.year,
+                readable_only=args.readable,
+                limit=args.limit,
+            )
+            for row in page:
+                print(
+                    f"{str(row['year'] or '----'):<6}{row['id']:<34}{str(row['title'] or '')[:60]}"
+                )
+            if page.truncated:
+                print()
+                print(f"showing {len(page)}; more matched. This is a page, not a total.")
+            return 0
+        read = read_publication(conn, args.publication, settings=settings)
+    finally:
+        conn.close()
+
+    if read is None:
+        print(f"no publication with id {args.publication!r}", file=sys.stderr)
+        return 2
+    if args.json:
+        json.dump(read.as_json(), sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    print(read.title.display)
+    print(f"  {read.id}   {read.year.display}   {read.journal.display}")
+    print(f"  full text  {read.fulltext.display}")
+    if read.fulltext.characters.is_known:
+        print(
+            f"             {read.fulltext.characters.display} characters, "
+            f"{read.fulltext.media_type.display}, licence {read.fulltext.license.display}"
+        )
+    if read.screening:
+        print("  found by   " + ", ".join(f"{s.family} ({s.triage_state})" for s in read.screening))
+    print()
+    established = sum(1 for f in read.findings if f.is_established)
+    print(
+        f"  {len(read.findings)} finding(s), {established} established, "
+        f"{len(read.unresolved_findings)} with a span that no longer resolves"
+    )
+    for finding in read.findings[: args.findings]:
+        mark = "ok " if finding.resolves else "!! "
+        print()
+        print(
+            f"  {mark}{finding.record_kind.display:<26}{finding.record_path.display:<20}"
+            f"[{finding.task_status.display}]"
+        )
+        for line in _wrap_text(finding.context or finding.quote_as_recorded.display, 92):
+            print(f"      {line}")
+    if read.findings_truncated:
+        print()
+        print("more findings matched than were read; this is a page, not a total")
+    return 0
+
+
 def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add ``fermdb query ...`` to an existing top-level subparsers action."""
     p_query = sub.add_parser(
@@ -255,3 +326,21 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_review.set_defaults(func=cmd_query_review)
+
+    p_pub = query_sub.add_parser(
+        "publication",
+        help="one paper with every finding and the sentence it came from (P.2)",
+    )
+    p_pub.add_argument("publication", nargs="?", help="publication id; omit to search")
+    p_pub.add_argument("--query", help="substring of the title")
+    p_pub.add_argument("--year", type=int, help="publication year")
+    p_pub.add_argument(
+        "--readable", action="store_true", help="only papers whose full text is actually held"
+    )
+    p_pub.add_argument("--shape", action="store_true", help="corpus totals by what is held")
+    p_pub.add_argument("--limit", type=int, default=20, help="how many to list")
+    p_pub.add_argument("--findings", type=int, default=8, help="how many findings to show")
+    p_pub.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_pub.set_defaults(func=cmd_query_publication)

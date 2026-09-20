@@ -612,3 +612,42 @@ def test_no_genes_named_is_not_the_same_as_nowhere_to_record_them(
     assert with_table is not None and without_table is not None
     assert with_table.reactions[0].genes.unwrap() == ()  # looked, found none
     assert without_table.reactions[0].genes.is_known is False  # nowhere to look
+
+
+def test_a_join_may_carry_more_than_one_condition(conn: sqlite3.Connection) -> None:
+    """A single-condition join on a non-unique column silently multiplies rows.
+
+    `span` and `curation_task` share `record_path`, which is unique only within an extraction.
+    Joining on it alone cross-joins every extraction of a publication against every other -- and
+    the inflated count looks entirely plausible, which is why the builder has to express the
+    second condition rather than leaving callers to bolt it on.
+    """
+    conn.execute("CREATE TABLE other (id TEXT, name TEXT, tag TEXT)")
+    conn.executemany(
+        "INSERT INTO other VALUES (?,?,?)",
+        [("id1", "name1", "a"), ("id1", "name1", "b")],
+    )
+    one = (
+        B.Select("thing", alias="t")
+        .columns("t.id AS id")
+        .join("other", "t.id = o.id", alias="o", kind="INNER")
+        .where("t.id = ?", "id1")
+        .page(conn)
+    )
+    assert len(one) == 2  # the multiplication
+
+    both = (
+        B.Select("thing", alias="t")
+        .columns("t.id AS id")
+        .join("other", ("t.id = o.id", "t.name = o.name"), alias="o", kind="INNER")
+        .where("t.id = ? AND o.tag = ?", "id1", "a")
+        .page(conn)
+    )
+    assert len(both) == 1
+
+
+def test_every_join_condition_is_still_checked(conn: sqlite3.Connection) -> None:
+    with pytest.raises(B.QueryError):
+        B.Select("thing").join("other", ("a = b", "c; DROP TABLE thing = d"))
+    with pytest.raises(B.QueryError):
+        B.Select("thing").join("other", [])

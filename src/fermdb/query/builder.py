@@ -171,25 +171,45 @@ class Select:
     def distinct(self) -> Select:
         return self._replace(_distinct=True)
 
-    def join(self, table: str, on: str, *, alias: str | None = None, kind: str = "LEFT") -> Select:
-        """Join ``table`` on a condition written in terms of identifiers only.
+    def join(
+        self,
+        table: str,
+        on: str | Sequence[str],
+        *,
+        alias: str | None = None,
+        kind: str = "LEFT",
+    ) -> Select:
+        """Join ``table`` on one or more equalities between plain identifiers.
 
-        ``on`` is checked as ``left = right`` with both sides plain identifiers. That is narrow on
-        purpose: a join condition is the natural place for an injected predicate to hide, and
-        every join the read layer needs is an equality between two columns.
+        ``on`` is checked as ``left = right`` with both sides plain identifiers, and a sequence
+        of those is ANDed. That is narrow on purpose: a join condition is the natural place for
+        an injected predicate to hide, and every join the read layer needs is an equality between
+        columns.
+
+        Multiple conditions are not a convenience. `span` and `curation_task` share
+        ``record_path``, which is unique only *within* an extraction -- joining on it alone
+        cross-joins every extraction of a publication against every other, and the result is a
+        finding count several times the real one that looks entirely plausible.
         """
         kind_upper = kind.upper()
         if kind_upper not in _JOIN_KINDS:
             raise QueryError(f"join kind {kind!r} is not one of {sorted(_JOIN_KINDS)}")
-        sides = on.split("=")
-        if len(sides) != 2:
-            raise QueryError(f"join condition {on!r} must be 'left_column = right_column'")
-        left = _check_identifier(sides[0], what="join column")
-        right = _check_identifier(sides[1], what="join column")
+        conditions = [on] if isinstance(on, str) else list(on)
+        if not conditions:
+            raise QueryError("a join needs at least one condition")
+        rendered: list[str] = []
+        for condition in conditions:
+            sides = condition.split("=")
+            if len(sides) != 2:
+                raise QueryError(f"join condition {condition!r} must be 'left = right'")
+            left = _check_identifier(sides[0], what="join column")
+            right = _check_identifier(sides[1], what="join column")
+            rendered.append(f"{left} = {right}")
         table_checked = _check_identifier(table, what="table")
         alias_checked = _check_identifier(alias, what="alias") if alias else None
         return self._replace(
-            _joins=self._joins + ((kind_upper, table_checked, f"{left} = {right}", alias_checked),)
+            _joins=self._joins
+            + ((kind_upper, table_checked, " AND ".join(rendered), alias_checked),)
         )
 
     def where(self, expression: str, *params: Any) -> Select:

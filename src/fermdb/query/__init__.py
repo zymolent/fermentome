@@ -23,6 +23,8 @@ What is here:
 * :mod:`~fermdb.query.pathways` -- the Pathway read, with what the atlas cannot yet draw.
 * :mod:`~fermdb.query.review` -- one proposal with its re-resolved quote and what accepting
   it would write. The curation queue's read side.
+* :mod:`~fermdb.query.publications` -- one paper, what is held of it, and every finding with
+  the sentence it came from read back out of the document.
 
 What is deliberately **not** here yet: graph traversal, lexical and semantic search (PLAN.md O.1
 lists four modalities; this package implements the first). They are additive and are listed as
@@ -42,6 +44,15 @@ from .coverage import (
     PageReadiness,
     page_readiness,
     read_coverage,
+)
+from .publications import (
+    Finding,
+    FullTextAvailability,
+    PublicationRead,
+    ScreeningRead,
+    corpus_shape,
+    read_publication,
+    search_publications,
 )
 from .review import (
     CONTEXT_CHARS,
@@ -74,21 +85,28 @@ __all__ = [
     "Coverage",
     "EntityCoverage",
     "EvidenceLevel",
+    "Finding",
+    "FullTextAvailability",
     "Page",
     "PageReadiness",
     "ProposedField",
+    "PublicationRead",
     "Quantity",
     "QueryError",
     "QueryValueError",
     "ReviewPacket",
     "Select",
+    "ScreeningRead",
     "SpanView",
     "Value",
     "Zone",
+    "corpus_shape",
     "count_of",
     "read_coverage",
+    "read_publication",
     "review_packet",
     "review_queue",
+    "search_publications",
     "from_state_column",
     "from_text_column",
     "page_readiness",
