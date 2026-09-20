@@ -60,6 +60,7 @@ from datetime import UTC, datetime
 from typing import Any, Final
 
 from ..config import Settings
+from .genotype import parse_genotype
 from .queue import CurationError, Curator, Task, get_task
 
 __all__ = [
@@ -340,6 +341,7 @@ def _plan_strain(
             # Outside the closed set means "the paper said something we do not model", which is
             # not the same as 'unknown' and is therefore NULL.
             "class": role if role in _STRAIN_CLASSES else None,
+            "genotype_as_reported": payload.get("genotype_as_reported") or None,
         },
         missing=tuple(missing),
         already=already,
@@ -432,6 +434,7 @@ def _plan_measurement(
 def _write_strain(
     conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
 ) -> bool:
+    before = conn.total_changes
     conn.execute(
         "INSERT INTO strain (id, organism_id, canonical_name, class, zone, evidence, confidence) "
         "VALUES (?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
@@ -444,7 +447,38 @@ def _write_strain(
             confidence,
         ),
     )
-    return conn.total_changes > 0
+    created = conn.total_changes > before
+    _write_genotype(conn, plan, evidence=evidence, confidence=confidence)
+    return created
+
+
+def _write_genotype(
+    conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
+) -> None:
+    """Store the reported genotype and its parse, if the record carried one.
+
+    ``as_reported`` is Zone R and copied untouched. ``parsed_json`` is Zone H -- derived from it
+    by `curate.genotype`, rebuildable, and carrying its own unparsed tokens so a partial parse
+    cannot pass for a complete one. The row itself is filed Zone R because its NOT NULL content
+    is the reported string; the derived column says what it is.
+    """
+    reported = plan.row.get("genotype_as_reported")
+    if not reported:
+        return
+    parsed = parse_genotype(str(reported))
+    conn.execute(
+        "INSERT INTO genotype (id, strain_id, as_reported, parsed_json, zone, evidence, "
+        "confidence) VALUES (?,?,?,?,'R',?,?) ON CONFLICT(id) DO UPDATE SET "
+        "as_reported=excluded.as_reported, parsed_json=excluded.parsed_json",
+        (
+            f"YAA:GENOTYPE:{str(plan.row['id']).split(':')[-1]}",
+            plan.row["id"],
+            str(reported),
+            json.dumps(parsed.as_json(), ensure_ascii=False, sort_keys=True),
+            evidence,
+            confidence,
+        ),
+    )
 
 
 def _write_measurement(

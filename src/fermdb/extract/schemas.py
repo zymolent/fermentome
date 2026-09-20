@@ -311,6 +311,24 @@ def _strain_fields() -> tuple[FieldSpec, ...]:
             "background_as_reported",
             _text("The genetic background as written, if stated separately.", nullable=True),
         ),
+        # Added after a real extraction dropped it. Wess et al. list 17 strains with full
+        # genotypes in a table; the section had nowhere to put them, so the atlas kept the names
+        # and lost "Δilv2; Δbdh1; Δbdh2; Δleu4; Δleu9; Δecm31; Δilv1; Δadh1; Δgpd1; Δgpd2".
+        #
+        # The `genotype` table has held `as_reported` (Zone R) beside `parsed_json` (Zone H)
+        # since the schema was written, which is exactly this shape: keep the paper's string
+        # untouched, and derive structure from it by recorded code rather than by asking a model
+        # to decompose it. `curate.genotype` does the deriving.
+        FieldSpec(
+            "genotype_as_reported",
+            _text(
+                "The full genotype string exactly as the paper writes it, e.g. "
+                "'Δilv2; Δbdh1; Δbdh2' or 'BY4741/pATP426-kivd-ADH6'. Copy it verbatim "
+                "including the delta characters and separators; do not expand, reorder or "
+                "normalise it, and do not assemble one from prose if the paper gives none.",
+                nullable=True,
+            ),
+        ),
     )
 
 
