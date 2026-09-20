@@ -22,6 +22,7 @@ from __future__ import annotations
 import gzip
 import re
 import statistics
+from collections.abc import Container, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -31,6 +32,7 @@ from ..config import Settings
 __all__ = [
     "DETECTION_TPM",
     "MITOCHONDRIAL_PROTEIN_GENES",
+    "missing_mitochondrial_proteins",
     "BaselineReport",
     "GeneProfile",
     "build_baseline",
@@ -62,6 +64,24 @@ MITOCHONDRIAL_PROTEIN_GENES: Final[tuple[str, ...]] = (
     "ATP9",
     "VAR1",
 )
+
+#: Symbols a source may use for one of the above. NC_001224 annotates ATP9 as OLI1, so a check
+#: that only looked for "ATP9" would report it missing from a reference that in fact contains it --
+#: a false alarm that would send someone to fix a gap that had already been closed.
+_MITOCHONDRIAL_SYNONYMS: Final[Mapping[str, tuple[str, ...]]] = {
+    "ATP9": ("OLI1",),
+    "COB": ("CYTB", "COB1"),
+}
+
+
+def missing_mitochondrial_proteins(symbols: Container[str]) -> tuple[str, ...]:
+    """Which of the mtDNA protein-coding complement `symbols` does not contain, synonyms allowed."""
+    return tuple(
+        gene
+        for gene in MITOCHONDRIAL_PROTEIN_GENES
+        if gene not in symbols
+        and not any(alias in symbols for alias in _MITOCHONDRIAL_SYNONYMS.get(gene, ()))
+    )
 
 
 @dataclass(frozen=True)
@@ -223,7 +243,5 @@ def build_baseline(
         samples=samples,
         matrix_genes=total,
         matrix_path=str(matrix_path),
-        missing_mitochondrial_proteins=tuple(
-            name for name in MITOCHONDRIAL_PROTEIN_GENES if name not in symbols
-        ),
+        missing_mitochondrial_proteins=missing_mitochondrial_proteins(symbols),
     )
