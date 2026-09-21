@@ -1,0 +1,2136 @@
+# Triage of the pdf_included corpus against the atlas's admission scheme
+#
+# DRAFT. Nothing here is accepted, verified or enqueued. Nothing under data/ or the database was
+# written; the database was opened read-only. Project rule L.5/D2: agents draft only.
+#
+# Source (READ-ONLY, never written to): D:/Agentic/bifserver-works/literatures/pdf_included
+# Manifest rows: 127   PDFs on disk: 127
+# NOTE ON COUNT: the task brief says 128 PDFs. The directory holds 127 PDFs and the
+# manifest holds 127 data rows (128 lines including the header). There is no 128th paper.
+#
+# `basis` is how each call was made:
+#   title                    - manifest title/journal/year only
+#   title+fulltext_term_scan - title plus a scripted term scan of the stored PDF text
+#                              (counts of 'xylose', 'isobutanol', ADH3/POS5/shuttle/matrix
+#                              NAD(P)H, PPP gene names). No prose was read.
+#   abstract_read            - the PDF was opened and its abstract read. 15 papers.
+#
+# `admission` is this agent's own call against PLAN.md B.1-B.3.6, NOT the database's existing
+# tag. `db_admitted_criterion` records what the database currently says, so disagreements stay
+# visible; the shortlist report of 2026-09-21 section 2 already found the tagging misroutes
+# papers, and this corpus reproduces that finding.
+
+meta:
+  produced: 2026-09-21
+  source_dir: "D:/Agentic/bifserver-works/literatures/pdf_included"
+  source_treated_as: read_only
+  manifest_rows: 127
+  pdfs_on_disk: 127
+  database_access: read_only
+  nothing_enqueued: true
+  abstracts_opened: 15
+  headline:
+    already_in_corpus_as_metadata: 127
+    genuinely_new_publications: 0
+    fulltext_previously_stored: 0
+    newly_readable_fulltext: 124
+    usable_pdfs: 124
+    unusable_pdfs_wrong_content: 3
+
+admission_counts:
+  out_of_scope: 52
+  isobutanol_primary: 30
+  E4: 18
+  pentose_C5: 12
+  E6: 7
+  E2: 5
+  E3: 2
+  adjacent_higher_alcohol: 1
+
+slot_counts:
+  slot1_E3_anaerobic_vs_aerobic_reference_physiology: 1
+  slot2_E1_pdc_minus_background: 0
+  slot3_E4_ethanol_stress_acute_shock: 2
+  slot4_E4_ethanol_stress_adapted_growth: 4
+  slot5_E2_industrial_strain_under_VHG: 4
+  slot6_E5_mitochondrial_redox_shuttle: 0
+  slot7_E6_genetic_basis_of_industrial_performance: 3
+
+flag_counts:
+  strong_candidate: 14
+  marginal: 14
+  db_mistag_E5: 8
+  review: 7
+  cofactor_claim: 6
+  preprint_version: 4
+  no_c4_transfer_argument: 4
+  ploidy: 4
+  content_mismatch: 3
+  landmark: 3
+  kari_part: 2
+  glycerol_redox: 2
+  db_mistag_isobutanol: 2
+  compartment: 2
+  breaks_L3_cap: 2
+  tests_isobutanol: 2
+  non_cerevisiae: 2
+  glucose_repression: 2
+  corrigendum_only: 2
+  transcriptome: 2
+  b36_qtl_caveat: 1
+  nde1_nde2: 1
+  borderline: 1
+  ppp: 1
+  commentary_only: 1
+  adh3_negative: 1
+  landmark_for_duet: 1
+  c6_c5_handover: 1
+  proteome: 1
+  in_silico: 1
+  nadh_kinase_in_model: 1
+  closest_to_E1: 1
+  named_by_plan: 1
+  nadh_preferring_kari: 1
+  respiration_deleted: 1
+  nad_kinase: 1
+  pos5_analogue: 1
+  part_biosensor: 1
+  dynamic_regulation: 1
+  db_mistag_E2: 1
+  shuttle_blocked_contrast: 1
+  null_result: 1
+  title_changed_on_publication: 1
+
+papers:
+  - doi: "10.1006/mben.1999.0140"
+    file: "10.1006_mben.1999.0140.pdf"
+    year: 2000
+    journal: "Metabolic engineering"
+    title: "Optimization of ethanol production in Saccharomyces cerevisiae by metabolic engineering of the ammonium assimilation."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "PDF CONTENT MISMATCH: the file holds Fuel 312 (2022) 122848 on magnesium thermophotovoltaic combustor flammability, not the Metab Eng ammonium-assimilation paper the DOI names."
+    flags: ["content_mismatch"]
+  - doi: "10.1007/10_2007_057"
+    file: "10.1007_10_2007_057.pdf"
+    year: 2007
+    journal: "Advances in biochemical engineering/biotechnology"
+    title: "Development of efficient xylose fermentation in Saccharomyces cerevisiae: xylose isomerase as a key component."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title names xylose isomerase as the key component; full text carries 223 'xylose' plus XKS1/TAL1/TKL1/RPE1 and non-oxidative PPP - the exact gene set B.3.6 admits."
+    flags: []
+  - doi: "10.1007/s00253-020-10518-x"
+    file: "10.1007_s00253-020-10518-x.pdf"
+    year: 2020
+    journal: "Applied microbiology and biotechnology"
+    title: "Rpn4 and proteasome-mediated yeast resistance to ethanol includes regulation of autophagy."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: "slot4_E4_ethanol_stress_adapted_growth"
+    basis: "title"
+    evidence: "Title: Rpn4 and proteasome-mediated ethanol resistance including regulation of autophagy - a named mechanism of ethanol resistance under sustained exposure."
+    flags: []
+  - doi: "10.1007/s00253-021-11278-y"
+    file: "10.1007_s00253-021-11278-y.pdf"
+    year: 2021
+    journal: "Applied microbiology and biotechnology"
+    title: "A biorefinery concept for the production of fuel ethanol, probiotic yeast, and whey protein from a by-product of the cheese industry."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: biorefinery concept for fuel ethanol, probiotic yeast and whey protein from a cheese by-product - feedstock and process, B.3.6 excluded."
+    flags: ["preprint_version"]
+  - doi: "10.1007/s00253-023-12821-9"
+    file: "10.1007_s00253-023-12821-9.pdf"
+    year: 2024
+    journal: "Applied microbiology and biotechnology"
+    title: "Microbial host engineering for sustainable isobutanol production from renewable resources."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: microbial host engineering for sustainable isobutanol production; 280 'isobutanol' mentions - a primary-tier review."
+    flags: ["review"]
+  - doi: "10.1007/s00438-024-02196-5"
+    file: "10.1007_s00438-024-02196-5.pdf"
+    year: 2024
+    journal: "Molecular genetics and genomics : MGG"
+    title: "Unveiling genetic anchors in saccharomyces cerevisiae: QTL mapping identifies IRA2 as a key player in ethanol tolerance and beyond."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E6"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: null
+    slot: "slot7_E6_genetic_basis_of_industrial_performance"
+    basis: "title"
+    evidence: "Title: QTL mapping identifies IRA2 as a key player in ethanol tolerance - genetic basis of a performance trait. B.3.6 excludes bare tolerance QTL mapping; admitted only because a causal gene is named."
+    flags: ["preprint_version", "b36_qtl_caveat"]
+  - doi: "10.1007/s10482-006-9085-7"
+    file: "10.1007_s10482-006-9085-7.pdf"
+    year: 2006
+    journal: "Antonie van Leeuwenhoek"
+    title: "Alcoholic fermentation of carbon sources in biomass hydrolysates by Saccharomyces cerevisiae: current status."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Review of alcoholic fermentation of biomass-hydrolysate carbon sources; 146 'xylose', arabinose, the full PPP set, plus MIG1/HXK2 and glucose repression - two of B.3.6's named C5 areas at once."
+    flags: ["review"]
+  - doi: "10.1007/s10529-010-0330-9"
+    file: "10.1007_s10529-010-0330-9.pdf"
+    year: 2010
+    journal: "Biotechnology letters"
+    title: "Selection of Saccharomyces cerevisiae strains for efficient very high gravity bio-ethanol fermentation processes."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: selection of strains for efficient very high gravity fermentation - a strain-screening survey, B.3.6 excluded."
+    flags: []
+  - doi: "10.1007/s11274-018-2463-2"
+    file: "10.1007_s11274-018-2463-2.pdf"
+    year: 2018
+    journal: "World journal of microbiology & biotechnology"
+    title: "Conventional and nonconventional strategies for controlling bacterial contamination in fuel ethanol fermentations."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "PDF CONTENT MISMATCH: the file holds a 2009 IATP policy report, 'Fueling Resistance? Antibiotics in Ethanol Production', not the World J Microbiol Biotechnol review."
+    flags: ["content_mismatch"]
+  - doi: "10.1007/s11356-016-8018-x"
+    file: "10.1007_s11356-016-8018-x.pdf"
+    year: 2017
+    journal: "Environmental science and pollution research international"
+    title: "Identification of strain isolated from dates (Phœnix dactylifera L.) for enhancing very high gravity ethanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: identification of a strain isolated from dates for VHG ethanol - isolate screening, B.3.6 excluded."
+    flags: []
+  - doi: "10.1007/s11356-023-30185-5"
+    file: "10.1007_s11356-023-30185-5.pdf"
+    year: 2024
+    journal: "Environmental science and pollution research international"
+    title: "Enhanced ethanol production using hydrophobic resin detoxified Pine forest litter hydrolysate and integrated fermentation process development supplementing mola"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: resin-detoxified pine forest litter hydrolysate with integrated fermentation - hydrolysate and pretreatment, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.bbagen.2025.130804"
+    file: "10.1016_j.bbagen.2025.130804.pdf"
+    year: 2025
+    journal: "Biochimica et biophysica acta. General subjects"
+    title: "Yeast Hsp78 plays an essential role in adapting to severe ethanol stress via mild ethanol stress pretreatment in mitochondrial protein quality control."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: "slot4"
+    slot: "slot3_E4_ethanol_stress_acute_shock"
+    basis: "abstract_read"
+    evidence: "Abstract: 10% v/v severe ethanol stress with 6% v/v mild pretreatment; DUMPs and Aco1 aggregation, hsp78-delta and mdj1-delta, ROS and respiration-deficient mutant frequency. A true acute-shock design with a named mitochondrial mechanism."
+    flags: ["strong_candidate"]
+  - doi: "10.1016/j.biochi.2014.10.024"
+    file: "10.1016_j.biochi.2014.10.024.pdf"
+    year: 2015
+    journal: "Biochimie"
+    title: "Identification and optimization of a novel thermo- and solvent stable ketol-acid reductoisomerase for cell free isobutanol biosynthesis."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: a novel thermo- and solvent-stable ketol-acid reductoisomerase for cell-free isobutanol biosynthesis - a KARI part, the plan's highest-priority part class (G.6)."
+    flags: ["kari_part"]
+  - doi: "10.1016/j.biortech.2004.12.034"
+    file: "10.1016_j.biortech.2004.12.034.pdf"
+    year: 2005
+    journal: "Bioresource technology"
+    title: "Ethanolic fermentation of acid pre-treated starch industry effluents by recombinant Saccharomyces cerevisiae strains."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: ethanolic fermentation of acid-pretreated starch industry effluents - effluent feedstock process, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2007.09.046"
+    file: "10.1016_j.biortech.2007.09.046.pdf"
+    year: 2008
+    journal: "Bioresource technology"
+    title: "Simultaneous saccharification and fermentation of acid-pretreated corncobs with a recombinant Saccharomyces cerevisiae expressing beta-glucosidase."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: simultaneous saccharification and fermentation of acid-pretreated corncobs - SSF, excluded by name in B.3.6."
+    flags: []
+  - doi: "10.1016/j.biortech.2008.03.037"
+    file: "10.1016_j.biortech.2008.03.037.pdf"
+    year: 2008
+    journal: "Bioresource technology"
+    title: "Production of bio-ethanol from soybean molasses by Saccharomyces cerevisiae at laboratory, pilot and industrial scales."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E2"
+    admission_secondary: null
+    slot: "slot5_E2_industrial_strain_under_VHG"
+    basis: "title"
+    evidence: "Title: bio-ethanol from soybean molasses at laboratory, pilot and industrial scales - carries industrial-scale performance numbers, though the feedstock framing is marginal for a ceiling record."
+    flags: ["marginal"]
+  - doi: "10.1016/j.biortech.2008.11.010"
+    file: "10.1016_j.biortech.2008.11.010.pdf"
+    year: 2009
+    journal: "Bioresource technology"
+    title: "Flocculation characteristics of an isolated mutant flocculent Saccharomyces cerevisiae strain and its application for fuel ethanol production from kitchen refus"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: flocculent mutant applied to fuel ethanol from kitchen refuse - waste feedstock process, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2008.11.047"
+    file: "10.1016_j.biortech.2008.11.047.pdf"
+    year: 2009
+    journal: "Bioresource technology"
+    title: "Bioethanol production performance of five recombinant strains of laboratory and industrial xylose-fermenting Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: five recombinant xylose-fermenting S. cerevisiae strains; 123 'xylose' with XKS1 and XR/XDH present."
+    flags: []
+  - doi: "10.1016/j.biortech.2009.03.046"
+    file: "10.1016_j.biortech.2009.03.046.pdf"
+    year: 2009
+    journal: "Bioresource technology"
+    title: "Ethanol production from sweet sorghum juice using very high gravity technology: effects of carbon and nitrogen supplementations."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E2"
+    admission_secondary: null
+    slot: "slot5_E2_industrial_strain_under_VHG"
+    basis: "title"
+    evidence: "Title: sweet sorghum juice under very high gravity with carbon and nitrogen supplementation - a VHG performance record on a defined juice."
+    flags: ["marginal"]
+  - doi: "10.1016/j.biortech.2009.08.100"
+    file: "10.1016_j.biortech.2009.08.100.pdf"
+    year: 2010
+    journal: "Bioresource technology"
+    title: "Pretreatment of spruce and oak by N-methylmorpholine-N-oxide (NMMO) for efficient conversion of their cellulose to ethanol."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: NMMO pretreatment of spruce and oak - pretreatment optimisation, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2009.12.090"
+    file: "10.1016_j.biortech.2009.12.090.pdf"
+    year: 2010
+    journal: "Bioresource technology"
+    title: "Fuel ethanol production from granular corn starch using Saccharomyces cerevisiae in a long term repeated SSF process with full stillage recycling."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: granular corn starch in a long-term repeated SSF with full stillage recycling - SSF process study, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2010.03.129"
+    file: "10.1016_j.biortech.2010.03.129.pdf"
+    year: 2010
+    journal: "Bioresource technology"
+    title: "Ethanolic cofermentation with glucose and xylose by the recombinant industrial strain Saccharomyces cerevisiae NAN-127 and the effect of furfural on xylitol pro"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: glucose and xylose co-fermentation by industrial strain NAN-127 with furfural effect on xylitol; 101 'xylose' with XKS1 and XR/XDH - a MIXED carbon-regime record of the kind C.5 was amended to hold."
+    flags: []
+  - doi: "10.1016/j.biortech.2010.07.079"
+    file: "10.1016_j.biortech.2010.07.079.pdf"
+    year: 2010
+    journal: "Bioresource technology"
+    title: "Selection of stress-tolerant yeasts for simultaneous saccharification and fermentation (SSF) of very high gravity (VHG) potato mash to ethanol."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: selection of stress-tolerant yeasts for SSF of VHG potato mash - screening plus SSF, doubly excluded by B.3.6."
+    flags: []
+  - doi: "10.1016/j.biortech.2010.09.122"
+    file: "10.1016_j.biortech.2010.09.122.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Screening and construction of Saccharomyces cerevisiae strains with improved multi-tolerance and bioethanol fermentation performance."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: screening and construction of strains with improved multi-tolerance - strain-screening survey, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2010.10.126"
+    file: "10.1016_j.biortech.2010.10.126.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Bioconversion of industrial hemp to ethanol and methane: the benefits of steam pretreatment and co-production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: bioconversion of industrial hemp to ethanol and methane with steam pretreatment - pretreatment and co-production, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2010.11.034"
+    file: "10.1016_j.biortech.2010.11.034.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Fermentation of biomass sugars to ethanol using native industrial yeast strains."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: fermentation of biomass sugars by native industrial yeast strains - a native-strain survey; screening, B.3.6 excluded despite 92 'xylose' mentions."
+    flags: []
+  - doi: "10.1016/j.biortech.2010.11.097"
+    file: "10.1016_j.biortech.2010.11.097.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Potential utilization of sorghum field waste for fuel ethanol production employing Pachysolen tannophilus and Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2+E5"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: sorghum field waste with Pachysolen tannophilus and S. cerevisiae - feedstock utilisation, B.3.6 excluded. The database tags it E5, which nothing in the full text supports."
+    flags: ["db_mistag_E5"]
+  - doi: "10.1016/j.biortech.2010.12.115"
+    file: "10.1016_j.biortech.2010.12.115.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Application of simultaneous saccharification and fermentation (SSF) from viscosity reducing of raw sweet potato for bioethanol production at laboratory, pilot a"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: SSF from viscosity-reduced raw sweet potato at laboratory and pilot scale - SSF process study, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2011.01.062"
+    file: "10.1016_j.biortech.2011.01.062.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Fermentation of cellobiose to ethanol by industrial Saccharomyces strains carrying the β-glucosidase gene (BGL1) from Saccharomycopsis fibuligera."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: cellobiose to ethanol via BGL1 from Saccharomycopsis fibuligera - a consolidated-bioprocessing route, B.3.6 excluded. Database tags it E5, unsupported."
+    flags: ["db_mistag_E5"]
+  - doi: "10.1016/j.biortech.2011.02.101"
+    file: "10.1016_j.biortech.2011.02.101.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Expression of aldehyde dehydrogenase 6 reduces inhibitory effect of furan derivatives on cell growth and ethanol production in Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: aldehyde dehydrogenase 6 expression reduces furan-derivative inhibition - a named gene, and Ald6 is NADP+-dependent so the mechanism is redox-bearing, but the stressor is a hydrolysate inhibitor rather than an alcohol."
+    flags: ["marginal", "no_c4_transfer_argument"]
+  - doi: "10.1016/j.biortech.2011.04.094"
+    file: "10.1016_j.biortech.2011.04.094.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Techno-economic implications of improved high gravity corn mash fermentation."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: techno-economic implications of improved high gravity corn mash fermentation - process economics, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2011.05.075"
+    file: "10.1016_j.biortech.2011.05.075.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Industrial yeast strain engineered to ferment ethanol from lignocellulosic biomass."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: industrial yeast strain engineered to ferment ethanol from lignocellulosic biomass - lignocellulosic process, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2011.06.058"
+    file: "10.1016_j.biortech.2011.06.058.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Alteration of xylose reductase coenzyme preference to improve ethanol production by Saccharomyces cerevisiae from high xylose concentrations."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: alteration of xylose reductase coenzyme preference to improve ethanol from high xylose - a deliberate cofactor-preference change, which B.3.6 says must be recorded because it is a redox claim; 151 'xylose' and the full XKS1/TAL1/TKL1/RKI1/RPE1 set."
+    flags: ["strong_candidate", "cofactor_claim"]
+  - doi: "10.1016/j.biortech.2011.08.027"
+    file: "10.1016_j.biortech.2011.08.027.pdf"
+    year: 2011
+    journal: "Bioresource technology"
+    title: "Ethanol production from selected lignocellulosic hydrolysates by genome shuffled strains of Scheffersomyces stipitis."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: genome-shuffled Scheffersomyces stipitis on lignocellulosic hydrolysates - hydrolysate work in a non-Saccharomyces host, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2011.12.144"
+    file: "10.1016_j.biortech.2011.12.144.pdf"
+    year: 2012
+    journal: "Bioresource technology"
+    title: "Display of cellulases on the cell surface of Saccharomyces cerevisiae for high yield ethanol production from high-solid lignocellulosic biomass."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: display of cellulases for high-solid lignocellulosic biomass - consolidated bioprocessing, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2011.12.147"
+    file: "10.1016_j.biortech.2011.12.147.pdf"
+    year: 2012
+    journal: "Bioresource technology"
+    title: "The combination of glycerol metabolic engineering and drug resistance marker-aided genome shuffling to improve very-high-gravity fermentation performances of in"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: "E2"
+    slot: null
+    basis: "title"
+    evidence: "Title: glycerol metabolic engineering combined with genome shuffling for very-high-gravity performance - the glycerol branch is the compensating NADH sink B.3.1 names, engineered here with a VHG readout."
+    flags: ["glycerol_redox"]
+  - doi: "10.1016/j.biortech.2012.08.080"
+    file: "10.1016_j.biortech.2012.08.080.pdf"
+    year: 2012
+    journal: "Bioresource technology"
+    title: "Conversion of coffee residue waste into bioethanol with using popping pretreatment."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: coffee residue waste into bioethanol using popping pretreatment - pretreatment, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2012.08.104"
+    file: "10.1016_j.biortech.2012.08.104.pdf"
+    year: 2012
+    journal: "Bioresource technology"
+    title: "Sm-like protein enhanced tolerance of recombinant Saccharomyces cerevisiae to inhibitors in hemicellulosic hydrolysate."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: Sm-like protein enhances tolerance to hemicellulosic hydrolysate inhibitors - a named protein, but the stressor is hydrolysate inhibitors, with no alcohol-transfer argument."
+    flags: ["marginal", "no_c4_transfer_argument"]
+  - doi: "10.1016/j.biortech.2012.09.104"
+    file: "10.1016_j.biortech.2012.09.104.pdf"
+    year: 2013
+    journal: "Bioresource technology"
+    title: "Microbial synthesis of n-butanol, isobutanol, and other higher alcohols from diverse resources."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "adjacent_higher_alcohol"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: microbial synthesis of n-butanol, isobutanol and other higher alcohols from diverse resources; 54 'isobutanol' - a primary-tier review that also frames the adjacent alcohols B.1 calls diagnostic."
+    flags: ["review"]
+  - doi: "10.1016/j.biortech.2013.07.078"
+    file: "10.1016_j.biortech.2013.07.078.pdf"
+    year: 2013
+    journal: "Bioresource technology"
+    title: "Simultaneous saccharification and fermentation of Agave tequilana fructans by Kluyveromyces marxianus yeasts for bioethanol and tequila production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: SSF of Agave tequilana fructans by Kluyveromyces marxianus for bioethanol and tequila - SSF in a non-Saccharomyces host, B.3.6 excluded. The database files it isobutanol-tier, which the title does not support."
+    flags: ["db_mistag_isobutanol"]
+  - doi: "10.1016/j.biortech.2013.09.082"
+    file: "10.1016_j.biortech.2013.09.082.pdf"
+    year: 2013
+    journal: "Bioresource technology"
+    title: "Continuous co-fermentation of cellobiose and xylose by engineered Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: continuous co-fermentation of cellobiose and xylose by engineered S. cerevisiae; 87 'xylose' with XKS1, XR/XDH and glucose repression - a MIXED-regime co-fermentation record."
+    flags: []
+  - doi: "10.1016/j.biortech.2013.12.081"
+    file: "10.1016_j.biortech.2013.12.081.pdf"
+    year: 2014
+    journal: "Bioresource technology"
+    title: "Ethanol fermentation of energy beets by self-flocculating and non-flocculating yeasts."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: energy beets with self-flocculating and non-flocculating yeasts - feedstock and process, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2014.01.060"
+    file: "10.1016_j.biortech.2014.01.060.pdf"
+    year: 2014
+    journal: "Bioresource technology"
+    title: "Inhibitor analysis and adaptive evolution of Saccharomyces cerevisiae for simultaneous saccharification and ethanol fermentation from industrial waste corncob r"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: inhibitor analysis and adaptive evolution for SSF from industrial corncob residue - SSF plus hydrolysate, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2014.06.005"
+    file: "10.1016_j.biortech.2014.06.005.pdf"
+    year: 2014
+    journal: "Bioresource technology"
+    title: "An alternative feedstock of corn meal for industrial fuel ethanol production: delignified corncob residue."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: delignified corncob residue as an alternative feedstock for fuel ethanol - feedstock study, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2014.07.082"
+    file: "10.1016_j.biortech.2014.07.082.pdf"
+    year: 2014
+    journal: "Bioresource technology"
+    title: "Increased ethanol production from sweet sorghum juice concentrated by a membrane separation process."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: sweet sorghum juice concentrated by a membrane separation process - process and separation, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2015.03.127"
+    file: "10.1016_j.biortech.2015.03.127.pdf"
+    year: 2015
+    journal: "Bioresource technology"
+    title: "Repeated ethanol production from sweet sorghum juice concentrated by membrane separation."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: repeated ethanol production from membrane-concentrated sweet sorghum juice - process study, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2015.08.086"
+    file: "10.1016_j.biortech.2015.08.086.pdf"
+    year: 2015
+    journal: "Bioresource technology"
+    title: "Metabolic engineering of Klebsiella pneumoniae for the de novo production of 2-butanol as a potential biofuel."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "adjacent_higher_alcohol"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: de novo 2-butanol in Klebsiella pneumoniae; only 19 'isobutanol' mentions and no isobutanol build, so this is an adjacent C4 alcohol rather than a primary record. The database files it isobutanol-tier."
+    flags: ["db_mistag_isobutanol"]
+  - doi: "10.1016/j.biortech.2017.01.040"
+    file: "10.1016_j.biortech.2017.01.040.pdf"
+    year: 2017
+    journal: "Bioresource technology"
+    title: "Novel strategy to improve vanillin tolerance and ethanol fermentation performances of Saccharomycere cerevisiae strains."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E6"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: improving vanillin tolerance and ethanol fermentation performance - vanillin is a hydrolysate inhibitor, so the mechanism carries no stated C4-alcohol transfer path."
+    flags: ["marginal", "no_c4_transfer_argument"]
+  - doi: "10.1016/j.biortech.2017.05.125"
+    file: "10.1016_j.biortech.2017.05.125.pdf"
+    year: 2017
+    journal: "Bioresource technology"
+    title: "Continuous bioethanol fermentation from wheat straw hydrolysate with high suspended solid content using an immersed flat sheet membrane bioreactor."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: continuous fermentation from wheat straw hydrolysate in an immersed flat sheet membrane bioreactor - hydrolysate plus reactor engineering, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2017.05.191"
+    file: "10.1016_j.biortech.2017.05.191.pdf"
+    year: 2017
+    journal: "Bioresource technology"
+    title: "Deletion of acetate transporter gene ADY2 improved tolerance of Saccharomyces cerevisiae against multiple stresses and enhanced ethanol production in the presen"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: ADY2 deletion improves tolerance to acetic acid and hydrogen peroxide and lowers intracellular acetic acid and ROS - a named transporter mechanism, but the stressors are acetate and oxidative, not an alcohol."
+    flags: ["marginal", "no_c4_transfer_argument"]
+  - doi: "10.1016/j.biortech.2017.05.197"
+    file: "10.1016_j.biortech.2017.05.197.pdf"
+    year: 2017
+    journal: "Bioresource technology"
+    title: "Increase in furfural tolerance by combinatorial overexpression of NAD salvage pathway enzymes in engineered isobutanol-producing E. coli."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: combinatorial overexpression of NAD salvage pathway enzymes for furfural tolerance in engineered isobutanol-producing E. coli - tolerance measured inside an isobutanol host, with NAD(P) cofactor supply as the lever."
+    flags: ["cofactor_claim"]
+  - doi: "10.1016/j.biortech.2018.01.123"
+    file: "10.1016_j.biortech.2018.01.123.pdf"
+    year: 2018
+    journal: "Bioresource technology"
+    title: "Largely enhanced bioethanol production through the combined use of lignin-modified sugarcane and xylose fermenting yeast strain."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: lignin-modified sugarcane with a xylose-fermenting yeast strain - feedstock engineering, B.3.6 excluded; the pentose content is incidental to the claim."
+    flags: []
+  - doi: "10.1016/j.biortech.2018.03.081"
+    file: "10.1016_j.biortech.2018.03.081.pdf"
+    year: 2018
+    journal: "Bioresource technology"
+    title: "Improved production of isobutanol in pervaporation-coupled bioreactor using sugarcane bagasse hydrolysate in engineered Enterobacter aerogenes."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: improved isobutanol in a pervaporation-coupled bioreactor with engineered Enterobacter aerogenes on bagasse hydrolysate - an isobutanol production build with in-situ recovery."
+    flags: []
+  - doi: "10.1016/j.biortech.2018.07.150"
+    file: "10.1016_j.biortech.2018.07.150.pdf"
+    year: 2018
+    journal: "Bioresource technology"
+    title: "Elimination of biosynthetic pathways for l-valine and l-isoleucine in mitochondria enhances isobutanol production in engineered Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol+isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: elimination of mitochondrial L-valine and L-isoleucine biosynthesis enhances isobutanol in engineered S. cerevisiae; 112 'isobutanol' and 48 'S. cerevisiae' - a compartment-resolved yeast isobutanol build."
+    flags: ["strong_candidate", "compartment"]
+  - doi: "10.1016/j.biortech.2018.11.053"
+    file: "10.1016_j.biortech.2018.11.053.pdf"
+    year: 2019
+    journal: "Bioresource technology"
+    title: "Ethanol fermentation from non-detoxified lignocellulose hydrolysate by a multi-stress tolerant yeast Candida glycerinogenes mutant."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: non-detoxified lignocellulose hydrolysate with a Candida glycerinogenes mutant - hydrolysate in a non-Saccharomyces host, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2019.122104"
+    file: "10.1016_j.biortech.2019.122104.pdf"
+    year: 2019
+    journal: "Bioresource technology"
+    title: "Cell-free production of isobutanol: A completely immobilized system."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: cell-free production of isobutanol, a completely immobilised system - an in vitro isobutanol route with a defined enzyme set."
+    flags: []
+  - doi: "10.1016/j.biortech.2022.128002"
+    file: "10.1016_j.biortech.2022.128002.pdf"
+    year: 2022
+    journal: "Bioresource technology"
+    title: "Bioethanol production from microalgae biomass at high-solids loadings."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: bioethanol from microalgae biomass at high-solids loadings - feedstock and process, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2022.128079"
+    file: "10.1016_j.biortech.2022.128079.pdf"
+    year: 2022
+    journal: "Bioresource technology"
+    title: "Investigation of stress tolerance of Pichia kudriavzevii for high gravity bioethanol production from steam-exploded wheat straw hydrolysate."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: Pichia kudriavzevii stress tolerance on steam-exploded wheat straw hydrolysate - hydrolysate in a non-Saccharomyces host, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2023.129993"
+    file: "10.1016_j.biortech.2023.129993.pdf"
+    year: 2024
+    journal: "Bioresource technology"
+    title: "High titer (>100 g/L) ethanol production from pretreated corn stover hydrolysate by modified yeast strains."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E2"
+    admission_secondary: null
+    slot: "slot5_E2_industrial_strain_under_VHG"
+    basis: "title"
+    evidence: "Title: high titer, above 100 g/L, ethanol from pretreated corn stover hydrolysate by modified yeast strains - a genuine ceiling number, though measured on hydrolysate rather than a defined VHG medium."
+    flags: ["marginal"]
+  - doi: "10.1016/j.biortech.2025.132921"
+    file: "10.1016_j.biortech.2025.132921.pdf"
+    year: 2025
+    journal: "Bioresource technology"
+    title: "Engineering Saccharomyces cerevisiae for ethanol production from glycerol, xylose, acetic acid, and glucose."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol+isobutanol"
+    admission: "pentose_C5"
+    admission_secondary: "E4"
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: PsXR and PsXDH plus xylulose kinase replacing native ALD6; mitochondrial NDE1 and NDE2 replaced with an acetylating acetaldehyde dehydrogenase; above 95% theoretical ethanol from glycerol, xylose, acetate and glucose together. A four-substrate MIXED regime with explicit mitochondrial NADH-routing surgery."
+    flags: ["strong_candidate", "nde1_nde2"]
+  - doi: "10.1016/j.biortech.2025.133155"
+    file: "10.1016_j.biortech.2025.133155.pdf"
+    year: 2025
+    journal: "Bioresource technology"
+    title: "Evaluation of the application effect of surface immobilization technology on fuel ethanol production at industrial scale."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: surface immobilisation technology applied to fuel ethanol at industrial scale - process engineering, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2026.134191"
+    file: "10.1016_j.biortech.2026.134191.pdf"
+    year: 2026
+    journal: "Bioresource technology"
+    title: "Engineering stress tolerance in Saccharomyces cerevisiae by overexpressing PIR3 and SPI1 for efficient ethanol production from high-concentration sugarcane mola"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: "E2"
+    slot: null
+    basis: "title"
+    evidence: "Title: overexpressing PIR3 and SPI1 for stress tolerance and ethanol from high-concentration sugarcane molasses - two named cell-wall stress genes with a high-gravity performance readout."
+    flags: []
+  - doi: "10.1016/j.biortech.2026.134456"
+    file: "10.1016_j.biortech.2026.134456.pdf"
+    year: 2026
+    journal: "Bioresource technology"
+    title: "Adaptive evolution of thermotolerant xylose-utilizing Saccharomyces cerevisiae for lignocellulosic ethanol production via high-temperature simultaneous sacchari"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: "pentose_C5"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: adaptive evolution of thermotolerant xylose-utilising yeast for high-temperature SSF - SSF framing puts it outside B.3.6, though 108 'xylose' and the full PPP set make it a borderline pentose record."
+    flags: ["borderline"]
+  - doi: "10.1016/j.biortech.2026.135490"
+    file: "10.1016_j.biortech.2026.135490.pdf"
+    year: 2026
+    journal: "Bioresource technology"
+    title: "Efficient high-temperature simultaneous saccharification and fermentation of lignocellulosic substrates enabled by engineering thermotolerance in an enzyme-secr"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: high-temperature SSF enabled by engineering thermotolerance in an enzyme-secreting strain - SSF and CBP, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biortech.2026.135679"
+    file: "10.1016_j.biortech.2026.135679.pdf"
+    year: 2026
+    journal: "Bioresource technology"
+    title: "Enhanced cellulosic ethanol production by increasing p-benzoquinone tolerance of Saccharomyces cerevisiae in adaptive evolution."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: increasing p-benzoquinone tolerance by adaptive evolution for cellulosic ethanol - hydrolysate-inhibitor tolerance, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.biotechadv.2007.09.002"
+    file: "10.1016_j.biotechadv.2007.09.002.pdf"
+    year: 2008
+    journal: "Biotechnology advances"
+    title: "Ethanol fermentation technologies from sugar and starch feedstocks."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E2"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: review of ethanol fermentation technologies from sugar and starch feedstocks - a process review carrying industrial performance ranges, useful as calibration background rather than as a record."
+    flags: ["marginal", "review"]
+  - doi: "10.1016/j.carbpol.2017.01.090"
+    file: "10.1016_j.carbpol.2017.01.090.pdf"
+    year: 2017
+    journal: "Carbohydrate polymers"
+    title: "Production of bioethanol from pre-treated cotton fabrics and waste cotton materials."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: bioethanol from pre-treated cotton fabrics and waste cotton materials - feedstock and pretreatment, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.cbpa.2013.03.036"
+    file: "10.1016_j.cbpa.2013.03.036.pdf"
+    year: 2013
+    journal: "Current opinion in chemical biology"
+    title: "Advanced biofuel production by the yeast Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: advanced biofuel production by the yeast S. cerevisiae; 38 'isobutanol' and 49 'S. cerevisiae' - a primary-tier yeast review."
+    flags: ["review"]
+  - doi: "10.1016/j.cels.2019.10.006"
+    file: "10.1016_j.cels.2019.10.006.pdf"
+    year: 2019
+    journal: "Cell systems"
+    title: "Critical Roles of the Pentose Phosphate Pathway and GLN3 in Isobutanol-Specific Tolerance in Yeast."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E4"
+    db_product_tier: "ethanol+isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "E4"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: critical roles of the pentose phosphate pathway and GLN3 in isobutanol-SPECIFIC tolerance in yeast; 255 'isobutanol'. Isobutanol-specific tolerance is precisely the direct C4 evidence that lifts E4's L3 transfer cap, and the PPP link ties it to B.3.6's pentose amendment."
+    flags: ["landmark", "breaks_L3_cap", "ppp", "tests_isobutanol"]
+  - doi: "10.1016/j.cels.2020.01.005"
+    file: "10.1016_j.cels.2020.01.005.pdf"
+    year: 2020
+    journal: "Cell systems"
+    title: "Evaluation of Kuroda et al.: Insight into Yeast Isobutanol Tolerance with Advances Still Needed."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: a one-page evaluation of Kuroda et al. on yeast isobutanol tolerance - commentary that pairs with 10.1016/j.cels.2019.10.006, of low standalone value."
+    flags: ["commentary_only"]
+  - doi: "10.1016/j.copbio.2014.09.004"
+    file: "10.1016_j.copbio.2014.09.004.pdf"
+    year: 2015
+    journal: "Current opinion in biotechnology"
+    title: "Metabolic engineering of Saccharomyces cerevisiae for production of butanol isomers."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "adjacent_higher_alcohol"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: metabolic engineering of S. cerevisiae for production of butanol isomers; 41 'isobutanol' and 46 'S. cerevisiae' - covers isobutanol together with its adjacent isomers."
+    flags: ["review"]
+  - doi: "10.1016/j.enzmictec.2010.10.008"
+    file: "10.1016_j.enzmictec.2010.10.008.pdf"
+    year: 2011
+    journal: "Enzyme and microbial technology"
+    title: "Expression of aspartic protease from Neurospora crassa in industrial ethanol-producing yeast and its application in ethanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: aspartic protease from Neurospora crassa expressed in industrial ethanol yeast - a process-enzyme application, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.enzmictec.2012.07.003"
+    file: "10.1016_j.enzmictec.2012.07.003.pdf"
+    year: 2012
+    journal: "Enzyme and microbial technology"
+    title: "Increased ethanol production from glycerol by Saccharomyces cerevisiae strains with enhanced stress tolerance from the overexpression of SAGA complex components"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: increased ethanol from glycerol with enhanced stress tolerance from overexpressing SAGA complex components - a named chromatin-complex tolerance mechanism on a redox-relevant substrate."
+    flags: []
+  - doi: "10.1016/j.enzmictec.2026.110838"
+    file: "10.1016_j.enzmictec.2026.110838.pdf"
+    year: 2026
+    journal: "Enzyme and microbial technology"
+    title: "Improving isobutanol and 2-ketoisovalerate production by reducing by-product synthesis in Klebsiella pneumoniae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: improving isobutanol and 2-ketoisovalerate production by reducing by-product synthesis in Klebsiella pneumoniae; 104 'isobutanol' - a primary build with explicit KIV-node accounting."
+    flags: []
+  - doi: "10.1016/j.fgb.2024.103914"
+    file: "10.1016_j.fgb.2024.103914.pdf"
+    year: 2024
+    journal: "Fungal genetics and biology : FG & B"
+    title: "Differential impacts of furfural and acetic acid on the bioenergetics and fermentation performance of Scheffersomyces stipitis."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: differential impacts of furfural and acetic acid on bioenergetics of Scheffersomyces stipitis - inhibitor bioenergetics in a non-Saccharomyces host with no cytosol-to-matrix redox route. B.3.5 explicitly refuses general bioenergetics under E5, which is how the database has it tagged."
+    flags: ["db_mistag_E5"]
+  - doi: "10.1016/j.fm.2023.104288"
+    file: "10.1016_j.fm.2023.104288.pdf"
+    year: 2023
+    journal: "Food microbiology"
+    title: "Bioactive dipeptides enhance the tolerance of lager yeast to ethanol-oxidation cross-stress by regulating the multilevel defense system."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: eleven bioactive dipeptides raise lager-yeast tolerance to ethanol-oxidation cross-stress, regulating GPD1, OLE1, SOD2, PEX11, CTT1 and HSP12 - a real ethanol-stress mechanism, but delivered by medium supplementation in lager yeast rather than S. cerevisiae genetics."
+    flags: ["marginal", "non_cerevisiae"]
+  - doi: "10.1016/j.jbiosc.2009.03.019"
+    file: "10.1016_j.jbiosc.2009.03.019.pdf"
+    year: 2009
+    journal: "Journal of bioscience and bioengineering"
+    title: "Ethanol-tolerant Saccharomyces cerevisiae strains isolated under selective conditions by over-expression of a proofreading-deficient DNA polymerase delta."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: null
+    slot: "slot7_E6_genetic_basis_of_industrial_performance"
+    basis: "title"
+    evidence: "Title: ethanol-tolerant strains isolated under selective conditions by over-expressing a proofreading-deficient DNA polymerase delta - mutagenesis-driven strain-improvement genetics."
+    flags: ["marginal"]
+  - doi: "10.1016/j.jbiosc.2010.02.003"
+    file: "10.1016_j.jbiosc.2010.02.003.pdf"
+    year: 2010
+    journal: "Journal of bioscience and bioengineering"
+    title: "Strategy for simultaneous saccharification and fermentation using a respiratory-deficient mutant of Candida glabrata for bioethanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: a two-page NOTE on SSF with a respiratory-deficient Candida glabrata mutant for thermotolerant SSF. SSF in a non-Saccharomyces host, B.3.6 excluded; the database tags E5 on the phrase 'respiratory-deficient' alone."
+    flags: ["db_mistag_E5"]
+  - doi: "10.1016/j.jbiosc.2011.12.015"
+    file: "10.1016_j.jbiosc.2011.12.015.pdf"
+    year: 2012
+    journal: "Journal of bioscience and bioengineering"
+    title: "Ethanol yield and volatile compound content in fermentation of agave must by Kluyveromyces marxianus UMPe-1 comparing with Saccharomyces cerevisiae baker's yeas"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: ethanol yield and volatile compound content in agave must by K. marxianus versus baker's yeast - fusel alcohols are reported, but with no isobutanol build in the same experiment the adjacent tier's admission test in B.1 is not met."
+    flags: []
+  - doi: "10.1016/j.jbiosc.2012.02.029"
+    file: "10.1016_j.jbiosc.2012.02.029.pdf"
+    year: 2012
+    journal: "Journal of bioscience and bioengineering"
+    title: "A new carbon catabolite repression mutation of Escherichia coli, mlc∗, and its use for producing isobutanol."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "pentose_C5"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: a new carbon catabolite repression mutation of E. coli, mlc*, and its use for producing isobutanol - carbon catabolite repression is B.3.6's named glucose-repression area, here inside an isobutanol build."
+    flags: ["glucose_repression"]
+  - doi: "10.1016/j.jbiosc.2014.04.016"
+    file: "10.1016_j.jbiosc.2014.04.016.pdf"
+    year: 2014
+    journal: "Journal of bioscience and bioengineering"
+    title: "Creation of an ethanol-tolerant Saccharomyces cerevisiae strain by 266 nm laser radiation and repetitive cultivation."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: ethanol-tolerant strain created by 266 nm laser radiation and repetitive cultivation - undirected mutagenesis with no mechanism delivered, B.3.6 screening exclusion."
+    flags: []
+  - doi: "10.1016/j.jbiosc.2015.09.006"
+    file: "10.1016_j.jbiosc.2015.09.006.pdf"
+    year: 2016
+    journal: "Journal of bioscience and bioengineering"
+    title: "Screening of natural yeast isolates under the effects of stresses associated with second-generation biofuel production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3+E5"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: screening of natural yeast isolates under second-generation biofuel stresses - a biodiversity and screening survey, excluded by name in B.3.6."
+    flags: ["db_mistag_E5"]
+  - doi: "10.1016/j.jbiosc.2015.10.012"
+    file: "10.1016_j.jbiosc.2015.10.012.pdf"
+    year: 2016
+    journal: "Journal of bioscience and bioengineering"
+    title: "Improved stress resistance and ethanol production by segmental haploidization of the diploid genome in Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E6"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: null
+    slot: "slot7_E6_genetic_basis_of_industrial_performance"
+    basis: "title"
+    evidence: "Title: improved stress resistance and ethanol production by segmental haploidization of the diploid genome - ploidy architecture offered as the cause of an industrial performance trait."
+    flags: ["ploidy"]
+  - doi: "10.1016/j.jbiosc.2015.10.013"
+    file: "10.1016_j.jbiosc.2015.10.013.pdf"
+    year: 2016
+    journal: "Journal of bioscience and bioengineering"
+    title: "Functional expression of xylose isomerase in flocculating industrial Saccharomyces cerevisiae strain for bioethanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: functional expression of xylose isomerase in a flocculating industrial S. cerevisiae strain; 133 'xylose' plus XKS1/TAL1/TKL1 - the XI route carried into an industrial background."
+    flags: []
+  - doi: "10.1016/j.jbiosc.2016.04.012"
+    file: "10.1016_j.jbiosc.2016.04.012.pdf"
+    year: 2016
+    journal: "Journal of bioscience and bioengineering"
+    title: "Optimization of prehydrolysis time and substrate feeding to improve ethanol production by simultaneous saccharification and fermentation of furfural process res"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: optimisation of prehydrolysis time and substrate feeding for SSF of furfural process residue - SSF process optimisation, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.jbiosc.2017.01.010"
+    file: "10.1016_j.jbiosc.2017.01.010.pdf"
+    year: 2017
+    journal: "Journal of bioscience and bioengineering"
+    title: "Corrigendum to \"Experimental evolution and gene knockout studies reveal AcrA-mediated isobutanol tolerance in Ralstonia eutropha\" [J Biosci Bioeng 122 (2016) 64"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: a one-page CORRIGENDUM to a paper on AcrA-mediated isobutanol tolerance in Ralstonia eutropha. The corrigendum is present; the article it corrects is not in this corpus."
+    flags: ["corrigendum_only"]
+  - doi: "10.1016/j.jbiosc.2017.04.005"
+    file: "10.1016_j.jbiosc.2017.04.005.pdf"
+    year: 2017
+    journal: "Journal of bioscience and bioengineering"
+    title: "Heterologous expression of bacterial phosphoenol pyruvate carboxylase and Entner-Doudoroff pathway in Saccharomyces cerevisiae for improvement of isobutanol pro"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: heterologous bacterial PEP carboxylase and Entner-Doudoroff pathway in S. cerevisiae to improve isobutanol; 38 'isobutanol' and 61 'S. cerevisiae' - a yeast build acting on cofactor and carbon supply."
+    flags: []
+  - doi: "10.1016/j.jbiosc.2017.04.012"
+    file: "10.1016_j.jbiosc.2017.04.012.pdf"
+    year: 2017
+    journal: "Journal of bioscience and bioengineering"
+    title: "In vivo evolutionary engineering for ethanol-tolerance of Saccharomyces cerevisiae haploid cells triggers diploidization."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: "E6"
+    slot: "slot4_E4_ethanol_stress_adapted_growth"
+    basis: "title"
+    evidence: "Title: in vivo evolutionary engineering for ethanol tolerance of haploid cells triggers diploidization - chronic selection under ethanol, where the mechanism recovered is a ploidy change."
+    flags: ["ploidy"]
+  - doi: "10.1016/j.jbiosc.2019.03.009"
+    file: "10.1016_j.jbiosc.2019.03.009.pdf"
+    year: 2019
+    journal: "Journal of bioscience and bioengineering"
+    title: "Establishment of a transient CRISPR-Cas9 genome editing system in Candida glycerinogenes for co-production of ethanol and xylonic acid."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E6"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: transient CRISPR-Cas9 genome editing in Candida glycerinogenes for co-production of ethanol and xylonic acid - a genome-editing tool paper in a non-Saccharomyces host."
+    flags: []
+  - doi: "10.1016/j.jbiotec.2004.01.017"
+    file: "10.1016_j.jbiotec.2004.01.017.pdf"
+    year: 2004
+    journal: "Journal of biotechnology"
+    title: "Continuous ethanol production and evaluation of yeast cell lysis and viability loss under very high gravity medium conditions."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E2"
+    admission_secondary: null
+    slot: "slot5_E2_industrial_strain_under_VHG"
+    basis: "title"
+    evidence: "Title: continuous ethanol production with evaluation of yeast cell lysis and viability loss under very high gravity - VHG performance with the viability cost recorded alongside it."
+    flags: []
+  - doi: "10.1016/j.jbiotec.2007.04.019"
+    file: "10.1016_j.jbiotec.2007.04.019.pdf"
+    year: 2007
+    journal: "Journal of biotechnology"
+    title: "Ethanol production from xylose by recombinant Saccharomyces cerevisiae expressing protein engineered NADP+-dependent xylitol dehydrogenase."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: ethanol from xylose by recombinant S. cerevisiae expressing protein-engineered NADP+-dependent xylitol dehydrogenase - a deliberate XDH cofactor switch, the redox claim B.3.6 says must be recorded."
+    flags: ["cofactor_claim"]
+  - doi: "10.1016/j.jbiotec.2007.05.010"
+    file: "10.1016_j.jbiotec.2007.05.010.pdf"
+    year: 2007
+    journal: "Journal of biotechnology"
+    title: "Identification of target genes conferring ethanol stress tolerance to Saccharomyces cerevisiae based on DNA microarray data analysis."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: "slot4_E4_ethanol_stress_adapted_growth"
+    basis: "abstract_read"
+    evidence: "Abstract: DNA microarray profiles of a laboratory and a sake strain in 5% v/v ethanol, with knockout validation; tryptophan biosynthesis overexpression and tryptophan permease confer tolerance. Growth under sustained ethanol, carrying transcriptome data."
+    flags: ["strong_candidate", "transcriptome"]
+  - doi: "10.1016/j.jbiotec.2010.02.009"
+    file: "10.1016_j.jbiotec.2010.02.009.pdf"
+    year: 2010
+    journal: "Journal of biotechnology"
+    title: "Thermodynamic analysis of fermentation and anaerobic growth of baker's yeast for ethanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E3"
+    admission_secondary: null
+    slot: "slot1_E3_anaerobic_vs_aerobic_reference_physiology"
+    basis: "title"
+    evidence: "Title: thermodynamic analysis of fermentation and anaerobic growth of baker's yeast for ethanol production - baseline anaerobic physiology at the energy- and carbon-balance standard slot 1 asks for."
+    flags: ["strong_candidate"]
+  - doi: "10.1016/j.jbiotec.2010.06.006"
+    file: "10.1016_j.jbiotec.2010.06.006.pdf"
+    year: 2010
+    journal: "Journal of biotechnology"
+    title: "Identification of gene targets eliciting improved alcohol tolerance in Saccharomyces cerevisiae through inverse metabolic engineering."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E4"
+    db_product_tier: "ethanol+isobutanol"
+    admission: "E4"
+    admission_secondary: "isobutanol_primary"
+    slot: "slot4_E4_ethanol_stress_adapted_growth"
+    basis: "abstract_read"
+    evidence: "Abstract: transformants enriched by serial subculture in 1% iso-butanol; INO1, DOG1, HAL1 and a truncated MSN2 raise tolerance to BOTH iso-butanol and ethanol, with INO1 giving higher titers and a threefold growth-rate gain under 10% glucose and 5% ethanol. Chronic-exposure selection in which the C4 transfer is measured, not argued."
+    flags: ["strong_candidate", "breaks_L3_cap", "tests_isobutanol"]
+  - doi: "10.1016/j.jbiotec.2011.06.005"
+    file: "10.1016_j.jbiotec.2011.06.005.pdf"
+    year: 2012
+    journal: "Journal of biotechnology"
+    title: "Effects of NADH-preferring xylose reductase expression on ethanol production from xylose in xylose-metabolizing recombinant Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: effects of NADH-preferring xylose reductase expression on ethanol from xylose; 157 'xylose' with XKS1/TAL1/TKL1 - the XR half of the XR/XDH cofactor imbalance B.3.6 names."
+    flags: ["cofactor_claim"]
+  - doi: "10.1016/j.jbiotec.2012.01.022"
+    file: "10.1016_j.jbiotec.2012.01.022.pdf"
+    year: 2012
+    journal: "Journal of biotechnology"
+    title: "Genetic engineering to enhance the Ehrlich pathway and alter carbon flux for increased isobutanol production from glucose by Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E4"
+    db_product_tier: "ethanol+isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: enhancing the Ehrlich pathway and altering carbon flux for isobutanol from glucose in S. cerevisiae; 65 'isobutanol' and 50 'S. cerevisiae'. Its single ADH3 mention records that Adh3 was EXCLUDED from the ADH candidate screen - a negative datum on the E5 enzyme."
+    flags: ["adh3_negative"]
+  - doi: "10.1016/j.jbiotec.2016.05.028"
+    file: "10.1016_j.jbiotec.2016.05.028.pdf"
+    year: 2016
+    journal: "Journal of biotechnology"
+    title: "Mating type and ploidy effect on the β-glucosidase activity and ethanol-producing performance of Saccharomyces cerevisiae with multiple δ-integrated bgl1 gene."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: mating type and ploidy effect on beta-glucosidase activity and ethanol performance with multiple delta-integrated bgl1 - ploidy as a determinant of performance, though wrapped inside a CBP build."
+    flags: ["marginal", "ploidy"]
+  - doi: "10.1016/j.jbiotec.2016.07.004"
+    file: "10.1016_j.jbiotec.2016.07.004.pdf"
+    year: 2016
+    journal: "Journal of biotechnology"
+    title: "Bioethanol production by reusable Saccharomyces cerevisiae immobilized in a macroporous monolithic hydrogel matrices."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: reusable yeast immobilised in macroporous monolithic hydrogel matrices - immobilisation process engineering, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.jbiotec.2020.06.017"
+    file: "10.1016_j.jbiotec.2020.06.017.pdf"
+    year: 2020
+    journal: "Journal of biotechnology"
+    title: "Enhanced isobutanol production by co-production of polyhydroxybutyrate and cofactor engineering."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: enhanced isobutanol by co-production of polyhydroxybutyrate and cofactor engineering; 87 'isobutanol' - a primary build whose lever is cofactor supply."
+    flags: ["cofactor_claim"]
+  - doi: "10.1016/j.jbiotec.2021.03.012"
+    file: "10.1016_j.jbiotec.2021.03.012.pdf"
+    year: 2021
+    journal: "Journal of biotechnology"
+    title: "Very high gravity ethanol fermentation from sweet sorghum stem juice using a stirred tank bioreactor coupled with a column bioreactor."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: VHG fermentation from sweet sorghum stem juice in a stirred tank coupled to a column bioreactor - reactor configuration, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.jbiotec.2022.09.012"
+    file: "10.1016_j.jbiotec.2022.09.012.pdf"
+    year: 2022
+    journal: "Journal of biotechnology"
+    title: "Controlling catabolite repression for isobutanol production using glucose and xylose by overexpressing the xylose regulator."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "pentose_C5"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: controlling catabolite repression for isobutanol production using glucose AND xylose by overexpressing the xylose regulator; 89 'isobutanol' and 90 'xylose', with glucose repression throughout. This is the C6-to-C5 handover B.3.6 calls a designed component, realised inside an isobutanol build."
+    flags: ["landmark_for_duet", "glucose_repression", "c6_c5_handover", "strong_candidate"]
+  - doi: "10.1016/j.jbiotec.2023.03.012"
+    file: "10.1016_j.jbiotec.2023.03.012.pdf"
+    year: 2023
+    journal: "Journal of biotechnology"
+    title: "Strategy for efficiently utilizing Escherichia coli cells producing isobutanol by combining isobutanol and indigo production systems."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: combining isobutanol and indigo production systems in E. coli; 124 'isobutanol' - a primary build with by-product partitioning."
+    flags: []
+  - doi: "10.1016/j.jbiotec.2024.07.014"
+    file: "10.1016_j.jbiotec.2024.07.014.pdf"
+    year: 2024
+    journal: "Journal of biotechnology"
+    title: "Employment of light-inducible promoter in genetically engineered cyanobacteria for photosynthetic isobutanol production with simulated diurnal sunlight and CO(2"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: light-inducible promoter in engineered cyanobacteria for photosynthetic isobutanol under simulated diurnal sunlight and CO2; 86 'isobutanol'."
+    flags: []
+  - doi: "10.1016/j.jprot.2019.103377"
+    file: "10.1016_j.jprot.2019.103377.pdf"
+    year: 2019
+    journal: "Journal of proteomics"
+    title: "Integrated transcriptomic and proteomic analysis of the ethanol stress response in Saccharomyces cerevisiae Sc131."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: "slot3_E4_ethanol_stress_acute_shock"
+    basis: "abstract_read"
+    evidence: "Abstract: 4 h of 10% v/v ethanol on strain Sc131 with RNA-seq plus iTRAQ; 937 differentially expressed genes and 457 proteins, mitochondria and ER implicated, tryptophan again. A short-exposure design carrying paired transcriptome and proteome."
+    flags: ["strong_candidate", "transcriptome", "proteome", "db_mistag_E5"]
+  - doi: "10.1016/j.scitotenv.2022.157302"
+    file: "10.1016_j.scitotenv.2022.157302.pdf"
+    year: 2022
+    journal: "The Science of the total environment"
+    title: "Bioethanol production from expired cookies and economic analysis for practical application."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: bioethanol from expired cookies with economic analysis - waste feedstock plus process economics, B.3.6 excluded."
+    flags: []
+  - doi: "10.1016/j.ymben.2005.09.007"
+    file: "10.1016_j.ymben.2005.09.007.pdf"
+    year: 2006
+    journal: "Metabolic engineering"
+    title: "In silico aided metabolic engineering of Saccharomyces cerevisiae for improved bioethanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E6"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: in silico aided metabolic engineering for improved bioethanol. Its strategy table enumerates an inserted NADH kinase, NADH + ATP to NADPH + ADP, alongside a transhydrogenase - an in silico redox-rebalancing survey, not a measurement."
+    flags: ["in_silico", "nadh_kinase_in_model"]
+  - doi: "10.1016/j.ymben.2010.11.003"
+    file: "10.1016_j.ymben.2010.11.003.pdf"
+    year: 2011
+    journal: "Metabolic engineering"
+    title: "Minimization of glycerol synthesis in industrial ethanol yeast without influencing its fermentation performance."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: "E1"
+    slot: null
+    basis: "title"
+    evidence: "Title: minimisation of glycerol synthesis in industrial ethanol yeast without influencing fermentation performance - the GPD1/GPD2 glycerol branch B.3.1 names as the compensating NADH sink, engineered and measured."
+    flags: ["glycerol_redox", "closest_to_E1"]
+  - doi: "10.1016/j.ymben.2011.02.004"
+    file: "10.1016_j.ymben.2011.02.004.pdf"
+    year: 2011
+    journal: "Metabolic engineering"
+    title: "Engineered ketol-acid reductoisomerase and alcohol dehydrogenase enable anaerobic 2-methylpropan-1-ol production at theoretical yield in Escherichia coli."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: engineered ketol-acid reductoisomerase AND alcohol dehydrogenase enable anaerobic 2-methylpropan-1-ol at theoretical yield in E. coli. This is the NADH-preferring KARI variant PLAN.md B.3.5 names as the highest-priority de-risking part under G.6."
+    flags: ["landmark", "named_by_plan", "kari_part", "nadh_preferring_kari", "strong_candidate"]
+  - doi: "10.1016/j.ymben.2011.08.004"
+    file: "10.1016_j.ymben.2011.08.004.pdf"
+    year: 2011
+    journal: "Metabolic engineering"
+    title: "An evolutionary strategy for isobutanol production strain development in Escherichia coli."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: an evolutionary strategy for isobutanol production strain development in E. coli; 82 'isobutanol'."
+    flags: []
+  - doi: "10.1016/j.ymben.2011.09.005"
+    file: "10.1016_j.ymben.2011.09.005.pdf"
+    year: 2011
+    journal: "Metabolic engineering"
+    title: "Engineering topology and kinetics of sucrose metabolism in Saccharomyces cerevisiae for improved ethanol yield."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E3"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: engineering topology and kinetics of sucrose metabolism for improved ethanol yield - pathway topology and yield accounting on a defined substrate."
+    flags: ["marginal"]
+  - doi: "10.1016/j.ymben.2011.12.001"
+    file: "10.1016_j.ymben.2011.12.001.pdf"
+    year: 2012
+    journal: "Metabolic engineering"
+    title: "Improvement of xylose fermentation in respiratory-deficient xylose-fermenting Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: "E4"
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: an XR/XDH strain with non-oxidative PPP overproduction, cytochrome c oxidase subunit IV deleted to remove respiration, then adaptive evolution with an NADP+-preferring XDH mutant. Keywords name the non-oxidative pentose phosphate pathway, coenzyme redox balance and adaptive evolution; the evolved strain accumulates rather than recycles ethanol even aerobically."
+    flags: ["strong_candidate", "cofactor_claim", "respiration_deleted"]
+  - doi: "10.1016/j.ymben.2012.11.008"
+    file: "10.1016_j.ymben.2012.11.008.pdf"
+    year: 2013
+    journal: "Metabolic engineering"
+    title: "Activating transhydrogenase and NAD kinase in combination for improving isobutanol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: activating transhydrogenase and NAD kinase in combination for improving isobutanol production. NAD kinase is the same enzyme class as Pos5, tested here as an NADPH-supply lever for an isobutanol pathway, though in a bacterial host and cytosolic."
+    flags: ["strong_candidate", "nad_kinase", "pos5_analogue"]
+  - doi: "10.1016/j.ymben.2014.03.006"
+    file: "10.1016_j.ymben.2014.03.006.pdf"
+    year: 2014
+    journal: "Metabolic engineering"
+    title: "Isobutanol production at elevated temperatures in thermophilic Geobacillus thermoglucosidasius."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: isobutanol production at elevated temperatures in thermophilic Geobacillus thermoglucosidasius; 78 'isobutanol'."
+    flags: []
+  - doi: "10.1016/j.ymben.2014.07.007"
+    file: "10.1016_j.ymben.2014.07.007.pdf"
+    year: 2014
+    journal: "Metabolic engineering"
+    title: "Metabolic engineering for higher alcohol production."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "adjacent_higher_alcohol"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: metabolic engineering for higher alcohol production; 33 'isobutanol' - a review spanning isobutanol and the adjacent alcohols whose ratios B.1 calls diagnostic of decarboxylase specificity."
+    flags: ["review"]
+  - doi: "10.1016/j.ymben.2017.02.006"
+    file: "10.1016_j.ymben.2017.02.006.pdf"
+    year: 2017
+    journal: "Metabolic engineering"
+    title: "Metabolic engineering of a haploid strain derived from a triploid industrial yeast for producing cellulosic ethanol."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: "pentose_C5"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: metabolic engineering of a haploid derived from a TRIPLOID industrial yeast for cellulosic ethanol; 102 'xylose'. Ploidy reduction as a route to a tractable industrial background."
+    flags: ["ploidy"]
+  - doi: "10.1016/j.ymben.2017.07.003"
+    file: "10.1016_j.ymben.2017.07.003.pdf"
+    year: 2017
+    journal: "Metabolic engineering"
+    title: "Isobutanol and 2-ketoisovalerate production by Klebsiella pneumoniae via a native pathway."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: isobutanol and 2-ketoisovalerate production by Klebsiella pneumoniae via a NATIVE pathway; 149 'isobutanol' - a native-route build with KIV accounting."
+    flags: []
+  - doi: "10.1016/j.ymben.2017.10.001"
+    file: "10.1016_j.ymben.2017.10.001.pdf"
+    year: 2017
+    journal: "Metabolic engineering"
+    title: "Uncovering the role of branched-chain amino acid transaminases in Saccharomyces cerevisiae isobutanol biosynthesis."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: uncovering the role of branched-chain amino acid transaminases in S. cerevisiae isobutanol biosynthesis; 168 'isobutanol' and 35 'S. cerevisiae'. Bat1 and Bat2 are the mitochondrial and cytosolic transaminase pair, making this compartment-resolved yeast isobutanol."
+    flags: ["landmark", "compartment", "strong_candidate"]
+  - doi: "10.1016/j.ymben.2019.08.015"
+    file: "10.1016_j.ymben.2019.08.015.pdf"
+    year: 2019
+    journal: "Metabolic engineering"
+    title: "Engineering transcription factor BmoR for screening butanol overproducers."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: "adjacent_higher_alcohol"
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: engineering transcription factor BmoR for screening butanol overproducers - a biosensor part for higher-alcohol screening."
+    flags: ["part_biosensor"]
+  - doi: "10.1016/j.ymben.2020.01.004"
+    file: "10.1016_j.ymben.2020.01.004.pdf"
+    year: 2020
+    journal: "Metabolic engineering"
+    title: "Isobutanol production in Corynebacterium glutamicum: Suppressed succinate by-production by pckA inactivation and enhanced productivity via the Entner-Doudoroff "
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: isobutanol in Corynebacterium glutamicum with pckA inactivation and an enhanced Entner-Doudoroff pathway; 36 'isobutanol'."
+    flags: []
+  - doi: "10.1016/j.ymben.2020.04.002"
+    file: "10.1016_j.ymben.2020.04.002.pdf"
+    year: 2020
+    journal: "Metabolic engineering"
+    title: "Corrigendum to \"Uncovering the role of branched-chain amino acid transaminases in Saccharomyces cerevisiae isobutanol biosynthesis\" [Metab. Eng. 44 (2017) 302-3"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: null
+    db_product_tier: "isobutanol"
+    admission: "isobutanol_primary"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: a one-page CORRIGENDUM to the branched-chain amino acid transaminase paper, Metab. Eng. 44 (2017) 302. It pairs with 10.1016/j.ymben.2017.10.001, which is also in this corpus."
+    flags: ["corrigendum_only"]
+  - doi: "10.1016/j.ymben.2020.06.003"
+    file: "10.1016_j.ymben.2020.06.003.pdf"
+    year: 2020
+    journal: "Metabolic engineering"
+    title: "Stress-driven dynamic regulation of multiple tolerance genes improves robustness and productive capacity of Saccharomyces cerevisiae in industrial lignocellulos"
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: "pentose_C5"
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: glutathione biosynthesis and acetic-acid degradation strengthened under stress-driven promoters discovered from the transcriptome, giving dynamic feedback control of ROS in a xylose-fermenting strain, with 49.5% and 17.5% higher productivity at 36 C. A designed stress-sensing circuit, the kind of programmed switching B.3.6 now treats as program literature."
+    flags: ["strong_candidate", "dynamic_regulation", "db_mistag_E2"]
+  - doi: "10.1016/j.ymben.2023.06.009"
+    file: "10.1016_j.ymben.2023.06.009.pdf"
+    year: 2023
+    journal: "Metabolic engineering"
+    title: "Consolidated bioprocessing for bioethanol production by metabolically engineered cellulolytic fungus Myceliophthora thermophila."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: consolidated bioprocessing by engineered Myceliophthora thermophila - CBP in a filamentous fungus, B.3.6 excluded. Its 'mitochondrial NADH shuttle' hits are knockouts made to BLOCK the shuttle in a non-yeast host, so they are a contrast case rather than an E5 record."
+    flags: ["db_mistag_E5", "shuttle_blocked_contrast"]
+  - doi: "10.1016/s1389-1723(00)80087-0"
+    file: "10.1016_s1389-1723_00_80087-0.pdf"
+    year: 2000
+    journal: "Journal of bioscience and bioengineering"
+    title: "Tolerance mechanism of the ethanol-tolerant mutant of sake yeast."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E6"
+    db_product_tier: "ethanol"
+    admission: "out_of_scope"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "PDF CONTENT MISMATCH: the file holds J Biol Chem 266:17537-17544 (1991), Kondo and Inouye on the TIP1 cold-shock-inducible gene, not the sake-yeast ethanol-tolerance paper the DOI names."
+    flags: ["content_mismatch"]
+  - doi: "10.1016/s1567-1356(03)00146-6"
+    file: "10.1016_s1567-1356_03_00146-6.pdf"
+    year: 2003
+    journal: "FEMS yeast research"
+    title: "Xylose and cellobiose fermentation to ethanol by the thermotolerant methylotrophic yeast Hansenula polymorpha."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E3"
+    db_product_tier: "ethanol"
+    admission: "pentose_C5"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: xylose and cellobiose fermentation by the thermotolerant methylotrophic yeast Hansenula polymorpha; 74 'xylose' plus arabinose - a non-Saccharomyces pentose route, admitted at the lower depth B.3.6 sets for non-core hosts."
+    flags: ["non_cerevisiae"]
+  - doi: "10.1128/aem.00268-21"
+    file: "10.1128_aem.00268-21.pdf"
+    year: 2021
+    journal: "Applied and environmental microbiology"
+    title: "Efficient Conversion of Glycerol to Ethanol by an Engineered Saccharomyces cerevisiae Strain."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E4"
+    admission_secondary: null
+    slot: null
+    basis: "title+fulltext_term_scan"
+    evidence: "Title: efficient conversion of glycerol to ethanol by an engineered S. cerevisiae strain. Its only mitochondrial-NADH mention is a citation to Asskamp on Nde1 in glycerol metabolism, so this is substrate-expansion redox work, not a shuttle measurement."
+    flags: ["marginal", "preprint_version"]
+  - doi: "10.1128/aem.02068-21"
+    file: "10.1128_aem.02068-21.pdf"
+    year: 2022
+    journal: "Applied and environmental microbiology"
+    title: "Blocking Mitophagy Does Not Significantly Improve Fuel Ethanol Production in Bioethanol Yeast Saccharomyces cerevisiae."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E5"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: null
+    slot: null
+    basis: "abstract_read"
+    evidence: "Abstract: blocking mitophagy does NOT improve fuel ethanol production in bioethanol yeast on mineral medium - a null result on an industrial strain. Mitophagy is organelle turnover, not a cytosol-to-matrix redox route, so B.3.5 refuses it under E5 where the database has it tagged."
+    flags: ["null_result", "preprint_version", "db_mistag_E5", "title_changed_on_publication"]
+  - doi: "10.2323/jgam.44.347"
+    file: "10.2323_jgam.44.347.pdf"
+    year: 1998
+    journal: "The Journal of general and applied microbiology"
+    title: "Breeding of flocculent industrial alcohol yeast strains by self-cloning of the flocculation gene FLO1 and repeated-batch fermentation by transformants."
+    already_in_corpus: yes            # publication row + screening_record already exist
+    fulltext_already_stored: no       # no fulltext_asset with storage_state='stored_fulltext'
+    in_manual_download_queue: yes
+    db_admitted_criterion: "E2"
+    db_product_tier: "ethanol"
+    admission: "E6"
+    admission_secondary: null
+    slot: null
+    basis: "title"
+    evidence: "Title: breeding flocculent industrial alcohol yeast by self-cloning the FLO1 flocculation gene with repeated-batch fermentation - industrial-strain genetics, though flocculation is a process trait rather than a performance mechanism."
+    flags: ["marginal"]
