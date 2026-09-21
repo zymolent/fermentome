@@ -27,6 +27,9 @@ What is here:
   the sentence it came from read back out of the document.
 * :mod:`~fermdb.query.genes` -- one gene, its pathway role, and the P.2 sections the atlas
   cannot fill, named rather than omitted.
+* :mod:`~fermdb.query.traceability` -- PLAN.md J.5's walk: every active assertion resolved hop
+  by hop back to a source and a curator, with each break named and located. The CI gate, and the
+  one read here whose job is to fail.
 
 What is deliberately **not** here yet: graph traversal, lexical and semantic search (PLAN.md O.1
 lists four modalities; this package implements the first). They are additive and are listed as
@@ -65,6 +68,16 @@ from .review import (
     review_packet,
     review_queue,
 )
+from .traceability import (
+    BREAK_KINDS,
+    AssertionChain,
+    Break,
+    EvidenceChain,
+    Gap,
+    Walk,
+    exit_code,
+    walk_assertions,
+)
 from .values import (
     Absence,
     Cited,
@@ -78,18 +91,24 @@ from .values import (
 )
 
 __all__ = [
+    "BREAK_KINDS",
     "DESTINATION_TABLE",
     "ENTITIES",
     "MAX_ROWS",
     "PAGES",
     "Absence",
     "AnnotationRead",
+    "AssertionChain",
+    "Break",
     "CONTEXT_CHARS",
     "Cited",
     "Coverage",
     "EntityCoverage",
+    "EvidenceChain",
     "EvidenceLevel",
     "Finding",
+    "Gap",
+    "Walk",
     "GeneRead",
     "FullTextAvailability",
     "Page",
@@ -108,6 +127,8 @@ __all__ = [
     "Zone",
     "corpus_shape",
     "count_of",
+    "exit_code",
+    "walk_assertions",
     "read_coverage",
     "read_gene",
     "read_publication",

@@ -45,7 +45,15 @@ something this module may do on its own.
 Zone R is the destination. An extraction is Zone I because a model produced it; once a person has
 read the span and agreed, the row records what the source stated, which is the definition of R
 (PLAN.md D.2). The evidence string names the publication, the task and the curator, so the J.5
-chain from row back to sentence stays walkable.
+chain from row back to sentence stays readable by a person.
+
+**And, since schema v12, the publication is also a column.** It was only ever the sentence, and a
+sentence is not a join: `curate/assertions.py` could not close J.5's last hop for a
+measurement-backed `evidence_item`, because the walk needs measurement -> publication to be a
+foreign key. `curation_task.publication_id` is NOT NULL, so this module had the paper in hand at
+every promotion and was dropping it on the floor -- the same "recorded faithfully and never wired
+to anything that reads it" failure the migrations module keeps finding. `measurement` and
+`bottleneck` now carry it; `modification` always did.
 """
 
 from __future__ import annotations
@@ -417,6 +425,10 @@ def _plan_measurement(
         row={
             "id": row_id,
             "strain_id": strain_id,
+            # The task names its paper in a NOT NULL column, so the promoter has always had this
+            # and used to drop it, leaving `evidence` prose as the only record. Prose is not a
+            # join, and PLAN.md J.5's last hop is a join (schema v12).
+            "publication_id": task.publication_id,
             "quantity_kind": kind,
             "product_id": product_id,
             "value_as_reported": value,
@@ -486,12 +498,14 @@ def _write_measurement(
     conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
 ) -> bool:
     conn.execute(
-        "INSERT INTO measurement (id, strain_id, quantity_kind, product_id, value_as_reported, "
-        "unit_as_reported, basis, source_locator, is_below_lod, is_upper_bound, zone, evidence, "
-        "confidence) VALUES (?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        "INSERT INTO measurement (id, strain_id, publication_id, quantity_kind, product_id, "
+        "value_as_reported, unit_as_reported, basis, source_locator, is_below_lod, "
+        "is_upper_bound, zone, evidence, confidence) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
         (
             plan.row["id"],
             plan.row["strain_id"],
+            plan.row["publication_id"],
             plan.row["quantity_kind"],
             plan.row["product_id"],
             plan.row["value_as_reported"],
@@ -665,6 +679,7 @@ def _plan_bottleneck(
         row={
             "id": row_id,
             "node": node,
+            "publication_id": task.publication_id,
             "observation_type": observation,
             "claim": str(payload.get("claim") or ""),
             "support": support,
@@ -706,9 +721,16 @@ def _write_bottleneck(
     if plan.row["intervention"]:
         detail += f"; intervention: {plan.row['intervention']}"
     conn.execute(
-        "INSERT INTO bottleneck (id, node, observation_type, zone, evidence, confidence) "
-        "VALUES (?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
-        (plan.row["id"], plan.row["node"], plan.row["observation_type"], detail, confidence),
+        "INSERT INTO bottleneck (id, node, publication_id, observation_type, zone, evidence, "
+        "confidence) VALUES (?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        (
+            plan.row["id"],
+            plan.row["node"],
+            plan.row["publication_id"],
+            plan.row["observation_type"],
+            detail,
+            confidence,
+        ),
     )
     return conn.total_changes > before
 
@@ -834,6 +856,7 @@ def _plan_higher_alcohol(
         row={
             "id": row_id,
             "strain_id": strain_id,
+            "publication_id": task.publication_id,
             "quantity_kind": kind,
             "product_id": product_id,
             "value_as_reported": value,
@@ -879,12 +902,14 @@ def _write_higher_alcohol(
             "(no condition_context yet; this is what distinguishes it from its siblings)"
         )
     conn.execute(
-        "INSERT INTO measurement (id, strain_id, quantity_kind, product_id, value_as_reported, "
-        "unit_as_reported, basis, source_locator, is_below_lod, is_upper_bound, zone, evidence, "
-        "confidence) VALUES (?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        "INSERT INTO measurement (id, strain_id, publication_id, quantity_kind, product_id, "
+        "value_as_reported, unit_as_reported, basis, source_locator, is_below_lod, "
+        "is_upper_bound, zone, evidence, confidence) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
         (
             plan.row["id"],
             plan.row["strain_id"],
+            plan.row["publication_id"],
             plan.row["quantity_kind"],
             plan.row["product_id"],
             plan.row["value_as_reported"],

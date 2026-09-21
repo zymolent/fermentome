@@ -47,8 +47,14 @@ def atlas() -> Iterator[sqlite3.Connection]:
     """A fresh in-memory atlas holding what `promote.py` would have left behind.
 
     Two publications from two different labs, one engineered strain and its control, a measured
-    titer from each paper, a modification (which carries its publication) and a bottleneck (which
-    does not carry anything typed at all). Nothing here is an assertion: that is the gap.
+    titer from each paper, a modification and a bottleneck. Nothing here is an assertion: that is
+    the gap.
+
+    Every one of those rows now carries a real `publication_id`. Until schema v12 `measurement`
+    and `bottleneck` did not have the column at all, and the paper survived only inside the
+    `evidence` prose -- which is why that prose is still written here exactly as promotion leaves
+    it, and why it deliberately says "paper-a" rather than the id. Anything that comes back with
+    the publication got it from the column.
     """
     conn = open_db(IN_MEMORY)
     conn.executescript(
@@ -70,18 +76,22 @@ def atlas() -> Iterator[sqlite3.Connection]:
                    ('YAA:SPAN:b', 'doi:10.9999/paper-b', 10, 40, 'we measured 2.10 g/L',
                     'measurements[0]', 'R');
         INSERT INTO measurement (id, strain_id, quantity_kind, product_id, value_as_reported,
-                                 unit_as_reported, source_locator, zone, evidence, confidence)
+                                 unit_as_reported, source_locator, publication_id, zone,
+                                 evidence, confidence)
             VALUES ('YAA:MEAS:a', 'YAA:STRAIN:host', 'titer', 'YAA:PRODUCT:isobutanol', 1.32,
-                    'g/L', 'text', 'R', 'promoted from curation task ... on paper-a', 'medium'),
+                    'g/L', 'text', 'doi:10.9999/paper-a', 'R',
+                    'promoted from curation task ... on paper-a', 'medium'),
                    ('YAA:MEAS:b', 'YAA:STRAIN:host', 'titer', 'YAA:PRODUCT:isobutanol', 2.10,
-                    'g/L', 'table 2', 'R', 'promoted from curation task ... on paper-b',
-                    'medium');
+                    'g/L', 'table 2', 'doi:10.9999/paper-b', 'R',
+                    'promoted from curation task ... on paper-b', 'medium');
         INSERT INTO modification (id, strain_id, type, target_locus, publication_id, zone,
                                   evidence, confidence)
             VALUES ('YAA:MOD:bat1', 'YAA:STRAIN:host', 'deletion', 'BAT1',
                     'doi:10.9999/paper-a', 'R', 'promoted', 'medium');
-        INSERT INTO bottleneck (id, node, observation_type, zone, evidence, confidence)
-            VALUES ('YAA:BNK:pyruvate', 'pyruvate node', 'inferred', 'R', 'promoted', 'medium');
+        INSERT INTO bottleneck (id, node, observation_type, publication_id, zone, evidence,
+                                confidence)
+            VALUES ('YAA:BNK:pyruvate', 'pyruvate node', 'inferred', 'doi:10.9999/paper-a', 'R',
+                    'promoted', 'medium');
         INSERT INTO reaction (id, name, zone, evidence, confidence)
             VALUES ('YAA:RXN:ahas', 'acetolactate synthase', 'R', 'curated', 'medium');
         """
@@ -215,17 +225,31 @@ def test_evidence_that_cites_nothing_at_all_is_refused(atlas: sqlite3.Connection
     assert "J.5" in _why(plan)
 
 
-def test_a_measurement_cannot_supply_its_own_publication(atlas: sqlite3.Connection) -> None:
-    """`measurement` has no publication column, and its `evidence` prose is not a substitute.
+def test_a_measurement_now_has_a_publication_column_of_its_own(atlas: sqlite3.Connection) -> None:
+    """The asymmetry this file used to record is gone at the schema layer (v12).
 
-    Promotion writes "promoted from curation task ... on doi:10.1186/..." into `measurement.
-    evidence`. Parsing that back is citing a file in this repository, which CONVENTIONS.md calls
-    citing memory with an extra hop -- and it would produce a confidently wrong publication the
-    first time the string's format changes. So `from_measurement` leaves it None and the plan
-    asks for it.
+    What it used to say: `measurement` had no publication column, so promotion's
+    "promoted from curation task ... on doi:10.1186/..." prose was the only record of the paper,
+    and J.5's assertion -> evidence -> measurement -> publication walk had no last hop. Parsing
+    that sentence back out was refused -- it is citing a file in this repository, which
+    CONVENTIONS.md calls citing memory with an extra hop, and it would produce a confidently wrong
+    publication the first time the format changed. The column was added instead, and the 97 rows
+    already in the atlas were backfilled from `curation_task`, which is where promotion had the
+    value all along.
+
+    So the hop is now a join, and this test walks it. What is *not* yet wired is the consumer:
+    `from_measurement` still leaves `publication_id` None and the plan still asks a curator for it,
+    the way `from_modification` has never had to. That is a change to `assertions.py` and belongs
+    to whoever owns this module; it is asserted here so the remaining half cannot be forgotten.
     """
     columns = {row["name"] for row in atlas.execute("PRAGMA table_info(measurement)")}
-    assert "publication_id" not in columns, "if this column is added, the refusal below is stale"
+    assert "publication_id" in columns
+
+    walked = atlas.execute(
+        "SELECT p.id FROM measurement m JOIN publication p ON p.id = m.publication_id "
+        "WHERE m.id = 'YAA:MEAS:a'"
+    ).fetchone()
+    assert walked["id"] == PUB_A, "J.5's last hop is a join now, not a sentence"
 
     request = A.from_measurement(
         atlas,
@@ -236,8 +260,25 @@ def test_a_measurement_cannot_supply_its_own_publication(atlas: sqlite3.Connecti
         direction="increases",
         control_strain_id="YAA:STRAIN:ctrl",
     )
-    assert request.evidence[0].publication_id is None
+    assert request.evidence[0].publication_id is None, (
+        "from_measurement does not read the new column yet; when it does, this assertion and the "
+        "one below flip and the Requirement text in assertions.py needs updating with them"
+    )
     assert "J.5" in _why(A.plan_assertion(atlas, request))
+
+    # Supplied explicitly, the plan is satisfied -- which is what wiring the column up will do
+    # without asking.
+    supplied = A.from_measurement(
+        atlas,
+        "YAA:MEAS:a",
+        predicate="affects_production_of",
+        evidence_type="direct_perturbation",
+        independent_group="lab-atsumi",
+        direction="increases",
+        control_strain_id="YAA:STRAIN:ctrl",
+        publication_id=PUB_A,
+    )
+    assert "J.5" not in _why(A.plan_assertion(atlas, supplied))
 
 
 def test_a_direct_perturbation_without_a_stated_control_is_refused(

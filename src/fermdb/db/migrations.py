@@ -330,6 +330,84 @@ _V10_TO_V11: Final[Migration] = Migration(
     ),
 )
 
+#: v11 -> v12. `measurement.publication_id` and `bottleneck.publication_id` -- the last hop of
+#: PLAN.md J.5's chain, which until now existed only as prose.
+#:
+#: What was broken. J.5 requires a walkable chain from an assertion to the sentence that supports
+#: it: assertion -> evidence_item -> measurement -> publication. `modification` has carried a real
+#: `publication_id` since v1 and so has `bottleneck_fix_attempt`; `measurement` and `bottleneck`
+#: never did. Promotion had the paper in hand the whole time -- `curation_task.publication_id` is
+#: NOT NULL -- and wrote it into `evidence` as a sentence ("promoted from curation task
+#: YAA:CTASK:... on doi:10.1186/...") and into no column. The consequence was exact: a
+#: measurement-backed `evidence_item` could not close its own arm of J.5, because the last hop was
+#: not a join. `curate/assertions.py` reported it and declined to regex the DOI back out of the
+#: prose, which was the right call -- CONVENTIONS.md calls citing a file in this repo "citing
+#: memory with an extra hop", and a parser over an evidence sentence produces a confidently wrong
+#: DOI the day the sentence's format changes.
+#:
+#: Both columns are nullable, and the nullability is a fact and not a convenience: a measurement
+#: derived from a deposited dataset rather than from a paper has no publication to name, and must
+#: stay storable. NULL therefore means "there is no paper", never "the paper is in the evidence
+#: sentence".
+#:
+#: **The backfill, and where it gets its answer.** This is the first migration here that carries an
+#: UPDATE, so the module's "may add and may backfill, may not destroy" rule is doing real work for
+#: the first time: both statements write only into a column this same migration created, only where
+#: it is NULL, and no existing value can be overwritten by either. `evidence` is untouched.
+#:
+#: The value comes from `curation_task`, reached two ways at once, and from nothing else:
+#:
+#: * the row must carry a `curation_event` with action 'promote' naming it, which is what makes it
+#:   a promoted row rather than one written by hand or by a loader; and
+#: * the task is found by the id derivation the promoter itself uses -- `_measurement_id` is
+#:   ``YAA:MEAS:`` plus the first 16 characters of `curation_task.proposal_hash`, and the
+#:   bottleneck promoter's is the same shape. That is a structural join against a column, not a
+#:   parse of a sentence.
+#:
+#: The `HAVING COUNT(DISTINCT ...) = 1` is what makes "never guessed" true rather than intended:
+#: if two tasks from different publications ever shared a 16-character hash prefix, the subquery
+#: returns no row, the column stays NULL, and `fermdb db status` shows it as unlinked. A row that
+#: cannot be linked this way is left NULL and reported. On the live database at v11 all 97
+#: measurements and all 4 bottlenecks linked, none ambiguous, none left NULL.
+_V11_TO_V12: Final[Migration] = Migration(
+    from_version=11,
+    to_version=12,
+    summary=(
+        "measurement.publication_id and bottleneck.publication_id -- J.5's last hop, backfilled "
+        "from curation_task rather than from the evidence prose"
+    ),
+    statements=(
+        "ALTER TABLE measurement ADD COLUMN publication_id TEXT REFERENCES publication(id)",
+        "CREATE INDEX measurement_by_publication ON measurement(publication_id)",
+        """
+        UPDATE measurement
+           SET publication_id = (
+               SELECT MIN(t.publication_id) FROM curation_task t
+                WHERE 'YAA:MEAS:' || substr(t.proposal_hash, 1, 16) = measurement.id
+                  AND t.record_kind IN ('measurements', 'co_reported_higher_alcohols')
+               HAVING COUNT(DISTINCT t.publication_id) = 1)
+         WHERE publication_id IS NULL
+           AND EXISTS (SELECT 1 FROM curation_event e
+                        WHERE e.target_type = 'measurement' AND e.target_id = measurement.id
+                          AND e.action = 'promote')
+        """,
+        "ALTER TABLE bottleneck ADD COLUMN publication_id TEXT REFERENCES publication(id)",
+        "CREATE INDEX bottleneck_by_publication ON bottleneck(publication_id)",
+        """
+        UPDATE bottleneck
+           SET publication_id = (
+               SELECT MIN(t.publication_id) FROM curation_task t
+                WHERE 'YAA:BNK:' || substr(t.proposal_hash, 1, 16) = bottleneck.id
+                  AND t.record_kind = 'bottlenecks'
+               HAVING COUNT(DISTINCT t.publication_id) = 1)
+         WHERE publication_id IS NULL
+           AND EXISTS (SELECT 1 FROM curation_event e
+                        WHERE e.target_type = 'bottleneck' AND e.target_id = bottleneck.id
+                          AND e.action = 'promote')
+        """,
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -338,6 +416,7 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V8_TO_V9,
     _V9_TO_V10,
     _V10_TO_V11,
+    _V11_TO_V12,
 )
 
 

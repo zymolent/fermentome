@@ -955,6 +955,14 @@ CREATE TABLE measurement (
     sample_id         TEXT REFERENCES sample(id),
     strain_id         TEXT REFERENCES strain(id),
     experiment_id     TEXT REFERENCES experiment(id),
+    -- The paper the number was read out of. Nullable, because a measurement derived from a
+    -- deposited dataset rather than from a publication is a legitimate row -- but NULL here means
+    -- "there is no paper", never "the paper is in the evidence sentence". PLAN.md J.5 wants a
+    -- walkable chain assertion -> evidence_item -> measurement -> publication, and prose in
+    -- `evidence` is not a join: `curate/assertions.py` could not close that last hop, and
+    -- regexing a DOI back out of a sentence would produce a confidently wrong answer the first
+    -- time the sentence's format changed.
+    publication_id    TEXT REFERENCES publication(id),
     quantity_kind     TEXT NOT NULL,        -- titer | yield | productivity | growth_rate | ...
     product_id        TEXT REFERENCES product(id),   -- NULL for non-product quantities
     -- Zone R, never overwritten and never unit-converted in place. Enforced by the trigger below.
@@ -1017,6 +1025,8 @@ END;
 CREATE INDEX measurement_by_strain ON measurement(strain_id);
 CREATE INDEX measurement_by_sample ON measurement(sample_id);
 CREATE INDEX measurement_by_product ON measurement(product_id, quantity_kind);
+-- The J.5 direction of travel: given a paper, which numbers came out of it.
+CREATE INDEX measurement_by_publication ON measurement(publication_id);
 
 
 -- ---------------------------------------------------------------------------------------------
@@ -1612,6 +1622,11 @@ CREATE TABLE bottleneck (
     transport_step    TEXT,
     node              TEXT,
     route_context_id  TEXT REFERENCES pathway_configuration(id),
+    -- Same reasoning as `measurement.publication_id`, and the same gap: a promoted bottleneck
+    -- named its paper only inside `evidence`, while `bottleneck_fix_attempt` two tables down has
+    -- carried a real `publication_id` all along. Nullable, because a bottleneck inferred from the
+    -- curated pathway model rather than from a paper has no publication to name.
+    publication_id    TEXT REFERENCES publication(id),
     observation_type  TEXT NOT NULL
                       CHECK (observation_type IN ('metabolite_accumulation', 'flux_measurement',
                                                   'overexpression_relieved', 'deletion_worsened',
@@ -1623,6 +1638,8 @@ CREATE TABLE bottleneck (
     -- Name what is bottlenecked, or the row says nothing.
     CHECK (reaction_id IS NOT NULL OR transport_step IS NOT NULL OR node IS NOT NULL)
 );
+
+CREATE INDEX bottleneck_by_publication ON bottleneck(publication_id);
 
 -- The highest-value field in the schema for the user's actual goal: it converts "2-KIV supply is
 -- limiting" from folklore into a record of what people did about it and whether it helped.

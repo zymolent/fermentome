@@ -26,9 +26,16 @@ import pytest
 from fermdb.db import IN_MEMORY, SCHEMA_VERSION, create_schema, open_db, schema_version
 from fermdb.db import migrations as M
 
-# The three tables as v5 declared them, verbatim. Kept here rather than derived from the current
-# schema, because a test that builds "the old shape" out of the new one cannot detect the drift it
-# exists to detect.
+# The tables the migrations touch, as v5 declared them, verbatim. Kept here rather than derived
+# from the current schema, because a test that builds "the old shape" out of the new one cannot
+# detect the drift it exists to detect.
+#
+# `measurement` and `bottleneck` joined the list at v12, which is the first migration to add a
+# column to a table that was already full of rows. `publication`, `curation_task` and
+# `curation_event` joined with them for a different reason: v12's backfill READS those three, so a
+# v5 database without them cannot be migrated at all. They are reduced to the columns that
+# backfill touches and are deliberately never shape-compared -- see the note above them below, so
+# nobody later mistakes a stub for a record of what v5 declared.
 V5_TABLES = """
 CREATE TABLE gene (id TEXT PRIMARY KEY, standard_name TEXT, gene_group_id TEXT);
 CREATE TABLE gene_group (id TEXT PRIMARY KEY);
@@ -83,6 +90,76 @@ INSERT INTO compartment_strategy (id, label, source) VALUES
      'docs/design/ISOBUTANOL_PROGRAM.md section 2'),
     ('E_mtdna_encoded', 'Recoded Ehrlich enzymes encoded in mtDNA',
      'docs/design/MITOCHONDRIAL_PROGRAM.md section 4');
+CREATE TABLE measurement (
+    id                TEXT PRIMARY KEY,
+    sample_id         TEXT,
+    strain_id         TEXT,
+    experiment_id     TEXT,
+    quantity_kind     TEXT NOT NULL,
+    product_id        TEXT,
+    value_as_reported REAL NOT NULL,
+    unit_as_reported  TEXT NOT NULL,
+    value_si          REAL,
+    unit_si           TEXT,
+    basis             TEXT CHECK (basis IN ('consumed', 'supplied', 'theoretical_max_pct',
+                                            'per_biomass', 'per_volume', 'NA', 'unknown')),
+    is_fraction       INTEGER NOT NULL DEFAULT 0 CHECK (is_fraction IN (0, 1)),
+    assay_method      TEXT,
+    assay_details     TEXT,
+    detection_limit   REAL,
+    is_below_lod      INTEGER NOT NULL DEFAULT 0 CHECK (is_below_lod IN (0, 1)),
+    is_upper_bound    INTEGER NOT NULL DEFAULT 0 CHECK (is_upper_bound IN (0, 1)),
+    uncertainty_sd    REAL CHECK (uncertainty_sd IS NULL OR uncertainty_sd >= 0),
+    uncertainty_sem   REAL CHECK (uncertainty_sem IS NULL OR uncertainty_sem >= 0),
+    ci_low            REAL,
+    ci_high           REAL,
+    n_replicates      INTEGER CHECK (n_replicates IS NULL OR n_replicates >= 1),
+    replicate_type    TEXT CHECK (replicate_type IN ('biological', 'technical', 'unknown')),
+    derived_by        TEXT,
+    is_digitized      INTEGER NOT NULL DEFAULT 0 CHECK (is_digitized IN (0, 1)),
+    source_locator    TEXT NOT NULL,
+    zone              TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence          TEXT NOT NULL,
+    confidence        TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    CHECK (sample_id IS NOT NULL OR strain_id IS NOT NULL OR experiment_id IS NOT NULL),
+    CHECK (quantity_kind <> 'yield' OR basis IS NOT NULL)
+);
+CREATE INDEX measurement_by_strain ON measurement(strain_id);
+CREATE INDEX measurement_by_sample ON measurement(sample_id);
+CREATE INDEX measurement_by_product ON measurement(product_id, quantity_kind);
+CREATE TABLE bottleneck (
+    id                TEXT PRIMARY KEY,
+    assertion_id      TEXT,
+    reaction_id       TEXT,
+    transport_step    TEXT,
+    node              TEXT,
+    route_context_id  TEXT,
+    observation_type  TEXT NOT NULL
+                      CHECK (observation_type IN ('metabolite_accumulation', 'flux_measurement',
+                                                  'overexpression_relieved', 'deletion_worsened',
+                                                  'in_vitro_kinetics', 'inferred')),
+    recurrence        INTEGER CHECK (recurrence IS NULL OR recurrence >= 0),
+    zone              TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence          TEXT NOT NULL,
+    confidence        TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    CHECK (reaction_id IS NOT NULL OR transport_step IS NOT NULL OR node IS NOT NULL)
+);
+-- The next three are NOT a record of what v5 declared and are never shape-compared. They are cut
+-- down to exactly what v12's backfill reads, because that backfill joins through them and a
+-- database missing them cannot be migrated. Their real definitions live in schema.sql.
+CREATE TABLE publication (id TEXT PRIMARY KEY);
+CREATE TABLE curation_task (
+    id             TEXT PRIMARY KEY,
+    publication_id TEXT NOT NULL REFERENCES publication(id),
+    record_kind    TEXT NOT NULL,
+    proposal_hash  TEXT NOT NULL
+);
+CREATE TABLE curation_event (
+    id          TEXT PRIMARY KEY,
+    action      TEXT NOT NULL,
+    target_type TEXT NOT NULL,
+    target_id   TEXT NOT NULL
+);
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 INSERT INTO meta VALUES ('schema_version', '5');
 """
@@ -113,7 +190,9 @@ def fresh() -> sqlite3.Connection:
 # --------------------------------------------------------------------- the drift-catching test
 
 
-@pytest.mark.parametrize("table", ["reaction", "metabolite", "product"])
+@pytest.mark.parametrize(
+    "table", ["reaction", "metabolite", "product", "measurement", "bottleneck"]
+)
 def test_migrated_tables_match_freshly_created_ones(fresh: sqlite3.Connection, table: str) -> None:
     """The invariant the whole module rests on: two routes, one schema."""
     old = _v5()
@@ -142,6 +221,162 @@ def test_the_new_table_matches_too(fresh: sqlite3.Connection) -> None:
             )
         }
         assert migrated_indexes == fresh_indexes
+    finally:
+        old.close()
+
+
+def test_the_new_indexes_match_too(fresh: sqlite3.Connection) -> None:
+    """v12 adds an index as well as a column, and an index is as easy to forget to mirror."""
+    old = _v5()
+    try:
+        M.migrate(old)
+        for table in ("measurement", "bottleneck"):
+            query = "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=?"
+            migrated = {str(r["name"]) for r in old.execute(query, (table,))}
+            created = {str(r["name"]) for r in fresh.execute(query, (table,))}
+            assert migrated == created, table
+            assert f"{table}_by_publication" in created
+    finally:
+        old.close()
+
+
+# ------------------------------------------------- v12's backfill: from the task, not the prose
+
+
+def _promoted(conn: sqlite3.Connection) -> None:
+    """One promoted measurement and one promoted bottleneck, as the promoter actually leaves them.
+
+    The publication appears **twice and differently**: as `curation_task.publication_id`, which is
+    a column, and inside the `evidence` sentence, which is prose. The two are deliberately given
+    different values here. Anything that recovers the prose one is parsing a string, and the tests
+    below say which value came back.
+    """
+    conn.executescript(
+        """
+        INSERT INTO publication (id) VALUES ('doi:10.1/from-the-task');
+        INSERT INTO publication (id) VALUES ('doi:10.1/from-the-prose');
+        INSERT INTO curation_task (id, publication_id, record_kind, proposal_hash) VALUES
+            ('YAA:CTASK:m', 'doi:10.1/from-the-task', 'measurements',
+             'aaaaaaaaaaaaaaaabbbbbbbb'),
+            ('YAA:CTASK:b', 'doi:10.1/from-the-task', 'bottlenecks',
+             'ccccccccccccccccdddddddd');
+        INSERT INTO curation_event (id, action, target_type, target_id) VALUES
+            ('YAA:CUEV:m', 'promote', 'measurement', 'YAA:MEAS:aaaaaaaaaaaaaaaa'),
+            ('YAA:CUEV:b', 'promote', 'bottleneck', 'YAA:BNK:cccccccccccccccc');
+        INSERT INTO measurement (id, strain_id, quantity_kind, value_as_reported,
+                                 unit_as_reported, source_locator, zone, evidence, confidence)
+            VALUES ('YAA:MEAS:aaaaaaaaaaaaaaaa', 'YAA:STRAIN:x', 'titer', 1.62, 'g/L', 'text',
+                    'R',
+                    'promoted from curation task YAA:CTASK:m on doi:10.1/from-the-prose (m[0])',
+                    'medium');
+        INSERT INTO bottleneck (id, node, observation_type, zone, evidence, confidence)
+            VALUES ('YAA:BNK:cccccccccccccccc', 'pyruvate node', 'inferred', 'R',
+                    'promoted from curation task YAA:CTASK:b on doi:10.1/from-the-prose (b[0])',
+                    'medium');
+        """
+    )
+
+
+@pytest.mark.parametrize(
+    ("table", "row_id"),
+    [("measurement", "YAA:MEAS:aaaaaaaaaaaaaaaa"), ("bottleneck", "YAA:BNK:cccccccccccccccc")],
+)
+def test_the_backfill_takes_the_publication_from_the_task_not_the_evidence(
+    table: str, row_id: str
+) -> None:
+    """The point of v12, stated as the one thing that could have been done wrong.
+
+    The evidence sentence names `doi:10.1/from-the-prose` and the curation task names
+    `doi:10.1/from-the-task`. A backfill that regexed the DOI out of `evidence` would pass every
+    other test in this module and fail this one -- which is the whole reason the two differ.
+    """
+    old = _v5()
+    try:
+        _promoted(old)
+        M.migrate(old)
+        row = old.execute(
+            f"SELECT publication_id, evidence FROM {table} WHERE id = ?", (row_id,)
+        ).fetchone()
+        assert row["publication_id"] == "doi:10.1/from-the-task"
+        # And the prose it did not read is still there, unedited. A backfill may add; it may not
+        # rewrite what was already recorded.
+        assert "doi:10.1/from-the-prose" in row["evidence"]
+    finally:
+        old.close()
+
+
+def test_a_row_with_no_curation_task_is_left_null_rather_than_guessed() -> None:
+    """A measurement from a deposited dataset has no paper, and must stay storable and honest.
+
+    NULL here means "there is no publication", which is a fact. The alternative -- reaching for
+    the nearest plausible paper, or for whatever a sentence happens to contain -- would be
+    indistinguishable afterwards from a publication someone checked.
+    """
+    old = _v5()
+    try:
+        _promoted(old)
+        old.execute(
+            "INSERT INTO measurement (id, strain_id, quantity_kind, value_as_reported, "
+            "unit_as_reported, source_locator, zone, evidence, confidence) "
+            "VALUES ('YAA:MEAS:dataset', 'YAA:STRAIN:x', 'titer', 4.2, 'g/L', 'table 1', 'R', "
+            "'from the deposited dataset, not from a paper', 'medium')"
+        )
+        M.migrate(old)
+        row = old.execute(
+            "SELECT publication_id FROM measurement WHERE id = 'YAA:MEAS:dataset'"
+        ).fetchone()
+        assert row["publication_id"] is None
+        # The one that could be linked still was; an unlinkable row does not suppress the rest.
+        linked = old.execute(
+            "SELECT COUNT(*) FROM measurement WHERE publication_id IS NOT NULL"
+        ).fetchone()
+        assert linked[0] == 1
+    finally:
+        old.close()
+
+
+def test_an_ambiguous_hash_prefix_is_left_null_rather_than_picked() -> None:
+    """Two tasks from two papers sharing a 16-character prefix must not resolve to either.
+
+    The id derivation truncates `proposal_hash`, so a collision is possible in principle. The
+    `HAVING COUNT(DISTINCT ...) = 1` is what makes "never guessed" a property rather than a hope,
+    and this is the test that holds it there.
+    """
+    old = _v5()
+    try:
+        _promoted(old)
+        old.executescript(
+            """
+            INSERT INTO publication (id) VALUES ('doi:10.1/other-paper');
+            INSERT INTO curation_task (id, publication_id, record_kind, proposal_hash) VALUES
+                ('YAA:CTASK:m2', 'doi:10.1/other-paper', 'measurements',
+                 'aaaaaaaaaaaaaaaaeeeeeeee');
+            """
+        )
+        M.migrate(old)
+        row = old.execute(
+            "SELECT publication_id FROM measurement WHERE id = 'YAA:MEAS:aaaaaaaaaaaaaaaa'"
+        ).fetchone()
+        assert row["publication_id"] is None
+    finally:
+        old.close()
+
+
+def test_a_row_that_was_never_promoted_is_not_linked() -> None:
+    """The `curation_event` leg is a real condition, not decoration.
+
+    A row written by hand or by a loader is not a promotion, and must not acquire a paper from a
+    task that merely hashes the same way.
+    """
+    old = _v5()
+    try:
+        _promoted(old)
+        old.execute("DELETE FROM curation_event WHERE target_type = 'measurement'")
+        M.migrate(old)
+        row = old.execute(
+            "SELECT publication_id FROM measurement WHERE id = 'YAA:MEAS:aaaaaaaaaaaaaaaa'"
+        ).fetchone()
+        assert row["publication_id"] is None
     finally:
         old.close()
 

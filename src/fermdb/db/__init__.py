@@ -92,7 +92,22 @@ from typing import Final
 #:     could not be stored. PLAN.md phase 1 curates "any host", so those builds were in scope by
 #:     the plan and unrepresentable by the schema. The first migration that adds a ROW: this list
 #:     is seeded by `schema.sql` rather than loaded from a TSV, so extending it is a version bump.
-SCHEMA_VERSION: Final[int] = 11
+#: 12: `measurement.publication_id` and `bottleneck.publication_id` -- the last hop of PLAN.md
+#:     J.5's chain (assertion -> evidence_item -> measurement -> publication), which existed only
+#:     as prose. `modification` has carried a real `publication_id` all along and so has
+#:     `bottleneck_fix_attempt`; these two never did, although promotion had the paper in hand the
+#:     whole time (`curation_task.publication_id` is NOT NULL) and wrote it into the `evidence`
+#:     sentence instead. The cost was exact: a measurement-backed `evidence_item` could not close
+#:     its own J.5 arm, because the last hop was not a join. Parsing the DOI back out of that
+#:     sentence was refused rather than written -- CONVENTIONS.md calls citing a file in this repo
+#:     "citing memory with an extra hop", and the parser would return a confidently wrong DOI the
+#:     day the sentence's format changed -- so the migration backfills from `curation_task`
+#:     instead, and leaves NULL anything it cannot reach that way.
+#:
+#:     Both columns are nullable and stay that way: a measurement derived from a deposited dataset
+#:     rather than from a paper is a legitimate row. NULL means "there is no publication", never
+#:     "the publication is in the evidence prose".
+SCHEMA_VERSION: Final[int] = 12
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

@@ -314,6 +314,51 @@ def test_the_batch_promotes_strains_before_measurements(atlas: sqlite3.Connectio
     assert measurement["confidence"] == "medium"
 
 
+def test_a_promoted_measurement_carries_its_publication_as_a_column(
+    atlas: sqlite3.Connection,
+) -> None:
+    """PLAN.md J.5's last hop, as a join rather than a sentence (schema v12).
+
+    The task's `publication_id` is NOT NULL, so this was always available and was always dropped.
+    Asserted against the task's column rather than against the evidence string, because the string
+    agreeing with the column is what a prose parser would also achieve, and the point is that the
+    value did not come from there.
+    """
+    P.promote_ready(atlas, curator=HUMAN, reason="batch", supplied={"organism_id": "YAA:ORG:scer"})
+    expected = atlas.execute(
+        "SELECT publication_id FROM curation_task WHERE id = 'YAA:CTASK:meas'"
+    ).fetchone()["publication_id"]
+    row = atlas.execute("SELECT publication_id FROM measurement").fetchone()
+    assert row["publication_id"] == expected
+
+    # And it is a real foreign key, not a string that happens to look like one.
+    walked = atlas.execute(
+        "SELECT p.id FROM measurement m JOIN publication p ON p.id = m.publication_id"
+    ).fetchone()
+    assert walked["id"] == expected
+
+
+def test_a_measurement_with_no_publication_is_still_storable(atlas: sqlite3.Connection) -> None:
+    """A number from a deposited dataset has no paper, and the column stays nullable for it.
+
+    If this ever fails, the fix is not to invent a publication for such a row.
+    """
+    atlas.execute(
+        "INSERT INTO strain (id, organism_id, canonical_name, zone, evidence, confidence) "
+        "VALUES ('YAA:STRAIN:ds', 'YAA:ORG:scer', 'DS', 'R', 'test', 'high')"
+    )
+    atlas.execute(
+        "INSERT INTO measurement (id, strain_id, quantity_kind, value_as_reported, "
+        "unit_as_reported, source_locator, zone, evidence, confidence) "
+        "VALUES ('YAA:MEAS:ds', 'YAA:STRAIN:ds', 'titer', 4.2, 'g/L', 'dataset', 'R', "
+        "'from a deposited dataset, not from a paper', 'medium')"
+    )
+    row = atlas.execute(
+        "SELECT publication_id FROM measurement WHERE id = 'YAA:MEAS:ds'"
+    ).fetchone()
+    assert row["publication_id"] is None
+
+
 def test_nothing_is_skipped_silently(atlas: sqlite3.Connection) -> None:
     """Every task that did not promote comes back with a reason, so a partial run cannot pass
     for a complete one."""
@@ -351,6 +396,46 @@ def test_an_edited_payload_is_what_gets_promoted(atlas: sqlite3.Connection) -> N
 def test_the_slug_matches_the_convention(atlas: sqlite3.Connection) -> None:
     """CONVENTIONS.md writes the example id as YAA:STRAIN:cen-pk113-7d."""
     assert P._strain_id("CEN.PK113-7D") == "YAA:STRAIN:cen-pk113-7d"
+
+
+def test_a_promoted_bottleneck_carries_its_publication_too(atlas: sqlite3.Connection) -> None:
+    """`bottleneck` had the same gap as `measurement` and was fixed in the same migration.
+
+    Worth its own test rather than a parametrization: `bottleneck_fix_attempt`, two tables down in
+    `schema.sql`, has carried a real `publication_id` all along, so the missing one here was an
+    inconsistency inside a single section of the schema rather than an oversight about one table.
+    """
+    payload = {
+        "node_as_reported": "pyruvate node",
+        "claim": "pyruvate supply is limiting",
+        "support": "stated_by_authors",
+        "zone": "I",
+        "confidence": "unverified",
+        "span": {"quote": QUOTE, "char_start": START, "char_end": END, "section": "results"},
+    }
+    atlas.execute(
+        "INSERT INTO curation_task (id, extraction_id, publication_id, record_path, "
+        "record_kind, payload, status, priority, attempt_count, proposal_hash, curator, "
+        "curator_kind, resolved_at, resolution_reason, zone) "
+        "VALUES ('YAA:CTASK:bnk', 'YAA:EXTR:test', 'YAA:PUB:test', 'bottlenecks[0]', "
+        "'bottlenecks', ?, 'accepted', 1, 0, 'hash-bnk', 'kangkon', 'human', "
+        "'2026-09-20T00:00:00Z', 'checked', 'I')",
+        (json.dumps(payload),),
+    )
+    result = P.promote(
+        atlas,
+        "YAA:CTASK:bnk",
+        curator=HUMAN,
+        reason="checked",
+        supplied={"observation_type": "inferred"},
+    )
+    row = atlas.execute(
+        "SELECT b.publication_id FROM bottleneck b JOIN publication p ON p.id = b.publication_id "
+        "WHERE b.id = ?",
+        (result.row_id,),
+    ).fetchone()
+    assert row is not None, "the bottleneck did not join to a publication"
+    assert row["publication_id"] == "YAA:PUB:test"
 
 
 # ------------------------------------------------- the adjacent tier and the configuration row

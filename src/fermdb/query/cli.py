@@ -25,6 +25,7 @@ from .pathways import list_pathways, read_pathway
 from .publications import corpus_shape, read_publication, search_publications
 from .review import ReviewPacket, review_packet, review_queue
 from .reviewhtml import build_review_page
+from .traceability import WHY_IT_MATTERS, Walk, exit_code, walk_assertions
 
 __all__ = ["add_query_subcommand"]
 
@@ -343,6 +344,85 @@ def cmd_query_gene(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_walk(walk: Walk, *, verbose: bool, allow_empty: bool) -> None:
+    """The walk, hop by hop for what broke and one line for what did not."""
+    for chain in walk.chains:
+        broken = not chain.closes
+        if not broken and not verbose:
+            continue
+        mark = "BROKEN" if broken else "ok    "
+        print(f"{mark} {chain.assertion_id}  {chain.predicate}")
+        print(f"         {chain.subject}  ->  {chain.object}   zone {chain.zone}")
+        for item in chain.evidence:
+            arms = "+".join(item.arms) or "no arm"
+            state = "ok " if item.closes else "!! "
+            print(f"         {state}{item.evidence_id}  {item.evidence_type:<20}[{arms}]")
+            if verbose:
+                print(f"             {' -> '.join(item.hops)}")
+        for event, curator, at in chain.curation[:1]:
+            print(f"         curation {event} by {curator or '(unnamed)'} at {at or '?'}")
+        for failure in chain.all_breaks:
+            print(f"         {failure}")
+        print()
+
+    if walk.is_vacuous:
+        print("0 active assertions walked.")
+        print()
+        print("VACUOUS. Nothing was checked, so nothing was verified. PLAN.md J.5 calls a broken")
+        print("chain 'a bug of the same severity as a failing unit test', and that severity comes")
+        print("from the check being believed -- a pass here would be believed in exactly the same")
+        print("way while having looked at no row at all. `assertion` holds zero rows today, which")
+        print("is PLAN.md C.1's gap, not a clean bill of health.")
+        print()
+        if allow_empty:
+            print("--allow-empty was given, so this is reported as a pass (exit 0). Delete the")
+            print("flag once the atlas holds assertions: from that day it changes nothing, which")
+            print("is exactly when it should go.")
+        else:
+            print("Exit 3 -- neither a pass nor a broken chain. Pass --allow-empty to accept it")
+            print("as a pass while the atlas is still empty.")
+        return
+
+    print(f"walked {walk.n_walked} active assertion(s): {walk.n_closed} closed, ", end="")
+    print(f"{len(walk.broken)} broken")
+
+    breaks = walk.breaks_by_kind()
+    if breaks:
+        print()
+        print("breaks by kind:")
+        for kind, count in sorted(breaks.items(), key=lambda item: (-item[1], item[0])):
+            print(f"  {kind:<32}{count:>4}   {WHY_IT_MATTERS.get(kind, '')[:52]}")
+
+    gaps = walk.gaps_by_kind()
+    if gaps:
+        print()
+        print("hops J.5 names that the schema cannot traverse (reported, not failed):")
+        for kind, count in sorted(gaps.items()):
+            print(f"  {kind:<32}{count:>4}   {WHY_IT_MATTERS.get(kind, '')[:52]}")
+
+
+def cmd_query_traceability(args: argparse.Namespace) -> int:
+    """PLAN.md J.5's acceptance test: every active assertion, or where its chain breaks."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        walk = walk_assertions(conn, assertion_ids=args.assertion or None)
+    finally:
+        conn.close()
+
+    if args.json:
+        payload = walk.as_json()
+        payload["allow_empty"] = bool(args.allow_empty)
+        payload["exit_code"] = exit_code(walk, allow_empty=args.allow_empty)
+        json.dump(payload, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return int(payload["exit_code"])
+
+    _print_walk(walk, verbose=args.verbose, allow_empty=args.allow_empty)
+    return exit_code(walk, allow_empty=args.allow_empty)
+
+
 def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add ``fermdb query ...`` to an existing top-level subparsers action."""
     p_query = sub.add_parser(
@@ -428,3 +508,27 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_gene.set_defaults(func=cmd_query_gene)
+
+    p_trace = query_sub.add_parser(
+        "traceability",
+        help="PLAN.md J.5's CI gate: walk every active assertion and name where its chain breaks",
+    )
+    p_trace.add_argument(
+        "assertion", nargs="*", help="assertion ids to walk; omit for every active assertion"
+    )
+    p_trace.add_argument(
+        "--verbose",
+        action="store_true",
+        help="print every assertion hop by hop, not only the broken ones",
+    )
+    p_trace.add_argument(
+        "--allow-empty",
+        action="store_true",
+        help="treat a walk of zero assertions as a pass. Without it that case exits 3, because a "
+        "check that reports success having looked at nothing is trusted exactly as much as one "
+        "that verified something",
+    )
+    p_trace.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_trace.set_defaults(func=cmd_query_traceability)
