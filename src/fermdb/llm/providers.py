@@ -829,12 +829,17 @@ def claude_agent_sdk_runner(request: AgentRequest) -> AgentReply:
     """
     source = subscription_credential()
     try:
-        import claude_agent_sdk  # type: ignore[import-not-found]
+        # No inline ignore: the module is declared in pyproject's mypy overrides instead, because
+        # an inline one is "unused" wherever the optional `escalation` extra happens to be
+        # installed and required where it is not -- an error that tracks the environment rather
+        # than the code.
+        import claude_agent_sdk
     except ImportError as exc:
         raise ProviderUnavailableError(
-            "the 'agent-sdk' provider needs the claude-agent-sdk package "
-            "(pip install claude-agent-sdk). It is not a dependency of fermdb yet; see the "
-            f"escalation notes in docs/reference/MODEL_ROUTING.md §7a. Credential found: {source}"
+            "the 'agent-sdk' provider needs the claude-agent-sdk package. It is an optional "
+            "dependency: `pip install -e .[escalation]`, or `pip install claude-agent-sdk`. See "
+            f"the escalation notes in docs/reference/MODEL_ROUTING.md §7a. Credential found: "
+            f"{source}"
         ) from exc
 
     options_kwargs: dict[str, Any] = {

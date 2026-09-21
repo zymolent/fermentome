@@ -57,3 +57,12 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 python_version = "3.11"
 strict = true
 files = ["src"]
+
+# `claude-agent-sdk` is an OPTIONAL dependency (the `escalation` extra), so whether it is importable
+# depends on the environment mypy runs in — and an inline `# type: ignore[import-not-found]` is
+# therefore correct in a clean checkout and "unused" wherever the extra is installed. Under
+# `strict = true` that flips the error on and off with the environment rather than with the code,
+# which is the one thing a type gate must not do. Declaring the module here is right in both.
+[[tool.mypy.overrides]]
+module = "claude_agent_sdk.*"
+ignore_missing_imports = true

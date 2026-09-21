@@ -381,7 +381,11 @@ def _facet_records(conn: sqlite3.Connection, publication_id: str) -> tuple[Facet
         loaded: Any = json.loads(str(raw))
         if not isinstance(loaded, dict):
             continue
-        span = loaded.get("span") if isinstance(loaded.get("span"), dict) else {}
+        # Annotated rather than inferred: `loaded.get` returns `Any | None`, so the ternary's type
+        # stays optional however the isinstance guard reads to a human, and every `.get` below it
+        # is then an error. A payload with no span is `{}` here, never None.
+        raw_span = loaded.get("span")
+        span: dict[str, Any] = raw_span if isinstance(raw_span, dict) else {}
         strain = loaded.get("strain_name_as_reported")
         out.append(
             FacetRecord(

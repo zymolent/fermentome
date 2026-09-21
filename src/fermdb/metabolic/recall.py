@@ -794,41 +794,46 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
                     by_symbol.setdefault(role, set()).add(part_id)
         if recognised:
             reported = reported_designations(entry, by_gene)
-            for role, part_ids in by_symbol.items():
+            # Distinct names from the loop above deliberately: `part_ids` there is the catalog
+            # lookup's `tuple[str, ...] | None` and here it is a `set[str]`, and reusing one name
+            # for both makes the narrowing call's argument type unprovable.
+            for symbol_role, symbol_part_ids in by_symbol.items():
                 narrowed, designation, colliding = _narrow_by_designation(
-                    part_ids, reported, designations
+                    symbol_part_ids, reported, designations
                 )
                 if colliding:
                     # THE SAFEGUARD, in the same shape as the organism clause's: a named refusal
                     # that says which parts collided, and leaves the role unfilled rather than
                     # quietly reverting to an ambiguous match over the cofactor the record named.
                     ambiguous_variants.append(
-                        AmbiguousVariant(role, entry, designation or "", colliding)
+                        AmbiguousVariant(symbol_role, entry, designation or "", colliding)
                     )
                     continue
-                found[role] |= narrowed
-                entries_for[role].add(entry)
-                resolved_by[role].add(BY_GENE_SYMBOL)
+                found[symbol_role] |= narrowed
+                entries_for[symbol_role].add(entry)
+                resolved_by[symbol_role].add(BY_GENE_SYMBOL)
                 if designation is not None:
-                    resolved_by[role].add(BY_VARIANT_DESIGNATION)
+                    resolved_by[symbol_role].add(BY_VARIANT_DESIGNATION)
             continue
 
         if names_a_role:
-            role = _sole_step_role(tokens)
+            # `sole_role` rather than `role`: the loop above binds `role` to a definite `str` from
+            # `role_of`, while this is the optional result of a lookup that may find no single role.
+            sole_role = _sole_step_role(tokens)
             organism = source_organism_of(entry)
-            if role is not None and organism is not None:
-                candidates = _parts_from(parts, role, organism)
+            if sole_role is not None and organism is not None:
+                candidates = _parts_from(parts, sole_role, organism)
                 if len(candidates) == 1:
-                    found[role].add(candidates[0])
-                    entries_for[role].add(entry)
-                    resolved_by[role].add(BY_SOURCE_ORGANISM)
+                    found[sole_role].add(candidates[0])
+                    entries_for[sole_role].add(entry)
+                    resolved_by[sole_role].add(BY_SOURCE_ORGANISM)
                     continue
                 if len(candidates) > 1:
                     # THE SAFEGUARD. Not a pick, not a silent fall-through to "vague record": a
                     # named refusal that says which parts collided, because the collision is the
                     # curation question and the reader is the one who can settle it.
                     ambiguous_sources.append(
-                        AmbiguousSource(role, entry, organism, tuple(candidates))
+                        AmbiguousSource(sole_role, entry, organism, tuple(candidates))
                     )
                     continue
                 # Zero candidates: the phrase parsed but the catalog has no such part. Treated as
