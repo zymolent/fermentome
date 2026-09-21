@@ -30,7 +30,7 @@
 # Lactococcus lactis) are equally unverified. Nothing marked `unverified` may support an assertion
 # until it is checked against primary literature, which is what the literature layer is for.
 #
-# `adh7_native` is the first exception and is marked `medium`. It was written by reading the
+# `adh7_native` was the first exception and is marked `medium`. It was written by reading the
 # stored full text of the paper that used it and quoting what that paper says, so it is not
 # background knowledge and must not be filed as though it were -- a file where a checked entry and
 # an unchecked one carry the same confidence has thrown away the distinction it exists to record.
@@ -41,6 +41,14 @@
 #     enumerator skips it rather than scoring a demand nobody has checked.
 #   * `medium`, not `high`. One paper's report of its own construction, quoted, and confirmed by
 #     nothing else.
+#
+# 2026-09-22: THE THREE `cofactor_cycle` ENTRIES AT THE FOOT OF THIS FILE NOW MEET THE SAME
+# STANDARD. `pos5_native` and `adh3_native` existed but were recalled rather than read; they have
+# been re-grounded against the stored corpus and quote it, and `gpd1_gpd2_native` is new and was
+# written the same way. All three are `medium`, all three carry DOIs, and each has at least one
+# field left `unknown` because no source in the corpus states it. They are also the parts the
+# route enumerator's optional sixth role draws on, so the standard matters more here than
+# elsewhere: a redox claim in this section is what decides whether a route's balance closes.
 
 version: 1
 zone: I
@@ -307,6 +315,33 @@ parts:
     confidence: unverified
 
   # ---- cofactor_cycle: the DUET coupling ------------------------------------------------------
+  #
+  # THESE THREE ARE THE PARTS OF THE ENUMERATOR'S OPTIONAL SIXTH ROLE (owner's ruling, 2026-09-22).
+  # Until that ruling the five catalytic roles all consumed reducing power and none regenerated it,
+  # so no route could ever close and these parts sat in the catalog with nothing able to use them.
+  # `routes.py` now enumerates every SUBSET of them alongside the five-step product, and the empty
+  # subset -- no cofactor cycle at all, which is what nearly every published build is -- is a
+  # first-class member rather than a missing value.
+  #
+  # WHAT `cofactor_preference` MEANS IN THIS SECTION, AND WHY IT IS NOT A DEMAND. For the five
+  # catalytic roles the field names a pool the step *consumes*. Here it names the pool the enzyme
+  # ACTS ON, and the direction lives in the curated reaction and nowhere else: Adh3 declares NADH
+  # and produces it, Gpd declares NADH and spends it, Pos5 declares NADH and converts it to NADPH.
+  # `routes.py` therefore skips these steps in `_cofactor_gate` and in `cofactor_demand` -- both of
+  # which ask an unsigned question -- and reads their signed contribution out of the stoichiometry
+  # in `ethanol_reference.yaml`, matched to the part BY GENE SYMBOL. So the `genes` list on each of
+  # these three is not decoration: it is the key that decides which curated reaction the step is.
+  #
+  # NOT CURATED HERE, DELIBERATELY: a cytosolic Pos5. The corpus treats it as its own construct
+  # rather than as a relocalization -- "a cytosolic version of the mitochondrial NADH kinase from
+  # Saccharomyces cerevisiae (cPOS5)" (10.1186/s12934-023-02123-0), and "the truncated gene
+  # pos5D17" in 10.1016/j.synbio.2025.04.016 -- and that is also how this catalog would have to
+  # hold it, because a cofactor-cycle step takes its compartment from its part. It is left out for
+  # now because the enumerated route count doubles with each part added to this section, and
+  # because 10.1016/j.mec.2024.e00245 reports the intervention as equivocal: "Whereas cytosolic
+  # Pos5 expression showed positive effects in some studies ... it was described as rather
+  # detrimental by other authors". Recorded as an absence with its reason, per CONVENTIONS.md.
+
   - id: pos5_native
     step_role: cofactor_cycle
     source_organism: "Saccharomyces cerevisiae"
@@ -314,13 +349,47 @@ parts:
     native_compartment: mitochondrial_matrix
     sequence_encoding_genome: nuclear
     cofactor_preference: NADH
-    oxygen_sensitivity: insensitive
+    oxygen_sensitivity: unknown
     evidence: >-
-      Mitochondrial NADH kinase: the only local route from matrix NADH to matrix NADPH, and so the
-      coupling strategy C depends on. MEASURED at median 19.4 TPM against ILV5's 174, roughly
-      nine-fold below the enzyme consuming its product -- overexpression is an obvious route
-      intervention and the baseline is the argument for it.
-    confidence: unverified
+      RE-GROUNDED 2026-09-22 against the stored corpus; this entry used to assert the same facts
+      from background knowledge. 10.1016/j.mec.2024.e00245 states the two that decide routes in one
+      sentence: "the kinase Pos5 - naturally a mitochondrial enzyme - is regarded as particularly
+      suitable, as it strongly prefers NADH over NAD+". That is the basis for both
+      native_compartment and cofactor_preference, and neither is recalled. The same paragraph gives
+      the cost the route ranker cannot see: "the kinase consumes ATP and decreases the amount of
+      NADH available for respiration".
+
+      What the enzyme does is quoted rather than inferred. 10.1186/1475-2859-10-27: "Pos5 is
+      mitochondrial NADH kinase and phosphorylates NADH and NAD(+) with lower specificity and it is
+      required for the response to oxidative stress". 10.1128/spectrum.00108-23: "Pos5 is an NADH
+      kinase responsible for the production of mitochondrial NADPH". And it is used as a redox
+      intervention in exactly the way DUET proposes, in another host:
+      10.1186/s13068-019-1356-4 "constructed a NADPH-regenerating system from NADH by expressing
+      NADH kinase (Pos5p) from S. cerevisiae", whose Methods add "The gene POS5 was amplified from
+      Saccharomyces cerevisiae genome" -- which is where source_organism comes from.
+
+      sequence_encoding_genome is nuclear: the gene is amplified from the S. cerevisiae nuclear
+      genome and expressed from a plasmid in the papers above, so it reads under NCBI table 1 and a
+      presequence-targeted construct of it needs no recoding.
+
+      NOT RECORDED, DELIBERATELY. oxygen_sensitivity is 'unknown'. It used to say 'insensitive',
+      which was recalled. "Required for the response to oxidative stress" is a statement about the
+      cell's need for Pos5 under oxidative stress and is NOT a statement about whether the enzyme
+      itself is oxygen-labile; reading the second out of the first would be exactly the inference
+      this file exists to refuse. native_compartment is 'mitochondrial_matrix' because that is the
+      compartment term the atlas has and the one the curated `pos5_nadh_kinase` reaction is written
+      for; the sources quoted say "mitochondrial" and do not resolve matrix against intermembrane
+      space, so the sub-compartment claim is the atlas's own and is weaker than the rest.
+
+      MEASURED, in this atlas: median 19.4 TPM against ILV5's 174
+      (docs/reports/2026-09-20-duet-expression-baseline.md), roughly nine-fold below the enzyme
+      consuming its product -- overexpression is an obvious route intervention and the baseline is
+      the argument for it.
+
+      CONFIDENCE 'medium', not 'high': every claim above is quoted from the corpus copy of a paper
+      that is reporting or reviewing somebody's construction, and none of it has been confirmed by
+      a measurement in this atlas.
+    confidence: medium
 
   - id: adh3_native
     step_role: cofactor_cycle
@@ -329,10 +398,89 @@ parts:
     native_compartment: mitochondrial_matrix
     sequence_encoding_genome: nuclear
     cofactor_preference: NADH
-    oxygen_sensitivity: insensitive
+    oxygen_sensitivity: unknown
     evidence: >-
-      Oxidises ethanol inside the matrix, delivering reducing equivalents across the inner
-      membrane without a shuttle -- ethanol crosses freely, NADH does not. Nuclear-encoded despite
-      acting in the matrix, so it reads under table 1 and a presequence-targeted construct needs
-      no recoding. Measured at median 232 TPM, the best-expressed member of the redox set.
-    confidence: unverified
+      RE-GROUNDED 2026-09-22 against the stored corpus. 10.1128/aem.00362-26 gives the compartment
+      and the job in one sentence -- "Adh3 is located in the mitochondrial matrix, where it plays a
+      role in anaerobic balancing of the NAD+/NADH ratio" -- and the cofactor two sentences
+      earlier, surveying the family: "The S. cerevisiae genome harbors seven ADH-encoding genes, of
+      which Adh1-5 are NAD+-dependent, while Adh6 and Adh7 are NADP+-dependent enzymes with very
+      low activities towards ethanol". Adh3 is one of Adh1-5, so cofactor_preference is NADH by
+      quotation rather than by recall.
+
+      The direction that makes it a cofactor-cycle part, rather than a sixth alcohol dehydrogenase
+      competing for the ADH step, is the one the corpus describes: 10.1128/spectrum.03519-22 --
+      "This reaction is catalyzed by ADH3-encoded mitochondrial alcohol dehydrogenase in
+      Saccharomyces and helps to regenerate mitochondrial NAD+ at the level of the
+      ethanol-acetaldehyde shuttle"; 10.1186/s13068-016-0583-1 -- "ADH3, which encodes a
+      mitochondrial alcohol dehydrogenase involved in NADH shuttling to the cytosol under anaerobic
+      conditions". DUET runs that shuttle the other way, and the reason it can is quoted in
+      10.1111/1751-7915.12160: ethanol and acetaldehyde "can freely diffuse through mitochondrial
+      membranes" and "are oxidized or reduced by cytosolic or mitochondrial alcohol dehydrogenases
+      transferring the NADH excess from one cellular compartment to the other". So matrix reducing
+      power arrives without a carrier, which is why CARRIER_KNOWN in routes.py records ethanol
+      crossing in both directions and records nothing for NADH.
+
+      sequence_encoding_genome is nuclear -- 10.1007/s00253-015-7266-x searches "The D. bruxellensis
+      ADH3 protein sequence ... for mitochondrial-targeting motifs by pairwise alignment with S.
+      cerevisiae ADH3 sequence", which is a presequence on a nuclear gene, not an mtDNA-carried
+      one. It therefore reads under NCBI table 1 and needs no recoding, which is the distinction
+      this project has been wrong about before.
+
+      NOT RECORDED, DELIBERATELY. oxygen_sensitivity is 'unknown'; it used to say 'insensitive' and
+      no source in the corpus states it. The sources above describe Adh3's role under ANAEROBIC
+      conditions, which says when the flux matters and not whether the enzyme is oxygen-labile.
+
+      MEASURED, in this atlas: median 232 TPM, the best-expressed member of the redox set
+      (docs/reports/2026-09-20-duet-expression-baseline.md).
+
+      CONFIDENCE 'medium', not 'high': quoted from four papers, none of which measured Adh3 for
+      this purpose, and none confirmed here.
+    confidence: medium
+
+  - id: gpd1_gpd2_native
+    step_role: cofactor_cycle
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [GPD1, GPD2]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: NADH
+    oxygen_sensitivity: unknown
+    evidence: >-
+      NEW 2026-09-22, and read rather than recalled. The reaction, the cofactor and the EC number
+      are one sentence of 10.1016/j.synbio.2021.12.010: anaerobic S. cerevisiae cultures "rely on
+      NADH-dependent reduction of the glycolytic intermediate dihydroxyacetone-phosphate to
+      glycerol-3-phosphate, in a reaction catalysed by NAD+-dependent glycerol-3-phosphate
+      dehydrogenase (Gpd1, Gpd2, EC 1.1.1.8)". That matches the curated `gpd_glycerol3p` reaction
+      in ethanol_reference.yaml term for term, which is what lets the enumerator resolve this part
+      to that reaction by gene symbol.
+
+      IT IS A SINK FOR REDUCING POWER, NOT A SOURCE, and that is the point of curating it. The same
+      paper: "due to the essential role of glycerol formation in NADH redox-cofactor balancing in
+      non-respiratory cultures, double deletion of GPD1 and GPD2 prevents anaerobic growth". What
+      Gpd regenerates is the OXIDISED member of the couple -- the NAD+ glycolysis needs -- so in a
+      balance that counts reducing equivalents it deepens the shortfall rather than closing it. A
+      "cofactor cycle" is not free reducing power, and this entry is the file's worked example of
+      that.
+
+      IT IS ALSO A REAL ISOBUTANOL INTERVENTION, in this atlas's own corpus:
+      10.1186/s13068-019-1486-8 reports that "deletion of glycerol-3-phosphate dehydrogenase genes
+      GPD1 and GPD2 prevented formation of glycerol and increased isobutanol production up to
+      1.32 g/L". Note the direction: the published move is to DELETE this part, not to add it. The
+      enumerator can express both, because it offers the part rather than asserting it.
+
+      native_compartment IS THE WEAKEST FIELD HERE AND IS FLAGGED AS SUCH. The atlas's curated
+      reaction places it in the cytosol and the substrate is a glycolytic intermediate, but the
+      corpus does not support a single clean answer for the pair: 10.1093/femsyr/foac007 states
+      "Gpd1 is mainly located in peroxisomes and Gpd2 in the cytosol and in mitochondria". So
+      'cytosol' is right for Gpd2 by quotation and is the curated reaction's compartment; it is not
+      a claim that all Gpd protein is cytosolic, and a route that turned on this part's
+      localisation should read that sentence first. The two genes are kept as ONE part because
+      every source quoted above treats them as one activity and deletes them together.
+
+      NOT RECORDED, DELIBERATELY. oxygen_sensitivity is 'unknown': nothing in the corpus states it.
+
+      CONFIDENCE 'medium', not 'high': three papers quoted, one of them a review, none of them a
+      measurement made or checked here -- and one field ('cytosol') where two of the sources do not
+      fully agree, said out loud rather than smoothed over.
+    confidence: medium

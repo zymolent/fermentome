@@ -27,8 +27,10 @@ import pytest
 
 from fermdb.config import Settings
 from fermdb.db import IN_MEMORY, open_db
-from fermdb.metabolic.curated import load_parts
+from fermdb.metabolic.curated import Part, load_parts
 from fermdb.metabolic.recall import (
+    BY_GENE_SYMBOL,
+    BY_SOURCE_ORGANISM,
     ENZYME_ALIASES,
     MATCHING_RULE,
     Configuration,
@@ -39,6 +41,7 @@ from fermdb.metabolic.recall import (
     load_configurations,
     recall_report,
     resolve_roles,
+    source_organism_of,
 )
 from fermdb.metabolic.routes import STEP_ORDER, enumerate_routes
 
@@ -88,6 +91,35 @@ def _verdict(config: Configuration, parts: tuple, routes: list) -> object:
     return classify(config, parts, routes, chassis_organism_id=_YEAST)
 
 
+#: The decarboxylase phrase both `doi:10.1016/j.cels.2019.10.006` configurations carry, verbatim.
+#: It is the whole reason the source-organism clause exists, so it is quoted once and reused.
+_KDC_FROM_LACTOCOCCUS = "2-ketoacid decarboxylase (KDC) from Lactococcus lactis"
+
+#: That paper's build as the atlas holds it: four gene symbols and one organism-qualified role.
+_CELS_2019 = ["ILV2", "ILV3", "ILV5", "ADH7", _KDC_FROM_LACTOCOCCUS]
+
+
+def _a_second_lactococcal_kdc() -> Part:
+    """A hypothetical second *Lactococcus lactis* KDC part, built here rather than curated.
+
+    The point of the source-organism clause is that it is safe only while the catalog holds ONE
+    part for the pair. Testing that means making the catalog hold two, which is a fixture and not
+    a curation act — `data/pathways/parts_catalog.yaml` is untouched.
+    """
+    return Part(
+        id="kivd2_lactococcus_fixture",
+        step_role="KDC",
+        source_organism="Lactococcus lactis",
+        genes=("kivD2",),
+        native_compartment="cytosol",
+        sequence_encoding_genome="nuclear",
+        cofactor_preference="unknown",
+        oxygen_sensitivity="unknown",
+        evidence="synthetic test fixture: a second part for an already-occupied (role, organism)",
+        confidence="low",
+    )
+
+
 # ------------------------------------------------------------------ the rule is inspectable
 
 
@@ -122,9 +154,17 @@ def test_every_clause_of_the_rule_is_reachable(parts: tuple, routes: list) -> No
         "catalog_gap": _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH2"]),
         "under_specified": _configuration(["ILV2", "ILV5", "ILV3", "KDC", "ADH"]),
     }
-    assert set(cases) == {clause.name for clause in MATCHING_RULE}
+    # `source_organism_ambiguous` is the one clause that cannot be reached against the real
+    # catalog, because the catalog holds exactly one Lactococcus KDC — which is precisely the fact
+    # that makes those two configurations resolvable. Reaching it needs a second such part.
+    ambiguous = (_configuration(_CELS_2019), (*parts, _a_second_lactococcal_kdc()))
+    assert set(cases) | {"source_organism_ambiguous"} == {c.name for c in MATCHING_RULE}
     for expected, config in cases.items():
         assert _verdict(config, parts, routes).clause == expected, expected
+    assert (
+        classify(ambiguous[0], ambiguous[1], routes, chassis_organism_id=_YEAST).clause
+        == "source_organism_ambiguous"
+    )
 
 
 # ---------------------------------------------------------------- where the enzyme names come from
@@ -233,6 +273,130 @@ def test_a_cofactor_cycle_gene_is_recognised_but_fills_no_step_role(parts: tuple
     assert resolution.unfilled_roles == STEP_ORDER
 
 
+# ------------------------------------------------- 'ROLE from ORGANISM' — the owner's 2026-09-22
+# ruling, and the uniqueness requirement that is the whole of its safety.
+
+
+def test_a_role_name_qualified_by_a_source_organism_is_an_identification(parts: tuple) -> None:
+    """The ruling. `"KDC"` alone is a wildcard; `"KDC from Lactococcus lactis"` names a protein,
+    because the catalog holds exactly one Lactococcus KDC and can say which one.
+
+    The entry must leave `role_named_only` — it is no longer a record that failed to say what it
+    built — and the resolution must say it was reached BY SOURCE ORGANISM rather than by a gene
+    symbol, because those are different strengths of evidence.
+    """
+    resolution = resolve_roles([_KDC_FROM_LACTOCOCCUS], parts)
+    kdc = next(r for r in resolution.roles if r.role == "KDC")
+    assert kdc.part_ids == ("kivd_lactococcus",)
+    assert kdc.resolved_by == (BY_SOURCE_ORGANISM,)
+    assert not kdc.ambiguous
+    assert resolution.role_named_only == ()
+    assert resolution.unrecognised == ()
+    assert resolution.ambiguous_sources == ()
+    assert resolution.organism_resolved_roles == ("KDC",)
+
+
+def test_a_second_part_for_the_same_role_and_organism_turns_the_match_into_a_refusal(
+    parts: tuple, routes: list
+) -> None:
+    """THE SAFEGUARD, tested by breaking it. This is the property the whole clause rests on.
+
+    Uniqueness in the catalog is what makes `"KDC from Lactococcus lactis"` an identification
+    rather than a guess. So the resolution must not outlive it: add a second *Lactococcus lactis*
+    KDC and today's match has to become a REFUSAL by itself, with both colliding parts named — not
+    a silently kept stale answer, and not a coin toss between them.
+    """
+    config = _configuration(_CELS_2019)
+    before = _verdict(config, parts, routes)
+    assert before.clause == "matched"
+    assert before.organism_resolved_roles == ("KDC",)
+
+    crowded = (*parts, _a_second_lactococcal_kdc())
+    after = classify(config, crowded, routes, chassis_organism_id=_YEAST)
+    assert after.clause == "source_organism_ambiguous"
+    assert after.outcome == "not_evaluable", "a refusal is never a match and never a miss"
+    assert after.route_ids != (), "the routes it WOULD have matched are not the question"
+    assert "kivd_lactococcus" in after.detail and "kivd2_lactococcus_fixture" in after.detail
+    assert after.resolution is not None
+    assert [a.role for a in after.resolution.ambiguous_sources] == ["KDC"]
+    assert after.resolution.unfilled_roles == ("KDC",), "refused means unfilled, not half-filled"
+    # And the refusal must not leak into the figure as a match by any other door.
+    report = recall_report((config,), crowded, routes, chassis_organism_id=_YEAST)
+    assert report.matched == ()
+    assert report.recall is None and report.coverage == 0.0
+
+
+def test_an_abbreviated_genus_and_a_strain_suffix_still_name_the_same_organism(
+    parts: tuple,
+) -> None:
+    """Papers write `L. lactis` and `Lactococcus lactis subsp. lactis IFPL730`. Both are the same
+    source organism for the purpose of asking which catalog part the author meant, and the strain
+    suffix is discarded rather than interpreted."""
+    for phrase in (
+        "KDC from L. lactis",
+        "2-ketoacid decarboxylase (KDC) from Lactococcus lactis subsp. lactis IFPL730",
+        "KDC from lactococcus lactis",
+    ):
+        resolved = dict((r.role, r.part_ids) for r in resolve_roles([phrase], parts).roles)
+        assert resolved["KDC"] == ("kivd_lactococcus",), phrase
+
+
+def test_a_bare_role_name_is_still_refused_and_that_is_not_eroded(parts: tuple) -> None:
+    """The thing the new clause must NOT loosen. Without an organism there is nothing for
+    uniqueness to bite on, so `"KDC"` would resolve to every KDC part — the wildcard that returns
+    100% recall on an empty record. A one-word 'organism' is the same case.
+
+    `"KDC from the Ehrlich pathway"` is the interesting one: the two words after `from` are shaped
+    like a binomial and the parser does read them as a candidate. Nothing rests on the parser
+    rejecting them — safety comes from matching against `part.source_organism`, and no part is
+    from the genus *the*. Asserted behaviourally for that reason: the role stays unfilled.
+    """
+    for phrase in ("KDC", "ADH", "KDC from the Ehrlich pathway", "KDC from yeast"):
+        resolution = resolve_roles([phrase], parts)
+        assert not any(role.filled for role in resolution.roles), phrase
+        assert resolution.role_named_only == (phrase,), phrase
+        assert resolution.ambiguous_sources == (), phrase
+    assert source_organism_of("KDC") is None
+    assert source_organism_of("KDC from yeast") is None, "one word is not a binomial"
+    assert source_organism_of(_KDC_FROM_LACTOCOCCUS) == "Lactococcus lactis"
+
+
+def test_an_organism_with_no_part_for_that_role_falls_through_rather_than_guessing(
+    parts: tuple, routes: list
+) -> None:
+    """The catalog has an *E. coli* DHAD and no *E. coli* KDC. A phrase naming one must leave the
+    role unfilled and the configuration not-evaluable — never resolved to the nearest KDC, and
+    never asserted as a catalog gap, which would be a miss claimed on a parse."""
+    resolution = resolve_roles(["KDC from Escherichia coli"], parts)
+    assert not any(role.filled for role in resolution.roles)
+    assert resolution.role_named_only == ("KDC from Escherichia coli",)
+    assert resolution.unrecognised == ()
+    verdict = _verdict(
+        _configuration(["ILV2", "ILV5", "ILV3", "ADH7", "KDC from Escherichia coli"]), parts, routes
+    )
+    assert verdict.clause == "under_specified"
+
+
+def test_a_gene_family_named_as_a_block_is_not_rescued_by_an_organism(parts: tuple) -> None:
+    """`"ILV genes from Saccharomyces cerevisiae"` names three steps at once, and each of them has
+    exactly one native yeast part — so a rule that resolved role by role would fill all three off
+    a record that never named a protein. That is the wildcard wearing a binomial, and it is
+    refused: the ruling resolves ONE role qualified by an organism, not a block of them."""
+    resolution = resolve_roles(["ILV genes from Saccharomyces cerevisiae"], parts)
+    assert not any(role.filled for role in resolution.roles)
+    assert resolution.role_named_only == ("ILV genes from Saccharomyces cerevisiae",)
+
+
+def test_a_gene_symbol_beats_an_organism_phrase_and_the_kind_says_which(parts: tuple) -> None:
+    """`kivD` is an exact gene symbol; the organism path is only reached by an entry no symbol
+    recognised. A match made both ways is still reported as the stronger kind at that role."""
+    resolution = resolve_roles(["kivD"], parts)
+    kdc = next(r for r in resolution.roles if r.role == "KDC")
+    assert kdc.part_ids == ("kivd_lactococcus",)
+    assert kdc.resolved_by == (BY_GENE_SYMBOL,)
+    assert resolution.organism_resolved_roles == ()
+
+
 # ------------------------------------------------------------------------- matching and misses
 
 
@@ -335,6 +499,25 @@ def test_recall_is_over_the_judgeable_set_and_coverage_says_how_big_that_was(
     # partial is over ALL four: the matched one and the under-specified one whose named steps agreed
     assert report.partial == pytest.approx(0.5)
     assert report.partial >= report.recall * report.coverage
+
+
+def test_the_report_counts_the_two_kinds_of_match_apart(parts: tuple, routes: list) -> None:
+    """Somebody reading 100% must be able to see how much of it rests on the weaker
+    identification. Both kinds are counted, both are printed, and the per-configuration line says
+    which one that configuration used — so the breakdown is never only a total."""
+    configurations = (
+        _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH6"], name="by gene symbol"),
+        _configuration(_CELS_2019, name="by source organism"),
+    )
+    report = recall_report(configurations, parts, routes, chassis_organism_id=_YEAST)
+    assert report.recall == pytest.approx(1.0)
+    assert [v.configuration.name for v in report.matched_by_gene_symbol] == ["by gene symbol"]
+    assert [v.configuration.name for v in report.matched_by_source_organism] == [
+        "by source organism"
+    ]
+    body = "\n".join(describe_report(report))
+    assert "1   matched by gene symbol, and 1 by a role name plus a source organism" in body
+    assert "resolved BY SOURCE ORGANISM at KDC" in body
 
 
 def test_the_report_names_every_miss_and_the_enzymes_behind_it(parts: tuple, routes: list) -> None:

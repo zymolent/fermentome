@@ -38,6 +38,7 @@ from .routes import (
     enumerate_routes,
     explain,
     insertion_plan,
+    pathway_for_routes,
     rank,
     write_routes,
 )
@@ -189,19 +190,23 @@ def cmd_atlas_routes(args: argparse.Namespace) -> int:
     settings = Settings.load()
     parts = load_parts(settings)
     chassis = selected_profile(load_profiles(settings))
-    routes = enumerate_routes(parts, chassis=chassis)
+    # The curated stoichiometry the per-compartment redox balance is summed from. Without it every
+    # route is flagged `unknown` rather than `balanced`, which is honest but useless.
+    pathway = pathway_for_routes(load_pathways(settings))
+    routes = enumerate_routes(parts, chassis=chassis, pathway=pathway)
     ordered = rank(routes, objective=args.objective)
     excluded = [route for route in routes if not route.viable]
 
     print(f"{len(routes)} routes enumerated, {len(ordered)} viable, {len(excluded)} excluded")
     print(f"ranked by objective={args.objective} ({_OBJECTIVE_MEANS[args.objective]})")
     print()
-    print(f"{'#':>4}  {'strategy':28}{'gaps':>5}{'risks':>7}{'feas':>7}  parts")
+    print(f"{'#':>4}  {'strategy':28}{'gaps':>5}{'risks':>7}{'feas':>7}  {'redox':10}parts")
     for index, route in enumerate(ordered[: args.limit], start=1):
         chain = " + ".join(step.part.id for step in route.steps)
         print(
             f"{index:>4}  {route.strategy:28}{len(route.transport_gaps):>5}"
-            f"{len(route.cofactor_risks):>7}{route.score_feasibility or 0:>7.2f}  {chain}"
+            f"{len(route.cofactor_risks):>7}{route.score_feasibility or 0:>7.2f}  "
+            f"{route.redox_balance.status:10}{chain}"
         )
     if excluded:
         print()
@@ -222,6 +227,15 @@ def cmd_atlas_routes(args: argparse.Namespace) -> int:
                     seen.add(gate.message)
                     print(f"      [{gate.kind}] {gate.message}")
     print()
+    tally: dict[str, int] = {}
+    for route in routes:
+        tally[route.redox_balance.status] = tally.get(route.redox_balance.status, 0) + 1
+    print("per-compartment redox: " + ", ".join(f"{n} {s}" for s, n in sorted(tally.items())))
+    print("  Flagged, never excluded (owner's ruling, 2026-09-22): a route whose balance does not")
+    print("  close keeps its place in the enumeration and in the ranking, and the flag is not a")
+    print("  sort key. `fermdb atlas explain <route>` names the compartment, pool and magnitude.")
+    print("  'unknown' means the stoichiometry is not in the atlas. It never means 'balanced'.")
+    print()
     print("Evidence and toxicity are NULL on every route: nothing has been extracted from the")
     print("literature and no tolerance has been measured. NULL is 'not yet looked', not 0.")
 
@@ -241,7 +255,9 @@ def cmd_atlas_routes(args: argparse.Namespace) -> int:
 def cmd_atlas_explain(args: argparse.Namespace) -> int:
     """Explain why one route ranks where it does, by naming the dominating term."""
     settings = Settings.load()
-    routes = rank(enumerate_routes(load_parts(settings)), objective=args.objective)
+    pathway = pathway_for_routes(load_pathways(settings))
+    enumerated = enumerate_routes(load_parts(settings), pathway=pathway)
+    routes = rank(enumerated, objective=args.objective)
     loci = load_activator_map(settings)
     matches = [route for route in routes if args.route in route.id]
     if not matches:
@@ -258,6 +274,15 @@ def cmd_atlas_explain(args: argparse.Namespace) -> int:
             print(f"   cofactor risk: {risk}")
         for line in describe_demand(route.redox_demand):
             print(f"   redox demand: {line}")
+        # The per-compartment BALANCE, which is a different statement from the demand above: the
+        # demand counts how many steps want a pool, the balance sums the curated stoichiometry and
+        # says what does not close and where. Flagged, never excluded.
+        for line in route.redox_balance.imbalances:
+            print(f"   redox imbalance (flagged, not excluded): {line}")
+        for line in route.redox_balance.unknowns:
+            print(f"   redox NOT EVALUATED: {line}")
+        for line in route.redox_balance.substitutions:
+            print(f"   redox pool taken from the part: {line}")
         # PLAN.md phase 3: a strategy-E route must name its locus, leader, displaced gene and
         # recoding requirement. Empty for every other strategy, because nothing is in the mtDNA.
         for line in insertion_plan(route.steps, loci):
@@ -294,7 +319,12 @@ def cmd_atlas_recall(args: argparse.Namespace) -> int:
     # No chassis. A chassis gate excludes routes for THIS chassis, which is not a statement about
     # whether the enumerator can express somebody else's published build — and depressing recall
     # with it would attribute a curation question to the ranker.
-    routes = enumerate_routes(parts)
+    #
+    # The pathway IS supplied, so these are the same 600 route objects the other commands report
+    # on. It makes no difference to the figure — the redox flag excludes nothing, by the owner's
+    # ruling — and a route that carried a different balance depending on which command built it
+    # would be a needless second version of the truth.
+    routes = enumerate_routes(parts, pathway=pathway_for_routes(load_pathways(settings)))
 
     conn = open_db(settings.db_file, create=False)
     conn.execute("PRAGMA busy_timeout=60000")

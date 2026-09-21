@@ -27,8 +27,11 @@ from fermdb.config import Settings
 from fermdb.db import IN_MEMORY, open_db
 from fermdb.metabolic import load_parts, load_pathways, write_parts
 from fermdb.metabolic.routes import (
+    COFACTOR_CYCLE,
+    ROUTE_STEP_ROLES,
     STEP_ORDER,
     STRATEGY_PLANS,
+    cofactor_cycle_sets,
     enumerate_routes,
     explain,
     pathway_for_routes,
@@ -82,12 +85,33 @@ def test_enumeration_is_the_full_product_of_parts_and_strategies(
     parts: tuple, routes: list
 ) -> None:
     """Generative, not a catalogue of published builds — which is the only way 'what has never
-    been tried' can be read off as the complement of the evidence."""
+    been tried' can be read off as the complement of the evidence.
+
+    CHANGED 2026-09-22. The product gained a factor. It used to be
+    `strategies x AHAS x KARI x DHAD x KDC x ADH`; the owner's ruling added an **optional**
+    `cofactor_cycle` role, so it is now that same product times the number of *subsets* of the
+    cofactor-cycle parts — `2 ** k`, whose first term is the empty subset. The five catalytic
+    roles are still required and are still counted exactly as before, which is the half of the
+    contract this test was protecting and still protects.
+
+    The `2 ** k` is asserted against `cofactor_cycle_sets` rather than recomputed from
+    `len(parts)`, because the thing worth pinning is that the enumerator multiplies by *the same
+    set the catalog offers* — including, crucially, the empty one.
+    """
     per_role = {role: sum(1 for p in parts if p.step_role == role) for role in STEP_ORDER}
     expected = len(STRATEGY_PLANS)
     for count in per_role.values():
         expected *= count
-    assert len(routes) == expected
+
+    cycles = cofactor_cycle_sets(parts)
+    cycle_parts = [p for p in parts if p.step_role == "cofactor_cycle"]
+    assert len(cycles) == 2 ** len(cycle_parts)
+    assert cycles[0] == (), "the empty set is a member, and it is the first one"
+
+    assert len(routes) == expected * len(cycles)
+    # and the catalytic half of the product is untouched: exactly `expected` routes carry no
+    # cofactor cycle at all, which is the population that existed before this axis did.
+    assert sum(1 for r in routes if not r.cofactor_cycle) == expected
 
 
 def test_a_missing_part_for_a_step_is_an_error_not_an_empty_result(parts: tuple) -> None:
@@ -403,11 +427,17 @@ def test_a_route_of_non_redox_steps_balances_which_is_how_balanced_is_reachable(
 ) -> None:  # noqa: ANN001 - a CuratedPathway
     """`balanced` is not dead code, it is merely unreached by the current catalog.
 
-    No route comes back balanced today and that is a finding, not a bug: the five catalytic steps
-    consume reducing power and none of them regenerates it, so closure would need a
-    `cofactor_cycle` part and STEP_ORDER has no slot for one. Substitute non-redox parts into the
-    two redox steps and the same function returns `balanced` — which is what makes the three-state
-    verdict a measurement rather than a constant.
+    CHANGED 2026-09-22 — THE REASON NOTHING BALANCES IS NOW A DIFFERENT AND SHARPER ONE. This test
+    used to say closure "would need a `cofactor_cycle` part and STEP_ORDER has no slot for one".
+    That was true and is not any more: the enumerator has an optional cofactor-cycle role, routes
+    carrying POS5 and ADH3 are enumerated, and `test_the_duet_pair_closes_the_mitochondrial_matrix`
+    below shows a compartment closing for the first time. Nothing balances for an **arithmetic**
+    reason the slot exposed rather than caused — a route spends two reducing equivalents (the KARI
+    and the ADH) and the only curated cofactor-cycle reaction that supplies one, Adh3, supplies
+    one — so the assertion below is kept, with its meaning restated, rather than deleted.
+
+    Substitute non-redox parts into the two redox steps and the same function returns `balanced`,
+    which is what makes the three-state verdict a measurement rather than a constant.
     """
     assert not [r for r in routes if r.redox_balance.status == "balanced"]
 
@@ -467,6 +497,392 @@ def test_the_pool_is_taken_from_the_part_and_the_substitution_is_named(routes: l
         and any(s.part.id == "ilv5_native" for s in r.steps)
     )
     assert agreeing.redox_balance.substitutions == ()
+
+
+# ------------------------------------------- the optional cofactor_cycle role (owner, 2026-09-22)
+#
+# THE RULING: add a `cofactor_cycle` step role so POS5, ADH3 and GPD can exist as parts, and make
+# it OPTIONAL — most published builds have no cofactor-cycle step, and a route without one is a
+# real route rather than a deficient one.
+#
+# Optionality is expressed as a POWER SET over the cofactor-cycle parts whose empty member is
+# first and is a first-class value, and the role is deliberately NOT a member of `STEP_ORDER`.
+# The tests below pin both halves, and the second one has teeth: `metabolic/recall.py` reads
+# `STEP_ORDER` as "the roles a published configuration must fill", so a role added there would
+# make every published build unmatchable.
+
+
+def test_a_route_with_no_cofactor_cycle_is_a_route_and_not_a_deficient_one(
+    parts: tuple, routes: list
+) -> None:
+    """The constraint that mattered most, as four assertions.
+
+    *Enumerated*: the 800 routes that existed before this axis are all still here.
+    *Identical*: byte for byte — same ids, because an empty cycle set appends nothing to a route
+    id — and with the same redox verdicts, so the change added routes rather than moving any.
+    *Not marked*: nothing about a cycle-free route says it is incomplete. It is viable, ranked,
+    and `explain` prints `cofactor_cycle=none` rather than a count of zero.
+    *Not required*: a catalog with no cofactor-cycle parts at all still enumerates.
+    """
+    without_cycle_parts = [p for p in parts if p.step_role != COFACTOR_CYCLE]
+    baseline = enumerate_routes(without_cycle_parts)
+    assert baseline, "the role is optional, so its absence is not an error"
+
+    cycle_free = [r for r in routes if not r.cofactor_cycle]
+    assert [r.id for r in cycle_free] == [r.id for r in baseline]
+    assert all(len(r.steps) == len(STEP_ORDER) for r in cycle_free)
+    assert all(r.viable for r in cycle_free)
+
+    ranked = {r.id for r in rank(routes)}
+    assert all(r.id in ranked for r in cycle_free)
+    assert "cofactor_cycle=none" in explain(cycle_free[0])
+
+
+def test_the_optional_role_is_not_in_step_order_and_that_is_the_whole_design(
+    parts: tuple,
+) -> None:
+    """Where the role lives, and the alternative that was rejected.
+
+    `STEP_ORDER` is not "the roles a route can carry" — it is the roles a route MUST carry, and
+    `metabolic/recall.py` reads it as the roles a **published configuration** must fill before it
+    can be called re-discovered. No paper's enzyme list names POS5; it is a host gene, not a
+    pathway enzyme. So adding `cofactor_cycle` to `STEP_ORDER` would leave that role permanently
+    unfilled and turn every matched configuration into `under_specified` — which is precisely the
+    failure the ruling warned against, and it is not hypothetical: two of the four configurations
+    in the live atlas match today.
+
+    `ROUTE_STEP_ROLES` carries the optional role instead, so the two contracts stay separate.
+    """
+    assert COFACTOR_CYCLE not in STEP_ORDER
+    assert (*STEP_ORDER, COFACTOR_CYCLE) == ROUTE_STEP_ROLES
+    assert len(STEP_ORDER) == 5
+
+    # And the catalog really does carry parts under the optional role, or the point is untested.
+    assert {p.id for p in parts if p.step_role == COFACTOR_CYCLE} == {
+        "adh3_native",
+        "gpd1_gpd2_native",
+        "pos5_native",
+    }
+    # `resolve_roles` seeds one bucket per STEP_ORDER member; POS5 filling none of them is the
+    # property tests/test_recall.py pins from the other side, asserted here on the source of that
+    # tuple so a change to it fails in this file too.
+    assert all(part.step_role in ROUTE_STEP_ROLES for part in parts)
+
+
+def test_a_cofactor_cycle_step_takes_its_compartment_and_genome_from_its_own_part(
+    routes: list,
+) -> None:
+    """A compartment strategy relocalizes the five catalytic steps and says nothing about a redox
+    enzyme, so there is no strategy entry to read. Pos5 sits in the matrix in a cytosolic route
+    too — and that is not a bug, it is what makes the matrix bucket it opens visible.
+
+    The literature agrees that a relocalized Pos5 is a different construct rather than the same
+    one moved: the corpus calls it `cPOS5` and `pos5D17`, expressed without the targeting
+    sequence. If the atlas wants it, it is a second part.
+
+    The encoding genome comes from the part for the same reason, and the consequence is the one
+    the code gate exists for: POS5/ADH3/GPD are nuclear, so a cofactor-cycle step is **never**
+    flagged for recoding, not even in strategy E.
+    """
+    cytosolic = next(
+        r
+        for r in routes
+        if r.strategy == "B_cytosolic_relocalization"
+        and any(s.part.id == "pos5_native" for s in r.cofactor_cycle)
+    )
+    pos5 = next(s for s in cytosolic.cofactor_cycle if s.part.id == "pos5_native")
+    assert pos5.compartment == "mitochondrial_matrix"
+    assert all(s.compartment == "cytosol" for s in cytosolic.steps if s.step_role in STEP_ORDER)
+
+    mtdna = [r for r in routes if r.strategy == "E_mtdna_encoded" and r.cofactor_cycle]
+    assert mtdna
+    for route in mtdna:
+        assert all(not s.needs_recoding for s in route.cofactor_cycle), route.id
+        assert all("cofactor_cycle" not in req for req in route.construction_requirements)
+
+
+def test_a_cofactor_cycle_step_is_not_counted_as_a_demand_or_a_supply_risk(routes: list) -> None:
+    """`cofactor_preference` means something different on a cofactor-cycle part, and two unsigned
+    gates must not read it as though it did not.
+
+    `cofactor_demand` counts reducing equivalents a route CONSUMES and `_cofactor_gate` asks
+    whether a compartment supplies what a step NEEDS. Adh3 declares `NADH` and *produces* it, so
+    counting it in either would file a source of reducing power as a demand for it — and a wrong
+    number here would read as a measurement. The direction lives in the curated reaction, and
+    `redox_balance` is the function that reads it.
+
+    This is also what keeps the ranking of the pre-existing routes byte-identical: `rank`'s second
+    key counts cofactor risks, so a cycle step that added one would silently reorder the atlas.
+    """
+    from fermdb.metabolic.routes import cofactor_demand
+
+    with_adh3 = next(
+        r
+        for r in routes
+        if r.strategy == "C_mitochondrial_ehrlich"
+        and [s.part.id for s in r.cofactor_cycle] == ["adh3_native"]
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+        and any(s.part.id == "adh6_native" for s in r.steps)
+    )
+    bare = next(r for r in routes if r.id == with_adh3.id.split("+cycle:")[0])
+
+    assert cofactor_demand(with_adh3.steps) == cofactor_demand(bare.steps)
+    assert with_adh3.cofactor_risks == bare.cofactor_risks
+    # ...and the balance, which reads the signed stoichiometry, does NOT agree with them: that
+    # difference is the whole content of the change.
+    assert with_adh3.redox_balance.net != bare.redox_balance.net
+
+
+def test_a_cofactor_cycle_step_contributes_the_sign_its_curated_reaction_is_written_in(
+    routes: list,
+) -> None:
+    """Adh3 produces, Gpd consumes, and the atlas must not assume the first.
+
+    "Cofactor cycle" sounds like free reducing power and is not. `adh3_matrix` has NADH as a
+    product, so it contributes +1 to matrix NADH. `gpd_glycerol3p` has NADH as a substrate, so it
+    contributes -1 to cytosolic NADH: what Gpd regenerates is the *oxidised* member, which a sum
+    over reducing equivalents does not count. A model that treated every cofactor-cycle part as a
+    source would report the most-deleted gene in the ethanol literature as a way to close a route.
+    """
+
+    def net_of(strategy: str, cycle: list[str], kari: str, adh: str) -> dict:
+        route = next(
+            r
+            for r in routes
+            if r.strategy == strategy
+            and [s.part.id for s in r.cofactor_cycle] == cycle
+            and any(s.part.id == kari for s in r.steps)
+            and any(s.part.id == adh for s in r.steps)
+        )
+        return dict(route.redox_balance.net)
+
+    bare = net_of("C_mitochondrial_ehrlich", [], "ilvc6e6_ecoli", "adh1_native")
+    assert bare[("mitochondrial_matrix", "NADH")] == -2
+
+    adh3 = net_of("C_mitochondrial_ehrlich", ["adh3_native"], "ilvc6e6_ecoli", "adh1_native")
+    assert adh3[("mitochondrial_matrix", "NADH")] == -1, "Adh3 SUPPLIES one matrix NADH"
+
+    gpd = net_of("B_cytosolic_relocalization", ["gpd1_gpd2_native"], "ilvc6e6_ecoli", "adh1_native")
+    assert gpd[("cytosol", "NADH")] == -3, "Gpd is a further SINK, not a source"
+
+
+def test_pos5_moves_reducing_power_between_pools_and_never_creates_it(routes: list) -> None:
+    """The one step in this model that is different in kind, and the check that keeps it honest.
+
+    Pos5 consumes matrix NADH and produces matrix NADPH: **one compartment, two pools**. Every
+    other step spends or makes reducing power; this one only relocates it. So its two terms must
+    land in the same compartment and must sum to zero — the total reducing power of the route is
+    unchanged, only its distribution between the pools moves.
+    """
+    with_pos5 = next(
+        r
+        for r in routes
+        if r.strategy == "C_mitochondrial_ehrlich"
+        and [s.part.id for s in r.cofactor_cycle] == ["pos5_native"]
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+        and any(s.part.id == "adh1_native" for s in r.steps)
+    )
+    bare = next(r for r in routes if r.id == with_pos5.id.split("+cycle:")[0])
+
+    # Both terms in the matrix, and nowhere else: the inner membrane passes neither dinucleotide.
+    moved = {
+        key: with_pos5.redox_balance.net.get(key, 0.0) - bare.redox_balance.net.get(key, 0.0)
+        for key in set(with_pos5.redox_balance.net) | set(bare.redox_balance.net)
+    }
+    assert {k for k, v in moved.items() if v} == {
+        ("mitochondrial_matrix", "NADH"),
+        ("mitochondrial_matrix", "NADPH"),
+    }
+    assert moved[("mitochondrial_matrix", "NADH")] == -1
+    assert moved[("mitochondrial_matrix", "NADPH")] == +1
+    # IT CREATES NOTHING. The route's total reducing-equivalent debt is identical either side.
+    assert sum(moved.values()) == 0
+    assert sum(with_pos5.redox_balance.net.values()) == sum(bare.redox_balance.net.values())
+
+    # The pool is NOT taken from the part for a transfer: a single `cofactor_preference` cannot
+    # say how a kinase splits two pools, so nothing is inferred and nothing is recorded as
+    # inferred either.
+    assert not any("pos5_native" in note for note in with_pos5.redox_balance.substitutions)
+
+
+def test_a_declared_pool_transfer_that_does_not_conserve_is_unknown_not_balanced(
+    routes: list, pathway
+) -> None:  # noqa: ANN001 - a CuratedPathway
+    """The guard on the one branch that could manufacture a balanced route out of a typo.
+
+    A transfer relocates reducing power between pools and cannot create it, so its terms sum to
+    zero. That is checked rather than assumed: mistype Pos5's NADPH coefficient as 2 and the step
+    would appear to conjure an equivalent from ATP, and the route carrying it could come back
+    `balanced` — the one verdict in this module nobody would go back and re-derive.
+    """
+    route = next(
+        r
+        for r in routes
+        if [s.part.id for s in r.cofactor_cycle] == ["pos5_native"]
+        and r.strategy == "C_mitochondrial_ehrlich"
+    )
+    assert route.redox_balance.status == "unbalanced"
+
+    broken = replace(
+        pathway,
+        reactions=tuple(
+            replace(
+                reaction,
+                participants=tuple(
+                    replace(p, coefficient=2.0) if p.metabolite == "nadph" else p
+                    for p in reaction.participants
+                ),
+            )
+            if reaction.id == "pos5_nadh_kinase"
+            else reaction
+            for reaction in pathway.reactions
+        ),
+    )
+    verdict = redox_balance(route.steps, broken)
+    assert verdict.status == "unknown"
+    assert any("transfer" in line and "sum to +1" in line for line in verdict.unknowns), (
+        verdict.unknowns
+    )
+
+
+def test_the_duet_pair_closes_the_mitochondrial_matrix_for_the_first_time(routes: list) -> None:
+    """THE RESULT THE WHOLE CHANGE EXISTS FOR, and it is checked by hand in the docstring.
+
+    DUET is two genes in series: ADH3 oxidises matrix ethanol to matrix NADH, POS5 phosphorylates
+    that NADH to the matrix NADPH Ilv5 consumes. The native split runs Ilv2/Ilv5/Ilv3 in the
+    matrix and the Ehrlich steps in the cytosol. Term by term, on the route below:
+
+        AHAS  ilv2_ilv6_native  matrix   `ahas`             no redox participant   0
+        KARI  ilv5_native       matrix   `kari`             NADPH a substrate      -1 matrix NADPH
+        DHAD  ilv3_native       matrix   `dhad`             no redox participant   0
+        KDC   aro10_native      cytosol  `kdc`              no redox participant   0
+        ADH   adh1_native       cytosol  `adh_isobutanol`   NADH a substrate       -1 cytosol NADH
+        cycle adh3_native       matrix   `adh3_matrix`      NADH a PRODUCT         +1 matrix NADH
+        cycle pos5_native       matrix   `pos5_nadh_kinase` a declared transfer    -1 matrix NADH,
+                                                                                   +1 matrix NADPH
+
+        matrix NADPH   -1 + 1 = 0
+        matrix NADH    +1 - 1 = 0
+        cytosol NADH        -1
+
+    So **the mitochondrial matrix closes completely** — the first compartment the atlas has ever
+    reported as closing — and one open bucket remains, in the cytosol, where the ADH sits. The
+    route is still `unbalanced`, correctly: `COFACTOR_POOLS` records that the cytosol *has* NADH
+    and never *how much*, so "glycolysis will cover it" is a supply claim the atlas cannot make.
+
+    NOT A FULL CLOSURE, AND THE REASON IS WORTH KEEPING. A route spends two reducing equivalents
+    and Adh3 supplies one, so one bucket is open whatever set of cofactor-cycle parts is chosen.
+    Closing the last one needs a second equivalent of Adh3 flux — stoichiometric multiplicity a
+    model that picks each part once cannot express — or a cytosolic regenerating part nobody has
+    curated. Note also what this sum does NOT carry: Pos5 spends ATP, and an adenylate balance is
+    not part of this calculation.
+    """
+    duet = next(
+        r
+        for r in routes
+        if r.strategy == "A_native_split"
+        and [s.part.id for s in r.cofactor_cycle] == ["adh3_native", "pos5_native"]
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+        and any(s.part.id == "adh1_native" for s in r.steps)
+    )
+    assert duet.redox_balance.net[("mitochondrial_matrix", "NADPH")] == 0
+    assert duet.redox_balance.net[("mitochondrial_matrix", "NADH")] == 0
+    assert duet.redox_balance.net[("cytosol", "NADH")] == -1
+    assert duet.redox_balance.imbalances == ("NADH short by 1 in cytosol",)
+    assert duet.redox_balance.status == "unbalanced"
+    assert duet.viable and duet.id in {r.id for r in rank(routes)}
+
+    # Neither gene alone does it — which is why the axis holds a SET and not one nullable slot.
+    for alone in (["adh3_native"], ["pos5_native"]):
+        partial = next(
+            r
+            for r in routes
+            if r.strategy == "A_native_split"
+            and [s.part.id for s in r.cofactor_cycle] == alone
+            and any(s.part.id == "ilv5_native" for s in r.steps)
+            and any(s.part.id == "adh1_native" for s in r.steps)
+        )
+        matrix = [c for c, _, _ in partial.redox_balance.open_buckets]
+        assert "mitochondrial_matrix" in matrix, alone
+
+
+def test_the_curated_reaction_for_a_cycle_step_is_chosen_by_gene_and_never_guessed(
+    routes: list, pathway
+) -> None:  # noqa: ANN001 - a CuratedPathway
+    """Three curated reactions share the `cofactor_cycle` role and they are three *different
+    interventions*, not three descriptions of one. The part's gene symbol is what picks between
+    them — an identity claim both curated files already make — and it is exact, never substring:
+    a loose match would attach the matrix ethanol OXIDATION to Adh1 and sum a source where a sink
+    belongs.
+
+    Strip the genes off the part and the atlas stops being able to say which reaction the step is,
+    so the verdict is `unknown` with the role named. It is not resolved by position, by order in
+    the file, or by picking the first.
+    """
+    roles = {r.step_role for r in pathway.reactions}
+    assert COFACTOR_CYCLE in roles, "the cofactor-cycle reactions must reach the enumerator"
+    assert len([r for r in pathway.reactions if r.step_role == COFACTOR_CYCLE]) == 3
+
+    route = next(r for r in routes if [s.part.id for s in r.cofactor_cycle] == ["adh3_native"])
+    anonymous = tuple(
+        replace(step, part=replace(step.part, genes=()))
+        if step.step_role == COFACTOR_CYCLE
+        else step
+        for step in route.steps
+    )
+    verdict = redox_balance(anonymous, pathway)
+    assert verdict.status == "unknown"
+    assert any("cofactor_cycle" in line and "disagree" in line for line in verdict.unknowns), (
+        verdict.unknowns
+    )
+
+
+def test_a_metabolite_the_two_files_disagree_about_blocks_the_merge_rather_than_the_sum(
+    settings: Settings,
+) -> None:
+    """The merge that brings the cofactor-cycle reactions into the isobutanol pathway is the ONE
+    pooling across curated files this module permits, and it has a guard.
+
+    A metabolite id means the same thing in both files today — `nadh` is `nadh` — which is why the
+    merge is safe. If it ever stopped being true, summing a reaction from one file against a
+    metabolite table from the other would produce a number with no meaning. So a reaction whose
+    participants resolve differently in the two files is **not merged**, and its step then reports
+    `unknown` with the role named: the failure is loud and lands in the state reserved for "the
+    atlas does not say", rather than quietly changing a coefficient.
+    """
+    pathways = load_pathways(settings)
+    merged = pathway_for_routes(pathways)
+    assert merged is not None
+    assert len([r for r in merged.reactions if r.step_role == COFACTOR_CYCLE]) == 3
+
+    # Redefine NADH in the DONOR file as something else, and the reactions that use it drop out.
+    poisoned = tuple(
+        replace(
+            p,
+            metabolites={
+                **p.metabolites,
+                "nadh": replace(p.metabolites["nadh"], pair="something_else"),
+            },
+        )
+        if p.product != "isobutanol" and "nadh" in p.metabolites
+        else p
+        for p in pathways
+    )
+    blocked = pathway_for_routes(poisoned)
+    assert blocked is not None
+    assert not [r for r in blocked.reactions if r.step_role == COFACTOR_CYCLE], (
+        "no cofactor-cycle reaction may survive a metabolite the two files disagree about"
+    )
+
+    # ...and the step then reports `unknown`, which is the state reserved for "not in the atlas".
+    parts = load_parts(settings)
+    cycled = next(
+        r
+        for r in enumerate_routes(parts, strategies=["A_native_split"], pathway=blocked)
+        if [s.part.id for s in r.cofactor_cycle] == ["pos5_native"]
+    )
+    assert cycled.redox_balance.status == "unknown"
+    assert any(COFACTOR_CYCLE in line for line in cycled.redox_balance.unknowns)
 
 
 def test_the_redox_flag_does_not_reorder_the_ranking(parts: tuple, routes: list, pathway) -> None:  # noqa: ANN001

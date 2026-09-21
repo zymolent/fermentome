@@ -31,6 +31,15 @@ THREE NUMBERS, NEVER ONE. ``recall`` is over the configurations that *can* be ju
 ``partial`` says what recall would be if a configuration naming three of five enzymes counted.
 Reporting only the first would be the same inflation by a different route.
 
+TWO KINDS OF MATCH, COUNTED APART. A role resolves either by an exact gene symbol or — under the
+owner's ruling of 2026-09-22 — by a role name qualified with a source organism ("2-ketoacid
+decarboxylase (KDC) from Lactococcus lactis"), and then only where the catalog holds exactly one
+part for that ``(step_role, source_organism)`` pair. The second is a weaker identification, so it
+is never allowed to disappear into the total: every verdict names the roles it resolved that way
+and :class:`RecallReport` counts the two kinds separately. A bare role name with no organism stays
+refused, for the reason it always was — it is a wildcard, and a wildcard returns 100% on a record
+that said nothing.
+
 The rule itself is :data:`MATCHING_RULE` — a list of clauses, in the order they are applied,
 printed by ``fermdb atlas recall --rule``. It is data rather than prose in a docstring so that
 :func:`classify` cannot drift from it: every outcome reason this module produces names the clause
@@ -49,8 +58,11 @@ from .curated import Part
 from .routes import STEP_ORDER, STRATEGY_PLANS, Route
 
 __all__ = [
+    "BY_GENE_SYMBOL",
+    "BY_SOURCE_ORGANISM",
     "ENZYME_ALIASES",
     "MATCHING_RULE",
+    "AmbiguousSource",
     "Configuration",
     "ConfigurationVerdict",
     "RecallReport",
@@ -63,6 +75,7 @@ __all__ = [
     "load_configurations",
     "recall_report",
     "resolve_roles",
+    "source_organism_of",
 ]
 
 
@@ -125,11 +138,19 @@ MATCHING_RULE: Final[tuple[RuleClause, ...]] = (
         "matched",
         "matched",
         "All five step roles resolved to at least one catalog part, and some enumerated route of "
-        "the same strategy uses, at every role, one of that role's resolved parts. Resolution is "
-        "by EXACT gene-symbol token equality (case-folded) against part.genes, plus the curated "
-        "ENZYME_ALIASES table — never substring, never fuzzy. A role that resolved to more than "
-        "one part is reported as ambiguous beside the match, because ilvC and ilvC6E6 share a "
-        "gene symbol and differ by exactly the NADPH/NADH question the atlas is for.",
+        "the same strategy uses, at every role, one of that role's resolved parts. A role resolves "
+        "in one of TWO ways, and they are not the same strength of evidence: (a) by EXACT "
+        "gene-symbol token equality (case-folded) against part.genes, plus the curated "
+        "ENZYME_ALIASES table — never substring, never fuzzy; or (b) by a role name QUALIFIED WITH "
+        "A SOURCE ORGANISM ('2-ketoacid decarboxylase (KDC) from Lactococcus lactis'), under the "
+        "owner's ruling of 2026-09-22, and only where the catalog holds exactly one part for that "
+        "(step_role, source_organism) pair — see source_organism_ambiguous for the safeguard and "
+        "for why a role name WITHOUT an organism is still refused. Every verdict says which kind "
+        "it used, and the report counts the two separately, so a reader of a recall figure can see "
+        "how much of it rests on the weaker identification rather than having to assume. A role "
+        "that resolved to more than one part is reported as ambiguous beside the match, because "
+        "ilvC and ilvC6E6 share a gene symbol and differ by exactly the NADPH/NADH question the "
+        "atlas is for.",
     ),
     RuleClause(
         "catalog_gap",
@@ -143,6 +164,30 @@ MATCHING_RULE: Final[tuple[RuleClause, ...]] = (
         "which makes the figure pessimistic rather than generous. That is the intended direction.",
     ),
     RuleClause(
+        "source_organism_ambiguous",
+        "not_evaluable",
+        "A role is unfilled because the record identified its enzyme as 'ROLE from ORGANISM' and "
+        "the catalog holds MORE THAN ONE part for that (step_role, source_organism) pair. The "
+        "owner ruled on 2026-09-22 that a role name qualified by a source organism IS a real "
+        "identification and not a wildcard — '2-ketoacid decarboxylase (KDC) from Lactococcus "
+        "lactis' names a protein by where it was cloned from, the way a paper's Methods does — "
+        "but only for as long as the catalog can name exactly one part for it. Where two or more "
+        "can, the harness REFUSES and names them rather than picking: choosing between two "
+        "Lactococcus KDCs is a curation claim about which enzyme the paper used, and making it "
+        "silently inside a matcher would put the claim in the one place nobody would look for it. "
+        "THE REFUSAL IS A PROPERTY OF TODAY'S CATALOG, NOT OF THE RECORD. Uniqueness is recomputed "
+        "on every run, so curating a second Lactococcus KDC tomorrow turns today's resolved "
+        "matches into this clause by itself — a stale resolution cannot outlive the fact that made "
+        "it safe. WHY A BARE ROLE NAME IS STILL REFUSED, which this clause does not erode: 'KDC' "
+        "alone says which STEP ran, never which protein; it carries no organism, so there is "
+        "nothing for uniqueness to bite on and it would resolve to every KDC part in the catalog. "
+        "That is a wildcard, and it would let a configuration naming nothing match every route of "
+        "its strategy and report 100% recall on an empty record. The organism is exactly what "
+        "turns the phrase into an identification; without one the clause below applies. An "
+        "organism that parses but matches NO part of that role is also refused, and falls through "
+        "below rather than being guessed at.",
+    ),
+    RuleClause(
         "under_specified",
         "not_evaluable",
         "A role is unfilled and every enzyme entry was recognised — the record simply does not "
@@ -150,8 +195,9 @@ MATCHING_RULE: Final[tuple[RuleClause, ...]] = (
         "family ('ILV genes', 'the Ehrlich pathway'; see _ROLE_SYNONYMS). "
         "A role name is NOT an enzyme identification and is never treated as a wildcard: allowing "
         "it would let a configuration naming nothing match all 120 routes of its strategy and "
-        "return 100% recall on an empty record. Counted in `partial` instead, and never in "
-        "`recall`.",
+        "return 100% recall on an empty record. The one qualification a role name can carry that "
+        "makes it an identification is a SOURCE ORGANISM, and it must still resolve uniquely — "
+        "see source_organism_ambiguous. Counted in `partial` instead, and never in `recall`.",
     ),
 )
 
@@ -195,6 +241,14 @@ _LOCALIZATION_PREFIX: Final[str] = "localization as reported:"
 #: Step-role names, case-folded. A token equal to one of these names the STEP, not the enzyme.
 _ROLE_TOKENS: Final[frozenset[str]] = frozenset(role.casefold() for role in STEP_ORDER)
 
+#: Case-folded role token -> the STEP_ORDER spelling, so a parsed role keeps the canonical name.
+_ROLE_BY_TOKEN: Final[Mapping[str, str]] = {role.casefold(): role for role in STEP_ORDER}
+
+#: How a role was resolved. Reported, never averaged: the two are different strengths of evidence
+#: and a figure that pooled them would hide exactly what the owner's 2026-09-22 ruling exposed.
+BY_GENE_SYMBOL: Final[str] = "gene_symbol"
+BY_SOURCE_ORGANISM: Final[str] = "source_organism"
+
 #: Tokens that name a GROUP of steps rather than an enzyme. The same category as a bare role
 #: name: the paper said which steps, not which proteins.
 #:
@@ -213,6 +267,92 @@ _ROLE_SYNONYMS: Final[Mapping[str, tuple[str, ...]]] = {
     # The Ehrlich pathway is the decarboxylation and the reduction, named as a block.
     "ehrlich": ("KDC", "ADH"),
 }
+
+
+# ------------------------------------------------------------------- 'ROLE from ORGANISM'
+#
+# The owner's 2026-09-22 ruling: a role name qualified by a source organism is a real enzyme
+# identification, resolvable against `part.source_organism`, but ONLY where the catalog holds
+# exactly one part for that (step_role, source_organism) pair. Everything below is deliberately
+# narrow. A parse this code is not sure of returns None and the entry falls through to the
+# existing `role_named_only` / `under_specified` path, because a wrong organism is a wrong enzyme
+# and a wrong enzyme is a false recall — the one outcome this module exists to prevent.
+
+#: The connective that introduces a source organism. The LAST one in the entry wins, so
+#: '... (KDC) from Lactococcus lactis' is read from the right.
+_FROM = re.compile(r"\bfrom\b", re.IGNORECASE)
+
+#: A word of an organism phrase. Keeps the trailing '.' of an abbreviated genus ('L.') and the
+#: hyphen of a strain ('K-12'); the species epithet is checked for being alphabetic separately.
+_ORGANISM_WORD = re.compile(r"[A-Za-z][A-Za-z0-9\-]*\.?")
+
+
+def _binomial(text: str) -> tuple[str, str] | None:
+    """``(genus-or-initial, species)``, case-folded, or None when the text is not a binomial.
+
+    Accepts the three shapes the literature actually writes: ``Lactococcus lactis``, the
+    abbreviated ``L. lactis``, and either of those with a strain or subspecies suffix
+    (``Lactococcus lactis subsp. lactis IFPL730``, ``Escherichia coli K-12``) — the suffix is
+    ignored, because a strain is not a different source organism for the purpose of asking which
+    catalog part an author meant.
+
+    Everything past the first two words is discarded rather than interpreted, and a phrase with
+    fewer than two words, a non-alphabetic genus or species, or a species of fewer than three
+    letters is NOT a binomial. That last guard is what stops 'from the KDC step' and similar prose
+    from being read as an organism.
+    """
+    words = _ORGANISM_WORD.findall(text)
+    if len(words) < 2:
+        return None
+    genus, species = words[0].rstrip("."), words[1].rstrip(".")
+    if not genus.isalpha() or not species.isalpha() or len(species) < 3:
+        return None
+    return genus.casefold(), species.casefold()
+
+
+def _organisms_agree(reported: tuple[str, str], catalog: tuple[str, str]) -> bool:
+    """Do a reported binomial and a catalog one name the same organism?
+
+    The species epithet must be equal outright. The genus is compared in full unless one side is a
+    single-letter abbreviation, in which case only the initial can be compared — which is
+    genuinely weaker ('L. lactis' is also *Leuconostoc lactis*). That weakness is not patched over
+    here: it is left to the uniqueness requirement, which counts the matching PARTS, so an
+    abbreviation spanning two catalog genera produces two candidates and is refused as ambiguous.
+    """
+    if reported[1] != catalog[1]:
+        return False
+    reported_genus, catalog_genus = reported[0], catalog[0]
+    if len(reported_genus) == 1 or len(catalog_genus) == 1:
+        return reported_genus[0] == catalog_genus[0]
+    return reported_genus == catalog_genus
+
+
+def source_organism_of(entry: str) -> str | None:
+    """The organism phrase an entry names after 'from', or None when it does not name one.
+
+    Returns the phrase verbatim (so a verdict can quote what it read) and only when that phrase
+    parses as a binomial. ``'ADH7'`` -> None; ``'KDC'`` -> None; ``'a KDC from L. lactis'`` ->
+    ``'L. lactis'``.
+    """
+    connectives = list(_FROM.finditer(entry))
+    if not connectives:
+        return None
+    phrase = entry[connectives[-1].end() :].strip(" \t,;:()")
+    return phrase if _binomial(phrase) is not None else None
+
+
+def _sole_step_role(tokens: Sequence[str]) -> str | None:
+    """The ONE step role an entry names, or None when it names none, several, or a family block.
+
+    Several, or a block, is refused rather than resolved role by role. 'ILV genes from
+    Saccharomyces cerevisiae' names three steps at once and the record still has not said which
+    protein ran any of them; resolving all three from the organism would be the wildcard wearing a
+    binomial, which is the thing the ruling was careful not to authorise.
+    """
+    if any(token in _ROLE_SYNONYMS for token in tokens):
+        return None
+    roles = {_ROLE_BY_TOKEN[token] for token in tokens if token in _ROLE_BY_TOKEN}
+    return roles.pop() if len(roles) == 1 else None
 
 
 # ------------------------------------------------------------------------------- the records
@@ -309,6 +449,10 @@ class RoleResolution:
     part_ids: tuple[str, ...]
     #: The entries that produced them, verbatim, so a verdict can be audited without re-running.
     from_entries: tuple[str, ...]
+    #: How the record identified this enzyme: :data:`BY_GENE_SYMBOL`, :data:`BY_SOURCE_ORGANISM`,
+    #: or both when two entries agreed by different routes. Never collapsed to a boolean — a
+    #: reader of a recall figure is entitled to know which kind of identification it rests on.
+    resolved_by: tuple[str, ...] = ()
 
     @property
     def filled(self) -> bool:
@@ -320,6 +464,29 @@ class RoleResolution:
 
 
 @dataclass(frozen=True)
+class AmbiguousSource:
+    """A 'ROLE from ORGANISM' phrase the catalog cannot narrow to one part.
+
+    A refusal, not a pick.
+    """
+
+    role: str
+    #: The enzyme entry verbatim, so the refusal quotes the record rather than paraphrasing it.
+    entry: str
+    #: The organism phrase as the record wrote it.
+    organism: str
+    #: The parts that share this (step_role, source_organism) pair — all of them, named.
+    part_ids: tuple[str, ...]
+
+    def describe(self) -> str:
+        return (
+            f"{self.entry!r} identifies {self.role} only as {self.organism!r}, and the catalog "
+            f"holds {len(self.part_ids)} parts for that (step_role, source_organism) pair "
+            f"({', '.join(self.part_ids)}) — picking one would be a curation claim"
+        )
+
+
+@dataclass(frozen=True)
 class Resolution:
     """The configuration's enzyme set, mapped onto the enumerator's coordinates."""
 
@@ -328,6 +495,8 @@ class Resolution:
     role_named_only: tuple[str, ...]
     #: Entries the catalog does not recognise at all. A catalog gap, or prose.
     unrecognised: tuple[str, ...]
+    #: Entries naming a role AND an organism that the catalog cannot narrow to one part.
+    ambiguous_sources: tuple[AmbiguousSource, ...] = ()
 
     @property
     def unfilled_roles(self) -> tuple[str, ...]:
@@ -337,6 +506,11 @@ class Resolution:
     def ambiguous_roles(self) -> tuple[str, ...]:
         return tuple(r.role for r in self.roles if r.ambiguous)
 
+    @property
+    def organism_resolved_roles(self) -> tuple[str, ...]:
+        """Roles whose enzyme was identified by role-plus-organism rather than by a gene symbol."""
+        return tuple(r.role for r in self.roles if BY_SOURCE_ORGANISM in r.resolved_by)
+
 
 def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
     """Map the paper's enzyme names onto step roles and part ids.
@@ -344,14 +518,23 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
     EXACT token equality, case-folded, against ``part.genes`` and :data:`ENZYME_ALIASES`. Never a
     substring test: 'ADH7' must not resolve to ADH1 because one contains 'ADH', and 'LlAdhA' is
     an alias precisely so that the general case stays strict.
+
+    An entry no gene symbol recognises gets a SECOND chance, added under the owner's 2026-09-22
+    ruling: if it names exactly one step role and one source organism ('... (KDC) from Lactococcus
+    lactis'), and the catalog holds exactly one part for that pair, the role resolves and is
+    flagged :data:`BY_SOURCE_ORGANISM`. Two or more parts for the pair is a refusal recorded in
+    ``ambiguous_sources``, never a pick. Uniqueness is recomputed here on every call, from the
+    ``parts`` passed in, so it tracks the catalog rather than a snapshot of it.
     """
     by_gene = gene_index(parts)
     role_of = {part.id: part.step_role for part in parts}
 
     found: dict[str, set[str]] = {role: set() for role in STEP_ORDER}
     entries_for: dict[str, set[str]] = {role: set() for role in STEP_ORDER}
+    resolved_by: dict[str, set[str]] = {role: set() for role in STEP_ORDER}
     role_named_only: list[str] = []
     unrecognised: list[str] = []
+    ambiguous_sources: list[AmbiguousSource] = []
 
     for entry in entries:
         tokens = [token.casefold() for token in _TOKEN.findall(entry)]
@@ -369,8 +552,33 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
                 if role in found:
                     found[role].add(part_id)
                     entries_for[role].add(entry)
+                    resolved_by[role].add(BY_GENE_SYMBOL)
         if recognised:
             continue
+
+        if names_a_role:
+            role = _sole_step_role(tokens)
+            organism = source_organism_of(entry)
+            if role is not None and organism is not None:
+                candidates = _parts_from(parts, role, organism)
+                if len(candidates) == 1:
+                    found[role].add(candidates[0])
+                    entries_for[role].add(entry)
+                    resolved_by[role].add(BY_SOURCE_ORGANISM)
+                    continue
+                if len(candidates) > 1:
+                    # THE SAFEGUARD. Not a pick, not a silent fall-through to "vague record": a
+                    # named refusal that says which parts collided, because the collision is the
+                    # curation question and the reader is the one who can settle it.
+                    ambiguous_sources.append(
+                        AmbiguousSource(role, entry, organism, tuple(candidates))
+                    )
+                    continue
+                # Zero candidates: the phrase parsed but the catalog has no such part. Treated as
+                # a record the atlas cannot place, not as a catalog gap — the organism may be a
+                # misparse of prose, and a miss asserted on a guess is the wrong direction of
+                # error for a harness whose bias is pessimistic by design.
+
         # A role name with no enzyme behind it is a curation limit, not a catalog gap: the paper
         # said which step, not which protein. Kept apart from `unrecognised` because the two lead
         # to different verdicts and conflating them is what would inflate the figure.
@@ -382,12 +590,35 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
                 role=role,
                 part_ids=tuple(sorted(found[role])),
                 from_entries=tuple(sorted(entries_for[role])),
+                resolved_by=tuple(sorted(resolved_by[role])),
             )
             for role in STEP_ORDER
         ),
         role_named_only=tuple(role_named_only),
         unrecognised=tuple(unrecognised),
+        ambiguous_sources=tuple(ambiguous_sources),
     )
+
+
+def _parts_from(parts: Sequence[Part], role: str, organism: str) -> list[str]:
+    """Every catalog part filling ``role`` whose ``source_organism`` is ``organism``.
+
+    Sorted, and returned in full rather than as a count or a first hit: the caller refuses on a
+    length of 2 and has to be able to NAME both. Recomputed per call — the uniqueness this rule
+    leans on is a fact about the catalog as it is now, and caching it is how a resolution outlives
+    the fact that justified it.
+    """
+    reported = _binomial(organism)
+    if reported is None:  # unreachable via source_organism_of, which already parsed it
+        return []
+    matched: list[str] = []
+    for part in parts:
+        if part.step_role != role:
+            continue
+        catalog = _binomial(part.source_organism)
+        if catalog is not None and _organisms_agree(reported, catalog):
+            matched.append(part.id)
+    return sorted(matched)
 
 
 # ----------------------------------------------------------------------------- the verdict
@@ -408,6 +639,16 @@ class ConfigurationVerdict:
     @property
     def outcome(self) -> str:
         return _CLAUSE_BY_NAME[self.clause].outcome
+
+    @property
+    def organism_resolved_roles(self) -> tuple[str, ...]:
+        """Roles this verdict resolved by role-plus-source-organism, not by a gene symbol.
+
+        Non-empty on a `matched` verdict means the match rests, at those roles, on the weaker of
+        the two identifications the rule allows. Exposed as data and not only as prose in
+        `detail`, so a caller counting matches can count the two kinds apart.
+        """
+        return () if self.resolution is None else self.resolution.organism_resolved_roles
 
     @property
     def partial(self) -> bool:
@@ -484,16 +725,29 @@ def classify(
     unfilled = resolution.unfilled_roles
 
     if not unfilled and route_ids:
+        notes: list[str] = []
         ambiguous = resolution.ambiguous_roles
-        detail = (
-            f"ambiguous at {', '.join(ambiguous)} (the gene symbol does not distinguish the "
-            f"variants); {len(route_ids)} routes agree"
-            if ambiguous
-            else f"{len(route_ids)} route agrees"
+        if ambiguous:
+            notes.append(
+                f"ambiguous at {', '.join(ambiguous)} (the gene symbol does not distinguish the "
+                f"variants)"
+            )
+        by_organism = resolution.organism_resolved_roles
+        if by_organism:
+            # The match kind, beside the match and not in a footnote. A reader of 100% has to be
+            # able to see how much of it rests on a role name plus an organism.
+            notes.append(
+                f"resolved BY SOURCE ORGANISM at {', '.join(by_organism)} — a role name plus a "
+                f"source organism, uniquely in the catalog, not a gene symbol"
+            )
+        notes.append(
+            f"{len(route_ids)} route agrees"
             if len(route_ids) == 1
             else f"{len(route_ids)} routes agree"
         )
-        return ConfigurationVerdict(configuration, "matched", resolution, route_ids, detail)
+        return ConfigurationVerdict(
+            configuration, "matched", resolution, route_ids, "; ".join(notes)
+        )
 
     if resolution.unrecognised:
         return ConfigurationVerdict(
@@ -507,6 +761,18 @@ def classify(
             ),
         )
 
+    blocking = tuple(a for a in resolution.ambiguous_sources if a.role in unfilled)
+    if blocking:
+        return ConfigurationVerdict(
+            configuration,
+            "source_organism_ambiguous",
+            resolution,
+            route_ids,
+            detail=(
+                f"unfilled: {', '.join(unfilled)}; " + "; ".join(a.describe() for a in blocking)
+            ),
+        )
+
     return ConfigurationVerdict(
         configuration,
         "under_specified",
@@ -517,6 +783,12 @@ def classify(
             + (
                 f"; named only by role: {', '.join(repr(e) for e in resolution.role_named_only)}"
                 if resolution.role_named_only
+                else ""
+            )
+            + (
+                "; also, a source organism the catalog cannot narrow: "
+                + "; ".join(a.describe() for a in resolution.ambiguous_sources)
+                if resolution.ambiguous_sources
                 else ""
             )
         ),
@@ -547,6 +819,22 @@ class RecallReport:
     @property
     def not_evaluable(self) -> tuple[ConfigurationVerdict, ...]:
         return tuple(v for v in self.verdicts if v.outcome == "not_evaluable")
+
+    @property
+    def matched_by_source_organism(self) -> tuple[ConfigurationVerdict, ...]:
+        """Matches resting, at one or more roles, on a role name plus a source organism.
+
+        Reported beside the total for the same reason `coverage` is reported beside `recall`: the
+        headline is true only in the company of the thing that qualifies it. A 100% built entirely
+        out of this kind of identification is a different claim from a 100% built out of gene
+        symbols, and nothing else in the output would say so.
+        """
+        return tuple(v for v in self.matched if v.organism_resolved_roles)
+
+    @property
+    def matched_by_gene_symbol(self) -> tuple[ConfigurationVerdict, ...]:
+        """Matches in which every role was pinned by a gene symbol. The stronger kind."""
+        return tuple(v for v in self.matched if not v.organism_resolved_roles)
 
     @property
     def evaluable(self) -> int:
@@ -619,6 +907,15 @@ def describe_report(report: RecallReport) -> tuple[str, ...]:
         f"  partial   {_fraction(report.partial):>14}   "
         f"every NAMED step agreed — NOT recall, and never to be quoted as it",
     ]
+    if report.matched:
+        # The match-kind breakdown, immediately under the figure it qualifies. Printed whenever
+        # anything matched, including when the weaker count is 0 — a reader has to be able to tell
+        # "none of it rests on that" from "nobody said".
+        lines.append(
+            f"  of which  {len(report.matched_by_gene_symbol):>14}   "
+            f"matched by gene symbol, and {len(report.matched_by_source_organism)} by a role name "
+            f"plus a source organism (weaker — see `--rule`)"
+        )
     if not report.verdicts:
         lines += [
             "",

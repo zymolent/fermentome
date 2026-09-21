@@ -13,25 +13,38 @@ PLAN.md Q, phase 3:
 > but costly* rather than either dropped or flattered, and each names its locus, leader, displaced
 > gene and recoding requirement.
 
-Five clauses. **Three pass, one does not, one is not a software test at all.** The one that does
-not is C1, and it is not a bug in the ranker — see that section for where its blocker now sits.
+Five clauses. **Four pass, one is not a software test at all.** C1 was the one that did not, and
+the thing that unblocked it was a matching-rule ruling rather than a curation edit — see below.
 
 **Updated 2026-09-22 — C2.** C2 was failing because the gate was never built and could not be
 built without decision **D1**. The owner settled D1 on 2026-09-22 — *flag, don't exclude* — and
 the per-compartment balance is now computed, flagged and named, with nothing excluded for a redox
 reason. See the C2 section and the D1 entry.
 
+**Updated 2026-09-22 — C2, a second time.** The owner ruled that the enumerator gains an
+**optional `cofactor_cycle` step role**, so `POS5`, `ADH3` and `GPD` can be parts a route carries.
+The tally is now **0 balanced / 4,800 unbalanced / 1,600 unknown** over 6,400 routes. Nothing
+balances, for a new and sharper reason, and **240 routes close the mitochondrial matrix
+completely** — the first compartment the atlas has ever reported as closing, and it is DUET. See
+"the optional `cofactor_cycle` role" and "What the run says" in C2.
+
+**Updated 2026-09-22 — C1.** The owner settled **D5** the same day: a role name *qualified by a
+source organism* is a real enzyme identification where the catalog holds exactly one part for that
+`(step_role, source_organism)` pair, and an ambiguous refusal where it holds more. Recall is now
+**100% on the judgeable set, 2/2, coverage 50%** — and **both matches rest on that weaker
+identification**, which the report says on its own line rather than leaving to be inferred.
+
 | # | Clause | Verdict | What it needs |
 |---|---|---|---|
-| C1 | Recall against phase 1 | **STILL NOT PASSING — now `not measurable`, 0/0 judgeable.** See the 2026-09-22 amendment below; the Adh7 part was curated and the blocker moved | A curator correction to the two cels-2019 configurations, naming the decarboxylase as `LlKivD` (the paper's own Methods do). Not another part |
-| C2 | Per-compartment redox balance, imbalance named | **PASSES**, as of 2026-09-22, under the owner's amended clause | Nothing in code. PLAN.md's wording still says *excluded*; the proposed amendment is at the foot of this section and is the owner's to apply |
+| C1 | Recall against phase 1 | **PASSES, as of 2026-09-22 — 100%, 2/2 judgeable, coverage 50%.** Both matches are *resolved-by-source-organism*, the weaker of the two identifications the rule allows, and are counted apart | Nothing in code. More rows: a denominator of 2 is not a trend, and `coverage` is 50% |
+| C2 | Per-compartment redox balance, imbalance named | **PASSES**, as of 2026-09-22, under the owner's amended clause. Tally over 6,400 routes: **0 balanced / 4,800 unbalanced / 1,600 unknown**, with the matrix closing on 240 of them | Nothing in code for the clause. PLAN.md's wording still says *excluded*; the proposed amendment is at the foot of this section and is the owner's to apply. To reach a *balanced* route: either curated stoichiometric multiplicity (a part used more than once) or a cytosolic NADH-regenerating part — both curation, not code |
 | C3 | ≥1 enumerated-but-never-built route is scientifically defensible | **NOT A TEST** | A human reads a route card and says so. Effectively blocked behind C1: "never built" is the complement of the matched configurations, and that complement is currently all 600 routes |
 | C4 | Every rank explainable term by term | **PASSES**, as of this change | Nothing. It did not pass before: `rank`'s fourth key was invisible to `explain` |
 | C5 | Strategy E reachable-but-costly, naming locus / leader / displaced gene / recoding | **PASSES** | Nothing |
 
 ---
 
-## C1 — recall. Ran for the first time today, and it fails
+## C1 — recall. Ran for the first time today, failed twice, and now passes
 
 **This section was written as "cannot be evaluated" and had to be rewritten mid-session.** When
 this work started `pathway_configuration` held **0 rows**, and the honest answer was that the
@@ -132,11 +145,105 @@ So C1 reaches **2/2 = 100% recall on the judgeable set, coverage 50%** the momen
 corrects those two `pathway_configuration` descriptions. That is a curation act on Zone R rows and
 is the owner's, not an agent's — it is recorded here rather than done.
 
+> **SUPERSEDED 2026-09-22.** The owner did not take that option. The Zone R descriptions stay as
+> the papers were reported, and the **rule** changed instead — see the next section. The
+> substitution above survives as what it always was: an independent check, run before the rule
+> changed, of where the harness ought to land. It landed there, on the same part
+> (`kivd_lactococcus`) and the same two route ids, by a different route.
+
 The general lesson is worth keeping, because it will recur: *"the enumerator cannot express this
 build"* and *"the record does not say what the build was"* are different failures that a single
 recall percentage cannot tell apart. Only the first is a catalog gap. The first run's worklist had
 one line and it looked like the whole story; it was one of two, and the second was invisible until
 the first was fixed.
+
+### 2026-09-22 — the owner's ruling on `ROLE from ORGANISM`, and C1 passing
+
+> **A role name qualified by a source organism is a real identification, not a wildcard — but
+> only when it is unambiguous.**
+>
+> Resolve `ROLE from ORGANISM` to a catalog part **when the catalog holds exactly one part for
+> that `(step_role, source_organism)` pair.** Flag the match as **resolved-by-organism**, distinct
+> from resolved-by-gene-symbol. If two or more parts share that pair, **refuse as ambiguous** — do
+> not pick one.
+>
+> — the owner, 2026-09-22, settling **D5**
+
+The blocker was never that the atlas lacked the enzyme. `kivd_lactococcus` has been in the catalog
+all along; what the rule refused was the *phrase*, because `"KDC"` on its own is a step and not a
+protein. The ruling says what the organism adds: `"2-ketoacid decarboxylase (KDC) from Lactococcus
+lactis"` identifies a protein by where it was cloned from, the way the paper's own Methods do, and
+the catalog can say which one — **as long as it can say which one**.
+
+**The figure, before and after.** Same 800 routes, same four configurations, nothing in `data/`
+touched and no `pathway_configuration` row edited:
+
+```
+                    before              after
+  recall      not measurable   0/0     100%   2/2      <- of the configurations that CAN be judged
+  coverage                0%   0/4      50%   2/4
+  partial               100%            100%
+  of which                 —            0 matched by gene symbol,
+                                        2 by a role name plus a source organism (weaker)
+```
+
+```
+$ fermdb atlas recall
+matched:
+  YAA:PCFG:6e7102e064ead4e7  C_mitochondrial_ehrlich ... doi:10.1016/j.cels.2019.10.006
+      resolved BY SOURCE ORGANISM at KDC — a role name plus a source organism, uniquely in the
+      catalog, not a gene symbol; 1 route agrees
+      first route: C_mitochondrial_ehrlich:ilv2_ilv6_native+ilv5_native+ilv3_native+
+                   kivd_lactococcus+adh7_native
+  YAA:PCFG:fbe93c86372bc5bb  A_native_split ... (same, 1 route agrees)
+```
+
+**Read the second line of that breakdown before the first.** 100% here is *two* configurations,
+and **both** of them rest on the weaker identification — the figure would be `0/2` by gene symbol
+alone. That is why the match kind is on the headline block and on every matched line, and why
+`RecallReport` exposes `matched_by_gene_symbol` and `matched_by_source_organism` as data rather
+than only as prose: a caller that counts matches can count the two kinds apart, and a reader of
+100% cannot miss what it is made of.
+
+**Verified independently of the claim it supports.** The previous pass established, by
+substituting `LlKivD` into the enzyme lists, that both configurations *ought* to reach 2/2. The new
+rule arrives at the same place by a different road, and the check is that they agree on more than
+the number: same clause (`matched`), same resolved part (`kivd_lactococcus`), same single route id
+each. No discrepancy to report.
+
+**The safeguard, which is the whole of why this is allowed.** Uniqueness is a fact about the
+catalog *as it is now*, so it is recomputed from the parts passed in on every call and never
+cached. Curate a second *Lactococcus lactis* KDC tomorrow and today's two matches become
+`source_organism_ambiguous` refusals by themselves — `not_evaluable`, with both colliding part ids
+named, because choosing between them is a curation claim about which enzyme the paper used and a
+matcher is the last place that claim should be made silently.
+`test_a_second_part_for_the_same_role_and_organism_turns_the_match_into_a_refusal` inserts exactly
+that part and asserts exactly that flip, including that the refusal does not reappear as a match
+through `recall_report`.
+
+**What the ruling deliberately does not reach**, each falling through to the old
+`under_specified`:
+
+* a **bare** role name — `"KDC"`, `"ADH"`. No organism, so nothing for uniqueness to bite on; it
+  would resolve to every KDC part, which is the wildcard that returns 100% on an empty record.
+  This is the defence the change was most at risk of eroding and it is unchanged;
+* a **gene family named as a block, even with an organism** — `"ILV genes from Saccharomyces
+  cerevisiae"`. Three roles at once, each with exactly one native yeast part, so a role-by-role
+  reading would fill all three off a record that named no protein. One role per phrase, or nothing;
+* an organism that parses but matches **no** part of that role — `"KDC from Escherichia coli"`.
+  Not resolved, and **not** asserted as a catalog gap either: a miss claimed on a parse is the
+  wrong direction of error for a harness whose bias is pessimistic by design;
+* anything the parser is **not sure of**. It accepts `Genus species`, the abbreviated `G. species`
+  and either with a subspecies or strain suffix (`Lactococcus lactis subsp. lactis IFPL730`); a
+  phrase with fewer than two words, or whose species epithet is not alphabetic, is not a binomial.
+  The abbreviation `L. lactis` is genuinely weaker than the full genus — it is also *Leuconostoc
+  lactis* — and that weakness is not patched over in the parser: it lands on the uniqueness test,
+  which counts matching **parts**, so an abbreviation spanning two catalog genera produces two
+  candidates and is refused.
+
+**A gene symbol still wins.** The organism path is only reached by an entry that no gene symbol
+recognised, so `"kivD"` resolves as it always did and is reported `gene_symbol`. A role that ends
+up resolved both ways carries both kinds.
 
 ### What was built, so the clause stays answerable as the table fills
 
@@ -168,12 +275,14 @@ Three axes, and only two of them are usable:
    no interpretation at all.
 2. **Enzyme set** — parsed out of `description`, which is where `curate/promote.py` puts it, and
    resolved to part ids by **exact, case-folded gene-symbol token equality** against `part.genes`,
-   plus a small curated `ENZYME_ALIASES` table of named exceptions.
+   plus a small curated `ENZYME_ALIASES` table of named exceptions — or, since the 2026-09-22
+   ruling, by a **role name qualified with a source organism**, where the catalog holds exactly
+   one part for that `(step_role, source_organism)` pair. The two kinds are counted apart.
 3. **Host** — `host_strain_id` resolves to an organism, but **`enumerate_routes` has no host axis**
    (see D2). So the host is used only to decide scope, never to match.
 
-Seven clauses, applied in order, first one wins. `fermdb atlas recall --rule` prints the full text
-of each; the short version:
+**Eight** clauses, applied in order, first one wins — seven until 2026-09-22.
+`fermdb atlas recall --rule` prints the full text of each; the short version:
 
 | clause | outcome | in one line |
 |---|---|---|
@@ -181,8 +290,9 @@ of each; the short version:
 | `host_not_recorded` | not evaluable | no host, so the configuration cannot be placed in or out of scope |
 | `host_outside_enumeration` | not evaluable | an *E. coli* build against a yeast-only enumeration |
 | `no_enzyme_set_recorded` | not evaluable | the description has no `enzymes as reported:` segment |
-| `matched` | **hit** | all five roles resolved, and some route of that strategy agrees at all five |
+| `matched` | **hit** | all five roles resolved — by gene symbol or by role-plus-organism, and it says which — and some route of that strategy agrees at all five |
 | `catalog_gap` | **miss** | a role is unfilled *and* an enzyme was named that no part carries |
+| `source_organism_ambiguous` | not evaluable | `ROLE from ORGANISM`, and the catalog holds two or more parts for that pair — refused, both named |
 | `under_specified` | not evaluable | a role is unfilled and every named enzyme was recognised |
 
 ### Four decisions inside that rule that could each have gone the other way
@@ -195,14 +305,20 @@ a pathway enzyme. A rule that scanned the whole description would credit builds 
 deliberately removed. Tested by
 `test_the_localization_prose_is_never_mined_for_enzyme_names`.
 
-**A role name is not an enzyme identification.** Real payloads name `"KDC"`, `"ADH"` and
+**A bare role name is not an enzyme identification.** Real payloads name `"KDC"`, `"ADH"` and
 `"ILV genes"`. Treating `"KDC"` as "any KDC part" is a wildcard, and a configuration naming
-nothing would then match all 120 routes of its strategy and return 100% recall on an empty record.
+nothing would then match every route of its strategy and return 100% recall on an empty record.
 Role names are recorded separately (`role_named_only`) and leave the role **unfilled**. Gene
 families named as a block — `"ILV genes"`, the Ehrlich pathway — are in the same category and are
 listed in `_ROLE_SYNONYMS`. Without that list, `"ILV genes"` is reported as a *catalog gap*, which
 would put a non-existent part called "ILV genes" on the curation worklist; the worklist is only
-worth reading if every line on it is actionable, and today it has exactly one line, `ADH7`.
+worth reading if every line on it is actionable, and today it has no lines at all.
+
+*Amended 2026-09-22, and the word that carries the amendment is **bare**.* A role name **plus a
+source organism** is an identification, because the organism is what lets the catalog name one
+protein — and it is allowed only while the catalog can name exactly one. Everything above stays
+true of a role name on its own; see the ruling section for the three things the amendment
+deliberately does not reach.
 
 **Three of five is not re-discovery.** A route is five choices. A configuration that names three
 of them and matches on all three has had two steps agreed and two never checked. That is reported
@@ -300,8 +416,65 @@ Three pieces, from three places, and it matters which comes from where:
   catalog carries NADH-preferring KARI variants and the NADPH-preferring Adh6 — which is exactly
   the variation the atlas exists to reason about. Where part and reaction disagree on the pool the
   coefficient is kept and the pool is taken from the part, and `RedoxBalance.substitutions` says
-  so in words. **560 of 800 routes carry such a note**; a reader can see where every number came
-  from.
+  so in words. **4,480 of 6,400 routes carry such a note**; a reader can see where every number
+  came from.
+
+### 2026-09-22, second amendment — the optional `cofactor_cycle` role
+
+The tally below used to read **0 balanced / 600 unbalanced / 200 unknown**, and the reason nothing
+balanced was named in this section as a *structural* one: the five roles in `STEP_ORDER` all
+consume reducing power, none regenerates it, and there was no slot for a step that could. That is
+also exactly what DUET is (`DUET_TARGET.md` §3): **Adh3** oxidises matrix ethanol to matrix NADH
+and **Pos5** phosphorylates it to the matrix NADPH Ilv5 requires. So the atlas could not express
+the redox closure the whole programme depends on.
+
+The owner ruled on 2026-09-22: **add a `cofactor_cycle` step role, and make it optional.** It is
+built.
+
+**How optionality is expressed: a power set whose empty member is first and is a real value.**
+`cofactor_cycle_sets(parts)` returns every subset of the cofactor-cycle parts, `()` first, and
+`enumerate_routes` multiplies the five-step product by it. A route with no cofactor cycle is the
+empty member — it goes through the same gates, the same ranking and the same storage as every
+other route, and its id is unchanged because an empty set appends nothing. The 800 routes that
+existed before are all still enumerated, with their ids, their gates and their relative order.
+
+*Why a set and not a single nullable slot.* DUET is two genes in series. A one-part slot holds
+Adh3 or Pos5 but not both, and would have left the exact gap this change exists to close.
+
+**The alternative rejected: putting `cofactor_cycle` into `STEP_ORDER`.** That is the obvious
+place for it and it would have broken C1. `metabolic/recall.py` reads `STEP_ORDER` as *the roles a
+published configuration must fill before it can be called re-discovered* — `resolve_roles` seeds
+one bucket per member and `classify` demands `not unfilled`. No paper's enzyme list names POS5; it
+is a host gene, not a pathway enzyme. The role would therefore have been permanently unfilled and
+**every published configuration would have become unmatchable**. Not hypothetical: the two
+cels-2019 configurations match today, and both would have dropped to `under_specified`. The
+optional role lives in a second tuple, `ROUTE_STEP_ROLES`, so the contract with the literature and
+the contract with the enumerator stay separate. Verified: `fermdb atlas recall` classifies all
+four configurations exactly as it did before (2 matched, 2 `under_specified`, recall 100% on 2/2,
+coverage 50%), and the first route reported for each match is still the cycle-free one, because
+`()` comes first.
+
+**How the balance accounts for the new step.** A cofactor-cycle step contributes with **the sign
+its curated reaction is written in** — no branch says "this one produces". `adh3_matrix` has NADH
+as a product, so `+1` matrix NADH. `gpd_glycerol3p` has NADH as a *substrate*, so `-1` cytosolic
+NADH: what Gpd regenerates is the *oxidised* member, which a sum over reducing equivalents does
+not count, so a cofactor-cycle part is **not assumed to be a source**. Which of the three curated
+reactions a step refers to is decided by exact gene-symbol match against the part; if the genes do
+not narrow it to one, the step is `unknown`.
+
+**Pos5 is different in kind from every other step in the model.** It consumes matrix NADH and
+produces matrix NADPH: one compartment, two pools. It moves reducing power *between pools within a
+compartment* rather than into or out of the route, so both terms are placed in the step's own
+compartment. The code keys on `Reaction.transfers_redox_pool`, which `curated.py` already declares
+for that one reaction, rather than inferring a transfer from "two pools appeared". And a declared
+transfer must **conserve**: its terms are required to sum to zero and a transfer that does not is
+reported `unknown` with the sum named. Without that check a mistyped coefficient would manufacture
+reducing power from ATP and could produce a `balanced` route — the one verdict nobody re-derives.
+
+The three parts are curated in `data/pathways/parts_catalog.yaml` to the `adh7_native` standard:
+read from the stored corpus and quoted, `confidence: medium`, DOIs in the evidence, and every
+field the corpus does not support left `unknown` (all three now say `oxygen_sensitivity: unknown`,
+where two of them previously asserted `insensitive` from memory).
 
 ### Where the flag lives, and why
 
@@ -328,35 +501,74 @@ same question until today and they are not any more.
 
 ### What the run says
 
-800 routes (600 until `adh7_native` was added to the catalog on 2026-09-22):
+**6,400 routes** — 800 five-step combinations × 8 cofactor-cycle subsets. (It was 600 before
+`adh7_native` was curated, 800 after, and 6,400 once the optional role landed.)
 
-| verdict | routes | stored as |
-|---|---|---|
-| balanced | **0** | `pass` |
-| unbalanced | **600** | `fail` |
-| unknown | **200** | `not_evaluated` |
+| verdict | routes | of which cycle-free | stored as |
+|---|---|---|---|
+| balanced | **0** | 0 | `pass` |
+| unbalanced | **4,800** | 600 | `fail` |
+| unknown | **1,600** | 200 | `not_evaluated` |
 
-**Nothing is excluded.** All 800 are viable, all 800 are in the ranked list, and the flag is not a
-sort key.
+**Nothing is excluded.** All 6,400 are viable, all 6,400 are in the ranked list, and the flag is
+not a sort key. The cycle-free column is the check that the optional role added routes rather than
+moving any: those 800 are the previous population, verdict for verdict.
 
-*Why no route is balanced, and why that is a finding rather than a bug.* The five catalytic steps
-consume reducing power and none of them regenerates it. Closure needs a `cofactor_cycle` part —
-POS5, ADH3, GPD — and `STEP_ORDER` has no slot for one. So the content of the flag is *where* and
-*how much*, and that varies: **13 distinct named imbalances** across the 600, from
-`NADPH short by 2 in mitochondrial_matrix` (strategy C on Ilv5 + Adh6 — the published build, and
+*Why no route is balanced — and why the reason is now a sharper finding than the one it replaces.*
+It used to be structural: nothing could regenerate a cofactor, so closure was unreachable. It is
+reachable now, and still unreached, for an **arithmetic** reason the slot exposed rather than
+caused. A route spends **two** reducing equivalents — the KARI and the ADH — and the only curated
+cofactor-cycle reaction that *supplies* one is Adh3, which supplies **one**. Pos5 moves a debt
+between pools rather than paying it, and Gpd deepens it. So the best any route reaches is a single
+open bucket: **472 routes are one equivalent short**, against a previous floor of two.
+
+*What the cofactor cycle does buy, and it is the result the change exists for.* **240 routes now
+close the mitochondrial matrix completely** — both matrix buckets at zero, the first compartment
+the atlas has ever reported as closing. They are the Adh3 + Pos5 routes with a matrix-side Ilv5,
+which is to say they are DUET. Worked by hand on the native split with Adh1:
+
+```
+AHAS  ilv2_ilv6_native  matrix   ahas              no redox participant    0
+KARI  ilv5_native       matrix   kari              NADPH a substrate      -1 matrix NADPH
+DHAD  ilv3_native       matrix   dhad              no redox participant    0
+KDC   aro10_native      cytosol  kdc               no redox participant    0
+ADH   adh1_native       cytosol  adh_isobutanol    NADH a substrate       -1 cytosol NADH
+cycle adh3_native       matrix   adh3_matrix       NADH a PRODUCT         +1 matrix NADH
+cycle pos5_native       matrix   pos5_nadh_kinase  declared transfer      -1 matrix NADH,
+                                                                          +1 matrix NADPH
+
+matrix NADPH  -1 +1 = 0      matrix NADH  +1 -1 = 0      cytosol NADH  -1
+```
+
+The route is still reported `unbalanced`, and correctly: the one open bucket is the cytosolic
+ADH's NADH. Glycolysis plainly supplies cytosolic NADH, but `COFACTOR_POOLS` records *which*
+cofactors a compartment holds and never *how much* — so "glycolysis will cover it" is a supply
+claim the atlas cannot make, and the same argument that forbids exclusion forbids calling this
+closed. Note also what the sum does not carry: **Pos5 spends ATP**, and an adenylate balance is
+not part of this calculation. `test_the_duet_pair_closes_the_mitochondrial_matrix_for_the_first_time`
+pins the whole derivation, and also that neither gene alone does it — which is why the axis holds
+a set rather than one slot.
+
+*The content of the flag is still where and how much, and there is more of it.* **81 distinct
+named imbalance signatures** across the 4,800, against 13 before — from
+`NADPH short by 2 in mitochondrial_matrix` (strategy C on Ilv5 + Adh6, the published build, and
 the number that contradicts `ISOBUTANOL_PROGRAM.md`'s prose) through
 `NADH short by 1 in cytosol; NADPH short by 1 in mitochondrial_matrix` (the native split, one
-shortfall on each side of the inner membrane) to `NADH short by 2 in cytosol`. A global sum would
-collapse the second of those to "2 short" and lose the only thing about it worth knowing.
+shortfall on each side of the inner membrane) to
+`NADH short by 2 in mitochondrial_matrix; NADH short by 1 in cytosol; NADPH in surplus by 1 in mitochondrial_matrix`
+— a Pos5 route making matrix NADPH nothing in that route consumes. A **surplus** is a real
+verdict and is named as one. A global sum would collapse all three and lose the only thing about
+them worth knowing.
 
-*Why 200 are unknown, and why that is the right answer.* `adh7_native` was read out of
+*Why 1,600 are unknown, and why that is the right answer.* `adh7_native` was read out of
 10.1016/j.cels.2019.10.006 and the paper does not state the enzyme's cofactor, so the catalog
 records `cofactor_preference: unknown` rather than filling it in from background knowledge. The
-balance calculation does the same thing: the 200 routes carrying that part report **`unknown`,
-with the reason named**, and they still print the NADPH shortfall the KARI step *does* produce.
-An `unknown` correctly reported is the honest state; a fabricated balance would be the worst
-outcome available. `unknown` is never rounded to `balanced` — `enumerate_routes(parts)` with no
-curated pathway supplied flags all routes `unknown` and says why.
+balance calculation does the same thing: the 1,600 routes carrying that part (a quarter of the
+enumeration, the same fraction as before) report **`unknown`, with the reason named**, and they
+still print the NADPH shortfall the KARI step *does* produce. An `unknown` correctly reported is
+the honest state; a fabricated balance would be the worst outcome available. `unknown` is never
+rounded to `balanced` — `enumerate_routes(parts)` with no curated pathway supplied flags all
+routes `unknown` and says why.
 
 ### Whether the flag affects rank: **it does not**, and that is a decision
 
@@ -390,9 +602,9 @@ supplied is identical, id for id, to the ranking without it, under both objectiv
 ### What `explain` prints
 
 ```
-objective=easiest | strategy=C_mitochondrial_ehrlich | feasibility=0.60 |
-programme_fit=unrecorded | transport_gaps=0 | cofactor_risks=0 | chassis_gates=0 |
-construction_requirements=0 | redox=unbalanced (NADPH short by 2 in mitochondrial_matrix) |
+objective=easiest | strategy=A_native_split | feasibility=1.00 | programme_fit=0.50 |
+transport_gaps=1 | cofactor_risks=0 | chassis_gates=0 | construction_requirements=0 |
+cofactor_cycle=adh3_native, pos5_native | redox=unbalanced (NADH short by 1 in cytosol) |
 evidence=unknown (nothing extracted yet) | toxicity=unknown (no tolerance measurement)
 ```
 
@@ -400,6 +612,12 @@ C4 does not regress: the flag is printed although it is *not* a ranking term, as
 of the route rather than a hidden reason for its position. `fermdb atlas explain` additionally
 prints each named imbalance, each `unknown` reason and each pool substitution on its own line, and
 `fermdb atlas routes` prints the balanced/unbalanced/unknown tally with the ruling beside it.
+
+`cofactor_cycle` is printed as a **name or the word `none`, never as a count**: `0` would read as
+a deficiency and a route with no cofactor cycle is what nearly every published build is. It is not
+a ranking term either — the cycle steps are skipped by `_cofactor_gate` and `cofactor_demand`,
+both of which ask unsigned questions of a field that carries no direction on these parts, so the
+optional role adds no cofactor risk and cannot silently reorder the atlas.
 
 ### Stored, not just printed
 
@@ -417,11 +635,27 @@ pool in which compartment is short would be the boolean the ruling rejects.
 | `test_the_balance_is_summed_per_compartment_and_never_across_them` | the native split's two shortfalls stay in different compartments; a route with the same parts in one compartment is a different record |
 | `test_a_missing_stoichiometry_is_unknown_and_never_balanced` | both routes to `unknown` — no pathway supplied, and `adh7_native`'s undeclared cofactor — and that the partial imbalance is still reported |
 | `test_every_route_carries_one_of_exactly_three_verdicts` | no fourth state, and the stored word stays inside the column's CHECK |
-| `test_a_route_of_non_redox_steps_balances_which_is_how_balanced_is_reachable` | `balanced` is reached by a measurement, not by a constant |
+| `test_a_route_of_non_redox_steps_balances_which_is_how_balanced_is_reachable` | `balanced` is reached by a measurement, not by a constant. **Rewritten 2026-09-22**: its docstring used to give the reason nothing balances as "STEP_ORDER has no slot for a cofactor_cycle part", which is no longer true; the assertion is kept and the reason restated as the arithmetic one |
 | `test_the_pool_is_taken_from_the_part_and_the_substitution_is_named` | the one inference, recorded by name; nothing substituted where part and reaction agree |
 | `test_the_redox_flag_does_not_reorder_the_ranking` | the flag is not a sort key |
 | `test_explain_prints_the_redox_flag_and_names_the_imbalance` | C4 — the name, not just the verdict, and on an excluded route too |
 | `test_the_named_imbalance_is_stored_as_a_gap_with_its_compartment` | `balance_status='fail'`, the gap row, the compartment column, and the route still present |
+
+And for the optional role, added 2026-09-22:
+
+| test | what it pins |
+|---|---|
+| `test_enumeration_is_the_full_product_of_parts_and_strategies` | **rewritten**: the product gained a `2 ** k` factor for the cofactor-cycle subsets, the five catalytic roles are counted exactly as before, and exactly the old number of routes carry no cycle |
+| `test_a_route_with_no_cofactor_cycle_is_a_route_and_not_a_deficient_one` | the constraint that mattered most — the 800 still enumerate with identical ids and verdicts, are viable and ranked, print `cofactor_cycle=none`, and a catalog with no cofactor-cycle parts still enumerates |
+| `test_the_optional_role_is_not_in_step_order_and_that_is_the_whole_design` | the alternative rejected, and why: `STEP_ORDER` stays the five roles a published configuration must fill, `ROUTE_STEP_ROLES` carries the optional one |
+| `test_a_cofactor_cycle_step_takes_its_compartment_and_genome_from_its_own_part` | Pos5 stays in the matrix in a cytosolic route; no cycle step is ever flagged for recoding, not even in strategy E |
+| `test_a_cofactor_cycle_step_is_not_counted_as_a_demand_or_a_supply_risk` | the two unsigned gates skip it, so the ranking of the pre-existing routes is untouched, while the signed balance does change |
+| `test_a_cofactor_cycle_step_contributes_the_sign_its_curated_reaction_is_written_in` | Adh3 supplies, **Gpd sinks** — a cofactor-cycle part is not assumed to be a source |
+| `test_pos5_moves_reducing_power_between_pools_and_never_creates_it` | both terms in one compartment, summing to zero, with the route's total debt unchanged and no pool taken from the part |
+| `test_a_declared_pool_transfer_that_does_not_conserve_is_unknown_not_balanced` | a mistyped coefficient cannot manufacture a `balanced` route |
+| `test_the_duet_pair_closes_the_mitochondrial_matrix_for_the_first_time` | the result, derived term by term in the docstring, and that neither gene alone achieves it |
+| `test_the_curated_reaction_for_a_cycle_step_is_chosen_by_gene_and_never_guessed` | exact gene-symbol resolution among the three cofactor-cycle reactions; `unknown` when it does not narrow to one |
+| `test_only_the_entries_that_cite_a_source_are_better_than_unverified` (`tests/test_curated_pathways.py`) | **rewritten**: it pinned the one DOI `adh7_native` came from and would now fail on a correctly curated entry; it asserts a DOI-shaped citation on every `medium` entry instead |
 
 ### Proposed PLAN.md wording — **NOT APPLIED.** The owner owns that file
 
@@ -454,15 +688,31 @@ pool in which compartment is short would be the boolean the ruling rejects.
 
 ## C3 — an enumerated-but-never-built route that survives inspection
 
-Not a software test. A human reads a route card and judges it. It is also **effectively blocked
-behind C1**: "never built" is the complement of the *matched* configurations, and with recall at
-0% the complement is all 600 routes — which is not a claim worth inspecting, because it is true by
+Not a software test. A human reads a route card and judges it. It **was** effectively blocked
+behind C1: "never built" is the complement of the *matched* configurations, and while recall was
+0% the complement was all 600 routes — not a claim worth inspecting, because it was true by
 default rather than by discovery.
 
-Once C1 matches anything, the candidate set is `routes − matched`, and `fermdb atlas explain <route>` already
+**Unblocked 2026-09-22.** C1 now matches two configurations, so the complement is a real set:
+**6,384 of the 6,400 routes**, with
+`C_mitochondrial_ehrlich:ilv2_ilv6_native+ilv5_native+ilv3_native+kivd_lactococcus+adh7_native`
+and its `A_native_split` twin excluded as built. The candidate set is `routes − matched`, and
+`fermdb atlas explain <route>` already
 prints everything an inspection needs: the term-by-term rank, the construction requirements, the
 transport gaps, the cofactor risks, the per-compartment redox demand, and (for strategy E) the
 insertion plan.
+
+> **A CONSEQUENCE OF THE OPTIONAL `cofactor_cycle` ROLE, FOR THE RECALL RULE'S OWNER TO WEIGH —
+> 2026-09-22.** Each of those two configurations now agrees with **8** enumerated routes rather
+> than 1, because `_matching_routes` compares only the roles a record *filled* and no published
+> record names a cofactor-cycle gene. Seven of the eight differ from the paper's build by adding
+> POS5, ADH3 or GPD. The classification is unaffected — both are still `matched`, on the same
+> clause, and the route reported first is still the cycle-free one, because the empty subset is
+> enumerated first — but the *count* beside a match now reads higher than the number of builds it
+> describes. Whether "8 routes agree" should instead read "1 route agrees, 7 with unnamed
+> cofactor-cycle additions" is a matching-rule question, not an enumeration one, and it is
+> recorded here rather than decided. It also slightly loosens C3's complement: 16 route ids are
+> held out as built where 2 correspond to actual builds.
 
 ---
 
@@ -536,6 +786,29 @@ Implemented 2026-09-22; see C2 above for where the flag lives, whether it affect
 not) and the alternative rejected. PLAN.md's own wording still says *excluded*; the proposed
 amendment is at the end of the C2 section and is the owner's to apply.
 
+**D6 — how should an optional step role be expressed? SETTLED by the owner, 2026-09-22.**
+
+> Add a **`cofactor_cycle` step role** so `POS5`, `ADH3` and `GPD` can exist as parts. The step
+> must be **OPTIONAL**: most published builds have no cofactor-cycle step, a route without one is
+> a real route rather than a deficient one, and no existing route or published configuration may
+> break.
+
+Three ways to express it were available: a nullable slot in the enumeration, a separate axis, or
+parts that may simply be absent. The implementation is **a power set over the cofactor-cycle
+parts, whose empty member is first and is a first-class value**, on a tuple (`ROUTE_STEP_ROLES`)
+that is deliberately *not* `STEP_ORDER`. A single nullable slot was rejected because DUET is two
+genes in series and one slot cannot hold both; membership of `STEP_ORDER` was rejected because
+`recall.py` reads that tuple as the roles a published configuration must fill, which would have
+made every published build unmatchable. Both rejections are argued in full in C2.
+
+**WHAT IS STILL NOT DECIDED, and is curation rather than code.** No route reaches `balanced`,
+because a route spends two reducing equivalents and the one curated supplying reaction (Adh3)
+supplies one. The two ways out are (a) curated stoichiometric multiplicity — a route model in
+which a part can carry more than one equivalent of flux — and (b) a curated cytosolic
+NADH-regenerating part. (a) is a change to what a route *is* and is the owner's; (b) is a curation
+act. Neither was taken here, and `balanced` remains reachable-in-principle and unreached-in-fact,
+which is the state the three-value verdict exists to report honestly.
+
 **D2 — is a non-*S. cerevisiae* configuration in the recall denominator?**
 Phase 1 curates "every published microbial isobutanol production strain, **any host**". But
 `enumerate_routes` has no host axis at all — G.7's product says `× host` and the implementation
@@ -554,6 +827,30 @@ specificity, and it is the claim the DUET question turns on. A curator can settl
 `variant_of` / sequence identity to the catalog so the match has something to key on — but the
 harness must not settle it silently.
 
+**D5 — is `ROLE from ORGANISM` an enzyme identification? SETTLED by the owner, 2026-09-22.**
+
+> A role name qualified by a source organism **is** a real identification, not a wildcard — but
+> only when it is unambiguous. Resolve it to a catalog part **when the catalog holds exactly one
+> part for that `(step_role, source_organism)` pair**; flag the match as **resolved-by-organism**,
+> distinct from resolved-by-gene-symbol; if two or more parts share that pair, **refuse as
+> ambiguous** — do not pick one.
+
+The question was raised by the two cels-2019 configurations, which name their decarboxylase as
+`"2-ketoacid decarboxylase (KDC) from Lactococcus lactis"` and were held `under_specified` because
+the rule refuses a bare role name. Three options: (a) leave the rule alone and have a curator
+rewrite the two Zone R descriptions to the paper's Methods spelling `LlKivD`; (b) treat the role
+name as a wildcard, which returns 100% on a record that named nothing and is refused outright;
+(c) read the organism.
+
+**The ruling is (c), with uniqueness as the price.** (a) was what this document recommended and it
+was not taken — the descriptions stay as the papers were reported, which is the Zone R rule, and
+the vocabulary problem is solved in the matcher where it belongs. The concession is that
+`resolved-by-organism` is genuinely weaker evidence than a gene symbol, so it is never allowed to
+vanish into the total: it is named on every verdict and counted separately in the report.
+Implemented 2026-09-22; see the C1 ruling section for the before/after figure, the three things
+the ruling does not reach, and the test that flips today's matches to refusals the moment a second
+*Lactococcus* KDC is curated.
+
 **D4 — should `ENZYME_ALIASES` grow, and who owns it?**
 It holds six entries today, each with its reason in a comment. Every alias is a curation claim
 ("the paper's X is the catalog's gene Y"). The first real recall run will produce a list of
@@ -568,6 +865,9 @@ two apart is curation, and it is the worklist this whole harness exists to produ
 |---|---|
 | `src/fermdb/metabolic/recall.py` | the harness and `MATCHING_RULE` |
 | `src/fermdb/metabolic/cli.py` | `fermdb atlas recall` / `--rule`; the redox tally on `atlas routes`; the named imbalance on `atlas explain` |
-| `src/fermdb/metabolic/routes.py` | `RedoxBalance`, `redox_balance`, `pathway_for_routes` (C2); `explain` prints the chassis term (C4) and the redox flag |
+| `src/fermdb/metabolic/routes.py` | `RedoxBalance`, `redox_balance`, `pathway_for_routes` (C2); `explain` prints the chassis term (C4) and the redox flag; `ROUTE_STEP_ROLES`, `cofactor_cycle_sets` and the Pos5 pool-transfer branch (the optional role) |
+| `data/pathways/parts_catalog.yaml` | `pos5_native`, `adh3_native` and `gpd1_gpd2_native` — the parts of the optional role, read from the corpus and quoted, `confidence: medium` |
+| `data/pathways/ethanol_reference.yaml` | where the three `cofactor_cycle` reactions are curated. `pathway_for_routes` merges **only those** into the isobutanol pathway; pooling the catalytic roles across files stays refused |
 | `tests/test_recall.py` | the rule, clause by clause, and the strictness properties |
-| `tests/test_routes.py` | C2 (flagged, named, not excluded), C4, C5 |
+| `tests/test_routes.py` | C2 (flagged, named, not excluded), C4, C5, and the optional-role contract |
+| `tests/test_curated_pathways.py` | the balance checks, and that a `medium` catalog entry cites a source |

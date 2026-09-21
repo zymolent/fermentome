@@ -10,6 +10,7 @@ to verify: sixteen reactions, three invariants each.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -280,15 +281,25 @@ def test_only_the_entries_that_cite_a_source_are_better_than_unverified() -> Non
     thrown away the distinction confidence exists to record.
 
     The default is `unverified` and the file's header says why: almost everything in it is
-    background knowledge. `adh7_native` is the exception -- written by reading the stored full text
-    of 10.1016/j.cels.2019.10.006 and quoting it -- so it carries `medium`, and its evidence has to
-    name the source that earns it. `high` is not available to this file at all: one paper's report
-    of its own construction, unconfirmed by anything else, is not a verified fact.
+    background knowledge. An entry that carries `medium` has been read out of the stored corpus
+    and must name the source that earns it. `high` is not available to this file at all: one
+    paper's report of its own construction, unconfirmed by anything else, is not a verified fact.
+
+    CHANGED 2026-09-22. This test used to require the literal string
+    `10.1016/j.cels.2019.10.006`, because `adh7_native` was the only entry above `unverified` and
+    that was the paper it came from. It is no longer the only one: `pos5_native`, `adh3_native`
+    and `gpd1_gpd2_native` were re-grounded against the corpus when the enumerator gained its
+    optional `cofactor_cycle` role, and they quote eight other papers between them. Pinning one
+    DOI would now fail on a correctly curated entry, so the assertion is on **the property that
+    was always the point** -- a claim better than `unverified` cites something a reader can go and
+    check -- rather than on the one source that happened to satisfy it first. It is not weakened:
+    a DOI-shaped citation is still required of every such entry, and the accepted vocabulary is
+    still exactly {unverified, medium}.
     """
     for part in C.load_parts(_settings()):
         assert part.confidence in {"unverified", "medium"}, part.id
         if part.confidence != "unverified":
-            assert "10.1016/j.cels.2019.10.006" in part.evidence, part.id
+            assert re.search(r"\b10\.\d{4,9}/\S+", part.evidence), part.id
 
 
 def test_a_field_the_source_does_not_support_is_left_unknown() -> None:
