@@ -212,6 +212,26 @@ class CorroborationReport:
 #: Separators that mean the field lists several things rather than naming one.
 _PLURAL_RE: Final[re.Pattern[str]] = re.compile(r",|\band\b|\bor\b|/")
 
+#: A bare integer, which is not a distinguishing identity however long it is.
+_BARE_NUMBER_RE: Final[re.Pattern[str]] = re.compile(r"^\d+$")
+
+
+def _is_distinguishing(value: str) -> bool:
+    """Would finding this token in a sentence actually tell you the sentence is about it?
+
+    Length is not the only way a token can fail to distinguish. Two corroborated rows in the
+    pending queue carry `1993` as an identity -- and in that paper it is genuinely a strain name,
+    an *E. coli* build from the Liao lineage. It is also a year, and it would match "Smith et al.
+    1993" or "first reported in 1993" exactly as readily as the sentence that actually builds the
+    strain. Both of those rows happen to be right; the channel they travel through is one where
+    being wrong looks identical to being right, and nothing downstream would notice.
+
+    So a bare number routes to review. The cost is bounded and known -- two rows today, which a
+    reader re-approves in a glance -- against closing a silent false-positive path, which is the
+    trade this whole module is built on.
+    """
+    return not _BARE_NUMBER_RE.match(value.strip())
+
 
 def _names_one_thing(value: str) -> bool:
     """Is this field an identity, or a list of them?
@@ -283,6 +303,13 @@ def corroborate_payload(
             # Fails even when the quote contains it verbatim -- see `_names_one_thing`.
             checks.append(
                 FieldCheck(key, kind, str(raw), False, "names several things, not one subject")
+            )
+        elif not _is_distinguishing(str(raw)):
+            # Also fails on a verbatim match, and for the same reason -- see `_is_distinguishing`.
+            checks.append(
+                FieldCheck(
+                    key, kind, str(raw), False, "a bare number does not distinguish one subject"
+                )
             )
         else:
             checks.append(FieldCheck(key, kind, str(raw), _contains(haystack, str(raw))))

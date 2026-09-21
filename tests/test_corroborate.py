@@ -163,6 +163,39 @@ def test_rejects_a_range_spread_across_four_strains() -> None:
     assert "names several things" in report.note
 
 
+def test_a_bare_number_as_an_identity_goes_to_review_even_when_the_quote_contains_it() -> None:
+    """Real, and right, and still routed to review -- which is the trade this module makes.
+
+    In `doi:10.1016/j.ymben.2011.02.004` the strain really is called 1993, so this row is
+    correct and a reader will re-approve it in a glance. But "1993" would match "Smith et al.
+    1993" just as readily as the sentence that builds the strain, and on that path being wrong
+    looks exactly like being right. One glance is the price of closing it.
+    """
+    quote = "PLlacO1::pntAB::FRT was integrated in the sthA locus of 1993 to yield 1993mod"
+    report = corroborate_payload(
+        "T",
+        "part_expression_records",
+        payload(quote, part_as_reported="pntAB", host_as_reported="1993"),
+    )
+    assert report.verdict == REVIEW
+    assert "bare number" in report.note
+    # The part is still reported as corroborated: the reviewer is told which half to check.
+    assert [c.found for c in report.checks] == [True, False]
+
+
+def test_a_name_that_merely_contains_digits_still_corroborates() -> None:
+    """The rule is "a bare number", not "anything with a digit in it".
+
+    Nearly every strain name in this corpus carries digits -- BSW100, JWY23, CEN.PK2-1C. If the
+    rule caught those it would send the whole queue to review and the gate would be worthless.
+    """
+    for name in ("BSW100", "JWY23", "CEN.PK2-1C", "SHy61"):
+        report = corroborate_payload(
+            "T", "strains", payload(f"the {name} strain was constructed", name_as_reported=name)
+        )
+        assert report.verdict == ACCEPT, f"{name}: {report.note}"
+
+
 # --------------------------------------------------------------------------------------------
 # Every ambiguity resolves toward review
 # --------------------------------------------------------------------------------------------
