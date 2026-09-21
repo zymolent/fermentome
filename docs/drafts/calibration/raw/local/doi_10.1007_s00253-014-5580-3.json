@@ -1,0 +1,2247 @@
+{
+  "rank": 5,
+  "stratum": "ET",
+  "publication_id": "doi:10.1007/s00253-014-5580-3",
+  "status": "ok",
+  "seconds": 42.0,
+  "counts": {
+    "strains": 18,
+    "measurements": 23,
+    "conditions": 10
+  },
+  "record_count": 51,
+  "excerpt_chars": 22543,
+  "document_chars": 37543,
+  "payload": {
+    "strains": [
+      {
+        "name_as_reported": "Saccharomyces cerevisiae LBM-1",
+        "role": "engineered",
+        "span": {
+          "quote": "Saccharomyces cerevisiae LBM-1 | Wild type | Laborat\u00f3rio Biotecnologia Molecular-DBB/UFV | UFMG-CM-Y342-Centro de Cole\u00e7\u00f5es Taxon\u00f4micas da UFMG",
+          "char_start": 7815,
+          "char_end": 7957,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Saccharomyces cerevisiae CAT-1",
+        "role": "engineered",
+        "span": {
+          "quote": "Saccharomyces cerevisiae CAT-1 | Industrial strain | Fermentec-Piracicaba - Brazil | CBMAI 0957-Cole\u00e7\u00e3o Brasileira de Micro-organismos de Ambiente e Ind\u00fastria",
+          "char_start": 7959,
+          "char_end": 8117,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Saccharomyces cerevisiae PE-2",
+        "role": "engineered",
+        "span": {
+          "quote": "Saccharomyces cerevisiae PE-2 | Industrial strain | Fermentec-Piracicaba-Brazil | CBMAI 0959-Cole\u00e7\u00e3o Brasileira de Micro-organismos de Ambiente e Ind\u00fastria",
+          "char_start": 8119,
+          "char_end": 8274,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Kluyveromyces marxianus UFV-3",
+        "role": "engineered",
+        "span": {
+          "quote": "Kluyveromyces marxianus UFV-3 | Wild type | Laborat\u00f3rio de Fisiologia de Micro-organismos UFV | _",
+          "char_start": 8276,
+          "char_end": 8373,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Kluyveromyces marxianus ATCC 8554",
+        "role": "engineered",
+        "span": {
+          "quote": "Kluyveromyces marxianus ATCC 8554 | Wild type | American Type Culture Collection | CBS 5795 = NRRL Y-1109 = ATCC 8554",
+          "char_start": 8375,
+          "char_end": 8492,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Kluyveromyces marxianus CCT 4086",
+        "role": "engineered",
+        "span": {
+          "quote": "Kluyveromyces marxianus CCT 4086 | Wild type | Cole\u00e7\u00e3o de Culturas Tropicais-Andr\u00e9 Tosello Tropical Culture | CBS 397 = NRRL Y-2415 = ATCC 46537",
+          "char_start": 8494,
+          "char_end": 8638,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "S. cerevisiae LBM-1",
+        "role": "engineered",
+        "span": {
+          "quote": "S. cerevisiae LBM-1",
+          "char_start": 17938,
+          "char_end": 17957,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "S. cerevisiae CAT-1",
+        "role": "engineered",
+        "span": {
+          "quote": "S. cerevisiae CAT-1",
+          "char_start": 18060,
+          "char_end": 18079,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "S. cerevisiae PE-2",
+        "role": "engineered",
+        "span": {
+          "quote": "S. cerevisiae PE-2",
+          "char_start": 18183,
+          "char_end": 18201,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "K. marxianus UFV-3",
+        "role": "engineered",
+        "span": {
+          "quote": "K. marxianus UFV-3",
+          "char_start": 18304,
+          "char_end": 18322,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "K. marxianus ATCC 8554",
+        "role": "engineered",
+        "span": {
+          "quote": "K. marxianus ATCC 8554",
+          "char_start": 18418,
+          "char_end": 18440,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "K. marxianus CCT 4086",
+        "role": "engineered",
+        "span": {
+          "quote": "K. marxianus CCT 4086",
+          "char_start": 18540,
+          "char_end": 18561,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "LBM-1",
+        "role": "engineered",
+        "span": {
+          "quote": "LBM-1",
+          "char_start": 28866,
+          "char_end": 28871,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "CAT-1",
+        "role": "engineered",
+        "span": {
+          "quote": "CAT-1",
+          "char_start": 28933,
+          "char_end": 28938,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "PE-2",
+        "role": "engineered",
+        "span": {
+          "quote": "PE-2",
+          "char_start": 29000,
+          "char_end": 29004,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "UFV-3",
+        "role": "engineered",
+        "span": {
+          "quote": "UFV-3",
+          "char_start": 29066,
+          "char_end": 29071,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "ATCC 8554",
+        "role": "engineered",
+        "span": {
+          "quote": "ATCC 8554",
+          "char_start": 29133,
+          "char_end": 29142,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "CCT 4086",
+        "role": "engineered",
+        "span": {
+          "quote": "CCT 4086",
+          "char_start": 29204,
+          "char_end": 29212,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "modifications": [],
+    "pathway_configurations": [],
+    "measurements": [
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "S. cerevisiae LBM-1 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | \u2212 | + | +++ | +++",
+          "char_start": 15906,
+          "char_end": 16017,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "S. cerevisiae CAT-1 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | \u2212 | \u2212 | ++ | +++",
+          "char_start": 16019,
+          "char_end": 16129,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "S. cerevisiae PE-2 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | \u2212 | \u2212 | ++ | +++",
+          "char_start": 16131,
+          "char_end": 16240,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "K. marxianus UFV-3 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++",
+          "char_start": 16242,
+          "char_end": 16356,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "K. marxianus ATCC 8554 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++",
+          "char_start": 16358,
+          "char_end": 16476,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "K. marxianus CCT 4086 | +++ | +++ | +++ | \u2212 | \u2212 | +++ | +++ | \u2212 | \u2212 | \u2212 | +++ | +++ | \u2212 | \u2212 | \u2212 | +++ | +++ | \u2212 | \u2212 | \u2212",
+          "char_start": 18540,
+          "char_end": 18659,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 21.7,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "21.70",
+          "char_start": 26829,
+          "char_end": 26834,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 10.64,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "10.64",
+          "char_start": 26837,
+          "char_end": 26842,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 22.77,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "22.77",
+          "char_start": 26896,
+          "char_end": 26901,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 9.92,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "9.92",
+          "char_start": 26904,
+          "char_end": 26908,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 22.24,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "22.24",
+          "char_start": 26962,
+          "char_end": 26967,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 8.47,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "8.47",
+          "char_start": 26970,
+          "char_end": 26974,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 17.19,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "17.19",
+          "char_start": 26954,
+          "char_end": 26959,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 16.11,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "16.11",
+          "char_start": 27021,
+          "char_end": 27026,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 18.53,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "18.53",
+          "char_start": 27029,
+          "char_end": 27034,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 7.24,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "7.24",
+          "char_start": 27037,
+          "char_end": 27041,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 19.66,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "19.66",
+          "char_start": 27099,
+          "char_end": 27104,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 12.11,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "12.11",
+          "char_start": 27107,
+          "char_end": 27112,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 12.06,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "12.06",
+          "char_start": 27177,
+          "char_end": 27182,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "titer",
+        "value": 22.62,
+        "unit": "g/L",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "22.62",
+          "char_start": 29090,
+          "char_end": 29095,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.28,
+        "unit": "g/g",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "0.28",
+          "char_start": 28906,
+          "char_end": 28910,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "titer",
+        "value": 22.84,
+        "unit": "g/L",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "22.84",
+          "char_start": 28965,
+          "char_end": 28970,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.29,
+        "unit": "g/g",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "0.29",
+          "char_start": 28980,
+          "char_end": 28984,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "conditions": [
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "Fermentation tests were performed at 37 and 42 \u00baC using glucose and pretreated sugarcane bagasse as substrates.",
+          "char_start": 10824,
+          "char_end": 10935,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "Fermentation tests were performed at 37 and 42 \u00baC using glucose and pretreated sugarcane bagasse as substrates.",
+          "char_start": 10824,
+          "char_end": 10935,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "total_sugar_g_l",
+        "value_as_reported": "4 % (w/v) glucose",
+        "span": {
+          "quote": "Fermentation tests were performed at 37 and 42 \u00baC using glucose and pretreated sugarcane bagasse as substrates.",
+          "char_start": 10824,
+          "char_end": 10935,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "37 \u00b0C",
+          "char_start": 19216,
+          "char_end": 19221,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "42 \u00b0C",
+          "char_start": 19225,
+          "char_end": 19230,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "45 \u00b0C",
+        "span": {
+          "quote": "45 \u00b0C",
+          "char_start": 17808,
+          "char_end": 17813,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "37 \u00b0C",
+          "char_start": 28803,
+          "char_end": 28808,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "42 \u00b0C",
+          "char_start": 28550,
+          "char_end": 28555,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "time_h",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "37 \u00b0C",
+          "char_start": 28803,
+          "char_end": 28808,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "time_h",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "42 \u00b0C",
+          "char_start": 28550,
+          "char_end": 28555,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "bottlenecks": [],
+    "co_reported_higher_alcohols": [],
+    "self_confidence": "medium"
+  },
+  "records": [
+    [
+      "strains",
+      0,
+      {
+        "name_as_reported": "Saccharomyces cerevisiae LBM-1",
+        "role": "engineered",
+        "span": {
+          "quote": "Saccharomyces cerevisiae LBM-1 | Wild type | Laborat\u00f3rio Biotecnologia Molecular-DBB/UFV | UFMG-CM-Y342-Centro de Cole\u00e7\u00f5es Taxon\u00f4micas da UFMG",
+          "char_start": 7815,
+          "char_end": 7957,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      1,
+      {
+        "name_as_reported": "Saccharomyces cerevisiae CAT-1",
+        "role": "engineered",
+        "span": {
+          "quote": "Saccharomyces cerevisiae CAT-1 | Industrial strain | Fermentec-Piracicaba - Brazil | CBMAI 0957-Cole\u00e7\u00e3o Brasileira de Micro-organismos de Ambiente e Ind\u00fastria",
+          "char_start": 7959,
+          "char_end": 8117,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      2,
+      {
+        "name_as_reported": "Saccharomyces cerevisiae PE-2",
+        "role": "engineered",
+        "span": {
+          "quote": "Saccharomyces cerevisiae PE-2 | Industrial strain | Fermentec-Piracicaba-Brazil | CBMAI 0959-Cole\u00e7\u00e3o Brasileira de Micro-organismos de Ambiente e Ind\u00fastria",
+          "char_start": 8119,
+          "char_end": 8274,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      3,
+      {
+        "name_as_reported": "Kluyveromyces marxianus UFV-3",
+        "role": "engineered",
+        "span": {
+          "quote": "Kluyveromyces marxianus UFV-3 | Wild type | Laborat\u00f3rio de Fisiologia de Micro-organismos UFV | _",
+          "char_start": 8276,
+          "char_end": 8373,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      4,
+      {
+        "name_as_reported": "Kluyveromyces marxianus ATCC 8554",
+        "role": "engineered",
+        "span": {
+          "quote": "Kluyveromyces marxianus ATCC 8554 | Wild type | American Type Culture Collection | CBS 5795 = NRRL Y-1109 = ATCC 8554",
+          "char_start": 8375,
+          "char_end": 8492,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      5,
+      {
+        "name_as_reported": "Kluyveromyces marxianus CCT 4086",
+        "role": "engineered",
+        "span": {
+          "quote": "Kluyveromyces marxianus CCT 4086 | Wild type | Cole\u00e7\u00e3o de Culturas Tropicais-Andr\u00e9 Tosello Tropical Culture | CBS 397 = NRRL Y-2415 = ATCC 46537",
+          "char_start": 8494,
+          "char_end": 8638,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      0,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "S. cerevisiae LBM-1 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | \u2212 | + | +++ | +++",
+          "char_start": 15906,
+          "char_end": 16017,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      1,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "S. cerevisiae CAT-1 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | \u2212 | \u2212 | ++ | +++",
+          "char_start": 16019,
+          "char_end": 16129,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      2,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "S. cerevisiae PE-2 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | \u2212 | \u2212 | ++ | +++",
+          "char_start": 16131,
+          "char_end": 16240,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      3,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "K. marxianus UFV-3 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++",
+          "char_start": 16242,
+          "char_end": 16356,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      4,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "K. marxianus ATCC 8554 | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++ | +++",
+          "char_start": 16358,
+          "char_end": 16476,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      5,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.39,
+        "unit": "g/g",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "K. marxianus CCT 4086 | +++ | +++ | +++ | \u2212 | \u2212 | +++ | +++ | \u2212 | \u2212 | \u2212 | +++ | +++ | \u2212 | \u2212 | \u2212 | +++ | +++ | \u2212 | \u2212 | \u2212",
+          "char_start": 18540,
+          "char_end": 18659,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      0,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "Fermentation tests were performed at 37 and 42 \u00baC using glucose and pretreated sugarcane bagasse as substrates.",
+          "char_start": 10824,
+          "char_end": 10935,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      1,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "Fermentation tests were performed at 37 and 42 \u00baC using glucose and pretreated sugarcane bagasse as substrates.",
+          "char_start": 10824,
+          "char_end": 10935,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      2,
+      {
+        "facet": "total_sugar_g_l",
+        "value_as_reported": "4 % (w/v) glucose",
+        "span": {
+          "quote": "Fermentation tests were performed at 37 and 42 \u00baC using glucose and pretreated sugarcane bagasse as substrates.",
+          "char_start": 10824,
+          "char_end": 10935,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      6,
+      {
+        "name_as_reported": "S. cerevisiae LBM-1",
+        "role": "engineered",
+        "span": {
+          "quote": "S. cerevisiae LBM-1",
+          "char_start": 17938,
+          "char_end": 17957,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      7,
+      {
+        "name_as_reported": "S. cerevisiae CAT-1",
+        "role": "engineered",
+        "span": {
+          "quote": "S. cerevisiae CAT-1",
+          "char_start": 18060,
+          "char_end": 18079,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      8,
+      {
+        "name_as_reported": "S. cerevisiae PE-2",
+        "role": "engineered",
+        "span": {
+          "quote": "S. cerevisiae PE-2",
+          "char_start": 18183,
+          "char_end": 18201,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      9,
+      {
+        "name_as_reported": "K. marxianus UFV-3",
+        "role": "engineered",
+        "span": {
+          "quote": "K. marxianus UFV-3",
+          "char_start": 18304,
+          "char_end": 18322,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      10,
+      {
+        "name_as_reported": "K. marxianus ATCC 8554",
+        "role": "engineered",
+        "span": {
+          "quote": "K. marxianus ATCC 8554",
+          "char_start": 18418,
+          "char_end": 18440,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      11,
+      {
+        "name_as_reported": "K. marxianus CCT 4086",
+        "role": "engineered",
+        "span": {
+          "quote": "K. marxianus CCT 4086",
+          "char_start": 18540,
+          "char_end": 18561,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      6,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 21.7,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "21.70",
+          "char_start": 26829,
+          "char_end": 26834,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      7,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 10.64,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "10.64",
+          "char_start": 26837,
+          "char_end": 26842,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      8,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 22.77,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "22.77",
+          "char_start": 26896,
+          "char_end": 26901,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      9,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 9.92,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "9.92",
+          "char_start": 26904,
+          "char_end": 26908,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      10,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 22.24,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "22.24",
+          "char_start": 26962,
+          "char_end": 26967,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      11,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 8.47,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "8.47",
+          "char_start": 26970,
+          "char_end": 26974,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      12,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 17.19,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "17.19",
+          "char_start": 26954,
+          "char_end": 26959,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      13,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 16.11,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "16.11",
+          "char_start": 27021,
+          "char_end": 27026,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      14,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 18.53,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "18.53",
+          "char_start": 27029,
+          "char_end": 27034,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      15,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 7.24,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "7.24",
+          "char_start": 27037,
+          "char_end": 27041,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      16,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 19.66,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "19.66",
+          "char_start": 27099,
+          "char_end": 27104,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      17,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 12.11,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "12.11",
+          "char_start": 27107,
+          "char_end": 27112,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      18,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "g/L",
+        "value": 12.06,
+        "unit": "g/L",
+        "source_locator": "Table 5",
+        "span": {
+          "quote": "12.06",
+          "char_start": 27177,
+          "char_end": 27182,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      3,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "37 \u00b0C",
+          "char_start": 19216,
+          "char_end": 19221,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      4,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "42 \u00b0C",
+          "char_start": 19225,
+          "char_end": 19230,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      5,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "45 \u00b0C",
+        "span": {
+          "quote": "45 \u00b0C",
+          "char_start": 17808,
+          "char_end": 17813,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      12,
+      {
+        "name_as_reported": "LBM-1",
+        "role": "engineered",
+        "span": {
+          "quote": "LBM-1",
+          "char_start": 28866,
+          "char_end": 28871,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      13,
+      {
+        "name_as_reported": "CAT-1",
+        "role": "engineered",
+        "span": {
+          "quote": "CAT-1",
+          "char_start": 28933,
+          "char_end": 28938,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      14,
+      {
+        "name_as_reported": "PE-2",
+        "role": "engineered",
+        "span": {
+          "quote": "PE-2",
+          "char_start": 29000,
+          "char_end": 29004,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      15,
+      {
+        "name_as_reported": "UFV-3",
+        "role": "engineered",
+        "span": {
+          "quote": "UFV-3",
+          "char_start": 29066,
+          "char_end": 29071,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      16,
+      {
+        "name_as_reported": "ATCC 8554",
+        "role": "engineered",
+        "span": {
+          "quote": "ATCC 8554",
+          "char_start": 29133,
+          "char_end": 29142,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      17,
+      {
+        "name_as_reported": "CCT 4086",
+        "role": "engineered",
+        "span": {
+          "quote": "CCT 4086",
+          "char_start": 29204,
+          "char_end": 29212,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      19,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "titer",
+        "value": 22.62,
+        "unit": "g/L",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "22.62",
+          "char_start": 29090,
+          "char_end": 29095,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      20,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.28,
+        "unit": "g/g",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "0.28",
+          "char_start": 28906,
+          "char_end": 28910,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      21,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "titer",
+        "value": 22.84,
+        "unit": "g/L",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "22.84",
+          "char_start": 28965,
+          "char_end": 28970,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      22,
+      {
+        "product_id": "YAA:PRODUCT:ethanol",
+        "product_as_reported": "ethanol",
+        "quantity_kind": "yield",
+        "value": 0.29,
+        "unit": "g/g",
+        "source_locator": "Table 6",
+        "span": {
+          "quote": "0.29",
+          "char_start": 28980,
+          "char_end": 28984,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "g/g",
+        "basis": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      6,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "37 \u00b0C",
+          "char_start": 28803,
+          "char_end": 28808,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      7,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "42 \u00b0C",
+          "char_start": 28550,
+          "char_end": 28555,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      8,
+      {
+        "facet": "time_h",
+        "value_as_reported": "37 \u00b0C",
+        "span": {
+          "quote": "37 \u00b0C",
+          "char_start": 28803,
+          "char_end": 28808,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      9,
+      {
+        "facet": "time_h",
+        "value_as_reported": "42 \u00b0C",
+        "span": {
+          "quote": "42 \u00b0C",
+          "char_start": 28550,
+          "char_end": 28555,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ]
+  ],
+  "notes": [
+    [
+      "w1:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [103, 156) and the quote occurs exactly once, at [451, 593)"
+    ],
+    [
+      "w1:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [157, 308) and the quote occurs exactly once, at [595, 753)"
+    ],
+    [
+      "w1:strains[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [309, 460) and the quote occurs exactly once, at [755, 910)"
+    ],
+    [
+      "w1:strains[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [461, 534) and the quote occurs exactly once, at [912, 1009)"
+    ],
+    [
+      "w1:strains[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [535, 696) and the quote occurs exactly once, at [1011, 1128)"
+    ],
+    [
+      "w1:strains[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [697, 868) and the quote occurs exactly once, at [1130, 1274)"
+    ],
+    [
+      "w1:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1039, 1045) and the quote occurs exactly once, at [8565, 8676)"
+    ],
+    [
+      "w1:measurements[0]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w1:measurements[0]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w1:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1046, 1052) and the quote occurs exactly once, at [8678, 8788)"
+    ],
+    [
+      "w1:measurements[1]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w1:measurements[1]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w1:measurements[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1053, 1059) and the quote occurs exactly once, at [8790, 8899)"
+    ],
+    [
+      "w1:measurements[2]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w1:measurements[2]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w1:measurements[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1060, 1066) and the quote occurs exactly once, at [8901, 9015)"
+    ],
+    [
+      "w1:measurements[3]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w1:measurements[3]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w1:measurements[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1067, 1073) and the quote occurs exactly once, at [9017, 9135)"
+    ],
+    [
+      "w1:measurements[4]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w1:measurements[4]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w1:measurements[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1074, 1080) and the quote occurs exactly once, at [11199, 11318)"
+    ],
+    [
+      "w1:measurements[5]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w1:measurements[5]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w1:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1285, 1294) and the quote occurs exactly once, at [3460, 3571)"
+    ],
+    [
+      "w1:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1285, 1294) and the quote occurs exactly once, at [3460, 3571)"
+    ],
+    [
+      "w1:conditions[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1285, 1294) and the quote occurs exactly once, at [3460, 3571)"
+    ],
+    [
+      "w2:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [123, 135); the quote occurs 6 times and the nearest is [496, 515)"
+    ],
+    [
+      "w2:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [136, 148); the quote occurs 5 times and the nearest is [618, 637)"
+    ],
+    [
+      "w2:strains[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [149, 161); the quote occurs 5 times and the nearest is [741, 759)"
+    ],
+    [
+      "w2:strains[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [162, 176); the quote occurs 5 times and the nearest is [862, 880)"
+    ],
+    [
+      "w2:strains[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [177, 193); the quote occurs 3 times and the nearest is [976, 998)"
+    ],
+    [
+      "w2:strains[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [194, 209); the quote occurs 4 times and the nearest is [1098, 1119)"
+    ],
+    [
+      "w2:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1059, 1064) and the quote occurs exactly once, at [9387, 9392)"
+    ],
+    [
+      "w2:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1065, 1071) and the quote occurs exactly once, at [9395, 9400)"
+    ],
+    [
+      "w2:measurements[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1072, 1078) and the quote occurs exactly once, at [9454, 9459)"
+    ],
+    [
+      "w2:measurements[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1079, 1085) and the quote occurs exactly once, at [9462, 9466)"
+    ],
+    [
+      "w2:measurements[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1086, 1092); the quote occurs 2 times and the nearest is [9520, 9525)"
+    ],
+    [
+      "w2:measurements[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1093, 1099) and the quote occurs exactly once, at [9528, 9532)"
+    ],
+    [
+      "w2:measurements[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1100, 1107) and the quote occurs exactly once, at [9512, 9517)"
+    ],
+    [
+      "w2:measurements[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1108, 1115) and the quote occurs exactly once, at [9579, 9584)"
+    ],
+    [
+      "w2:measurements[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1116, 1123) and the quote occurs exactly once, at [9587, 9592)"
+    ],
+    [
+      "w2:measurements[9]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1124, 1130) and the quote occurs exactly once, at [9595, 9599)"
+    ],
+    [
+      "w2:measurements[10]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1131, 1138) and the quote occurs exactly once, at [9657, 9662)"
+    ],
+    [
+      "w2:measurements[11]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1139, 1146); the quote occurs 2 times and the nearest is [9665, 9670)"
+    ],
+    [
+      "w2:measurements[12]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1147, 1154); the quote occurs 2 times and the nearest is [9735, 9740)"
+    ],
+    [
+      "w2:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1155, 1161); the quote occurs 18 times and the nearest is [1774, 1779)"
+    ],
+    [
+      "w2:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1162, 1168); the quote occurs 28 times and the nearest is [1783, 1788)"
+    ],
+    [
+      "w2:conditions[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1169, 1175); the quote occurs 11 times and the nearest is [366, 371)"
+    ],
+    [
+      "w3:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [104, 109) and the quote occurs exactly once, at [1094, 1099)"
+    ],
+    [
+      "w3:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [120, 125); the quote occurs 3 times and the nearest is [1161, 1166)"
+    ],
+    [
+      "w3:strains[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [136, 140) and the quote occurs exactly once, at [1228, 1232)"
+    ],
+    [
+      "w3:strains[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [151, 156); the quote occurs 2 times and the nearest is [1294, 1299)"
+    ],
+    [
+      "w3:strains[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [167, 176) and the quote occurs exactly once, at [1361, 1370)"
+    ],
+    [
+      "w3:strains[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [187, 194) and the quote occurs exactly once, at [1432, 1440)"
+    ],
+    [
+      "w3:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [285, 291); the quote occurs 2 times and the nearest is [1318, 1323)"
+    ],
+    [
+      "w3:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [303, 308); the quote occurs 4 times and the nearest is [1134, 1138)"
+    ],
+    [
+      "w3:measurements[1]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w3:measurements[1]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w3:measurements[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [329, 335); the quote occurs 2 times and the nearest is [1193, 1198)"
+    ],
+    [
+      "w3:measurements[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [347, 352); the quote occurs 2 times and the nearest is [1208, 1212)"
+    ],
+    [
+      "w3:measurements[3]",
+      "basis_defaulted_to_unknown",
+      "no basis reported for a yield; recorded as 'unknown' (not NULL) and not usable for cross-study comparison"
+    ],
+    [
+      "w3:measurements[3]",
+      "yield_not_checkable",
+      "a g/g yield without both product_id and substrate cannot be checked against a theoretical maximum"
+    ],
+    [
+      "w3:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [26, 31); the quote occurs 7 times and the nearest is [1031, 1036)"
+    ],
+    [
+      "w3:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [32, 37); the quote occurs 8 times and the nearest is [778, 783)"
+    ],
+    [
+      "w3:conditions[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [26, 31); the quote occurs 7 times and the nearest is [1031, 1036)"
+    ],
+    [
+      "w3:conditions[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [32, 37); the quote occurs 8 times and the nearest is [778, 783)"
+    ]
+  ],
+  "failed_attempts": [],
+  "model": "qwen2.5:7b-instruct"
+}

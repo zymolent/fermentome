@@ -1,0 +1,8 @@
+{
+  "rank": 2,
+  "stratum": "IY",
+  "publication_id": "doi:10.1016/j.meteno.2016.01.002",
+  "status": "error",
+  "seconds": 132.2,
+  "error": "LlmValidationError: qwen2.5:7b-instruct produced output that failed validation on all 2 attempt(s) (prompt_version=extraction/v1+723f92719ad1, input_hash=0323910f1726). Last errors: measurements[1]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [2702, 2725) reads 'athway intermediate dih'; measurements[2]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [2727, 2750) reads 'roxyisovalerate (DHIV) '"
+}

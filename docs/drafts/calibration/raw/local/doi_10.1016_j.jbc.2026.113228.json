@@ -1,0 +1,67 @@
+{
+  "rank": 1,
+  "stratum": "IY",
+  "publication_id": "doi:10.1016/j.jbc.2026.113228",
+  "status": "ok",
+  "seconds": 15.1,
+  "counts": {
+    "strains": 1
+  },
+  "record_count": 1,
+  "excerpt_chars": 23223,
+  "document_chars": 38483,
+  "payload": {
+    "strains": [
+      {
+        "name_as_reported": "BY4741",
+        "role": "engineered",
+        "span": {
+          "quote": "Yeast alcohol tolerance assay in the presence of excess amino acids\n\nAlcohol tolerance assays were performed using the yeast S. cerevisiae strain BY4741 (Euroscarf) () in media supplemented with excess amino acids.",
+          "char_start": 28743,
+          "char_end": 28957,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "modifications": [],
+    "pathway_configurations": [],
+    "measurements": [],
+    "conditions": [],
+    "bottlenecks": [],
+    "co_reported_higher_alcohols": [],
+    "self_confidence": "low"
+  },
+  "records": [
+    [
+      "strains",
+      0,
+      {
+        "name_as_reported": "BY4741",
+        "role": "engineered",
+        "span": {
+          "quote": "Yeast alcohol tolerance assay in the presence of excess amino acids\n\nAlcohol tolerance assays were performed using the yeast S. cerevisiae strain BY4741 (Euroscarf) () in media supplemented with excess amino acids.",
+          "char_start": 28743,
+          "char_end": 28957,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ]
+  ],
+  "notes": [
+    [
+      "w2:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [12, 34) and the quote occurs exactly once, at [4847, 5061)"
+    ]
+  ],
+  "failed_attempts": [],
+  "model": "qwen2.5:7b-instruct"
+}

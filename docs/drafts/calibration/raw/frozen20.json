@@ -1,0 +1,162 @@
+[
+  {
+    "rank": 1,
+    "stratum": "IY",
+    "doi": "10.1016/j.jbc.2026.113228",
+    "publication_id": "doi:10.1016/j.jbc.2026.113228",
+    "year": 2026,
+    "title": "Leucyl-tRNA synthetase as a molecular target of isobutanol-mediated growth inhibition in Saccharomyces cerevisiae."
+  },
+  {
+    "rank": 2,
+    "stratum": "IY",
+    "doi": "10.1016/j.meteno.2016.01.002",
+    "publication_id": "doi:10.1016/j.meteno.2016.01.002",
+    "year": 2016,
+    "title": "Excessive by-product formation: A key contributor to low isobutanol yields of engineered Saccharomyces cerevisiae strains."
+  },
+  {
+    "rank": 3,
+    "stratum": "IO",
+    "doi": "10.1002/elsc.201900151",
+    "publication_id": "doi:10.1002/elsc.201900151",
+    "year": 2020,
+    "title": "Engineering Pseudomonas putida KT2440 for the production of isobutanol."
+  },
+  {
+    "rank": 4,
+    "stratum": "MT",
+    "doi": "10.1093/g3journal/jkae295",
+    "publication_id": "doi:10.1093/g3journal/jkae295",
+    "year": 2025,
+    "title": "A high copy suppressor screen identifies factors enhancing the allotopic production of subunit II of cytochrome c oxidase."
+  },
+  {
+    "rank": 5,
+    "stratum": "ET",
+    "doi": "10.1007/s00253-014-5580-3",
+    "publication_id": "doi:10.1007/s00253-014-5580-3",
+    "year": 2014,
+    "title": "Physiological characterization of thermotolerant yeast for cellulosic ethanol production."
+  },
+  {
+    "rank": 6,
+    "stratum": "IY",
+    "doi": "10.1016/j.synbio.2022.02.007",
+    "publication_id": "doi:10.1016/j.synbio.2022.02.007",
+    "year": 2022,
+    "title": "Comparative functional genomics identifies an iron-limited bottleneck in a Saccharomyces cerevisiae strain with a cytosolic-localized isobutanol pathway."
+  },
+  {
+    "rank": 7,
+    "stratum": "IY",
+    "doi": "10.1038/s41467-021-27852-x",
+    "publication_id": "doi:10.1038/s41467-021-27852-x",
+    "year": 2022,
+    "title": "Biosensor for branched-chain amino acid metabolism in yeast and applications in isobutanol and isopentanol production."
+  },
+  {
+    "rank": 8,
+    "stratum": "IO",
+    "doi": "10.1007/s00253-009-2085-6",
+    "publication_id": "doi:10.1007/s00253-009-2085-6",
+    "year": 2010,
+    "title": "Engineering the isobutanol biosynthetic pathway in Escherichia coli by comparison of three aldehyde reductase/alcohol dehydrogenase genes."
+  },
+  {
+    "rank": 9,
+    "stratum": "MT",
+    "doi": "10.1093/genetics/iyaf037",
+    "publication_id": "doi:10.1093/genetics/iyaf037",
+    "year": 2025,
+    "title": "A new set of mutations in the second transmembrane helix of the Cox2p-W56R substantially improves its allotopic expression in Saccharomyces cerevisiae."
+  },
+  {
+    "rank": 10,
+    "stratum": "ET",
+    "doi": "10.1007/s00253-025-13446-w",
+    "publication_id": "doi:10.1007/s00253-025-13446-w",
+    "year": 2025,
+    "title": "Engineered S. cerevisiae construction for high-gravity ethanol production and targeted metabolomics."
+  },
+  {
+    "rank": 11,
+    "stratum": "IY",
+    "doi": "10.1038/s41598-019-40631-5",
+    "publication_id": "doi:10.1038/s41598-019-40631-5",
+    "year": 2019,
+    "title": "Development of an efficient cytosolic isobutanol production pathway in Saccharomyces cerevisiae by optimizing copy numbers and expression of the pathway genes based on the toxic effect of \u03b1-acetolactate."
+  },
+  {
+    "rank": 12,
+    "stratum": "IY",
+    "doi": "10.1093/femsyr/foae006",
+    "publication_id": "doi:10.1093/femsyr/foae006",
+    "year": 2024,
+    "title": "Increased production of isobutanol from xylose through metabolic engineering of Saccharomyces cerevisiae overexpressing transcription factor Znf1 and exogenous genes."
+  },
+  {
+    "rank": 13,
+    "stratum": "IO",
+    "doi": "10.1007/s00253-010-2522-6",
+    "publication_id": "doi:10.1007/s00253-010-2522-6",
+    "year": 2010,
+    "title": "Engineering Corynebacterium glutamicum for isobutanol production."
+  },
+  {
+    "rank": 14,
+    "stratum": "MT",
+    "doi": "10.1371/journal.pgen.1002876",
+    "publication_id": "doi:10.1371/journal.pgen.1002876",
+    "year": 2012,
+    "title": "Experimental relocation of the mitochondrial ATP9 gene to the nucleus reveals forces underlying mitochondrial genome evolution."
+  },
+  {
+    "rank": 15,
+    "stratum": "ET",
+    "doi": "10.1007/s00253-026-13830-0",
+    "publication_id": "doi:10.1007/s00253-026-13830-0",
+    "year": 2026,
+    "title": "Engineering natural Saccharomyces cerevisiae isolates for enhanced one-step cellulosic ethanol production."
+  },
+  {
+    "rank": 16,
+    "stratum": "IY",
+    "doi": "10.1186/1754-6834-4-21",
+    "publication_id": "doi:10.1186/1754-6834-4-21",
+    "year": 2011,
+    "title": "Increased isobutanol production in Saccharomyces cerevisiae by overexpression of genes in valine metabolism."
+  },
+  {
+    "rank": 17,
+    "stratum": "IY",
+    "doi": "10.1186/1754-6834-5-65",
+    "publication_id": "doi:10.1186/1754-6834-5-65",
+    "year": 2012,
+    "title": "Cytosolic re-localization and optimization of valine synthesis and catabolism enables inseased isobutanol production with the yeast Saccharomyces cerevisiae."
+  },
+  {
+    "rank": 18,
+    "stratum": "IO",
+    "doi": "10.1016/j.meteno.2017.07.003",
+    "publication_id": "doi:10.1016/j.meteno.2017.07.003",
+    "year": 2017,
+    "title": "Isobutanol production in Synechocystis PCC 6803 using heterologous and endogenous alcohol dehydrogenases."
+  },
+  {
+    "rank": 19,
+    "stratum": "MT",
+    "doi": "10.26508/lsa.202301965",
+    "publication_id": "doi:10.26508/lsa.202301965",
+    "year": 2023,
+    "title": "Allotopic expression of COX6 elucidates Atco-driven co-assembly of cytochrome oxidase and ATP synthase."
+  },
+  {
+    "rank": 20,
+    "stratum": "ET",
+    "doi": "10.1007/s10295-013-1311-5",
+    "publication_id": "doi:10.1007/s10295-013-1311-5",
+    "year": 2013,
+    "title": "Engineering of the glycerol decomposition pathway and cofactor regulation in an industrial yeast improves ethanol production."
+  }
+]

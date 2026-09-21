@@ -123,6 +123,14 @@ _CHARS_PER_TOKEN: Final[float] = 3.5
 #: largest thing this project asks a model to write.
 _RESERVED_COMPLETION_TOKENS: Final[int] = 2048
 
+#: Turns the escalation tier may take to produce one payload.
+#:
+#: This was 1, and at 1 **every real paper failed** -- see the comment at its use site. 8 is chosen
+#: to be comfortably above what a full payload needs while still bounding a runaway: the tier is
+#: metered against a document budget (`llm_escalation_max_documents`), and a turn count that could
+#: not terminate would spend that budget on one paper.
+_ESCALATION_MAX_TURNS: Final[int] = 8
+
 
 def _check_fits_context(
     prompt: str,
@@ -851,7 +859,17 @@ def claude_agent_sdk_runner(request: AgentRequest) -> AgentReply:
         ],
         "permission_mode": "dontAsk",
         "model": request.model,
-        "max_turns": 1,
+        # Measured, not guessed. `max_turns: 1` stood here and **every real paper failed** with
+        # "Reached maximum number of turns (1)" -- reproduced at 30k, 12k and 6k excerpt windows,
+        # so it is not excerpt size. The cause is the payload schema itself: at ~42,000 characters
+        # it does not complete in one turn, while a trivial schema does. This path had never been
+        # executed against a real document, so the ceiling had never been reached.
+        #
+        # Raising it does not widen what escalation may do. Every tool is disallowed above and
+        # `setting_sources` is empty, so an extra turn can only continue producing the JSON object
+        # the system prompt asks for -- the trust argument in this function's docstring is about
+        # tools and file access, and neither changes with the turn count.
+        "max_turns": _ESCALATION_MAX_TURNS,
         "setting_sources": [],
         "env": {API_KEY_VAR: "", "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "0"},
     }

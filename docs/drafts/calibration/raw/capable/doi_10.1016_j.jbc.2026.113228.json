@@ -1,0 +1,1606 @@
+{
+  "rank": 1,
+  "stratum": "IY",
+  "publication_id": "doi:10.1016/j.jbc.2026.113228",
+  "status": "ok",
+  "seconds": 267.0,
+  "counts": {
+    "strains": 3,
+    "modifications": 5,
+    "measurements": 9,
+    "conditions": 16,
+    "bottlenecks": 2,
+    "co_reported_higher_alcohols": 1
+  },
+  "record_count": 36,
+  "excerpt_chars": 23223,
+  "document_chars": 38483,
+  "payload": {
+    "strains": [
+      {
+        "name_as_reported": "wild-type yeast",
+        "role": "wild_type",
+        "span": {
+          "quote": "Isobutanol tolerance of wild-type yeast in medium supplemented with excess BCAAs.",
+          "char_start": 8650,
+          "char_end": 8731,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "BY4741",
+        "role": "wild_type",
+        "background_as_reported": "S. cerevisiae",
+        "span": {
+          "quote": "Alcohol tolerance assays were performed using the yeast S. cerevisiae strain BY4741 (Euroscarf)",
+          "char_start": 28812,
+          "char_end": 28907,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "E. coli Rosetta",
+        "role": "engineered",
+        "span": {
+          "quote": "Each plasmid was transformed into E. coli Rosetta (Sigma-Aldrich).",
+          "char_start": 31834,
+          "char_end": 31900,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "modifications": [
+      {
+        "target_as_reported": "cytoplasmic LeuRS (Cdc60p)",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "These proteins were produced in Escherichia coli, purified without removing the thioredoxin tag, and verified to be enzymatically active",
+        "encoding_genome": "unknown",
+        "compartment": "unknown",
+        "span": {
+          "quote": "These proteins were produced in Escherichia coli, purified without removing the thioredoxin tag, and verified to be enzymatically active ().",
+          "char_start": 11198,
+          "char_end": 11338,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "mitochondrial LeuRS (Nam2p)",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "These proteins were produced in Escherichia coli, purified without removing the thioredoxin tag, and verified to be enzymatically active",
+        "encoding_genome": "unknown",
+        "compartment": "unknown",
+        "span": {
+          "quote": "STD-NMR analysis was performed using the cytoplasmic LeuRS (Cdc60p) and the mitochondrial LeuRS (Nam2p).",
+          "char_start": 11093,
+          "char_end": 11197,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "CDC60",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "ORF of the CDC60 gene, encoding the cytosolic leucyl-tRNA synthetase, amplified from BY4741 genomic DNA and inserted into pET-32b for expression in E. coli",
+        "encoding_genome": "nuclear",
+        "compartment": "unknown",
+        "strain_name_as_reported": "E. coli Rosetta",
+        "span": {
+          "quote": "The open reading frame (ORF) of the CDC60 gene, which encodes the cytosolic leucyl-tRNA synthetase, and the ORF of the NAM2 gene, which encodes the mitochondrial isoform, were amplified from the genomic DNA by one-step PCR as previously described ().",
+          "char_start": 30905,
+          "char_end": 31155,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "NAM2",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "ORF of the NAM2 gene, encoding the mitochondrial LeuRS isoform, amplified from BY4741 genomic DNA and inserted into pET-32b for expression in E. coli",
+        "encoding_genome": "nuclear",
+        "compartment": "unknown",
+        "strain_name_as_reported": "E. coli Rosetta",
+        "span": {
+          "quote": "the ORF of the NAM2 gene, which encodes the mitochondrial isoform, were amplified from the genomic DNA by one-step PCR",
+          "char_start": 31009,
+          "char_end": 31127,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "pET32b-CDC60 and pET32b-NAM2",
+        "modification_type": "other",
+        "detail_as_reported": "target proteins fused to an N-terminal His-tagged thioredoxin",
+        "strain_name_as_reported": "E. coli Rosetta",
+        "span": {
+          "quote": "The resulting plasmids encoded the target proteins fused to an N-terminal His-tagged thioredoxin, facilitating affinity purification and improving protein solubility.",
+          "char_start": 31522,
+          "char_end": 31688,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "pathway_configurations": [],
+    "measurements": [
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "STD-NMR relative peak intensity (Peak 1) with Cdc60p",
+        "value": 57.4,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "with relative intensities of 57.4% and 9.7% of the reference spectrum, respectively",
+          "char_start": 12119,
+          "char_end": 12202,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "STD-NMR relative peak intensity (Peak 1) with Nam2p",
+        "value": 9.7,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "with relative intensities of 57.4% and 9.7% of the reference spectrum, respectively",
+          "char_start": 12119,
+          "char_end": 12202,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "STD-NMR relative peak intensity (Peak 1) with Cdc60p",
+        "value": 24.8,
+        "unit": "unknown",
+        "source_locator": "figure 2B",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "with an intensity of 24.8% relative to the reference spectrum (B)",
+          "char_start": 12840,
+          "char_end": 12905,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "STD-NMR relative peak intensity with Nam2p",
+        "value": 2,
+        "unit": "unknown",
+        "source_locator": "figure 2D legend",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": true,
+        "span": {
+          "quote": "In panel (D), the relative intensity is below 2%.",
+          "char_start": 13693,
+          "char_end": 13742,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "unknown",
+        "product_as_reported": "ethanol, valine, or isoleucine",
+        "quantity_kind": "STD-NMR relative peak intensity with Cdc60p",
+        "value": 2,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": true,
+        "span": {
+          "quote": "as the observed STD-NMR peak intensity was below 2% of the reference spectrum",
+          "char_start": 14459,
+          "char_end": 14536,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "STD-NMR relative peak intensity in equimolar mixture with isobutanol",
+        "value": 23.2,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "The leucine signal decreased from 57.4% to 23.2% of the reference spectrum, corresponding to 40.4% of the intensity observed in the absence of isobutanol.",
+          "char_start": 14992,
+          "char_end": 15146,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "residual STD-NMR intensity relative to single-ligand condition",
+        "value": 40.4,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "corresponding to 40.4% of the intensity observed in the absence of isobutanol",
+          "char_start": 15068,
+          "char_end": 15145,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "STD-NMR relative peak intensity in equimolar mixture with leucine",
+        "value": 3.5,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "the isobutanol signal decreased from 24.8% to 3.5%, corresponding to 14.1% of the intensity observed in the absence of leucine",
+          "char_start": 15158,
+          "char_end": 15284,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "residual STD-NMR intensity relative to single-ligand condition",
+        "value": 14.1,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "corresponding to 14.1% of the intensity observed in the absence of leucine",
+          "char_start": 15210,
+          "char_end": 15284,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "conditions": [
+      {
+        "facet": "medium_name",
+        "value_as_reported": "SC medium containing 0% or 1.5% (v/v) isobutanol",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "assessed in SC medium containing 0% or 1.5% (v/v) isobutanol",
+          "char_start": 8822,
+          "char_end": 8882,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "stressor.compound",
+        "value_as_reported": "isobutanol",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "The effect of excess BCAAs on isobutanol-induced growth inhibition in wild-type yeast was assessed in SC medium containing 0% or 1.5% (v/v) isobutanol.",
+          "char_start": 8732,
+          "char_end": 8883,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "stressor.concentration",
+        "value_as_reported": "0% or 1.5% (v/v) isobutanol",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "SC medium containing 0% or 1.5% (v/v) isobutanol",
+          "char_start": 8834,
+          "char_end": 8882,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "supplements",
+        "value_as_reported": "media supplemented with excess amino acids",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "we conducted isobutanol tolerance assays using media supplemented with excess amino acids",
+          "char_start": 7847,
+          "char_end": 7936,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "supplements",
+        "value_as_reported": "excess BCAAs",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "Supplementation with excess branched-chain amino acids, particularly leucine, partially alleviated isobutanol-induced growth inhibition.",
+          "char_start": 8884,
+          "char_end": 9020,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "medium_name",
+        "value_as_reported": "SC medium",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "The BY4741 strain was cultured in four types of liquid media: SC medium (), SC + BCAAs",
+          "char_start": 28958,
+          "char_end": 29044,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "supplements",
+        "value_as_reported": "SC + BCAAs (supplemented with excess l-leucine, l-valine, and l-isoleucine)",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "SC + BCAAs (supplemented with excess l-leucine, l-valine, and l-isoleucine)",
+          "char_start": 29034,
+          "char_end": 29109,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "supplements",
+        "value_as_reported": "added at twice their standard concentrations",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "All amino acids were purchased from Nacalai Tesque, and added at twice their standard concentrations.",
+          "char_start": 29303,
+          "char_end": 29404,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "supplements",
+        "value_as_reported": "SC media supplemented with twice the standard concentration of l-valine (SC + Val), l-leucine (SC + Leu), or l-isoleucine (SC + Ile)",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "we prepared SC media supplemented with twice the standard concentration of l-valine (SC + Val), l-leucine (SC + Leu), or l-isoleucine (SC + Ile)",
+          "char_start": 30459,
+          "char_end": 30603,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "preculture_condition_id",
+        "value_as_reported": "precultured in SC medium at 30 \u00b0C for 24 h",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "Yeast cells were precultured in SC medium at 30 \u00b0C for 24 h.",
+          "char_start": 29847,
+          "char_end": 29907,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "stressor.compound",
+        "value_as_reported": "1.4% (v/v) 1-butanol (Nacalai Tesque) or 1.4% (v/v) isobutanol (Nacalai Tesque)",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "containing either 1.4% (v/v) 1-butanol (Nacalai Tesque) or 1.4% (v/v) isobutanol (Nacalai Tesque)",
+          "char_start": 29975,
+          "char_end": 30072,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "stressor.concentration",
+        "value_as_reported": "1.5% (v/v) isobutanol",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "Following the addition of 1.5% (v/v) isobutanol",
+          "char_start": 30605,
+          "char_end": 30652,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "inoculum_od",
+        "value_as_reported": "initial optical density at 600 nm (OD600) of 0.1",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "to achieve an initial optical density at 600 nm (OD600) of 0.1 in 96-well plates",
+          "char_start": 30073,
+          "char_end": 30153,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "vessel_type",
+        "value_as_reported": "96-well plates",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "in 96-well plates",
+          "char_start": 30136,
+          "char_end": 30153,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30 \u00b0C",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "The 96-well plates were sealed with aluminum foil tape (3M) and incubated at 30 \u00b0C for 24 h.",
+          "char_start": 30155,
+          "char_end": 30247,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "time_h",
+        "value_as_reported": "24 h",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "incubated at 30 \u00b0C for 24 h",
+          "char_start": 30219,
+          "char_end": 30246,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "bottlenecks": [
+      {
+        "node_as_reported": "cytoplasmic Leu-tRNA synthesis (cytoplasmic LeuRS, Cdc60p)",
+        "claim": "Isobutanol preferentially binds cytoplasmic LeuRS rather than mitochondrial LeuRS and may thereby inhibit cytoplasmic Leu-tRNA synthesis.",
+        "support": "stated_by_authors",
+        "intervention_as_reported": "Supplementation of the medium with excess BCAAs, particularly leucine, partially alleviated isobutanol-induced growth inhibition.",
+        "span": {
+          "quote": "These results suggest that isobutanol preferentially binds to cytoplasmic LeuRS rather than mitochondrial LeuRS, potentially inhibiting cytoplasmic Leu-tRNA synthesis.",
+          "char_start": 13020,
+          "char_end": 13187,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "node_as_reported": "Cdc60p",
+        "claim": "Isobutanol and leucine bind to the same site on Cdc60p, and this competitive binding would account for the observed inhibition of yeast growth by isobutanol.",
+        "support": "stated_by_authors",
+        "intervention_as_reported": null,
+        "span": {
+          "quote": "Furthermore, the observation that leucine and isobutanol bind to the same site on Cdc60p suggests competitive binding, which would account for the observed inhibition of yeast growth by isobutanol.",
+          "char_start": 21920,
+          "char_end": 22117,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "co_reported_higher_alcohols": [
+      {
+        "product_id": "YAA:PRODUCT:n-butanol",
+        "product_as_reported": "1-butanol",
+        "quantity_kind": "STD-NMR relative peak intensity with Cdc60p",
+        "value": 8.8,
+        "unit": "unknown",
+        "source_locator": "figure 3A (panel A)",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "Cdc60p also interacted with 1-butanol, exhibiting a peak at 0.85 ppm with an intensity of 8.8% relative to the reference spectrum (A).",
+          "char_start": 14200,
+          "char_end": 14334,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "self_confidence": "medium"
+  },
+  "records": [
+    [
+      "strains",
+      0,
+      {
+        "name_as_reported": "wild-type yeast",
+        "role": "wild_type",
+        "span": {
+          "quote": "Isobutanol tolerance of wild-type yeast in medium supplemented with excess BCAAs.",
+          "char_start": 8650,
+          "char_end": 8731,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      0,
+      {
+        "target_as_reported": "cytoplasmic LeuRS (Cdc60p)",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "These proteins were produced in Escherichia coli, purified without removing the thioredoxin tag, and verified to be enzymatically active",
+        "encoding_genome": "unknown",
+        "compartment": "unknown",
+        "span": {
+          "quote": "These proteins were produced in Escherichia coli, purified without removing the thioredoxin tag, and verified to be enzymatically active ().",
+          "char_start": 11198,
+          "char_end": 11338,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      1,
+      {
+        "target_as_reported": "mitochondrial LeuRS (Nam2p)",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "These proteins were produced in Escherichia coli, purified without removing the thioredoxin tag, and verified to be enzymatically active",
+        "encoding_genome": "unknown",
+        "compartment": "unknown",
+        "span": {
+          "quote": "STD-NMR analysis was performed using the cytoplasmic LeuRS (Cdc60p) and the mitochondrial LeuRS (Nam2p).",
+          "char_start": 11093,
+          "char_end": 11197,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      0,
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "STD-NMR relative peak intensity (Peak 1) with Cdc60p",
+        "value": 57.4,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "with relative intensities of 57.4% and 9.7% of the reference spectrum, respectively",
+          "char_start": 12119,
+          "char_end": 12202,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      1,
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "STD-NMR relative peak intensity (Peak 1) with Nam2p",
+        "value": 9.7,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "with relative intensities of 57.4% and 9.7% of the reference spectrum, respectively",
+          "char_start": 12119,
+          "char_end": 12202,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      2,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "STD-NMR relative peak intensity (Peak 1) with Cdc60p",
+        "value": 24.8,
+        "unit": "unknown",
+        "source_locator": "figure 2B",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "with an intensity of 24.8% relative to the reference spectrum (B)",
+          "char_start": 12840,
+          "char_end": 12905,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      3,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "STD-NMR relative peak intensity with Nam2p",
+        "value": 2,
+        "unit": "unknown",
+        "source_locator": "figure 2D legend",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": true,
+        "span": {
+          "quote": "In panel (D), the relative intensity is below 2%.",
+          "char_start": 13693,
+          "char_end": 13742,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      4,
+      {
+        "product_id": "unknown",
+        "product_as_reported": "ethanol, valine, or isoleucine",
+        "quantity_kind": "STD-NMR relative peak intensity with Cdc60p",
+        "value": 2,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": true,
+        "span": {
+          "quote": "as the observed STD-NMR peak intensity was below 2% of the reference spectrum",
+          "char_start": 14459,
+          "char_end": 14536,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      5,
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "STD-NMR relative peak intensity in equimolar mixture with isobutanol",
+        "value": 23.2,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "The leucine signal decreased from 57.4% to 23.2% of the reference spectrum, corresponding to 40.4% of the intensity observed in the absence of isobutanol.",
+          "char_start": 14992,
+          "char_end": 15146,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      6,
+      {
+        "product_id": "unknown",
+        "product_as_reported": "leucine",
+        "quantity_kind": "residual STD-NMR intensity relative to single-ligand condition",
+        "value": 40.4,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "corresponding to 40.4% of the intensity observed in the absence of isobutanol",
+          "char_start": 15068,
+          "char_end": 15145,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      7,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "STD-NMR relative peak intensity in equimolar mixture with leucine",
+        "value": 3.5,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "the isobutanol signal decreased from 24.8% to 3.5%, corresponding to 14.1% of the intensity observed in the absence of leucine",
+          "char_start": 15158,
+          "char_end": 15284,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      8,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "residual STD-NMR intensity relative to single-ligand condition",
+        "value": 14.1,
+        "unit": "unknown",
+        "source_locator": "text",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "corresponding to 14.1% of the intensity observed in the absence of leucine",
+          "char_start": 15210,
+          "char_end": 15284,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      0,
+      {
+        "facet": "medium_name",
+        "value_as_reported": "SC medium containing 0% or 1.5% (v/v) isobutanol",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "assessed in SC medium containing 0% or 1.5% (v/v) isobutanol",
+          "char_start": 8822,
+          "char_end": 8882,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      1,
+      {
+        "facet": "stressor.compound",
+        "value_as_reported": "isobutanol",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "The effect of excess BCAAs on isobutanol-induced growth inhibition in wild-type yeast was assessed in SC medium containing 0% or 1.5% (v/v) isobutanol.",
+          "char_start": 8732,
+          "char_end": 8883,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      2,
+      {
+        "facet": "stressor.concentration",
+        "value_as_reported": "0% or 1.5% (v/v) isobutanol",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "SC medium containing 0% or 1.5% (v/v) isobutanol",
+          "char_start": 8834,
+          "char_end": 8882,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      3,
+      {
+        "facet": "supplements",
+        "value_as_reported": "media supplemented with excess amino acids",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "we conducted isobutanol tolerance assays using media supplemented with excess amino acids",
+          "char_start": 7847,
+          "char_end": 7936,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      4,
+      {
+        "facet": "supplements",
+        "value_as_reported": "excess BCAAs",
+        "strain_name_as_reported": "wild-type yeast",
+        "span": {
+          "quote": "Supplementation with excess branched-chain amino acids, particularly leucine, partially alleviated isobutanol-induced growth inhibition.",
+          "char_start": 8884,
+          "char_end": 9020,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "bottlenecks",
+      0,
+      {
+        "node_as_reported": "cytoplasmic Leu-tRNA synthesis (cytoplasmic LeuRS, Cdc60p)",
+        "claim": "Isobutanol preferentially binds cytoplasmic LeuRS rather than mitochondrial LeuRS and may thereby inhibit cytoplasmic Leu-tRNA synthesis.",
+        "support": "stated_by_authors",
+        "intervention_as_reported": "Supplementation of the medium with excess BCAAs, particularly leucine, partially alleviated isobutanol-induced growth inhibition.",
+        "span": {
+          "quote": "These results suggest that isobutanol preferentially binds to cytoplasmic LeuRS rather than mitochondrial LeuRS, potentially inhibiting cytoplasmic Leu-tRNA synthesis.",
+          "char_start": 13020,
+          "char_end": 13187,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "co_reported_higher_alcohols",
+      0,
+      {
+        "product_id": "YAA:PRODUCT:n-butanol",
+        "product_as_reported": "1-butanol",
+        "quantity_kind": "STD-NMR relative peak intensity with Cdc60p",
+        "value": 8.8,
+        "unit": "unknown",
+        "source_locator": "figure 3A (panel A)",
+        "strain_name_as_reported": null,
+        "is_below_lod": false,
+        "is_digitized": false,
+        "is_upper_bound": false,
+        "span": {
+          "quote": "Cdc60p also interacted with 1-butanol, exhibiting a peak at 0.85 ppm with an intensity of 8.8% relative to the reference spectrum (A).",
+          "char_start": 14200,
+          "char_end": 14334,
+          "section": "results"
+        },
+        "unit_state": "unknown",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      1,
+      {
+        "name_as_reported": "BY4741",
+        "role": "wild_type",
+        "background_as_reported": "S. cerevisiae",
+        "span": {
+          "quote": "Alcohol tolerance assays were performed using the yeast S. cerevisiae strain BY4741 (Euroscarf)",
+          "char_start": 28812,
+          "char_end": 28907,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      2,
+      {
+        "name_as_reported": "E. coli Rosetta",
+        "role": "engineered",
+        "span": {
+          "quote": "Each plasmid was transformed into E. coli Rosetta (Sigma-Aldrich).",
+          "char_start": 31834,
+          "char_end": 31900,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      2,
+      {
+        "target_as_reported": "CDC60",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "ORF of the CDC60 gene, encoding the cytosolic leucyl-tRNA synthetase, amplified from BY4741 genomic DNA and inserted into pET-32b for expression in E. coli",
+        "encoding_genome": "nuclear",
+        "compartment": "unknown",
+        "strain_name_as_reported": "E. coli Rosetta",
+        "span": {
+          "quote": "The open reading frame (ORF) of the CDC60 gene, which encodes the cytosolic leucyl-tRNA synthetase, and the ORF of the NAM2 gene, which encodes the mitochondrial isoform, were amplified from the genomic DNA by one-step PCR as previously described ().",
+          "char_start": 30905,
+          "char_end": 31155,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      3,
+      {
+        "target_as_reported": "NAM2",
+        "modification_type": "heterologous_expression",
+        "detail_as_reported": "ORF of the NAM2 gene, encoding the mitochondrial LeuRS isoform, amplified from BY4741 genomic DNA and inserted into pET-32b for expression in E. coli",
+        "encoding_genome": "nuclear",
+        "compartment": "unknown",
+        "strain_name_as_reported": "E. coli Rosetta",
+        "span": {
+          "quote": "the ORF of the NAM2 gene, which encodes the mitochondrial isoform, were amplified from the genomic DNA by one-step PCR",
+          "char_start": 31009,
+          "char_end": 31127,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      4,
+      {
+        "target_as_reported": "pET32b-CDC60 and pET32b-NAM2",
+        "modification_type": "other",
+        "detail_as_reported": "target proteins fused to an N-terminal His-tagged thioredoxin",
+        "strain_name_as_reported": "E. coli Rosetta",
+        "span": {
+          "quote": "The resulting plasmids encoded the target proteins fused to an N-terminal His-tagged thioredoxin, facilitating affinity purification and improving protein solubility.",
+          "char_start": 31522,
+          "char_end": 31688,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      5,
+      {
+        "facet": "medium_name",
+        "value_as_reported": "SC medium",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "The BY4741 strain was cultured in four types of liquid media: SC medium (), SC + BCAAs",
+          "char_start": 28958,
+          "char_end": 29044,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      6,
+      {
+        "facet": "supplements",
+        "value_as_reported": "SC + BCAAs (supplemented with excess l-leucine, l-valine, and l-isoleucine)",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "SC + BCAAs (supplemented with excess l-leucine, l-valine, and l-isoleucine)",
+          "char_start": 29034,
+          "char_end": 29109,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      7,
+      {
+        "facet": "supplements",
+        "value_as_reported": "added at twice their standard concentrations",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "All amino acids were purchased from Nacalai Tesque, and added at twice their standard concentrations.",
+          "char_start": 29303,
+          "char_end": 29404,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      8,
+      {
+        "facet": "supplements",
+        "value_as_reported": "SC media supplemented with twice the standard concentration of l-valine (SC + Val), l-leucine (SC + Leu), or l-isoleucine (SC + Ile)",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "we prepared SC media supplemented with twice the standard concentration of l-valine (SC + Val), l-leucine (SC + Leu), or l-isoleucine (SC + Ile)",
+          "char_start": 30459,
+          "char_end": 30603,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      9,
+      {
+        "facet": "preculture_condition_id",
+        "value_as_reported": "precultured in SC medium at 30 \u00b0C for 24 h",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "Yeast cells were precultured in SC medium at 30 \u00b0C for 24 h.",
+          "char_start": 29847,
+          "char_end": 29907,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      10,
+      {
+        "facet": "stressor.compound",
+        "value_as_reported": "1.4% (v/v) 1-butanol (Nacalai Tesque) or 1.4% (v/v) isobutanol (Nacalai Tesque)",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "containing either 1.4% (v/v) 1-butanol (Nacalai Tesque) or 1.4% (v/v) isobutanol (Nacalai Tesque)",
+          "char_start": 29975,
+          "char_end": 30072,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      11,
+      {
+        "facet": "stressor.concentration",
+        "value_as_reported": "1.5% (v/v) isobutanol",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "Following the addition of 1.5% (v/v) isobutanol",
+          "char_start": 30605,
+          "char_end": 30652,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      12,
+      {
+        "facet": "inoculum_od",
+        "value_as_reported": "initial optical density at 600 nm (OD600) of 0.1",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "to achieve an initial optical density at 600 nm (OD600) of 0.1 in 96-well plates",
+          "char_start": 30073,
+          "char_end": 30153,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      13,
+      {
+        "facet": "vessel_type",
+        "value_as_reported": "96-well plates",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "in 96-well plates",
+          "char_start": 30136,
+          "char_end": 30153,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      14,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30 \u00b0C",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "The 96-well plates were sealed with aluminum foil tape (3M) and incubated at 30 \u00b0C for 24 h.",
+          "char_start": 30155,
+          "char_end": 30247,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      15,
+      {
+        "facet": "time_h",
+        "value_as_reported": "24 h",
+        "strain_name_as_reported": "BY4741",
+        "span": {
+          "quote": "incubated at 30 \u00b0C for 24 h",
+          "char_start": 30219,
+          "char_end": 30246,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "bottlenecks",
+      1,
+      {
+        "node_as_reported": "Cdc60p",
+        "claim": "Isobutanol and leucine bind to the same site on Cdc60p, and this competitive binding would account for the observed inhibition of yeast growth by isobutanol.",
+        "support": "stated_by_authors",
+        "intervention_as_reported": null,
+        "span": {
+          "quote": "Furthermore, the observation that leucine and isobutanol bind to the same site on Cdc60p suggests competitive binding, which would account for the observed inhibition of yeast growth by isobutanol.",
+          "char_start": 21920,
+          "char_end": 22117,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ]
+  ],
+  "notes": [
+    [
+      "w1:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [997, 1077) and the quote occurs exactly once, at [1006, 1087)"
+    ],
+    [
+      "w1:modifications[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [3205, 3344) and the quote occurs exactly once, at [3554, 3694)"
+    ],
+    [
+      "w1:modifications[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [3101, 3204) and the quote occurs exactly once, at [3449, 3553)"
+    ],
+    [
+      "w1:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [3900, 3982) and the quote occurs exactly once, at [4475, 4558)"
+    ],
+    [
+      "w1:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [3900, 3982) and the quote occurs exactly once, at [4475, 4558)"
+    ],
+    [
+      "w1:measurements[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [4400, 4465) and the quote occurs exactly once, at [5196, 5261)"
+    ],
+    [
+      "w1:measurements[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5300, 5348) and the quote occurs exactly once, at [6049, 6098)"
+    ],
+    [
+      "w1:measurements[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5950, 6027) and the quote occurs exactly once, at [6815, 6892)"
+    ],
+    [
+      "w1:measurements[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6400, 6553) and the quote occurs exactly once, at [7348, 7502)"
+    ],
+    [
+      "w1:measurements[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6476, 6552) and the quote occurs exactly once, at [7424, 7501)"
+    ],
+    [
+      "w1:measurements[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6564, 6689) and the quote occurs exactly once, at [7514, 7640)"
+    ],
+    [
+      "w1:measurements[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6616, 6689) and the quote occurs exactly once, at [7566, 7640)"
+    ],
+    [
+      "w1:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1168, 1228) and the quote occurs exactly once, at [1178, 1238)"
+    ],
+    [
+      "w1:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1079, 1229) and the quote occurs exactly once, at [1088, 1239)"
+    ],
+    [
+      "w1:conditions[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1180, 1228) and the quote occurs exactly once, at [1190, 1238)"
+    ],
+    [
+      "w1:conditions[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [201, 289) and the quote occurs exactly once, at [203, 292)"
+    ],
+    [
+      "w1:conditions[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1230, 1365) and the quote occurs exactly once, at [1240, 1376)"
+    ],
+    [
+      "w1:bottlenecks[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [4588, 4753) and the quote occurs exactly once, at [5376, 5543)"
+    ],
+    [
+      "w1:co_reported_higher_alcohols[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5750, 5883) and the quote occurs exactly once, at [6556, 6690)"
+    ],
+    [
+      "w2:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [4560, 4655) and the quote occurs exactly once, at [4916, 5011)"
+    ],
+    [
+      "w2:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [7250, 7315) and the quote occurs exactly once, at [7938, 8004)"
+    ],
+    [
+      "w2:modifications[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6450, 6698) and the quote occurs exactly once, at [7009, 7259)"
+    ],
+    [
+      "w2:modifications[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6555, 6672) and the quote occurs exactly once, at [7113, 7231)"
+    ],
+    [
+      "w2:modifications[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6980, 7144) and the quote occurs exactly once, at [7626, 7792)"
+    ],
+    [
+      "w2:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [4700, 4785) and the quote occurs exactly once, at [5062, 5148)"
+    ],
+    [
+      "w2:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [4762, 4836) and the quote occurs exactly once, at [5138, 5213)"
+    ],
+    [
+      "w2:conditions[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5010, 5110) and the quote occurs exactly once, at [5407, 5508)"
+    ],
+    [
+      "w2:conditions[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6050, 6193) and the quote occurs exactly once, at [6563, 6707)"
+    ],
+    [
+      "w2:conditions[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5470, 5530) and the quote occurs exactly once, at [5951, 6011)"
+    ],
+    [
+      "w2:conditions[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5590, 5687) and the quote occurs exactly once, at [6079, 6176)"
+    ],
+    [
+      "w2:conditions[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [6195, 6242) and the quote occurs exactly once, at [6709, 6756)"
+    ],
+    [
+      "w2:conditions[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5690, 5770) and the quote occurs exactly once, at [6177, 6257)"
+    ],
+    [
+      "w2:conditions[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5753, 5770); the quote occurs 2 times and the nearest is [6240, 6257)"
+    ],
+    [
+      "w2:conditions[9]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5775, 5866) and the quote occurs exactly once, at [6259, 6351)"
+    ],
+    [
+      "w2:conditions[10]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [5839, 5866) and the quote occurs exactly once, at [6323, 6350)"
+    ],
+    [
+      "w2:bottlenecks[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [4230, 4425) and the quote occurs exactly once, at [4600, 4797)"
+    ]
+  ],
+  "failed_attempts": [],
+  "model": "claude-opus-5"
+}

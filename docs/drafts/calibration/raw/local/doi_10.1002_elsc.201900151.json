@@ -1,0 +1,3766 @@
+{
+  "rank": 3,
+  "stratum": "IO",
+  "publication_id": "doi:10.1002/elsc.201900151",
+  "status": "ok",
+  "seconds": 214.2,
+  "counts": {
+    "strains": 27,
+    "modifications": 14,
+    "pathway_configurations": 10,
+    "measurements": 13,
+    "conditions": 7
+  },
+  "record_count": 71,
+  "excerpt_chars": 23974,
+  "document_chars": 37980,
+  "payload": {
+    "strains": [
+      {
+        "name_as_reported": "Pseudomonas putida KT2440",
+        "role": "engineered",
+        "span": {
+          "quote": "Pseudomonas putida KT2440 | Wild type strain, DSM\u20106125, ATCC47054",
+          "char_start": 8092,
+          "char_end": 8157,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Carnobacterium maltaromaticum LMA28",
+        "role": "engineered",
+        "span": {
+          "quote": "Carnobacterium maltaromaticum LMA28",
+          "char_start": 8159,
+          "char_end": 8194,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Lactococcus lactis subsp. cremoris MG1363",
+        "role": "engineered",
+        "span": {
+          "quote": "Lactococcus lactis subsp. cremoris MG1363",
+          "char_start": 8196,
+          "char_end": 8237,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Corynebacterium glutamicum",
+        "role": "engineered",
+        "span": {
+          "quote": "Corynebacterium glutamicum | Wild type strain ATCC13032 | American type culture collection",
+          "char_start": 8239,
+          "char_end": 8329,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida GN346",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida GN346 | P. putida KT2440 \u0394upp, \u0394pedE, \u0394pedI, \u0394pedH, \u0394aldB\u2010I",
+          "char_start": 8331,
+          "char_end": 8400,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida EP1",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida EP1 | P. putida GN346 \u0394bkdAA | This work",
+          "char_start": 8402,
+          "char_end": 8452,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida EP2",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida EP2 | P. putida EP1 \u0394sthA | This work",
+          "char_start": 8454,
+          "char_end": 8501,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida EP3",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida EP3 | P. putida EP2 \u0394gcd | This work",
+          "char_start": 8503,
+          "char_end": 8549,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso1",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso1 | P. putida EP1 + pIP02 | This work",
+          "char_start": 8551,
+          "char_end": 8601,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso2",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso2 | P. putida EP2 + pIP02 | This work",
+          "char_start": 8603,
+          "char_end": 8653,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso3",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso3 | P. putida EP2 + pIP03 | This work",
+          "char_start": 8655,
+          "char_end": 8705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso4",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso4 | P. putida EP2 + pIP04 | This work",
+          "char_start": 8707,
+          "char_end": 8757,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso5",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso5 | P. putida EP3 + pIP02 | This work",
+          "char_start": 8759,
+          "char_end": 8809,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso6",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso6 | P. putida EP2 + pIP05 | This work",
+          "char_start": 8811,
+          "char_end": 8861,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "KT2440",
+        "role": "engineered",
+        "span": {
+          "quote": "KT2440",
+          "char_start": 17403,
+          "char_end": 17409,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Iso2",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso2",
+          "char_start": 17439,
+          "char_end": 17443,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Iso3",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso3",
+          "char_start": 17477,
+          "char_end": 17481,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Iso4",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso4",
+          "char_start": 17515,
+          "char_end": 17519,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Iso5",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso5",
+          "char_start": 17554,
+          "char_end": 17558,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "Iso6",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso6",
+          "char_start": 17582,
+          "char_end": 17586,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida EP1",
+        "role": "engineered",
+        "span": {
+          "quote": "to transform P. putida EP1 yielding P. putida Iso1.",
+          "char_start": 25979,
+          "char_end": 26030,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso1",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso1 showed a \u00b5 = 0.56 \u00b1 0.02.",
+          "char_start": 26063,
+          "char_end": 26103,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso2",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso2 | 0.25 \u00b1 0.01 | 0.13 \u00b1 0.01 | 438 \u00b1 20 | 22 \u00b1 2",
+          "char_start": 26555,
+          "char_end": 26607,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso3",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso3 | 0.14 \u00b1 0.01 | 0.06 \u00b1 0.01 | 833 \u00b1 100 | 13 \u00b1 1",
+          "char_start": 26609,
+          "char_end": 26662,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso4",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso4 | 0.19 \u00b1 0.01 | 0.09 \u00b1 0.02 | 771 \u00b1 15 | 14 \u00b1 0.0",
+          "char_start": 26664,
+          "char_end": 26718,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso5",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso5 | 0.18 \u00b1 0.02 | 0.28 \u00b1 0.01 | 0 | 0",
+          "char_start": 26720,
+          "char_end": 26760,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "name_as_reported": "P. putida Iso6",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso6 | 0.28 \u00b1 0.01 | 0.10 \u00b1 0.01 | 633 \u00b1 39 | 21 \u00b1 1",
+          "char_start": 26762,
+          "char_end": 26814,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "modifications": [
+      {
+        "target_as_reported": "P. putida KT2440 \u0394upp, \u0394pedE, \u0394pedI, \u0394pedH, \u0394aldB\u2010I",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida GN346 | P. putida KT2440 \u0394upp, \u0394pedE, \u0394pedI, \u0394pedH, \u0394aldB\u2010I",
+          "char_start": 8331,
+          "char_end": 8400,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida GN346 \u0394bkdAA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida EP1 | P. putida GN346 \u0394bkdAA | This work",
+          "char_start": 8402,
+          "char_end": 8452,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP1 \u0394sthA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida EP2 | P. putida EP1 \u0394sthA | This work",
+          "char_start": 8454,
+          "char_end": 8501,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP2 \u0394gcd",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida EP3 | P. putida EP2 \u0394gcd | This work",
+          "char_start": 8503,
+          "char_end": 8549,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP1 + pIP02",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso1 | P. putida EP1 + pIP02 | This work",
+          "char_start": 8551,
+          "char_end": 8601,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP2 + pIP02",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso2 | P. putida EP2 + pIP02 | This work",
+          "char_start": 8603,
+          "char_end": 8653,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP2 + pIP03",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso3 | P. putida EP2 + pIP03 | This work",
+          "char_start": 8655,
+          "char_end": 8705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP2 + pIP04",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso4 | P. putida EP2 + pIP04 | This work",
+          "char_start": 8707,
+          "char_end": 8757,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP3 + pIP02",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso5 | P. putida EP3 + pIP02 | This work",
+          "char_start": 8759,
+          "char_end": 8809,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "P. putida EP2 + pIP05",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso6 | P. putida EP2 + pIP05 | This work",
+          "char_start": 8811,
+          "char_end": 8861,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "bkdAA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "bkdAA",
+          "char_start": 20242,
+          "char_end": 20247,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "sthA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "sthA",
+          "char_start": 20321,
+          "char_end": 20325,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "gcd",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "gcd",
+          "char_start": 20375,
+          "char_end": 20378,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "target_as_reported": "sthA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "To test whether the inactivation of the soluble transhydrogenase is beneficial for isobutanol production, we deleted the sthA gene in P. putida EP1, yielding P. putida EP2 which was transformed with the plasmid pIP02.",
+          "char_start": 27481,
+          "char_end": 27698,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "pathway_configurations": [
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida EP1 | P. putida GN346 \u0394bkdAA | This work",
+          "char_start": 8402,
+          "char_end": 8452,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida EP2 | P. putida EP1 \u0394sthA | This work",
+          "char_start": 8454,
+          "char_end": 8501,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida EP3 | P. putida EP2 \u0394gcd | This work",
+          "char_start": 8503,
+          "char_end": 8549,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso1 | P. putida EP1 + pIP02 | This work",
+          "char_start": 8551,
+          "char_end": 8601,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso2 | P. putida EP2 + pIP02 | This work",
+          "char_start": 8603,
+          "char_end": 8653,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso3 | P. putida EP2 + pIP03 | This work",
+          "char_start": 8655,
+          "char_end": 8705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso4 | P. putida EP2 + pIP04 | This work",
+          "char_start": 8707,
+          "char_end": 8757,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso5 | P. putida EP3 + pIP02 | This work",
+          "char_start": 8759,
+          "char_end": 8809,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso6 | P. putida EP2 + pIP05 | This work",
+          "char_start": 8811,
+          "char_end": 8861,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "compartment_strategy": "B_cytosolic_relocalization",
+        "span": {
+          "quote": "The synthesis of isobutanol from glucose requires 2 mol NAD(P)H per mol isobutanol. The reduction of acetolactate is catalyzed by NADPH\u2010dependent ketolacid reductoisomerase (IlvC), while the conversion of isobutyraldehyde to isobutanol can be catalyzed by NAD(P)H\u2010dependent aldehyde/alcohol dehydrogenases such as YqhD (Figure ). Since YqhD is NADPH\u2010dependent, the engineered iosobutanol pathway should consume 2 mol NADPH per mol isobutanol. P. putida possesses a membrane\u2010bound and a soluble transhydrogenase. The latter is encoded by the sthA gene and has in E. coli been reported to favor the re\u2010",
+          "char_start": 26816,
+          "char_end": 27416,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "measurements": [
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 9,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "9 \u00b1 1",
+          "char_start": 17446,
+          "char_end": 17451,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 5,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "5 \u00b1 2",
+          "char_start": 17484,
+          "char_end": 17489,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 4,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "4 \u00b1 1",
+          "char_start": 17522,
+          "char_end": 17527,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 0,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "0",
+          "char_start": 8795,
+          "char_end": 8796,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 19,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "19 \u00b1 2",
+          "char_start": 17589,
+          "char_end": 17595,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 0,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "0",
+          "char_start": 8847,
+          "char_end": 8848,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 0,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "0",
+          "char_start": 17470,
+          "char_end": 17471,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 22,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "22 \u00b1 2",
+          "char_start": 26601,
+          "char_end": 26607,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 13,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "13 \u00b1 1",
+          "char_start": 26656,
+          "char_end": 26662,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 14,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "14 \u00b1 0.0",
+          "char_start": 17456,
+          "char_end": 17464,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 21,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "21 \u00b1 1",
+          "char_start": 26808,
+          "char_end": 26814,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "Y Iso/S",
+        "value": 22,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "P. putida Iso2 showed in minimal medium containing 5.4 g/L glucose, a growth rate of 0.26 \u00b1 0.01 h\u22121, a Y X/S of of 0.13 \u00b1 0.01 g/g, and produced 438 \u00b1 20 mg/gGLC 2\u2010KG and for the first time isobutanol with a Y Iso/S of 22 \u00b1 2 mg/gGLC (Table , Figure ).",
+          "char_start": 27720,
+          "char_end": 27973,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "Y Iso/S",
+        "value": 21,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "P. putida Iso6 showed a growth rate of 0.28 \u00b1 0.01 h\u22121, a Y X/S of of 0.10 \u00b1 0.01 g/g. and produced 633 \u00b1 39 mg/gGLC 2\u2010KG. Furthermore, P. putida Iso6 secreted as much isobutanol as P. putida Iso2 with a Y Iso/S of 21 \u00b1 1 mg/gGLC (Table ) showing that KDC from C. maltaromaticum LMA28 is a useful alternative to KDC from L. lactis.",
+          "char_start": 30185,
+          "char_end": 30516,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "conditions": [
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "C. maltaromaticum and L. lactis were grown in brain\u2013heart infusion (BHI) broth (Carl Roth GmbH & Co. KG, Karlsruhe, Germany) at 30\u00b0C on a rotary shaker at 120 rpm.",
+          "char_start": 14124,
+          "char_end": 14287,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "To obtain sufficient biomass, the second preculture was performed in 100 mL LB medium in a 500 mL baffled Erlenmeyer flask that was cultivated on a rotary shaker (175 rpm) overnight at 30\u00b0C.",
+          "char_start": 15515,
+          "char_end": 15705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "For plasmid\u2010bearing strains, 50 \u00b5g/mL kanamycin or 50 \u00b5g/mL apramycin were added to the medium.",
+          "char_start": 16012,
+          "char_end": 16107,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "Cells from the second preculture were harvested by centrifugation (4500 \u00d7 g, 15 min, 4\u00b0C) and resuspended in 25 mL DeBont minimal medium (pH 7) supplemented with 5.4 g/L glucose and 15 g/L 3\u2010morpholino\u2010propanesulfonic acid.",
+          "char_start": 15706,
+          "char_end": 15929,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "To induce plasmid\u2010based gene expression, 0.2% (w/v) l\u2010arabinose was supplemented.",
+          "char_start": 15930,
+          "char_end": 16011,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "growth_phase",
+        "value_as_reported": "growth rate",
+        "span": {
+          "quote": "P. putida Iso2 showed in minimal medium containing 5.4 g/L glucose, a growth rate of 0.26 \u00b1 0.01 h\u22121, a Y X/S of of 0.13 \u00b1 0.01 g/g, and produced 438 \u00b1 20 mg/gGLC 2\u2010KG and for the first time isobutanol with a Y Iso/S of 22 \u00b1 2 mg/gGLC (Table , Figure ).",
+          "char_start": 27720,
+          "char_end": 27973,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      },
+      {
+        "facet": "growth_phase",
+        "value_as_reported": "growth rate",
+        "span": {
+          "quote": "P. putida Iso6 showed a growth rate of 0.28 \u00b1 0.01 h\u22121, a Y X/S of of 0.10 \u00b1 0.01 g/g. and produced 633 \u00b1 39 mg/gGLC 2\u2010KG. Furthermore, P. putida Iso6 secreted as much isobutanol as P. putida Iso2 with a Y Iso/S of 21 \u00b1 1 mg/gGLC (Table ) showing that KDC from C. maltaromaticum LMA28 is a useful alternative to KDC from L. lactis.",
+          "char_start": 30185,
+          "char_end": 30516,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    "bottlenecks": [],
+    "co_reported_higher_alcohols": [],
+    "self_confidence": "low"
+  },
+  "records": [
+    [
+      "strains",
+      0,
+      {
+        "name_as_reported": "Pseudomonas putida KT2440",
+        "role": "engineered",
+        "span": {
+          "quote": "Pseudomonas putida KT2440 | Wild type strain, DSM\u20106125, ATCC47054",
+          "char_start": 8092,
+          "char_end": 8157,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      1,
+      {
+        "name_as_reported": "Carnobacterium maltaromaticum LMA28",
+        "role": "engineered",
+        "span": {
+          "quote": "Carnobacterium maltaromaticum LMA28",
+          "char_start": 8159,
+          "char_end": 8194,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      2,
+      {
+        "name_as_reported": "Lactococcus lactis subsp. cremoris MG1363",
+        "role": "engineered",
+        "span": {
+          "quote": "Lactococcus lactis subsp. cremoris MG1363",
+          "char_start": 8196,
+          "char_end": 8237,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      3,
+      {
+        "name_as_reported": "Corynebacterium glutamicum",
+        "role": "engineered",
+        "span": {
+          "quote": "Corynebacterium glutamicum | Wild type strain ATCC13032 | American type culture collection",
+          "char_start": 8239,
+          "char_end": 8329,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      4,
+      {
+        "name_as_reported": "P. putida GN346",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida GN346 | P. putida KT2440 \u0394upp, \u0394pedE, \u0394pedI, \u0394pedH, \u0394aldB\u2010I",
+          "char_start": 8331,
+          "char_end": 8400,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      5,
+      {
+        "name_as_reported": "P. putida EP1",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida EP1 | P. putida GN346 \u0394bkdAA | This work",
+          "char_start": 8402,
+          "char_end": 8452,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      6,
+      {
+        "name_as_reported": "P. putida EP2",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida EP2 | P. putida EP1 \u0394sthA | This work",
+          "char_start": 8454,
+          "char_end": 8501,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      7,
+      {
+        "name_as_reported": "P. putida EP3",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida EP3 | P. putida EP2 \u0394gcd | This work",
+          "char_start": 8503,
+          "char_end": 8549,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      8,
+      {
+        "name_as_reported": "P. putida Iso1",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso1 | P. putida EP1 + pIP02 | This work",
+          "char_start": 8551,
+          "char_end": 8601,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      9,
+      {
+        "name_as_reported": "P. putida Iso2",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso2 | P. putida EP2 + pIP02 | This work",
+          "char_start": 8603,
+          "char_end": 8653,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      10,
+      {
+        "name_as_reported": "P. putida Iso3",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso3 | P. putida EP2 + pIP03 | This work",
+          "char_start": 8655,
+          "char_end": 8705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      11,
+      {
+        "name_as_reported": "P. putida Iso4",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso4 | P. putida EP2 + pIP04 | This work",
+          "char_start": 8707,
+          "char_end": 8757,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      12,
+      {
+        "name_as_reported": "P. putida Iso5",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso5 | P. putida EP3 + pIP02 | This work",
+          "char_start": 8759,
+          "char_end": 8809,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      13,
+      {
+        "name_as_reported": "P. putida Iso6",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso6 | P. putida EP2 + pIP05 | This work",
+          "char_start": 8811,
+          "char_end": 8861,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      0,
+      {
+        "target_as_reported": "P. putida KT2440 \u0394upp, \u0394pedE, \u0394pedI, \u0394pedH, \u0394aldB\u2010I",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida GN346 | P. putida KT2440 \u0394upp, \u0394pedE, \u0394pedI, \u0394pedH, \u0394aldB\u2010I",
+          "char_start": 8331,
+          "char_end": 8400,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      1,
+      {
+        "target_as_reported": "P. putida GN346 \u0394bkdAA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida EP1 | P. putida GN346 \u0394bkdAA | This work",
+          "char_start": 8402,
+          "char_end": 8452,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      2,
+      {
+        "target_as_reported": "P. putida EP1 \u0394sthA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida EP2 | P. putida EP1 \u0394sthA | This work",
+          "char_start": 8454,
+          "char_end": 8501,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      3,
+      {
+        "target_as_reported": "P. putida EP2 \u0394gcd",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "P. putida EP3 | P. putida EP2 \u0394gcd | This work",
+          "char_start": 8503,
+          "char_end": 8549,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      4,
+      {
+        "target_as_reported": "P. putida EP1 + pIP02",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso1 | P. putida EP1 + pIP02 | This work",
+          "char_start": 8551,
+          "char_end": 8601,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      5,
+      {
+        "target_as_reported": "P. putida EP2 + pIP02",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso2 | P. putida EP2 + pIP02 | This work",
+          "char_start": 8603,
+          "char_end": 8653,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      6,
+      {
+        "target_as_reported": "P. putida EP2 + pIP03",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso3 | P. putida EP2 + pIP03 | This work",
+          "char_start": 8655,
+          "char_end": 8705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      7,
+      {
+        "target_as_reported": "P. putida EP2 + pIP04",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso4 | P. putida EP2 + pIP04 | This work",
+          "char_start": 8707,
+          "char_end": 8757,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      8,
+      {
+        "target_as_reported": "P. putida EP3 + pIP02",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso5 | P. putida EP3 + pIP02 | This work",
+          "char_start": 8759,
+          "char_end": 8809,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      9,
+      {
+        "target_as_reported": "P. putida EP2 + pIP05",
+        "modification_type": "heterologous_expression",
+        "span": {
+          "quote": "P. putida Iso6 | P. putida EP2 + pIP05 | This work",
+          "char_start": 8811,
+          "char_end": 8861,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      0,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida EP1 | P. putida GN346 \u0394bkdAA | This work",
+          "char_start": 8402,
+          "char_end": 8452,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      1,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida EP2 | P. putida EP1 \u0394sthA | This work",
+          "char_start": 8454,
+          "char_end": 8501,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      2,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida EP3 | P. putida EP2 \u0394gcd | This work",
+          "char_start": 8503,
+          "char_end": 8549,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      3,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso1 | P. putida EP1 + pIP02 | This work",
+          "char_start": 8551,
+          "char_end": 8601,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      4,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso2 | P. putida EP2 + pIP02 | This work",
+          "char_start": 8603,
+          "char_end": 8653,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      5,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso3 | P. putida EP2 + pIP03 | This work",
+          "char_start": 8655,
+          "char_end": 8705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      6,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso4 | P. putida EP2 + pIP04 | This work",
+          "char_start": 8707,
+          "char_end": 8757,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      7,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso5 | P. putida EP3 + pIP02 | This work",
+          "char_start": 8759,
+          "char_end": 8809,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      8,
+      {
+        "compartment_strategy": "unknown",
+        "span": {
+          "quote": "P. putida Iso6 | P. putida EP2 + pIP05 | This work",
+          "char_start": 8811,
+          "char_end": 8861,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      0,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 9,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "9 \u00b1 1",
+          "char_start": 17446,
+          "char_end": 17451,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      1,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 5,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "5 \u00b1 2",
+          "char_start": 17484,
+          "char_end": 17489,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      2,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 4,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "4 \u00b1 1",
+          "char_start": 17522,
+          "char_end": 17527,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      3,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 0,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "0",
+          "char_start": 8795,
+          "char_end": 8796,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      4,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 19,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "19 \u00b1 2",
+          "char_start": 17589,
+          "char_end": 17595,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      5,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "YIso/S [mg/gGLC]",
+        "quantity_kind": "titer",
+        "value": 0,
+        "unit": "mg/L",
+        "source_locator": "Table 3",
+        "span": {
+          "quote": "0",
+          "char_start": 8847,
+          "char_end": 8848,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      0,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "C. maltaromaticum and L. lactis were grown in brain\u2013heart infusion (BHI) broth (Carl Roth GmbH & Co. KG, Karlsruhe, Germany) at 30\u00b0C on a rotary shaker at 120 rpm.",
+          "char_start": 14124,
+          "char_end": 14287,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      1,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "To obtain sufficient biomass, the second preculture was performed in 100 mL LB medium in a 500 mL baffled Erlenmeyer flask that was cultivated on a rotary shaker (175 rpm) overnight at 30\u00b0C.",
+          "char_start": 15515,
+          "char_end": 15705,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      2,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "For plasmid\u2010bearing strains, 50 \u00b5g/mL kanamycin or 50 \u00b5g/mL apramycin were added to the medium.",
+          "char_start": 16012,
+          "char_end": 16107,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      3,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "Cells from the second preculture were harvested by centrifugation (4500 \u00d7 g, 15 min, 4\u00b0C) and resuspended in 25 mL DeBont minimal medium (pH 7) supplemented with 5.4 g/L glucose and 15 g/L 3\u2010morpholino\u2010propanesulfonic acid.",
+          "char_start": 15706,
+          "char_end": 15929,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      4,
+      {
+        "facet": "temperature_c",
+        "value_as_reported": "30\u00b0C",
+        "span": {
+          "quote": "To induce plasmid\u2010based gene expression, 0.2% (w/v) l\u2010arabinose was supplemented.",
+          "char_start": 15930,
+          "char_end": 16011,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      14,
+      {
+        "name_as_reported": "KT2440",
+        "role": "engineered",
+        "span": {
+          "quote": "KT2440",
+          "char_start": 17403,
+          "char_end": 17409,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      15,
+      {
+        "name_as_reported": "Iso2",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso2",
+          "char_start": 17439,
+          "char_end": 17443,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      16,
+      {
+        "name_as_reported": "Iso3",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso3",
+          "char_start": 17477,
+          "char_end": 17481,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      17,
+      {
+        "name_as_reported": "Iso4",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso4",
+          "char_start": 17515,
+          "char_end": 17519,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      18,
+      {
+        "name_as_reported": "Iso5",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso5",
+          "char_start": 17554,
+          "char_end": 17558,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      19,
+      {
+        "name_as_reported": "Iso6",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso6",
+          "char_start": 17582,
+          "char_end": 17586,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      10,
+      {
+        "target_as_reported": "bkdAA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "bkdAA",
+          "char_start": 20242,
+          "char_end": 20247,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      11,
+      {
+        "target_as_reported": "sthA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "sthA",
+          "char_start": 20321,
+          "char_end": 20325,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      12,
+      {
+        "target_as_reported": "gcd",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "gcd",
+          "char_start": 20375,
+          "char_end": 20378,
+          "section": "methods"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      6,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 0,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "0",
+          "char_start": 17470,
+          "char_end": 17471,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      7,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 22,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "22 \u00b1 2",
+          "char_start": 26601,
+          "char_end": 26607,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      8,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 13,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "13 \u00b1 1",
+          "char_start": 26656,
+          "char_end": 26662,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      9,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 14,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "14 \u00b1 0.0",
+          "char_start": 17456,
+          "char_end": 17464,
+          "section": "methods"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      10,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "Y Iso/S",
+        "quantity_kind": "yield",
+        "value": 21,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "21 \u00b1 1",
+          "char_start": 26808,
+          "char_end": 26814,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      20,
+      {
+        "name_as_reported": "P. putida EP1",
+        "role": "engineered",
+        "span": {
+          "quote": "to transform P. putida EP1 yielding P. putida Iso1.",
+          "char_start": 25979,
+          "char_end": 26030,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      21,
+      {
+        "name_as_reported": "P. putida Iso1",
+        "role": "engineered",
+        "span": {
+          "quote": "P. putida Iso1 showed a \u00b5 = 0.56 \u00b1 0.02.",
+          "char_start": 26063,
+          "char_end": 26103,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      22,
+      {
+        "name_as_reported": "P. putida Iso2",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso2 | 0.25 \u00b1 0.01 | 0.13 \u00b1 0.01 | 438 \u00b1 20 | 22 \u00b1 2",
+          "char_start": 26555,
+          "char_end": 26607,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      23,
+      {
+        "name_as_reported": "P. putida Iso3",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso3 | 0.14 \u00b1 0.01 | 0.06 \u00b1 0.01 | 833 \u00b1 100 | 13 \u00b1 1",
+          "char_start": 26609,
+          "char_end": 26662,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      24,
+      {
+        "name_as_reported": "P. putida Iso4",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso4 | 0.19 \u00b1 0.01 | 0.09 \u00b1 0.02 | 771 \u00b1 15 | 14 \u00b1 0.0",
+          "char_start": 26664,
+          "char_end": 26718,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      25,
+      {
+        "name_as_reported": "P. putida Iso5",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso5 | 0.18 \u00b1 0.02 | 0.28 \u00b1 0.01 | 0 | 0",
+          "char_start": 26720,
+          "char_end": 26760,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "strains",
+      26,
+      {
+        "name_as_reported": "P. putida Iso6",
+        "role": "engineered",
+        "span": {
+          "quote": "Iso6 | 0.28 \u00b1 0.01 | 0.10 \u00b1 0.01 | 633 \u00b1 39 | 21 \u00b1 1",
+          "char_start": 26762,
+          "char_end": 26814,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "modifications",
+      13,
+      {
+        "target_as_reported": "sthA",
+        "modification_type": "knockout",
+        "span": {
+          "quote": "To test whether the inactivation of the soluble transhydrogenase is beneficial for isobutanol production, we deleted the sthA gene in P. putida EP1, yielding P. putida EP2 which was transformed with the plasmid pIP02.",
+          "char_start": 27481,
+          "char_end": 27698,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "pathway_configurations",
+      9,
+      {
+        "compartment_strategy": "B_cytosolic_relocalization",
+        "span": {
+          "quote": "The synthesis of isobutanol from glucose requires 2 mol NAD(P)H per mol isobutanol. The reduction of acetolactate is catalyzed by NADPH\u2010dependent ketolacid reductoisomerase (IlvC), while the conversion of isobutyraldehyde to isobutanol can be catalyzed by NAD(P)H\u2010dependent aldehyde/alcohol dehydrogenases such as YqhD (Figure ). Since YqhD is NADPH\u2010dependent, the engineered iosobutanol pathway should consume 2 mol NADPH per mol isobutanol. P. putida possesses a membrane\u2010bound and a soluble transhydrogenase. The latter is encoded by the sthA gene and has in E. coli been reported to favor the re\u2010",
+          "char_start": 26816,
+          "char_end": 27416,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      11,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "Y Iso/S",
+        "value": 22,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "P. putida Iso2 showed in minimal medium containing 5.4 g/L glucose, a growth rate of 0.26 \u00b1 0.01 h\u22121, a Y X/S of of 0.13 \u00b1 0.01 g/g, and produced 438 \u00b1 20 mg/gGLC 2\u2010KG and for the first time isobutanol with a Y Iso/S of 22 \u00b1 2 mg/gGLC (Table , Figure ).",
+          "char_start": 27720,
+          "char_end": 27973,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "measurements",
+      12,
+      {
+        "product_id": "YAA:PRODUCT:isobutanol",
+        "product_as_reported": "isobutanol",
+        "quantity_kind": "Y Iso/S",
+        "value": 21,
+        "unit": "mg/L",
+        "source_locator": "Table 2",
+        "span": {
+          "quote": "P. putida Iso6 showed a growth rate of 0.28 \u00b1 0.01 h\u22121, a Y X/S of of 0.10 \u00b1 0.01 g/g. and produced 633 \u00b1 39 mg/gGLC 2\u2010KG. Furthermore, P. putida Iso6 secreted as much isobutanol as P. putida Iso2 with a Y Iso/S of 21 \u00b1 1 mg/gGLC (Table ) showing that KDC from C. maltaromaticum LMA28 is a useful alternative to KDC from L. lactis.",
+          "char_start": 30185,
+          "char_end": 30516,
+          "section": "results"
+        },
+        "unit_state": "recorded",
+        "unit_canonical": "mg/L",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      5,
+      {
+        "facet": "growth_phase",
+        "value_as_reported": "growth rate",
+        "span": {
+          "quote": "P. putida Iso2 showed in minimal medium containing 5.4 g/L glucose, a growth rate of 0.26 \u00b1 0.01 h\u22121, a Y X/S of of 0.13 \u00b1 0.01 g/g, and produced 438 \u00b1 20 mg/gGLC 2\u2010KG and for the first time isobutanol with a Y Iso/S of 22 \u00b1 2 mg/gGLC (Table , Figure ).",
+          "char_start": 27720,
+          "char_end": 27973,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ],
+    [
+      "conditions",
+      6,
+      {
+        "facet": "growth_phase",
+        "value_as_reported": "growth rate",
+        "span": {
+          "quote": "P. putida Iso6 showed a growth rate of 0.28 \u00b1 0.01 h\u22121, a Y X/S of of 0.10 \u00b1 0.01 g/g. and produced 633 \u00b1 39 mg/gGLC 2\u2010KG. Furthermore, P. putida Iso6 secreted as much isobutanol as P. putida Iso2 with a Y Iso/S of 21 \u00b1 1 mg/gGLC (Table ) showing that KDC from C. maltaromaticum LMA28 is a useful alternative to KDC from L. lactis.",
+          "char_start": 30185,
+          "char_end": 30516,
+          "section": "results"
+        },
+        "unit_state": "null",
+        "confidence": "unverified",
+        "zone": "I",
+        "review_state": "proposed"
+      }
+    ]
+  ],
+  "notes": [
+    [
+      "w1:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [109, 156) and the quote occurs exactly once, at [408, 473)"
+    ],
+    [
+      "w1:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [156, 182) and the quote occurs exactly once, at [475, 510)"
+    ],
+    [
+      "w1:strains[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [182, 212) and the quote occurs exactly once, at [512, 553)"
+    ],
+    [
+      "w1:strains[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [212, 305) and the quote occurs exactly once, at [555, 645)"
+    ],
+    [
+      "w1:strains[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [305, 412) and the quote occurs exactly once, at [647, 716)"
+    ],
+    [
+      "w1:strains[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [412, 476) and the quote occurs exactly once, at [718, 768)"
+    ],
+    [
+      "w1:strains[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [476, 532) and the quote occurs exactly once, at [770, 817)"
+    ],
+    [
+      "w1:strains[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [532, 586) and the quote occurs exactly once, at [819, 865)"
+    ],
+    [
+      "w1:strains[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [586, 642) and the quote occurs exactly once, at [867, 917)"
+    ],
+    [
+      "w1:strains[9]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [642, 698) and the quote occurs exactly once, at [919, 969)"
+    ],
+    [
+      "w1:strains[10]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [698, 754) and the quote occurs exactly once, at [971, 1021)"
+    ],
+    [
+      "w1:strains[11]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [754, 810) and the quote occurs exactly once, at [1023, 1073)"
+    ],
+    [
+      "w1:strains[12]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [810, 866) and the quote occurs exactly once, at [1075, 1125)"
+    ],
+    [
+      "w1:strains[13]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [866, 922) and the quote occurs exactly once, at [1127, 1177)"
+    ],
+    [
+      "w1:modifications[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [305, 412) and the quote occurs exactly once, at [647, 716)"
+    ],
+    [
+      "w1:modifications[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [412, 476) and the quote occurs exactly once, at [718, 768)"
+    ],
+    [
+      "w1:modifications[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [476, 532) and the quote occurs exactly once, at [770, 817)"
+    ],
+    [
+      "w1:modifications[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [532, 586) and the quote occurs exactly once, at [819, 865)"
+    ],
+    [
+      "w1:modifications[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [586, 642) and the quote occurs exactly once, at [867, 917)"
+    ],
+    [
+      "w1:modifications[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [642, 698) and the quote occurs exactly once, at [919, 969)"
+    ],
+    [
+      "w1:modifications[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [698, 754) and the quote occurs exactly once, at [971, 1021)"
+    ],
+    [
+      "w1:modifications[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [754, 810) and the quote occurs exactly once, at [1023, 1073)"
+    ],
+    [
+      "w1:modifications[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [810, 866) and the quote occurs exactly once, at [1075, 1125)"
+    ],
+    [
+      "w1:modifications[9]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [866, 922) and the quote occurs exactly once, at [1127, 1177)"
+    ],
+    [
+      "w1:pathway_configurations[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [412, 476) and the quote occurs exactly once, at [718, 768)"
+    ],
+    [
+      "w1:pathway_configurations[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [476, 532) and the quote occurs exactly once, at [770, 817)"
+    ],
+    [
+      "w1:pathway_configurations[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [532, 586) and the quote occurs exactly once, at [819, 865)"
+    ],
+    [
+      "w1:pathway_configurations[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [586, 642) and the quote occurs exactly once, at [867, 917)"
+    ],
+    [
+      "w1:pathway_configurations[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [642, 698) and the quote occurs exactly once, at [919, 969)"
+    ],
+    [
+      "w1:pathway_configurations[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [698, 754) and the quote occurs exactly once, at [971, 1021)"
+    ],
+    [
+      "w1:pathway_configurations[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [754, 810) and the quote occurs exactly once, at [1023, 1073)"
+    ],
+    [
+      "w1:pathway_configurations[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [810, 866) and the quote occurs exactly once, at [1075, 1125)"
+    ],
+    [
+      "w1:pathway_configurations[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [866, 922) and the quote occurs exactly once, at [1127, 1177)"
+    ],
+    [
+      "w1:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1029, 1034) and the quote occurs exactly once, at [9762, 9767)"
+    ],
+    [
+      "w1:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1059, 1065) and the quote occurs exactly once, at [9800, 9805)"
+    ],
+    [
+      "w1:measurements[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1089, 1095) and the quote occurs exactly once, at [9838, 9843)"
+    ],
+    [
+      "w1:measurements[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1119, 1121); the quote occurs 64 times and the nearest is [1111, 1112)"
+    ],
+    [
+      "w1:measurements[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1149, 1156) and the quote occurs exactly once, at [9905, 9911)"
+    ],
+    [
+      "w1:measurements[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1179, 1181); the quote occurs 64 times and the nearest is [1163, 1164)"
+    ],
+    [
+      "w1:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [128, 136) and the quote occurs exactly once, at [6440, 6603)"
+    ],
+    [
+      "w1:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1126, 1134) and the quote occurs exactly once, at [7831, 8021)"
+    ],
+    [
+      "w1:conditions[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1242, 1250) and the quote occurs exactly once, at [8022, 8245)"
+    ],
+    [
+      "w1:conditions[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[7]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[8]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[9]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[10]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[11]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[12]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[13]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[14]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[15]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[16]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[17]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[18]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[19]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[20]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[21]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[22]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[23]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[24]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[25]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[26]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[27]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[28]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[29]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[30]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[31]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[32]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[33]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[34]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[35]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[36]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[37]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[38]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[39]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[40]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[41]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[42]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[43]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[44]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[45]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[46]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[47]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[48]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[49]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[50]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[51]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[52]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[53]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[54]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[55]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[56]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[57]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[58]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[59]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[60]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[61]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[62]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[63]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[64]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[65]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[66]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[67]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[68]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[69]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[70]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[71]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[72]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[73]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[74]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[75]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[76]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[77]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[78]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[79]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[80]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[81]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[82]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[83]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[84]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[85]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[86]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[87]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[88]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[89]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[90]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[91]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[92]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[93]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[94]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[95]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[96]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[97]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[98]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[99]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[100]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[101]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[102]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[103]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[104]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[105]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[106]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[107]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[108]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[109]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[110]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[111]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[112]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[113]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[114]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[115]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[116]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[117]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[118]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[119]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[120]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[121]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[122]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[123]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[124]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[125]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[126]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[127]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[128]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[129]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[130]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[131]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[132]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[133]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[134]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[135]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[136]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[137]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[138]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[139]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[140]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[141]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[142]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[143]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[144]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[145]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[146]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[147]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[148]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[149]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[150]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[151]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[152]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[153]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[154]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[155]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[156]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[157]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[158]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[159]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[160]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[161]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[162]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[163]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[164]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[165]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[166]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[167]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[168]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[169]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[170]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[171]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[172]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[173]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[174]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[175]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[176]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[177]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[178]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[179]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[180]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[181]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[182]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[183]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[184]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[185]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[186]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[187]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[188]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[189]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[190]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[191]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[192]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[193]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[194]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[195]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[196]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[197]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w1:conditions[198]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1250, 1258) and the quote occurs exactly once, at [8246, 8327)"
+    ],
+    [
+      "w1:conditions[199]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1234, 1242) and the quote occurs exactly once, at [8328, 8423)"
+    ],
+    [
+      "w2:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1327, 1331); the quote occurs 3 times and the nearest is [1255, 1261)"
+    ],
+    [
+      "w2:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1411, 1414); the quote occurs 2 times and the nearest is [1291, 1295)"
+    ],
+    [
+      "w2:strains[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1435, 1438); the quote occurs 2 times and the nearest is [1329, 1333)"
+    ],
+    [
+      "w2:strains[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1459, 1462); the quote occurs 2 times and the nearest is [1367, 1371)"
+    ],
+    [
+      "w2:strains[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1483, 1486); the quote occurs 2 times and the nearest is [1406, 1410)"
+    ],
+    [
+      "w2:strains[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1507, 1510); the quote occurs 2 times and the nearest is [1434, 1438)"
+    ],
+    [
+      "w2:modifications[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1327, 1331); the quote occurs 2 times and the nearest is [4094, 4099)"
+    ],
+    [
+      "w2:modifications[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1411, 1414); the quote occurs 2 times and the nearest is [4173, 4177)"
+    ],
+    [
+      "w2:modifications[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1435, 1437); the quote occurs 7 times and the nearest is [4227, 4230)"
+    ],
+    [
+      "w2:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1331, 1332); the quote occurs 64 times and the nearest is [1322, 1323)"
+    ],
+    [
+      "w2:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1473, 1480) and the quote occurs exactly once, at [10476, 10482)"
+    ],
+    [
+      "w2:measurements[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1503, 1510) and the quote occurs exactly once, at [10531, 10537)"
+    ],
+    [
+      "w2:measurements[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1523, 1531); the quote occurs 3 times and the nearest is [1308, 1316)"
+    ],
+    [
+      "w2:measurements[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1543, 1550) and the quote occurs exactly once, at [10683, 10689)"
+    ],
+    [
+      "w3:strains[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [0, 46) and the quote occurs exactly once, at [0, 51)"
+    ],
+    [
+      "w3:strains[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [123, 165) and the quote occurs exactly once, at [84, 124)"
+    ],
+    [
+      "w3:strains[2]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [363, 425) and the quote occurs exactly once, at [576, 628)"
+    ],
+    [
+      "w3:strains[3]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [436, 498) and the quote occurs exactly once, at [630, 683)"
+    ],
+    [
+      "w3:strains[4]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [499, 561) and the quote occurs exactly once, at [685, 739)"
+    ],
+    [
+      "w3:strains[5]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [562, 624) and the quote occurs exactly once, at [741, 781)"
+    ],
+    [
+      "w3:strains[6]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [625, 687) and the quote occurs exactly once, at [783, 835)"
+    ],
+    [
+      "w3:modifications[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [105, 156) and the quote occurs exactly once, at [1502, 1719)"
+    ],
+    [
+      "w3:pathway_configurations[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [157, 364) and the quote occurs exactly once, at [837, 1437)"
+    ],
+    [
+      "w3:measurements[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [265, 293) and the quote occurs exactly once, at [1741, 1994)"
+    ],
+    [
+      "w3:measurements[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1059, 1087) and the quote occurs exactly once, at [4206, 4537)"
+    ],
+    [
+      "w3:conditions[0]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [253, 265) and the quote occurs exactly once, at [1741, 1994)"
+    ],
+    [
+      "w3:conditions[1]",
+      "span_offsets_repaired",
+      "offsets repaired: the model claimed [1037, 1049) and the quote occurs exactly once, at [4206, 4537)"
+    ]
+  ],
+  "failed_attempts": [
+    [
+      "strains[4]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1485, 1494) reads 'id constr'",
+      "strains[5]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1525, 1534) reads ' genomic '",
+      "strains[6]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1555, 1564) reads ' using th'",
+      "strains[7]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1585, 1594) reads ', digeste'",
+      "strains[8]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1605, 1614) reads '/XhoI and'",
+      "modifications[0]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1327, 1410) reads '\\n\\nIso3 | 5 \u00b1 2 | 0.12 \u00b1 0.01 | 183 \u00b1 8\\n\\nIso4 | 4 \u00b1 1 | 0.13 \u00b1 0.01 | 193 \u00b1 12\\n\\nIso5'",
+      "modifications[1]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1411, 1450) reads '| 0 | 0.01 \u00b1 0.00 | 0\\n\\nIso6 | 19 \u00b1 2 | '",
+      "modifications[2]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1451, 1489) reads '.07 \u00b1 0.01 | 397 \u00b1 14\\n\\n2.4.\\n\\nPlasmid c'"
+    ],
+    [
+      "modifications[0]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [365, 401) reads 'vatives\\n\\nStrain | \u03bc [h\u22121] | Y X/S [g'",
+      "conditions[0]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [663, 678) reads '| 833 \u00b1 100 | 1'",
+      "conditions[1]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [689, 710) reads ' | 0.19 \u00b1 0.01 | 0.09'"
+    ]
+  ],
+  "model": "qwen2.5:7b-instruct"
+}

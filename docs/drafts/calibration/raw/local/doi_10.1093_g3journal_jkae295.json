@@ -1,0 +1,8 @@
+{
+  "rank": 4,
+  "stratum": "MT",
+  "publication_id": "doi:10.1093/g3journal/jkae295",
+  "status": "error",
+  "seconds": 35.0,
+  "error": "LlmValidationError: qwen2.5:7b-instruct produced output that failed validation on all 2 attempt(s) (prompt_version=extraction/v1+723f92719ad1, input_hash=b17efcf4fcae). Last errors: pathway_configurations[0]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1280, 1290) reads '(http://ye'; measurements[0]: span does not resolve (quote_absent_from_source): the quoted text does not occur anywhere in the source; [1725, 1736) reads 'topic COX2W'; measurements[1]: span does not resolve (quote_absent_from_source): the quoted text does not occur"
+}

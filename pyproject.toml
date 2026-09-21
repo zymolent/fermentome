@@ -14,6 +14,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML"]
+# The escalation tier (MODEL_ROUTING.md §7a). Optional rather than required: fermdb runs fully
+# without it — `agent-sdk` is one of four providers and the others need nothing — and the import
+# raises ProviderUnavailableError with the install line when it is missing. It is declared here
+# because it was previously undeclared and undiscoverable: the 2026-09-21 calibration found the
+# package simply absent, on a code path no run had ever reached.
+escalation = ["claude-agent-sdk>=0.1"]
 
 [project.scripts]
 fermdb = "fermdb.cli:main"

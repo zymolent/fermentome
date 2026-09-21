@@ -199,6 +199,78 @@ Each is reversible, spends nothing, touches no bench, and promotes nothing a hum
 
 ---
 
+## 3a. The calibration, finally run — and the answer is no
+
+`OPEN_QUESTIONS.md` Q7 and `MODEL_ROUTING.md` §7 both call a 20-paper local-vs-capable recall
+calibration a **phase-1 deliverable**. It had never been run. It has now
+(`docs/drafts/calibration/`), and it decides the routing for the extraction that §3 says is newly
+unblocked.
+
+**The sentence: phase 1 must not route its 500–900 papers through the local tier as a first-pass
+extractor.** Across the two papers both tiers completed, local recalled **1 of 301**
+capable-proposed records — **0 of 84 measurements, 0 of 68 modifications, 0 of 75 condition
+facets** — and **2 of the 5 papers the local tier attempted produced nothing at all**, because it
+fabricated quotes the span validator rejected. §7's own rule then applies literally: local stays on
+triage.
+
+**N = 2 paired, and that is stated as N = 2.** The capable arm averages 267 s and 975 s per paper
+and was stopped mid-third. It is a pilot, both papers are isobutanol-yeast, and the 20-paper set
+was frozen *before* the run (it is in git as of `c7c06f6`, which is what S.2 asks). The margin is
+wide enough that sampling is unlikely to explain it; the honest caveat is in §3a.3.
+
+### 3a.1 The GPU was never the problem — three other things were
+
+`ollama ps` reports **100% GPU**, 50 tok/s for the 27B. The memory note's CPU trap did not bite.
+What did:
+
+* **The extraction payload schema does not fit the local tier's own default context.** The schema
+  alone is ~42,000 characters ≈ 10,500 tokens; with the reply reservation the floor is ~12,500
+  tokens **before any paper**. Default `num_ctx` is **8,192**, so local extraction is arithmetically
+  impossible at any excerpt size until the window is raised past ~17,500. `MODEL_ROUTING.md` §7c
+  concludes *"the excerpt, not the window, is the real limit"* — on this measurement **the schema
+  is a second, independent floor and it binds first.**
+* **The configured extraction model could not be run at a legal context at all.** `qwen3.6:27b` did
+  not return in 900 s at a 6,000-char window, and a *trivial* prompt at `num_ctx` 16,384 did not
+  return in 290 s while the same prompt at 8,192 returned in 5 s. A resident instance held 16 GB,
+  a different `num_ctx` needs a second instance, and it does not fit — **Ollama blocks
+  indefinitely rather than erroring.** Same silence as the CPU trap, different mechanism.
+* So the local arm ran on **`qwen2.5:7b-instruct`**, which §7c explicitly leaves open as a
+  throughput question to settle by measurement. **The configured 27B therefore remains untested.**
+
+### 3a.2 Two repo defects, both on paths no run had ever reached
+
+1. **`claude-agent-sdk` was not installed and was not declared anywhere.** Now declared as an
+   optional `escalation` extra — it was undiscoverable, which is how it stayed missing.
+2. **`claude_agent_sdk_runner` pinned `max_turns: 1`, and at 1 every real paper fails** with
+   "Reached maximum number of turns (1)". Reproduced at 30k, 12k and 6k excerpt windows, so it is
+   not excerpt size — a trivial schema completes in one turn and the 42,000-character payload
+   schema does not. **This is the tier the calibration says we must depend on, and it was broken.**
+   Fixed to 8, with the reasoning at the use site: every tool is disallowed and `setting_sources`
+   is empty, so an extra turn can only continue emitting the JSON object, and the docstring's trust
+   argument is about tools and file access, neither of which changes with a turn count.
+
+### 3a.3 The span validator holds — and `relocate_span` turns out to be load-bearing
+
+**Not one non-resolving span survived into either tier's output.** §3's claim that span
+verification is model-independent survives contact with real data, which is the single most
+reassuring result here.
+
+But **99–100% of proposed offsets were wrong in both tiers.** Opus 5 is no better at counting
+characters than a 7B. `relocate_span` is not a convenience, it is the thing that makes structured
+extraction work at all, and it should be treated as infrastructure.
+
+The local failure mode is also **worse than §7 predicted**: not merely omission but *fabrication* —
+16 quotes that are not in the paper, killing 2 of 5 papers outright. A false negative arriving by
+way of a false positive. And one nuance against over-reading the 0.3%: on two papers the 7B
+proposed 71 and 51 records, volumes in the capable tier's range. **It is unreliable, not weak**,
+and nothing in its output says which papers it dropped.
+
+**The caveat worth acting on before this is treated as permanent:** the 42,000-character payload
+schema may be the defect rather than the model. It is what forces the context floor above, and a
+narrower per-record-kind prompt is a far cheaper thing to fix than the routing.
+
+---
+
 ## 4a. The benchmark set: S.5's headline number was unobtainable, not merely unmeasured
 
 `data/benchmarks/known_positives.yaml` is what PLAN.md S.5 calls *"the headline number for whether
@@ -403,8 +475,12 @@ snapshot is cold, and it is also what brings the stack back up.
 
 ## 7. What I would do next, in order
 
-1. **Extract, now that extraction is free of the cap.** Start with the five landmarks and the 12
-   pentose papers. Route by whatever the calibration measurement says.
+1. **Extract, now that extraction is free of the cap — through the capable tier.** The calibration
+   has answered the routing question (§3a) and the `max_turns` defect that blocked that tier is
+   fixed. Start with the five landmarks and the 12 pentose papers. Budget ~270–975 s per paper.
+   Before scaling to 500–900, try the narrower per-record-kind prompt: if the 42,000-character
+   schema is what defeats the local tier, that is the cheapest thing in this report to fix and it
+   would change the economics of the whole phase.
 2. **Add the `part_expression_records` extraction section**, then its promoter. Every one of the
    seven existing record kinds now has a promoter except `conditions`, which is withheld on
    purpose — so promotion coverage is complete and the next gap has moved upstream, into what the
