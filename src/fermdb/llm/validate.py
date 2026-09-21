@@ -91,7 +91,24 @@ MODEL_REVIEW_STATE: Final[str] = "proposed"
 MISSING_STATES: Final[frozenset[str]] = frozenset(("NA", "unknown"))
 
 _CURIE_RE: Final[re.Pattern[str]] = re.compile(r"^[A-Za-z][A-Za-z0-9._\-]*:[^\s].*$")
-_YIELD_UNITS: Final[Mapping[str, str]] = {"g/g": "g_per_g", "mol/mol": "mol_per_mol"}
+#: Yield unit -> (which ``theoretical_yields.tsv`` column holds the ceiling, how to scale that
+#: ceiling into this unit). The scale converts the CEILING into the record's unit, never the
+#: record's value into the ceiling's: CONVENTIONS.md is explicit that ``value_as_reported`` is
+#: never converted in place, and the issue message has to quote the number the paper printed.
+#:
+#: ``mg/g`` added 2026-09-22. Its absence was not merely an unreadable unit: any unit outside this
+#: mapping makes `_check_yield` return at its first branch, so every mg/g yield skipped the
+#: theoretical-maximum ceiling in silence. Mapping it naively to ``g_per_g`` with no scale would
+#: have been worse than the gap -- an ordinary two-figure mg/g yield would then be compared
+#: against a sub-unity g/g ceiling and rejected as thermodynamically impossible.
+#:
+#: The scales here are SI prefixes and nothing else. No theoretical maximum appears in this
+#: module, by test: those live in ``theoretical_yields.tsv``, which records what each one assumes.
+_YIELD_UNITS: Final[Mapping[str, tuple[str, float]]] = {
+    "g/g": ("g_per_g", 1.0),
+    "mg/g": ("g_per_g", 1000.0),  # milli-: a g/g ceiling is 1000x as many mg/g
+    "mol/mol": ("mol_per_mol", 1.0),
+}
 
 #: Yields are stored as fractions in [0, 1], never percentages (CONVENTIONS.md, "Units").
 _FRACTION_BASES: Final[frozenset[str]] = frozenset(("theoretical_max_pct",))
@@ -712,10 +729,12 @@ class TheoreticalYield:
         """The ceiling in ``unit``, or None when this row cannot answer for that unit."""
         if self.state != "recorded":
             return None
-        column = _YIELD_UNITS.get(unit)
-        if column is None:
+        entry = _YIELD_UNITS.get(unit)
+        if entry is None:
             return None
-        return self.g_per_g if column == "g_per_g" else self.mol_per_mol
+        column, scale = entry
+        base = self.g_per_g if column == "g_per_g" else self.mol_per_mol
+        return None if base is None else base * scale
 
 
 @dataclass(frozen=True)

@@ -745,6 +745,75 @@ def test_a_yield_above_the_theoretical_maximum_is_rejected(units: Any, yields: A
     assert "theoretical maximum" in issue.message
 
 
+def test_an_ordinary_mg_per_g_yield_is_accepted_rather_than_compared_to_a_g_per_g_ceiling(
+    units: Any, yields: Any
+) -> None:
+    """The trap in adding mg/g: the ceiling must be converted, not the value.
+
+    40.51 mg/g glucose is an entirely ordinary isobutanol yield -- it is the number one of the
+    pending records actually quotes. Mapping mg/g onto the g_per_g column with no scale would
+    compare 40.51 against a sub-unity ceiling and reject it as thermodynamically impossible, which
+    is a worse failure than the silence it replaced, because it would look like a real finding.
+    """
+    text = "1.32 g/L (40.51 mg/g glucose) after 120 h"
+    report = validate_records(
+        [
+            {
+                "field": "yield",
+                "value": 40.51,
+                "unit": "mg/g",
+                "basis": "consumed",
+                "product_id": "YAA:PRODUCT:isobutanol",
+                "substrate": "glucose",
+                "span": span_for(text, "40.51 mg/g"),
+            }
+        ],
+        source_text=text,
+        units=units,
+        yields=yields,
+    )
+    assert report.rejected == (), [i.message for r in report.rejected for i in r.fatal_issues]
+    assert len(report.accepted) == 1
+
+
+def test_an_impossible_mg_per_g_yield_is_now_caught_instead_of_skipped(
+    units: Any, yields: Any
+) -> None:
+    """Before mg/g was in `_YIELD_UNITS`, `_check_yield` returned at its first branch for it.
+
+    So a yield claiming more product than the substrate contains passed the validator in silence,
+    purely because of how the unit was spelled. This is the same quantity as the rejected 0.55 g/g
+    case above, written the way this literature writes it.
+    """
+    text = "a yield of 550 mg/g glucose was obtained"
+    report = validate_records(
+        [
+            {
+                "field": "yield",
+                "value": 550.0,
+                "unit": "mg/g",
+                "basis": "consumed",
+                "product_id": "YAA:PRODUCT:isobutanol",
+                "substrate": "glucose",
+                "span": span_for(text, "550 mg/g"),
+            }
+        ],
+        source_text=text,
+        units=units,
+        yields=yields,
+    )
+    assert report.accepted == ()
+    assert report.rejected[0].fatal_issues[0].code == "yield_exceeds_theoretical_max"
+
+
+def test_the_mg_per_g_ceiling_is_a_thousand_times_the_g_per_g_one(yields: Any) -> None:
+    """Read off the same TSV row, so the two can never drift apart in code."""
+    g_per_g = yields.maximum("YAA:PRODUCT:isobutanol", "glucose", "g/g")
+    mg_per_g = yields.maximum("YAA:PRODUCT:isobutanol", "glucose", "mg/g")
+    assert g_per_g is not None and mg_per_g is not None
+    assert mg_per_g == pytest.approx(g_per_g * 1000)
+
+
 def test_a_yield_under_the_maximum_is_accepted(units: Any, yields: Any) -> None:
     report = validate_records(
         [
