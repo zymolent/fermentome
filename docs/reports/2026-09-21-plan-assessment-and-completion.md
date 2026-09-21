@@ -249,6 +249,25 @@ What did:
    is empty, so an extra turn can only continue emitting the JSON object, and the docstring's trust
    argument is about tools and file access, neither of which changes with a turn count.
 
+### 3a.2b The fix, proved end to end on the landmark
+
+With `max_turns` raised, a dry run of **Bastian 2011** (`10.1016/j.ymben.2011.02.004`, the
+NADH-preferring KARI paper B.3.5 names as the highest-priority de-risking part) through the capable
+tier:
+
+```
+87 proposed record(s) — bottlenecks=3, conditions=24, measurements=16,
+modifications=29, pathway_configurations=5, strains=10
+sent 20,282/49,176 chars (41% of the document); 67 notes
+model=claude-opus-5  attempts=5  tokens=82,273
+dry run: nothing written   (curation_task still 95, extraction still 7)
+```
+
+Two things to note. **`attempts=5`** — it genuinely needed multiple turns, which is exactly the
+ceiling that was set to 1. And **5 `pathway_configurations`**, the entity that had no promoter
+until earlier today and that phase 3's acceptance test measures recall against: the pipeline can
+now produce them *and* store them, which was true of neither this morning.
+
 ### 3a.3 The span validator holds — and `relocate_span` turns out to be load-bearing
 
 **Not one non-resolving span survived into either tier's output.** §3's claim that span
@@ -257,7 +276,9 @@ reassuring result here.
 
 But **99–100% of proposed offsets were wrong in both tiers.** Opus 5 is no better at counting
 characters than a 7B. `relocate_span` is not a convenience, it is the thing that makes structured
-extraction work at all, and it should be treated as infrastructure.
+extraction work at all, and it should be treated as infrastructure. The Bastian run above is the
+independent confirmation: **every one of its 67 notes is `span_offsets_repaired`** — not one
+offset arrived correct, and every quote was nonetheless found exactly once in the document.
 
 The local failure mode is also **worse than §7 predicted**: not merely omission but *fabrication* —
 16 quotes that are not in the paper, killing 2 of 5 papers outright. A false negative arriving by
