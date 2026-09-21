@@ -15,6 +15,7 @@ grows past this.
     python -m fermdb.cli literature discover --family isobutanol_mitochondria
     python -m fermdb.cli literature discover --dry-run
     python -m fermdb.cli literature status
+    python -m fermdb.cli literature rescreen --criterion E1
     python -m fermdb.cli literature manual-queue export --out queue.tsv
     python -m fermdb.cli literature manual-queue ingest --dir <folder>
     python -m fermdb.cli omics discover
@@ -82,6 +83,18 @@ from .literature.queries import (
     QueryFamily,
     family_status,
     load_query_families,
+)
+from .literature.rescreen import (
+    PATTERNS_FILE as RESCREEN_PATTERNS_FILE,
+)
+from .literature.rescreen import (
+    SCHEMA_CHANGE_REQUIRED,
+    RescreenError,
+    criterion_names,
+    load_rescreen_patterns,
+    rescreen,
+    summary_lines,
+    write_proposals,
 )
 from .llm import (
     FileCache,
@@ -234,6 +247,56 @@ def cmd_literature_status(args: argparse.Namespace) -> int:
             f"{last_hit:>9}{drift:>7}{status.included:>6}{status.needs_full_text:>8}"
             f"{status.excluded:>6}"
         )
+    return 0
+
+
+def cmd_literature_rescreen(args: argparse.Namespace) -> int:
+    """Screen stored full text for one criterion's evidence and propose candidates.
+
+    Reads the database and writes nothing to it. That is the design, not a limitation of this
+    command: a row a full-text screen produces has no `search_run` to point at, and
+    `screening_record` requires one. `rescreen.SCHEMA_CHANGE_REQUIRED` spells out the migration
+    that would give these rows a home; it is deliberately not applied here.
+    """
+    settings = Settings.load()
+    try:
+        patterns = load_rescreen_patterns(settings.literature_dir / RESCREEN_PATTERNS_FILE)
+    except RescreenError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    if args.criterion not in patterns.criteria_names():
+        available = ", ".join(f"{c} ({label})" for c, label in criterion_names(patterns).items())
+        print(
+            f"error: no pattern set for criterion {args.criterion!r}; available: {available}.\n"
+            f"A criterion belongs in {RESCREEN_PATTERNS_FILE} only with a measurement behind it "
+            f"showing its evidence does not live in abstracts -- E1 is there because its "
+            f"admission test is a genotype, which is a methods fact.",
+            file=sys.stderr,
+        )
+        return 2
+
+    conn = open_db(settings.db_file)
+    try:
+        result = rescreen(conn, settings, criterion=args.criterion, patterns=patterns)
+    finally:
+        conn.close()
+
+    for line in summary_lines(result):
+        print(line)
+
+    if args.no_write:
+        print("\n--no-write: no proposal document written")
+    else:
+        out = (
+            Path(args.out)
+            if args.out
+            else settings.exports_dir / "rescreen" / f"{result.criterion}.yaml"
+        )
+        written = write_proposals(result, out, sectioned_only=not args.all_matches)
+        print(f"\nproposals written to {written}")
+
+    print(f"\nNOT STORED AS screening_record ROWS. {SCHEMA_CHANGE_REQUIRED}")
     return 0
 
 
@@ -608,6 +671,75 @@ def cmd_curate_reject(args: argparse.Namespace) -> int:
     return _curate_resolve(args, "reject")
 
 
+def cmd_curate_corroborate(args: argparse.Namespace) -> int:
+    """Split the pending queue by whether each proposal's own quote supports it.
+
+    Reports by default and writes nothing. `--accept` is what turns the report into verdicts, and
+    it takes a curator for the same reason `accept` does: a person is deciding that a quote naming
+    its own subject is good enough to admit without reading the paper. That decision is theirs,
+    the gate only sorts.
+    """
+    from .curate.corroborate import ACCEPT, corroborate_queue
+
+    if args.accept and not args.curator:
+        print("--accept needs --curator: the verdict is recorded against a person", file=sys.stderr)
+        return 2
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    try:
+        reports = corroborate_queue(conn)
+        if args.kind:
+            wanted = {part.strip() for part in args.kind.split(",") if part.strip()}
+            reports = tuple(r for r in reports if r.record_kind in wanted)
+
+        corroborated = [r for r in reports if r.verdict == ACCEPT]
+        needs_review = [r for r in reports if r.verdict != ACCEPT]
+
+        print(
+            f"{len(reports)} pending; {len(corroborated)} corroborated, "
+            f"{len(needs_review)} need a reader"
+        )
+        by_kind: dict[str, list[int]] = {}
+        for report in reports:
+            counts = by_kind.setdefault(report.record_kind, [0, 0])
+            counts[0 if report.verdict == ACCEPT else 1] += 1
+        for kind, (ok, review) in sorted(by_kind.items()):
+            print(f"  {kind:<28} {ok:>4} corroborated  {review:>4} review")
+
+        if args.show_absent:
+            print("\nwhat the quote does not carry:")
+            missing_counts: dict[str, int] = {}
+            for report in needs_review:
+                for field in report.absent:
+                    missing_counts[f"{report.record_kind}.{field}"] = (
+                        missing_counts.get(f"{report.record_kind}.{field}", 0) + 1
+                    )
+            for field, count in sorted(missing_counts.items(), key=lambda kv: -kv[1]):
+                print(f"  {field:<48} {count:>4}")
+
+        if not args.accept:
+            print("\nreport only; nothing written. Re-run with --accept --curator NAME to apply.")
+            return 0
+
+        curator = Curator(name=args.curator, kind="human")
+        applied = 0
+        for report in corroborated:
+            evidenced = ", ".join(f"{c.field}={c.claimed!r}" for c in report.checks)
+            reason = (
+                "corroboration gate: the cited quote itself contains " + evidenced + ". "
+                "Accepted in bulk without a reader opening the paper, on the grounds that the "
+                "subject was read from the span rather than inferred from surrounding text. "
+                "This attests to attribution, not to truth."
+            )
+            curate.accept(conn, report.task_id, curator=curator, reason=reason)
+            applied += 1
+    finally:
+        conn.close()
+    print(f"\naccepted {applied} corroborated proposal(s); {len(needs_review)} left for review")
+    return 0
+
+
 def cmd_curate_promote(args: argparse.Namespace) -> int:
     """Write the rows that accepted proposals describe, or say precisely why each cannot."""
     from .curate.promote import NotPromotable, plan_promotion, promote, promote_ready
@@ -791,6 +923,42 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_lit_status.set_defaults(func=cmd_literature_status)
 
+    p_lit_rescreen = lit_sub.add_parser(
+        "rescreen",
+        help="re-screen stored full text for a criterion whose evidence is not in abstracts",
+        description=(
+            "Screen stored full text for one B.3 criterion's evidence and propose candidates. "
+            "Reads the database, writes no rows to it, and admits nothing: every proposal is "
+            f"review_state='proposed'. Patterns come from data/literature/{RESCREEN_PATTERNS_FILE}."
+        ),
+    )
+    p_lit_rescreen.add_argument(
+        "--criterion",
+        required=True,
+        help="which B.3 criterion to screen for; only criteria defined in "
+        f"{RESCREEN_PATTERNS_FILE} are available (today: E1)",
+    )
+    p_lit_rescreen.add_argument(
+        "--out",
+        default=None,
+        help="where to write the proposal document (default: "
+        "<exports_dir>/rescreen/<criterion>.yaml)",
+    )
+    p_lit_rescreen.add_argument(
+        "--all-matches",
+        dest="all_matches",
+        action="store_true",
+        help="include candidates whose genotype match landed outside Methods/Results. Reproduces "
+        "the looser measurement; expect passing Discussion citations in the extra rows",
+    )
+    p_lit_rescreen.add_argument(
+        "--no-write",
+        dest="no_write",
+        action="store_true",
+        help="report only; do not write the proposal document",
+    )
+    p_lit_rescreen.set_defaults(func=cmd_literature_rescreen)
+
     p_lit_ethanol = lit_sub.add_parser(
         "ethanol", help="the capped ethanol reference layer: slots, budgets and admission"
     )
@@ -967,6 +1135,29 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_verdict_args(p_cu_reject)
     p_cu_reject.set_defaults(func=cmd_curate_reject)
+
+    p_cu_corroborate = cu_sub.add_parser(
+        "corroborate",
+        help="split the queue by whether each proposal's own quote names what it claims",
+    )
+    p_cu_corroborate.add_argument(
+        "--kind", default=None, help="comma-separated record kinds, e.g. measurements,strains"
+    )
+    p_cu_corroborate.add_argument(
+        "--show-absent",
+        dest="show_absent",
+        action="store_true",
+        help="tally which identifying fields are missing from their quotes",
+    )
+    # Accepting is opt-in and needs a named curator, because the default must stay a report: a
+    # flag that both measures and writes gets run for the measurement and writes by accident.
+    p_cu_corroborate.add_argument(
+        "--accept", action="store_true", help="accept the corroborated proposals in bulk"
+    )
+    p_cu_corroborate.add_argument(
+        "--curator", default=None, help="who is deciding; required with --accept"
+    )
+    p_cu_corroborate.set_defaults(func=cmd_curate_corroborate)
 
     p_cu_promote = cu_sub.add_parser(
         "promote",

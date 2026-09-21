@@ -272,7 +272,7 @@ def test_the_real_shipped_query_families_file_loads_and_matches_the_recorded_mea
     test is what catches an accidental edit -- it is not exercising discovery.py at all.
     """
     families = load_query_families(REAL_QUERY_FAMILIES_YAML)
-    assert families.version == 1
+    assert families.version == 2
 
     # Re-baselined 2026-09-20 against the SHIPPED query strings, run live. The previous values
     # were measured with different, hand-written queries, so comparing a live count against them
@@ -291,7 +291,12 @@ def test_the_real_shipped_query_families_file_loads_and_matches_the_recorded_mea
         "mtdna_engineering_yeast": 912,
         "mtdna_methods_yeast": 1298,
         "ethanol_mitochondria_yeast": 504,
-        "ethanol_scerevisiae_prod_ferm_tol": 1586,
+        # 1586 -> 1640 on 2026-09-22 with the E1 and E6 term edits (E1 68 -> 101, E6 362 -> 383,
+        # 0 records lost by either). `discovery.run_family` sums the sub-query counts, so the
+        # baseline has to move with the terms or `status` reports permanent false drift. Verified
+        # live the same day with `discover --dry-run`: every family above reproduces its number
+        # exactly, which is also what lifted this file's standing "unverified" caveat.
+        "ethanol_scerevisiae_prod_ferm_tol": 1640,
     }
     assert {f.name: f.expected_count for f in families.families} == expected
 
@@ -329,6 +334,65 @@ def test_the_real_shipped_query_families_file_loads_and_matches_the_recorded_mea
     eth_mito = families["ethanol_mitochondria_yeast"]
     assert [sq.criterion for sq in eth_mito.sub_queries] == ["E5"]
     assert eth_mito.term is None
+
+
+def test_e1_keeps_its_genotype_tokens_out_from_under_the_deletion_verb() -> None:
+    """The structural property of the 2026-09-22 E1 edit, guarded so it cannot be flattened back.
+
+    A Δ-genotype token already ASSERTS the deletion -- `pdc1Δ` means "PDC1 is deleted" -- so
+    gating it on a second deletion verb re-loses the papers it was added for. Measured against the
+    8 Δ-notation papers PubMed holds that the atlas does not: adding the tokens flat, under the
+    existing AND, reaches 1 of 8 (77 hits); lifting them into their own branch reaches 6 of 8
+    (101 hits). The fix is the structure, not the vocabulary, so the structure is what this test
+    asserts -- a later editor tidying the parentheses would otherwise silently undo it.
+    """
+    e1 = next(
+        sq
+        for sq in load_query_families(REAL_QUERY_FAMILIES_YAML)[
+            "ethanol_scerevisiae_prod_ferm_tol"
+        ].sub_queries
+        if sq.criterion == "E1"
+    )
+    normalized = " ".join(e1.term.split())
+
+    # PubMed transliterates Δ to `delta` and glues it to the preceding token, so `pdc1delta` IS
+    # the index term for `pdc1Δ` -- and `pdc1` does not retrieve it (disjoint index terms).
+    assert "pdc1delta[tiab]" in normalized
+    # The branch closes and ORs into the gene AND verb clause; it is never a member of it.
+    assert '"decarboxylase-negative"[tiab]) OR ((PDC1[tiab]' in normalized
+    assert normalized.index("pdc1delta") < normalized.index("deletion[tiab]")
+
+    # `"pdc minus"` returns 0 PubMed-wide and was removed as dead. `"C2 auxotroph"` returns 0 too
+    # and is retained KNOWINGLY: PLAN.md B.3.1 names C2 auxotrophy as the thing E1 exists to
+    # characterise, so its absence from the literature is itself the finding.
+    assert "pdc minus" not in normalized
+    assert '"C2 auxotroph"[tiab]' in normalized
+
+    # Never added: PubMed has no such index terms, so it drops them from the translated query
+    # silently -- invisible dead weight, which is exactly what `"pdc minus"` had become.
+    assert "deltapdc5" not in normalized
+    assert "deltapdc6" not in normalized
+
+
+def test_e6_gained_the_stress_synonyms_without_changing_its_structure() -> None:
+    """E6's evidence is an abstract-level outcome, not a genotype, so the flat form is right here
+    and only the vocabulary moved: 362 -> 383, 0 lost, behind the same three ANDs."""
+    e6 = next(
+        sq
+        for sq in load_query_families(REAL_QUERY_FAMILIES_YAML)[
+            "ethanol_scerevisiae_prod_ferm_tol"
+        ].sub_queries
+        if sq.criterion == "E6"
+    )
+    normalized = " ".join(e6.term.split())
+    for phrase in (
+        '"stress resistance"[tiab]',
+        '"stress resistant"[tiab]',
+        '"stress tolerance"[tiab]',
+        '"fermentation performance"[tiab]',
+    ):
+        assert phrase in normalized
+    assert normalized.count(" AND ") == 3
 
 
 def test_a_family_key_the_parser_would_ignore_is_an_error(tmp_path: Path) -> None:

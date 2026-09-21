@@ -1,0 +1,99 @@
+# fermdb full-text re-screen patterns. Repo-tier, curated, Zone R: this file is the recorded
+# input that `screening_record.zone = 'H'` would be reconstructible from, exactly as
+# `query_families.yaml` is for discovery (docs/reference/CONVENTIONS.md).
+#
+# WHY THIS EXISTS. `query_families.yaml` asks PubMed a question about title+abstract.
+# docs/drafts/literature/E1_QUERY_BLINDNESS.md §4.1 measured what that instrument can see for E1:
+# across the iso-only publications with stored full text, 5 carry Pdc evidence in title+abstract
+# and 56 carry it in the body. 51 of those 56 are invisible to EVERY `[tiab]` query that could
+# ever be written, in any notation. Abstract screening reaches about 9% of the E1-relevant
+# material in the readable corpus, and no rewrite of a query closes that -- the missing papers
+# have no Pdc token in their abstracts at all.
+#
+# WHY ONLY E1. The criteria differ in where their defining evidence structurally lives, and E1 is
+# the outlier for a structural reason: it is the only B.3 criterion whose admission test is a
+# GENOTYPE, and a genotype is a methods fact. It appears in an abstract only when the paper is
+# ABOUT the genotype -- and the entire class of papers this defect loses are papers that USE a
+# Pdc-minus chassis to study something else. E2 (titer/yield), E3 (parental strain and regime),
+# E4 (a tolerance measurement), E5 (shuttle terms) and E6 (a named industrial strain) are outcome
+# criteria whose evidence is in the abstract by construction. Widening all six because one is
+# broken would be the wrong lesson. Add a criterion here only with the same kind of measurement
+# behind it.
+#
+# WHAT A MATCH IS AND IS NOT. A regex over a whole paper hits every passing Discussion citation
+# ("unlike Pdc-minus strains..."). Two gates cut that down, and both are recorded per candidate so
+# a reviewer can see which did the work:
+#   * `min_mentions` -- how many times the criterion's subject must be named in the body at all;
+#   * `sections`     -- where a `genotype` match must land. A genotype is stated in Methods (a
+#                       strain table) or Results, not in a literature review.
+# Neither gate makes a match a fact. Everything this screen produces is a PROPOSAL for a human to
+# read the paper against; nothing here admits anything.
+
+version: 1
+measured_on: "2026-09-22"
+
+description: >-
+  Pattern sets for `fermdb literature rescreen`: a deterministic regex screen over stored full
+  text, one entry per B.3 admission criterion whose evidence does not live in abstracts.
+
+criteria:
+  - criterion: E1
+    label: competing_sink
+    description: >-
+      The competing ethanol sink: a strain whose pyruvate decarboxylase genes are deleted or
+      attenuated (PLAN.md B.3.1). The admission test is a genotype, so the evidence is a strain
+      table in Methods.
+
+    # How many `mention` matches the body must carry before a `genotype` hit counts as
+    # substantive. 3 is E1_QUERY_BLINDNESS.md §4.1's measured gate: over the readable iso-only
+    # pool it cuts 73 publications with any Pdc evidence in the body down to 11, and even then
+    # leaves at least one clear false positive (10.18632/oncotarget.7174, a cancer-metabolism
+    # paper). It is a precision floor, not a truth test.
+    min_mentions: 3
+
+    # Where a `genotype` match must land for the strict gate. These are
+    # `fermdb.extract.harness.SECTION_NAMES` values, produced by the same sectioner the extraction
+    # path uses -- so a structured abstract's `Results` sub-heading is already folded into
+    # `abstract` and cannot be mistaken for the paper's Results (that fix is why this list is
+    # trustworthy at all; see the sectioner's `_fold_structured_abstract`).
+    sections: [methods, results, results_and_discussion]
+
+    # Counted toward `min_mentions`. Deliberately NOT anchored with `\b` on the left: `\b` fails
+    # inside `Δpdc1`, because Δ is a word character to Python's `re` under Unicode, and that alone
+    # silently under-counted a real candidate (10.3389/fmicb.2025.1753983) during calibration.
+    mention:
+      - "(?<![a-z0-9])pdc\\s?[1-6]?(?![a-z])"
+      - "pyruvate\\s+decarboxylase"
+
+    # A genotype token ASSERTS the deletion by itself -- `pdc1Δ` means "PDC1 is deleted" -- which
+    # is the same structural fact that made E1's PubMed query need its Δ branch lifted out from
+    # under the AND (query_families.yaml, criterion E1).
+    #
+    # THREE DELTA CODE POINTS, NOT ONE. Publishers use U+0394 GREEK CAPITAL LETTER DELTA (Δ),
+    # U+2206 INCREMENT (∆) and occasionally U+03B4 GREEK SMALL LETTER DELTA (δ) for the same
+    # genotype. They render identically and compare unequal. A pattern matching only U+0394 missed
+    # 10.1186/s12934-016-0449-z, whose stored text spells its genotype `pdc1∆ pdc5∆ pdc6∆` with
+    # U+2206 -- a paper E1_QUERY_BLINDNESS.md §4.1 names by hand. This is the full-text twin of
+    # the transliteration finding in §2.2: the notation is reachable, under a spelling nobody
+    # would guess.
+    #
+    # `pdc1::loxP` is here and is the reason this screen exists rather than another query. It is
+    # how the Delft CEN.PK lineage writes its strains and it has NO reachable `[tiab]` spelling in
+    # PubMed at all -- not phrased, not split, not glued (§2.2). In stored full text it is simply
+    # a string.
+    genotype:
+      - "pdc\\s?[1-6]?\\s*-?\\s*(?:[\\u0394\\u2206\\u03b4]|delta\\b|::\\s*\\S+)"
+      - "[\\u0394\\u2206\\u03b4]\\s*pdc\\s?[1-6]?"
+      - "delta\\s*pdc\\s?[1-6]?"
+
+    # A stated negative phenotype. Like a genotype token it asserts the deletion on its own, so it
+    # is recorded as corroborating evidence beside the genotype rather than as a second hurdle.
+    # `pdc minus` and `C2 auxotroph` are here although both return 0 records in PubMed: this file
+    # searches stored bytes, not an index, so a phrase with no PubMed index term is still findable
+    # here. That asymmetry is the point -- it is the one place those phrases can actually work.
+    phrase:
+      - "decarboxylase[-\\s]negative"
+      - "pdc[-\\s]negative"
+      - "pdc[-\\s]deficient"
+      - "pdc[-\\s]minus"
+      - "c2[-\\s]auxotroph"

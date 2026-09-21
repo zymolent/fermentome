@@ -11,11 +11,24 @@
 #   compares a fresh esearch `count` against, so drift becomes visible over time. IMPORTANT: the
 #   exact boolean query strings below are THIS implementation's construction, written to match each
 #   family's name/description/scope -- they were not handed to this session as literal search
-#   strings, only as (family name, expected_count) pairs. They have NOT been re-run against the
-#   live NCBI service in this offline environment to confirm they reproduce the recorded count
-#   exactly (unverified). `fermdb literature status` reports live hit_count vs expected_count on
-#   the next run with network access, so any mismatch -- whether from term drift or from these
-#   terms not being the original ones -- is visible rather than silently assumed away.
+#   strings, only as (family name, expected_count) pairs.
+#
+#   That construction is no longer unverified. BEFORE the E1/E6 edits below, every family was
+#   re-run against the live NCBI service on 2026-09-22 with `fermdb literature discover --dry-run`
+#   (esearch only, nothing written) and each reproduced its then-recorded expected_count exactly:
+#   isobutanol_all 1309, isobutanol_production 649, isobutanol_yeast 257, isobutanol_mitochondria
+#   29, mtdna_engineering_yeast 912, mtdna_methods_yeast 1298, ethanol_mitochondria_yeast 504, and
+#   ethanol_scerevisiae_prod_ferm_tol 1586 (E1 68 + E2 591 + E3 381 + E4 32 + E5 152 + E6 362).
+#   The earlier caveat is therefore lifted: these terms are the ones the counts were measured from.
+#   AFTER the edits, re-measured the same way, that last family is 1640 (E1 101, E6 383, the other
+#   four unchanged) -- which is the expected_count it now carries.
+#
+#   A COUNT THAT MATCHES IS NOT A QUERY THAT WORKS. The same 2026-09-22 pass found that PubMed
+#   SILENTLY DROPS a term with no index entry from the translated query -- `"pdc minus"[tiab]` and
+#   `"C2 auxotroph"[tiab]` were both absent from E1's returned `querytranslation` rather than
+#   contributing zero -- so a sub-query can carry dead terms, and a systematically blind query has
+#   a perfectly stable `hit_count`. `fermdb literature status` compares only the family total and
+#   cannot see either. See docs/drafts/literature/E1_QUERY_BLINDNESS.md.
 #
 # mtdna_scope
 #   The project owner's explicit instruction (harness "comments (1)") is that mtDNA-related
@@ -41,8 +54,8 @@
 #   editorial classification call by this implementation, not a fact recalled from a source --
 #   flagged here for the reviewer to confirm or override.
 
-version: 1
-measured_on: "2026-09-19/2026-09-20"
+version: 2
+measured_on: "2026-09-19/2026-09-20; E1 and E6 re-measured 2026-09-22"
 
 description: >-
   fermdb corpus definition: one row per NCBI E-utilities query family. See the file header above
@@ -186,7 +199,11 @@ families:
     db: pubmed
     product_tier: ethanol
     default_disposition: exclude_unless_admitted
-    expected_count: 1586
+    # 1586 -> 1640 on 2026-09-22, moved WITH the E1 and E6 term edits below and not independently:
+    # `discovery.run_family` computes `hit_count` as the SUM of the sub-query counts, so an
+    # expected_count left at the pre-edit value would report permanent false drift forever.
+    # Re-measured live the same day: E1 101 + E2 591 + E3 381 + E4 32 + E5 152 + E6 383 = 1640.
+    expected_count: 1640
     mtdna_scope: null
     capped: true
     notes: >-
@@ -204,13 +221,51 @@ families:
       The bounded ethanol reference layer (PLAN.md B.3), one targeted sub-query per admission
       criterion, and nothing broader.
     sub_queries:
+      # E1 rewritten 2026-09-22 from docs/drafts/literature/E1_QUERY_BLINDNESS.md §5.1 ("variant
+      # B"), owner-approved. Measured live the same day: 68 -> 101 hits, 0 records lost.
+      #
+      # THE NOTATION. PubMed transliterates Greek letters into their spelled-out Latin names, at
+      # both index time and query time, and glues the result to the adjacent token. `pdc1Δ` is
+      # therefore indexed as the single term `pdc1delta`, and `pdc1`, `pdc1delta` and `deltapdc1`
+      # are three DISJOINT index terms with no stemming between them -- `pdc1[tiab]` (261 records)
+      # retrieves none of the 6 `pdc1delta` records and vice versa. So `pdc1delta` below is not a
+      # misspelling: it is the index term for the genotype `pdc1Δ`, verified against the
+      # `querytranslation` NCBI returns. (`pdc1::loxP`, how the Delft CEN.PK lineage writes its
+      # strains, has NO reachable [tiab] spelling in any form -- not phrased, split or glued. That
+      # wall is why the full-text re-screen exists and this query cannot replace it.)
+      #
+      # THE STRUCTURE IS THE FIX, NOT THE NEW TERMS. A Δ-genotype token already ASSERTS the
+      # deletion -- `pdc1Δ` means "PDC1 is deleted" -- and so does `decarboxylase-negative`.
+      # Gating either on a second deletion verb re-loses the papers it was added for. Measured
+      # against the 8 Δ-notation papers PubMed holds that the atlas does not: adding the tokens
+      # flat, under the existing AND, reaches 1 of 8 (77 hits); lifting them OUT of the AND into
+      # their own branch, as below, reaches 6 of 8 (101 hits). Do not flatten this back.
+      #
+      # `"pdc minus"[tiab]` was REMOVED as dead: 0 records in all of PubMed. It had never
+      # contributed a hit, and it never announced that -- PubMed dropped it from the translated
+      # query silently (see the file header). `"glucose tolerant"[tiab]` was removed as a
+      # duplicate: PubMed auto-maps it to `"glucose-tolerant"`, already present.
+      #
+      # `"C2 auxotroph"[tiab]` IS ALSO ZERO PubMed-wide AND IS RETAINED KNOWINGLY. It is not a
+      # working clause and must not be mistaken for one. It stays because PLAN.md B.3.1 names C2
+      # auxotrophy as the thing E1 exists to characterise, so the term's absence from the
+      # literature is itself the finding; if the field ever adopts the phrase, this query is
+      # already pointed at it.
+      #
+      # `deltapdc5` and `deltapdc6` are deliberately NOT added. PubMed has no such index terms, so
+      # they would be dropped silently -- invisible dead weight, exactly what `"pdc minus"` was.
       - criterion: E1
         label: competing_sink
         term: >-
           (yeast[tiab] OR "Saccharomyces cerevisiae"[tiab]) AND
-          (PDC1[tiab] OR PDC5[tiab] OR PDC6[tiab] OR "pyruvate decarboxylase"[tiab]) AND
-          (deletion[tiab] OR knockout[tiab] OR "pdc-negative"[tiab] OR "pdc minus"[tiab] OR
-           "C2 auxotroph"[tiab] OR "glucose tolerant"[tiab] OR "glucose-tolerant"[tiab])
+          (
+           (pdc1delta[tiab] OR pdc5delta[tiab] OR pdc6delta[tiab] OR deltapdc1[tiab] OR
+            pdcdelta[tiab] OR "decarboxylase-negative"[tiab])
+           OR
+           ((PDC1[tiab] OR PDC5[tiab] OR PDC6[tiab] OR "pyruvate decarboxylase"[tiab]) AND
+            (deletion[tiab] OR knockout[tiab] OR deleted[tiab] OR "pdc-negative"[tiab] OR
+             "pdc-deficient"[tiab] OR "C2 auxotroph"[tiab] OR "glucose-tolerant"[tiab]))
+          )
       - criterion: E2
         label: performance_ceiling
         term: >-
@@ -253,6 +308,13 @@ families:
       # chassis, so "what makes an industrial strain industrial" is the most directly transferable
       # ethanol question available. Expect a polygenic answer dominated by CNV and aneuploidy
       # rather than a few clean alleles (unverified) -- see docs/reference/ETHANOL_REFERENCE_SLOTS.md.
+      #
+      # Fourth clause widened 2026-09-22 (E1_QUERY_BLINDNESS.md §5.2), owner-approved: 362 -> 383,
+      # 0 lost, 18 of the 21 added not previously in the atlas. "stress resistance"/"stress
+      # tolerance" are near-synonyms of the `tolerance` term already in this clause and sit behind
+      # three other ANDs, so this widens vocabulary rather than scope. Unlike E1 the structure is
+      # untouched: E6's evidence is an abstract-level outcome, not a genotype, so the flat form is
+      # the right one here.
       - criterion: E6
         label: industrial_performance_basis
         term: >-
@@ -262,4 +324,5 @@ families:
           (genome[tiab] OR "comparative genomics"[tiab] OR QTL[tiab] OR aneuploidy[tiab] OR
            "copy number"[tiab] OR polymorphism[tiab] OR "reverse engineering"[tiab]) AND
           (tolerance[tiab] OR robustness[tiab] OR "high gravity"[tiab] OR productivity[tiab] OR
-           yield[tiab])
+           yield[tiab] OR "stress resistance"[tiab] OR "stress resistant"[tiab] OR
+           "stress tolerance"[tiab] OR "fermentation performance"[tiab])
