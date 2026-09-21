@@ -1,0 +1,376 @@
+# Host and product resolution for the 14 accepted `pathway_configurations` proposals.
+#
+# DRAFT ONLY. Nothing here has been written to the database, no curation task has been
+# accepted, rejected or promoted, no `confidence` value is set and no `verified` flag is
+# flipped. See HOST_RESOLUTION.md in this directory for the argument per configuration.
+#
+# Method: the host was read out of the stored full text for each publication, loaded
+# through `fermdb.extract.harness.load_source_text`, and every quote below was sliced
+# straight out of that text and then re-checked independently with
+# `fermdb.llm.validate.verify_span`. Offsets are character offsets into the text that
+# loader returns, which is the same coordinate system the stored proposals use.
+#
+# Span verification: 23 of 23 re-resolved exact, 0 absent, 0 spliced.
+#
+# The proposals number 14, not the 13 the brief expected: two of them (SHy61 and SHy62)
+# share one span and differ only in strain_name_as_reported.
+
+schema_version: 1
+generated: 2026-09-21
+span_verification: {re_resolved_exact: 23, total: 23, absent: 0, spliced: 0}
+
+# recommendation is one of:
+#   promote                     -- host and product established; the promoter will accept it
+#   promote_pending_vocabulary  -- host and product established; blocked on a missing
+#                                  compartment_strategy row, which is a curator data change
+#   reject                      -- see reason
+configurations:
+  - task_id: "YAA:CTASK:4c3086bec063433ead5175f94622e91b"
+    publication_id: "doi:10.1016/j.cels.2019.10.006"
+    compartment_strategy_as_proposed: "A_native_split"
+    strain_name_as_reported: "gln3D strain"
+    host_strain_id: "YAA:STRAIN:gln3d-gln3d-homozygous-diploid-by4743-strain"
+    host_strain_name: "gln3D/gln3D homozygous diploid BY4743 strain"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "promote"
+    reason: "The natively localized five-gene pathway (ILV2/ILV3/ILV5/ADH7 + L. lactis KDC, plasmid pJA184) in a GLN3-deleted background. The sentence at the proposal's own span names the host generically as 'the gln3D strain'; the very next sentence names the concrete background it was introduced into. Titers in Fig. 6A are for that diploid (306 +/- 4 mg/L vs 63 +/- 7 mg/L for BY4743 with the same plasmid)."
+    quote_key: "cels_native"
+    quote: "2-ketoacid decarboxylase (KDC) from Lactococcus lactis in the\ngln3D strain in their native locations (mitochondria and cytosol)"
+    char_start: 35628
+    char_end: 35755
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "cels_diploid"
+        quote: "We introduced the\nnative or mitochondrial isobutanol biosynthetic pathways into a\ngln3D/gln3D homozygous diploid BY4743 strain using a 2 m\nplasmid"
+        char_start: 35874
+        char_end: 36020
+        verified_exact: true
+      - quote_key: "cels_haploid"
+        quote: "The BY4741\ngln3D strain harboring pJA184"
+        char_start: 36851
+        char_end: 36891
+        verified_exact: true
+    caveats:
+      - "The same natively localized configuration was ALSO built in the haploid BY4741 gln3D strain (quote cels_haploid). A curator may legitimately want two rows, one per host; this draft names the diploid because that is the background the introduction sentence and Fig. 6A both attach to the pathway plasmid."
+      - "YAA:STRAIN:gln3d-strain ('gln3D strain') is the looser alternative and is what the proposal's strain_name_as_reported says. It is a generic label, not a background."
+
+  - task_id: "YAA:CTASK:7372b27ddc5941c69e6f793a40e7afa2"
+    publication_id: "doi:10.1016/j.cels.2019.10.006"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: "gln3D strain"
+    host_strain_id: "YAA:STRAIN:gln3d-gln3d-homozygous-diploid-by4743-strain"
+    host_strain_name: "gln3D/gln3D homozygous diploid BY4743 strain"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "promote"
+    reason: "The same five enzymes 'targeted exclusively to the mitochondria'. The only sentence in the paper that says where the mitochondrial pathway was introduced names the diploid gln3D/gln3D BY4743 background ('the native or mitochondrial isobutanol biosynthetic pathways into a gln3D/gln3D homozygous diploid BY4743 strain'). The later haploid sentence is explicitly about the natively localized pathway only, so it cannot be borrowed for this row."
+    quote_key: "cels_mito"
+    quote: "gln3D strain in their native locations (mitochondria and cytosol)\nor targeted exclusively to the mitochondria"
+    char_start: 35690
+    char_end: 35799
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "cels_diploid"
+        quote: "We introduced the\nnative or mitochondrial isobutanol biosynthetic pathways into a\ngln3D/gln3D homozygous diploid BY4743 strain using a 2 m\nplasmid"
+        char_start: 35874
+        char_end: 36020
+        verified_exact: true
+    caveats:
+      - "The paper reports no titer for this configuration: 'isobutanol titers did not improve in strains harboring the mitochondrial pathway (data not shown)'. The configuration was built and is a real published build; the measurement is absent."
+
+  - task_id: "YAA:CTASK:2fda6f4b9e114e7f9cd9406c6d83c72d"
+    publication_id: "doi:10.1016/j.jbiotec.2022.09.012"
+    compartment_strategy_as_proposed: "NA"
+    strain_name_as_reported: "E. coli HM501"
+    host_strain_id: "YAA:STRAIN:e-coli-hm501"
+    host_strain_name: "E. coli HM501"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: null
+    recommendation: "promote_pending_vocabulary"
+    reason: "The cleanest host determination in the set: the paper says so in the words the schema wants -- 'The isobutanol producing strain E. coli HM501 was used in this work as a host strain'. The five enzymes in the payload (alsS, ilvC, ilvD, kivD, yqhD) are exactly HM501's introduced set. Product is isobutanol, measured in g/L throughout. BLOCKED only by vocabulary: 'NA' is not a seeded compartment_strategy (the five seeded rows are all eukaryotic-compartment choices), and E. coli has no compartment choice to make. The honest fix is a curator adding a prokaryotic / no-compartmentalization strategy row, which PLAN.md phase 1's 'any host' scope already implies is needed."
+    quote_key: "jbiotec_host"
+    quote: "The isobutanol producing strain E. coli HM501 was used in this work \nas a host strain"
+    char_start: 8398
+    char_end: 8483
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "jbiotec_enzymes"
+        quote: "frdA, ldhA, pta, and adhE ) and introduce five genes \n( alsS, ilvC, ilvD, kivD , and yqhD ) that positively regulate isobutanol \nproduction"
+        char_start: 15549
+        char_end: 15688
+        verified_exact: true
+    caveats:
+      - "Two strain rows exist for the same organism: YAA:STRAIN:e-coli-hm501 ('E. coli HM501') and YAA:STRAIN:hm501 ('HM501'). This draft picks the one the host sentence names verbatim and the one the proposal reports. They should be merged."
+      - "pathway_id left null: the only isobutanol pathway row (YAA:PWY:isobutanol-valine-ehrlich) carries evidence saying 'compartment assignment follows the native S. cerevisiae localisation', so attaching an E. coli build to it is a scope decision, not a reading of this paper."
+
+  - task_id: "YAA:CTASK:ba74ea37f7d64b4c8cbfd94dcddee9ec"
+    publication_id: "doi:10.1016/j.meteno.2016.03.004"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: null
+    host_strain_id: null
+    host_strain_name: null
+    product_id: null
+    pathway_id: null
+    recommendation: "reject"
+    reason: "HOST NOT ESTABLISHED, and deliberately so. The paper names two hosts for the same constructs in one sentence -- 'Constructed plasmids were expressed in haploid S. cerevisiae strains CKY263 and BJ5464'. Worse, the two hosts carry different parts of this configuration: the span the proposal quotes sits in the confocal localization work, done in CKY263 (Fig. 3), while the assembled five-gene BCKAD+ACD set the payload lists was assayed in BJ5464 [p(mt)ACD1 p(mt)BCKAD4 p(mt)CoA2]. No single host answers for this proposal. PRODUCT ALSO NOT ESTABLISHED: this route was never run to a product. It ends at isobutyryl-CoA / methacrylyl-CoA and the paper measures enzyme specific activity, not a titer; its own claim is that the route yields 'precursors for isobutanol'. Filing it as YAA:PRODUCT:isobutanol would be the exact error the promoter's product_id refusal exists to prevent. This confirms decision D12 and question 1 of the report's section 7 from the text rather than from the payload note."
+    quote_key: "meteno_twohosts"
+    quote: "Constructed plasmids were expressed in haploid S. cerevisiae strains CKY263 and BJ5464 after transformation"
+    char_start: 11337
+    char_end: 11444
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "meteno_cky263_loc"
+        quote: "S. cerevisiae CKY263 cells were induced for 24 h with galactose before being stained"
+        char_start: 18436
+        char_end: 18520
+        verified_exact: true
+      - quote_key: "meteno_bj5464_full"
+        quote: "Experiments performed in triplicate in BJ5464 [p(mt)ACD1 p(mt)BCKAD4 p(mt)CoA2] at 24 h"
+        char_start: 21764
+        char_end: 21851
+        verified_exact: true
+      - quote_key: "meteno_product"
+        quote: "bacterial valine catabolism may be used in yeast to produce precursors for isobutanol and biomonomer production"
+        char_start: 23716
+        char_end: 23827
+        verified_exact: true
+    caveats:
+      - "compartment_strategy 'C_mitochondrial_ehrlich' is wrong on its face and the curator already wrote that warning into the payload: these are bacterial valine DEGRADATION enzymes (BCKAD/ACD from P. aeruginosa), not the Ehrlich pathway."
+
+  - task_id: "YAA:CTASK:450f2925f1804e9c9939e6696a1f5f98"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: "SHy48"
+    host_strain_id: "YAA:STRAIN:shy48"
+    host_strain_name: "SHy48"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "promote"
+    reason: "bat1D strain with mitochondrially targeted ARO10 + LlAdhA(RE1) (Cox4 presequence) PLUS overexpressed ILV genes. The Results name the strain and its titer at the locus: 'When we also overexpress the ILV genes (SHy48) the isobutanol titer increases to 1245 +/- 33 mg/L'. This is the paper's best producer and the single strongest configuration in the whole set."
+    quote_key: "ymben_shy48"
+    quote: "When we also overexpress the ILV genes (SHy48) the iso-\nbutanol titer increases to 1245 ± 33 mg/L"
+    char_start: 43206
+    char_end: 43303
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_chassis"
+        quote: "Single 2μ plasmids\nbearing the desired genes were transformed into CEN.PK2-1C"
+        char_start: 28836
+        char_end: 28913
+        verified_exact: true
+      - quote_key: "ymben_mito_2mb"
+        quote: "strains with the mi-\ntochondrial isobutanol pathway also produce 2-methyl-1-butanol"
+        char_start: 44005
+        char_end: 44088
+        verified_exact: true
+    caveats:
+      - "Chassis is CEN.PK2-1C ('Single 2u plasmids bearing the desired genes were transformed into CEN.PK2-1C'); SHy48 is the engineered derivative and is the host the configuration actually lives in."
+      - "Task YAA:CTASK:e7822ff19d95400fb0810054527d2c47 is the same build described again in the Discussion. Promote one of the two, not both."
+
+  - task_id: "YAA:CTASK:46249a1049c64600bccfdbea5f5f791f"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: "SHy34"
+    host_strain_id: "YAA:STRAIN:shy34"
+    host_strain_name: "SHy34"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "promote"
+    reason: "bat1D strain with mitochondrially targeted ARO10 + LlAdhA(RE1) and NO ILV overexpression -- genuinely distinct from SHy48, and the paper contrasts them directly. The strain name and the localization are in one sentence."
+    quote_key: "ymben_shy34"
+    quote: "The bat1Δ strain over-\nexpressing only ARO10 and LlAdhA RE1 localized to mitochondria\n(SHy34) produces 998 ± 7 mg/L isobutanol in the absence of valine"
+    char_start: 42972
+    char_end: 43123
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_chassis"
+        quote: "Single 2μ plasmids\nbearing the desired genes were transformed into CEN.PK2-1C"
+        char_start: 28836
+        char_end: 28913
+        verified_exact: true
+    caveats: []
+
+  - task_id: "YAA:CTASK:541651192df14251960a617444fe2470"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: null
+    host_strain_id: null
+    host_strain_name: null
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST NOT ESTABLISHED. The paper describes this configuration in general terms; no single host is named at this locus. The span is a Discussion clause stating that mitochondrial compartmentalization is an effective alternative to overcoming the KIV transport bottleneck -- a strategy statement, not a build. The payload has no strain_name_as_reported and NO enzymes_as_reported key at all. A configuration with no host and no enzyme list records nothing that YAA:STRAIN:shy34 / YAA:STRAIN:shy48 do not already record."
+    quote_key: "ymben_generic_compart"
+    quote: "compartmentalization of the complete isobutanol pathway in mi-\ntochondria"
+    char_start: 57627
+    char_end: 57700
+    verified_exact: true
+    supporting_quotes: []
+    caveats: []
+
+  - task_id: "YAA:CTASK:8740d5dd9cf64f0990f2b3269ff742d0"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "A_native_split"
+    strain_name_as_reported: null
+    host_strain_id: null
+    host_strain_name: null
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST NOT ESTABLISHED. The paper describes this configuration in general terms; no single host is named at this locus. The span is the closing clause of the Fig. 2 schematic paragraph, which describes the NATIVE compartmentalization of S. cerevisiae rather than any constructed strain, and it is the half the ValC- and KIVC-dependent routes share. It duplicates the shared tail of tasks e9cabbfd and f9ed4d41."
+    quote_key: "ymben_fig2_generic"
+    quote: "In both pathways, KDC and ADH enzymes convert KIV to\nisobutanol in the cytosol"
+    char_start: 27850
+    char_end: 27928
+    verified_exact: true
+    supporting_quotes: []
+    caveats: []
+
+  - task_id: "YAA:CTASK:9cc8eb20a61243c2ba829fe67a5209a9"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: "bat1D strains"
+    host_strain_id: null
+    host_strain_name: null
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST NOT ESTABLISHED and the record is degenerate. 'bat1D strains' is plural and collective -- it covers SHy24, SHy34, SHy48, SHy16, SHy55 at different points of the paper -- and enzymes_as_reported is EMPTY. The span is the Discussion's self-summary ('fairly minimal strain engineering: only a BAT1 deletion and the mitochondrial isobutanol pathway'), which is a claim about the study, not a configuration. A row with no enzymes and a collective host records nothing."
+    quote_key: "ymben_minimal"
+    quote: "only a BAT1 deletion and the mitochondrial isobutanol\npathway in fermentation media lacking valine"
+    char_start: 59078
+    char_end: 59176
+    verified_exact: true
+    supporting_quotes: []
+    caveats:
+      - "YAA:STRAIN:bat1-strains ('bat1D strains') exists as a promoted strain row. It is itself a collective-label artifact and should not be used as a host."
+
+  - task_id: "YAA:CTASK:a182c009ccf64f6fa80c9ac845355352"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "unknown"
+    strain_name_as_reported: "SHy61"
+    host_strain_id: "YAA:STRAIN:shy61"
+    host_strain_name: "SHy61"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST IS ESTABLISHED -- SHy61 is the ilv6D strain carrying pSH46 (ILV2, ILV3, ILV5 and the valine-insensitive ILV6 V90D/L91F), named with its titer at the locus. But compartment_strategy is 'unknown', which is not one of the five seeded compartment_strategy rows, so the promoter refuses it, and a configuration whose strategy is unknown records nothing the strain and modification rows do not already hold. Reject as proposed."
+    quote_key: "ymben_shy61"
+    quote: "The ilv6Δ strain overexpressing these\nfour genes (SHy61) produces 502 ± 5 mg/L isobutanol in the absence\nof valine"
+    char_start: 39206
+    char_end: 39320
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_pSH46"
+        quote: "we transformed ilv6Δ and bat1Δ ilv6Δ strains with a 2μ\nplasmid (pSH46) containing ILV2, ILV3, ILV5, and a valine-insensitive"
+        char_start: 38974
+        char_end: 39098
+        verified_exact: true
+      - quote_key: "ymben_chassis"
+        quote: "Single 2μ plasmids\nbearing the desired genes were transformed into CEN.PK2-1C"
+        char_start: 28836
+        char_end: 28913
+        verified_exact: true
+    caveats:
+      - "Curator fix available and cheap: the build overexpresses only upstream ILV enzymes and relies on the native cytosolic KDC/ADH, which is A_native_split by the vocabulary's own definition and by the paper's Fig. 2. Editing the one field turns this into a promotable row with a host already resolved. That edit is a curator act and is NOT taken here."
+
+  - task_id: "YAA:CTASK:a55bc0303a90418ebdb0a9fe430af415"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "unknown"
+    strain_name_as_reported: "SHy62"
+    host_strain_id: "YAA:STRAIN:shy62"
+    host_strain_name: "SHy62"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST IS ESTABLISHED -- SHy62 is the bat1D ilv6D background carrying the same pSH46 plasmid, named with its titer at the locus. Rejected for the same reason as SHy61: compartment_strategy 'unknown' is not in the seeded vocabulary and records nothing."
+    quote_key: "ymben_shy62"
+    quote: "expressing ILV6\nV90D/L91F in the\nbat1Δ ilv6Δ background (SHy62) restores isobutanol titers in the ab-\nsence of valine to 655 ± 10 mg/L"
+    char_start: 39421
+    char_end: 39555
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_pSH46"
+        quote: "we transformed ilv6Δ and bat1Δ ilv6Δ strains with a 2μ\nplasmid (pSH46) containing ILV2, ILV3, ILV5, and a valine-insensitive"
+        char_start: 38974
+        char_end: 39098
+        verified_exact: true
+      - quote_key: "ymben_chassis"
+        quote: "Single 2μ plasmids\nbearing the desired genes were transformed into CEN.PK2-1C"
+        char_start: 28836
+        char_end: 28913
+        verified_exact: true
+    caveats:
+      - "This payload and task a182c009's are byte-identical apart from strain_name_as_reported, and they share one span. That is correct behaviour, not a duplicate: the same plasmid in two backgrounds is two configurations by host. Same A_native_split curator fix applies."
+
+  - task_id: "YAA:CTASK:e7822ff19d95400fb0810054527d2c47"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "C_mitochondrial_ehrlich"
+    strain_name_as_reported: null
+    host_strain_id: "YAA:STRAIN:shy48"
+    host_strain_name: "SHy48"
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "DUPLICATE of YAA:CTASK:450f2925f1804e9c9939e6696a1f5f98. This is the same build restated in the Discussion: 'The best isobutanol producing strain in this study, containing a BAT1 deletion and overexpressing ILV2, ILV3, ILV5, along with ARO10 and LlAdhA(RE1) in the mitochondria can reach a titer of 1.25 g/L'. The Discussion locus names no strain; SHy48 is identified by the titer match to the Results (1.25 g/L vs 1245 +/- 33 mg/L, and SHy48 is the paper's best producer). That is a sound identification but it spans two loci, so it is recorded here and NOT used to promote. Promote 450f2925 instead, whose Results quote names the strain outright."
+    quote_key: "ymben_best"
+    quote: "The best isobutanol producing strain in this study, con-\ntaining a BAT1 deletion and overexpressing ILV2, ILV3, ILV5 , along\nwith ARO10 and LlAdhA\nRE1 in the mitochondria can reach a titer of\n1.25 g/L"
+    char_start: 57772
+    char_end: 57972
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_shy48"
+        quote: "When we also overexpress the ILV genes (SHy48) the iso-\nbutanol titer increases to 1245 ± 33 mg/L"
+        char_start: 43206
+        char_end: 43303
+        verified_exact: true
+    caveats:
+      - "This payload's enzymes_as_reported (ILV2, ILV3, ILV5, ARO10, LlAdhA) is more complete than 450f2925's (ARO10, LlAdhA RE1, 'ILV genes'). A curator merging the two should keep this enzyme list and 450f2925's strain-naming span."
+
+  - task_id: "YAA:CTASK:e9cabbfddf7f490fb4646802b555c96e"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "A_native_split"
+    strain_name_as_reported: null
+    host_strain_id: null
+    host_strain_name: null
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST NOT ESTABLISHED. The paper describes this configuration in general terms; no single host is named at this locus. This is the ValC-dependent route as defined in the Fig. 2 schematic paragraph -- a claim about the NATIVE architecture of S. cerevisiae ('Isobutanol production from glucose in the naturally compartmentalized upstream and downstream pathways in Saccharomyces cerevisiae'), not about a constructed strain. Reject as a pathway_configuration."
+    quote_key: "ymben_valc"
+    quote: "we call this the ValC-dependent pathway"
+    char_start: 27597
+    char_end: 27636
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_fig2_generic"
+        quote: "In both pathways, KDC and ADH enzymes convert KIV to\nisobutanol in the cytosol"
+        char_start: 27850
+        char_end: 27928
+        verified_exact: true
+    caveats:
+      - "Worth keeping somewhere else: the ValC-dependent / KIVC-dependent split is this paper's central novel claim and is exactly the kind of topology phase 3's route enumerator reasons over. It belongs in `pathway` / route knowledge, not in a host-bound configuration row. Both carriers (ValC, KIVC) are unidentified genes -- a standing knowledge_gap."
+
+  - task_id: "YAA:CTASK:f9ed4d413cc64c86945f12140eb80a2b"
+    publication_id: "doi:10.1016/j.ymben.2017.10.001"
+    compartment_strategy_as_proposed: "A_native_split"
+    strain_name_as_reported: null
+    host_strain_id: null
+    host_strain_name: null
+    product_id: "YAA:PRODUCT:isobutanol"
+    pathway_id: "YAA:PWY:isobutanol-valine-ehrlich"
+    recommendation: "reject"
+    reason: "HOST NOT ESTABLISHED. The paper describes this configuration in general terms; no single host is named at this locus. This is the KIVC-dependent route from the same Fig. 2 schematic paragraph as e9cabbfd. Same verdict for the same reason."
+    quote_key: "ymben_kivc"
+    quote: "mitochondrial KIV is exported to the cytosol,"
+    char_start: 27665
+    char_end: 27710
+    verified_exact: true
+    supporting_quotes:
+      - quote_key: "ymben_fig2_generic"
+        quote: "In both pathways, KDC and ADH enzymes convert KIV to\nisobutanol in the cytosol"
+        char_start: 27850
+        char_end: 27928
+        verified_exact: true
+    caveats: []
