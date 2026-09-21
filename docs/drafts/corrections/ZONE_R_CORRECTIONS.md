@@ -473,3 +473,52 @@ unit is touched. **The live database was not opened for writing at any point.**
 Neither suspicion was unfounded. Both flagged rows are wrong, and the sweep found a third that is
 wrong the same way and had not been flagged. The one abstract-sited row the sweep cleared is
 cleared explicitly rather than by silence.
+
+---
+
+## 8. Root cause — fixed (appended 2026-09-22)
+
+§4's `split_sections` bug is fixed in `src/fermdb/extract/harness.py`. A leading **structured
+abstract** — the run of `Background` / `Results` / `Conclusions` sub-headings BMC and its
+imitators print inside the abstract — is now collapsed into one `abstract` section by
+`_fold_structured_abstract`, so the paper's own Results is the only thing named `results`. The
+fix is in the sectioner, not in `build_excerpt`: `build_excerpt` could have been taught to take
+only the largest `results`, but `span.section` would then still have said `results` for a
+sentence in the abstract, and that is the half that made this invisible. `EXTRACTOR_VERSION` is
+bumped `1` → `2`, so a version-1 row is identifiable as one that may carry this defect.
+
+**Reach, measured over the 1,429 stored full texts.** 209 produce more than one section with a
+name in `DEFAULT_EXTRACTION_SECTIONS` (`results` duplicated in 187, `methods` in 44). Counting
+duplicates *understates* it: 293 papers have an abstract sub-heading reaching the model as body
+text, because a paper whose body is `Results and discussion` gets an abstract `results` that
+duplicates nothing. 301,243 characters of abstract stop being sent. This is a house style, not a
+paper.
+
+**Nothing real was dropped.** Before/after across all 1,429: zero body sections moved, resized or
+vanished; every range the fix removes lies wholly inside the new `abstract`. The three
+publications' body sections are byte-identical — this paper's Results stays `[4882, 23662)`. The
+18 remaining duplicated `methods` are genuine Elsevier/MDPI bodies that announce Methods twice,
+deliberately left alone: both halves are still sent, and a test pins that.
+
+**A second paper, not covered above.** Of the 11 extractions performed, **5** were affected,
+across **3** publications — `doi:10.1186/1475-2859-12-119` (this one), `doi:10.1186/s13068-019-1560-2`
+(no span landed in its abstract) and **`doi:10.1186/s13068-019-1486-8`**, which §2 treats only as
+the blast-radius neighbour. That paper has 5 abstract-sited spans stored `section = 'results'`,
+and **two promoted `modification` rows** among them:
+
+| row | offsets | span names a strain? | `strain_id` |
+|---|---|---|---|
+| `YAA:MOD:cc361f36d38986e4` | `[2157, 2306)` | **no** | `YAA:STRAIN:jwy19` |
+| `YAA:MOD:5ad5ac8c1f7d0d2c` | `[2434, 2524)` | **no** | `YAA:STRAIN:jwy23` |
+
+No strain token occurs anywhere in that paper's abstract, `[1213, 2601)`. Both rows therefore
+have the same inferred-subject shape as §2's, and neither has been checked against its in-text
+counterpart. **Not proposed here** — that is the same curation act §5 declines to take, and it
+needs the body read the way §§1–4 read this one.
+
+**Re-extraction is the owner's call and has not been run.** It is worth it for
+`doi:10.1186/1475-2859-12-119` and `doi:10.1186/s13068-019-1486-8`, whose spans sit in the
+abstract; `doi:10.1186/s13068-019-1560-2` was extracted from a polluted excerpt but no span
+landed in the abstract, so re-extraction there buys only cost. Note that re-extraction produces
+*new* proposals, not corrections: §5.3's point stands, so the rows above still need §6-style SQL
+whatever is re-run.

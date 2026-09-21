@@ -338,6 +338,257 @@ def test_section_at_returns_none_on_a_marker() -> None:
     assert excerpt.section_at(excerpt.text.index("[[section: results]]")) is None
 
 
+# ---------------------------------------------------------------------------------------------
+# Structured abstracts.
+#
+# BMC and its imitators print `Background` / `Results` / `Conclusions` *inside* the abstract, in
+# the same heading shape the body uses. Until `_fold_structured_abstract`, `split_sections`
+# returned two sections named `results` for such a paper -- the abstract's and the body's -- and
+# `build_excerpt` sent both. The abstract is the one passage in a paper where several strains are
+# compressed into one subject-less clause, so it is the worst possible thing to hand an extractor
+# under the label "results"; three Zone R rows on doi:10.1186/1475-2859-12-119 attribute an
+# abstract claim to a strain the sentence never named because of it, and every one of those spans
+# is stored with `section = 'results'`, which is why nothing downstream could tell.
+#
+# 209 of the 1,429 stored full texts produce a duplicated wanted section name, and 270 have an
+# abstract sub-heading reaching the model as body text. This is a house style, not a paper.
+# ---------------------------------------------------------------------------------------------
+
+#: The real shape of doi:10.1186/1475-2859-12-119 (Matsuda et al. 2013), quoted from the stored
+#: JATS: an `Abstract` heading, three sub-headings under it, then the body restarting at
+#: `Background`. The abstract's Results and the body's Results are both present and say different
+#: things about the same strains, which is the whole hazard in one fixture.
+BMC_STRUCTURED = """Increased isobutanol production in Saccharomyces cerevisiae
+F. Matsuda, J. Ishii, A. Kondo
+
+Abstract
+
+Background
+
+Isobutanol is an important target for biorefinery research as a next-generation biofuel.
+
+Results
+
+The integration of a single gene deletion lpd1D and the activation of the transhydrogenase-like
+shunt further increased isobutanol levels. In a batch fermentation test at the 50-mL scale using
+the two integrated strains, the isobutanol titer reached 1.62 g/L at 24 h.
+
+Conclusions
+
+Downregulation of competing pathways is a promising strategy.
+
+Keywords: Isobutanol, Ehrlich pathway, Saccharomyces cerevisiae
+
+Background
+
+There is increasing interest in the production of branched higher alcohols from renewable
+biomass to be used as a next-generation biofuel.
+
+Results
+
+Disruption of genes related to pyruvate metabolism and valine biosynthesis
+
+The isobutanol titer of the BSW205 and BSW206 strains reached 230 and 221 mg/L.
+
+Discussion
+
+The integration of PDH suppression by lpd1D in BSW205 and BSW206 strains.
+
+Methods
+
+Strains were derived from BY4741.
+
+References
+1. Matsuda et al., 2013.
+"""
+
+
+def test_a_structured_abstract_does_not_contribute_a_results_section() -> None:
+    """The abstract's `Results` sub-heading is not the paper's Results, and must not be named one.
+
+    This is the bug itself, pinned at its source: before the fix `split_sections` returned two
+    sections called `results` for this shape, and `build_excerpt` includes every section matching
+    a wanted name, so the excerpt began with the abstract.
+    """
+    names = [section.name for section in split_sections(BMC_STRUCTURED)]
+    assert names.count("results") == 1
+    assert names == [
+        "front_matter",
+        "abstract",
+        "introduction",
+        "results",
+        "discussion",
+        "methods",
+        "references",
+    ]
+
+
+def test_the_folded_abstract_covers_every_one_of_its_sub_headings() -> None:
+    """One `abstract` section spanning the lot, not four sections that happen to be adjacent.
+
+    Sections must still tile the document exactly -- that is what makes an excerpt offset
+    translatable back -- so folding replaces the run rather than dropping or overlapping it.
+    """
+    sections = split_sections(BMC_STRUCTURED)
+    assert sections[0].char_start == 0
+    assert sections[-1].char_end == len(BMC_STRUCTURED)
+    for earlier, later in zip(sections, sections[1:], strict=False):
+        assert earlier.char_end == later.char_start
+
+    abstract = sections[1]
+    assert abstract.name == "abstract"
+    body = abstract.text_of(BMC_STRUCTURED)
+    # Every sub-heading, and the abstract's own claims, are inside the one section.
+    assert "Conclusions" in body
+    assert "the isobutanol titer reached 1.62 g/L" in body
+
+
+def test_the_bodys_results_is_still_found_and_still_whole() -> None:
+    """Fixing the abstract must not cost a single character of the section that was wanted."""
+    sections = split_sections(BMC_STRUCTURED)
+    results = [section for section in sections if section.name == "results"]
+    assert len(results) == 1
+    text = results[0].text_of(BMC_STRUCTURED)
+    assert text.startswith("Results")
+    assert "BSW205 and BSW206 strains reached 230 and 221 mg/L" in text
+    # It ends where Discussion begins, so nothing of it was handed to the abstract.
+    assert text.rstrip().endswith("230 and 221 mg/L.")
+    assert "1.62 g/L" not in text
+
+
+def test_a_structured_abstract_with_no_abstract_heading_is_still_an_abstract() -> None:
+    """85 of the 209 affected papers have no `Abstract` heading for a rule to key on.
+
+    `jats_to_text` emits the sub-headings bare, straight after the title block, so the abstract
+    begins at `Background` and looks exactly like an introduction. What identifies it is that the
+    body restarts with that same `Background` further down -- never that the word "abstract"
+    appears anywhere.
+    """
+    document = BMC_STRUCTURED.replace("Abstract\n\n", "", 1)
+    names = [section.name for section in split_sections(document)]
+    assert names.count("results") == 1
+    assert names[:3] == ["front_matter", "abstract", "introduction"]
+
+
+def test_no_part_of_the_abstract_reaches_the_model_or_can_be_labelled_results() -> None:
+    """The guarantee that had to hold: a span in the abstract is never labelled `results`.
+
+    Both halves are checked, because only one of them was ever visible. The excerpt must not
+    contain the abstract's sentence (cost, and the wrong subject), *and* no offset inside the
+    abstract may resolve to the name `results` (provenance -- the half that let three wrong rows
+    through a bulk accept looking like Results quotes).
+    """
+    sections = split_sections(BMC_STRUCTURED)
+    excerpt = build_excerpt(BMC_STRUCTURED, sections, DEFAULT_EXTRACTION_SECTIONS)
+    assert excerpt.section_names == ("results", "methods")
+    assert "the isobutanol titer reached 1.62 g/L" not in excerpt.text
+
+    abstract = next(section for section in sections if section.name == "abstract")
+    for piece in excerpt.pieces:
+        overlaps = piece.doc_start < abstract.char_end and abstract.char_start < piece.doc_end
+        assert not overlaps, f"{piece.name} piece overlaps the abstract"
+    for section in sections:
+        if section.char_start >= abstract.char_start and section.char_end <= abstract.char_end:
+            assert section.name == "abstract"
+
+
+def test_a_body_that_announces_methods_twice_keeps_both_halves() -> None:
+    """ "The abstract has a Results sub-heading" and "the body's Methods is discontinuous" differ.
+
+    Elsevier and MDPI papers really do print two matching `Methods` headings in the body, and 13
+    of the stored full texts are that shape. Such a body re-opens a name, so a naive "a name
+    repeats later, so the first one was the abstract" rule folds it and silently drops the real
+    Introduction and the real first Methods. What separates them is that a body never re-opens
+    its *Introduction*: the paper only starts once.
+    """
+    document = (
+        "A paper\n\nAbstract\nWe did things.\n\n"
+        "Introduction\nBackground to the work.\n\n"
+        "Materials and Methods\nStrains were derived from CEN.PK113-7D.\n\n"
+        "Experimental procedures\nIsobutanol was quantified by HPLC.\n\n"
+        "Results\nThe strain produced 22.6 g/L.\n\n"
+        "Discussion\nGood.\n"
+    )
+    names = [section.name for section in split_sections(document)]
+    assert names.count("methods") == 2
+    assert "introduction" in names, "the real Introduction was folded away"
+
+    excerpt = build_excerpt(document, split_sections(document), DEFAULT_EXTRACTION_SECTIONS)
+    assert excerpt.section_names == ("methods", "methods", "results")
+    assert "Strains were derived from CEN.PK113-7D." in excerpt.text
+    assert "Isobutanol was quantified by HPLC." in excerpt.text
+
+
+def test_a_discontinuous_body_results_is_sent_in_both_halves() -> None:
+    """A Results split in two by an intervening heading is still Results, twice over.
+
+    The fix must not be "there can only be one Results". A paper that reports findings, breaks
+    for a methods aside and resumes has two genuine Results blocks, and dropping either would
+    lose measurements exactly as quietly as sending the abstract added false ones.
+    """
+    document = (
+        "A paper\n\nAbstract\nWe did things.\n\n"
+        "Introduction\nBackground to the work.\n\n"
+        "Methods\nStrains were derived from CEN.PK113-7D.\n\n"
+        "Results\nThe strain produced 22.6 g/L.\n\n"
+        "Experimental procedures\nIsobutanol was quantified by HPLC.\n\n"
+        "Results\nThe parent strain reached 1.2 g/L.\n\n"
+        "Discussion\nGood.\n"
+    )
+    sections = split_sections(document)
+    assert [section.name for section in sections].count("results") == 2
+
+    excerpt = build_excerpt(document, sections, DEFAULT_EXTRACTION_SECTIONS)
+    assert excerpt.section_names == ("methods", "results", "methods", "results")
+    assert "The strain produced 22.6 g/L." in excerpt.text
+    assert "The parent strain reached 1.2 g/L." in excerpt.text
+
+
+def test_an_ordinary_abstract_is_left_exactly_as_it_was() -> None:
+    """The common paper has one unstructured abstract and must pass through untouched.
+
+    `abstract` is not a body-opening name, so a run consisting only of it is never confirmed --
+    which is what keeps this rule from having an opinion about the 1,136 papers it has no
+    business touching.
+    """
+    names = [section.name for section in split_sections(DOCUMENT)]
+    assert names == [
+        "front_matter",
+        "abstract",
+        "introduction",
+        "methods",
+        "results",
+        "discussion",
+        "references",
+    ]
+    assert split_sections(DOCUMENT)[1].text_of(DOCUMENT).startswith("Abstract")
+
+
+def test_a_long_leading_section_is_a_body_not_an_abstract() -> None:
+    """An abstract is short because a journal caps it; a body Introduction is not.
+
+    The second, dimensional guard. A paper whose body somehow did re-open its Introduction would
+    still not be folded, because folding it would swallow thousands of characters of real text.
+    The two guards are independent on purpose: over the 1,429 stored full texts each one alone
+    selects exactly the same 293 runs, so neither is carrying the result by itself.
+    """
+    filler = "This is a real body paragraph that runs on at length. " * 60
+    document = (
+        f"A paper\n\nIntroduction\n{filler}\n\n"
+        f"Results\n{filler}\n\n"
+        f"Introduction\nA second introduction heading, improbably.\n\n"
+        f"Results\nThe strain produced 22.6 g/L.\n\n"
+        f"Discussion\nGood.\n"
+    )
+    names = [section.name for section in split_sections(document)]
+    assert names.count("introduction") == 2, "a long body Introduction was folded into an abstract"
+    assert names.count("results") == 2
+    assert (
+        filler.strip()
+        in build_excerpt(document, split_sections(document), DEFAULT_EXTRACTION_SECTIONS).text
+    )
+
+
 # --------------------------------------------------------------------------------------- prompts
 
 
