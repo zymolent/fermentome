@@ -29,6 +29,37 @@
 # no cofactor is measured in it, and its two load-bearing numbers are cited rather than measured;
 # all three are on the record in `what_it_lacks` and in `evidence_ceiling`, which caps it at L3.
 #
+# AMENDED 2026-09-22 - THE LAYER IS FILLED TO ITS MEASURED CEILING, AND THE CEILING IS NOT THE CAP.
+# Sixteen further records take the layer from 24 to 40. Four independent passes put the honestly
+# admissible total at ~45-65 against a cap of 150, and this pass admits everything the six slot
+# shortlists actually name, which is 40. The remaining distance to ~45-65 is NOT refusal and NOT
+# scarcity: it is that the shortlists stopped where they stopped. Per criterion:
+#
+#   E5  1 -> 5   ranks 2-5 of the slot-6 re-run. Rank 2 `doi:10.1186/s13068-023-02309-z` is the
+#                COMPARTMENT-CORRECT record the layer was missing - native, matrix-resident Pos5
+#                overexpressed against a matrix-targeted NADPH sink in CEN.PK - and it covers the
+#                half rank 1 cannot, because rank 1's Pos5 has its targeting sequence deleted and
+#                is cytosolic. Ranks 3-5 are ADH3 localisation, pos5-delta consequences and the
+#                ADH3 transcript time course. Realistic ceiling ~5-8; this stops at 5 and does not
+#                pad. Ranks 6-8 stay unadmitted candidates, not rejections.
+#   E1  3 -> 6   the slot-2 runners-up. E1 remains ACQUISITION-BLOCKED - 17 readable of 69, 52 on
+#                the manual download queue - and that is a finding about institutional access, not
+#                about the literature. `doi:10.1016/j.meteno.2016.01.002` is still refused with
+#                `wrong_tier` and is still the record the criterion most needs.
+#   E2  3 -> 7   the four candidates slot 5 filed under `pool_notes_not_shortlisted`.
+#   E3  3 -> 4   only one. Slot 1's own runners-up are each rejected there with a stated reason -
+#                a test-tube anaerobiosis, a hydrolysate-only study, a re-analysis of other
+#                laboratories' data - and admitting them would lower the standard the whole layer
+#                is read against. Four is what the pool supports at chemostat-adjacent grade.
+#   E4  11       unchanged. `doi:10.1016/j.fm.2023.104288` was read for the twelfth place and not
+#                admitted: lager yeast plus a dipeptide supplement is not a transferable mechanism.
+#   E6  3 -> 7   the four strongest of slot 7's `not_shortlisted_but_notable`.
+#
+# EVERY ONE OF THE 46 NEW SPANS WAS SLICED OUT OF THE `fulltext_asset` STORE at its recorded
+# offsets through `load_source_text` and re-checked with `verify_span` - 46 of 46 exact, each
+# unique in its source, none transcribed and none spliced. `verified` is still false and
+# `confidence` still 'unverified' on all 40; promotion remains a curator act and was not performed.
+#
 # DO NOT HAND-EDIT THE OFFSETS. They are 0-based half-open [char_start, char_end) into the text
 # `fermdb.extract.harness.load_source_text` returns for that publication_id, and they were
 # re-resolved against the `fulltext_asset` store - NOT against the corpus cache, which is a
@@ -54,47 +85,72 @@ span_verification:
   re_verified: '2026-09-22'
   against: fulltext_asset store, via fermdb.extract.harness.load_source_text
   checked_with: fermdb.llm.validate.verify_span
-  spans_in_this_file: 60
-  re_resolved_exact: 60
+  spans_in_this_file: 106
+  re_resolved_exact: 106
   absent: 0
   spliced: 0
-  note: The draft's headline of 63 covers the first 53 of these plus the 10 basis quotes on the re-tagging
-    proposals, which stay in the draft because nothing is re-tagged here beyond the admissions themselves;
-    those 10 were re-checked in the same pass and are 10 of 10 exact. Three quotes below occur more than
-    once in their source (repeated data-availability statements); they are exact but not positionally
-    unique, and the recorded offset is the first occurrence. The remaining 7 are the slot-6 E5 admission
-    added 2026-09-22; every one of them was SLICED from the fulltext_asset store at its recorded offsets
-    rather than transcribed, and re-checked with verify_span - 7 of 7 exact, each unique in its source.
+  note: 'Three groups. (1) The first 53 are the 2026-09-21 phase-2 admissions; the draft''s headline
+    of 63 covers those plus the 10 basis quotes on the re-tagging proposals, which stay in the draft
+    because nothing is re-tagged here beyond the admissions themselves, and which were 10 of 10 exact
+    in the same pass. (2) The next 7 are the slot-6 E5 rank-1 admission added 2026-09-22. (3) The last
+    46 are the sixteen records added later on 2026-09-22 to fill the layer to its measured ceiling.
+    Groups 2 and 3 were SLICED out of the fulltext_asset store at their recorded offsets through
+    load_source_text and re-checked with verify_span - 7 of 7 and 46 of 46 exact, each unique in its
+    source, none transcribed and none spliced. Three quotes in group 1 occur more than once in their
+    source (repeated data-availability statements); they are exact but not positionally unique, and the
+    recorded offset is the first occurrence. Every span in groups 2 and 3 is positionally unique.'
 caps:
   publication_cap: 150
   measurement_study_cap: 60
-  publications_admitted_here: 24
-  measurement_bearing_admitted_here: 23
+  publications_admitted_here: 40
+  measurement_bearing_admitted_here: 39
 budget_position:
 - criterion: E5
   budget: 45
-  admitted_here: 1
-  unspent: 44
+  admitted_here: 5
+  unspent: 40
+  why_unspent: Not scarcity of papers but scarcity of MEASUREMENTS. Five passes now agree that no paper
+    measures a matrix NAD(P)H pool or ratio in living S. cerevisiae under a named condition; the realistic
+    ceiling against B.3.5's wider admitted list is ~5-8 qualitative records and this is 5. Ranks 6-8
+    of the slot-6 re-run remain unadmitted candidates, not rejections.
 - criterion: E6
   budget: 25
-  admitted_here: 3
-  unspent: 22
+  admitted_here: 7
+  unspent: 18
+  why_unspent: Genuinely thin once off-target organisms and bare QTL mapping are removed (B.3.6). Of
+    57 corpus documents naming Ethanol Red, one sequences it and none tests why it performs as it does.
 - criterion: E1
   budget: 25
-  admitted_here: 3
-  unspent: 22
+  admitted_here: 6
+  unspent: 19
+  why_unspent: ACQUISITION, NOT SCARCITY. 17 of 69 tagged publications are readable; 52 sit on the manual
+    download queue (25 paywalled, 14 licence-forbidden, 11 no PDF found). The founding characterisations
+    of the pdc1/pdc5/pdc6 phenotype are cited by almost every candidate and readable in none. Unspendable
+    by construction until the queue is worked.
 - criterion: E2
   budget: 20
-  admitted_here: 3
-  unspent: 17
+  admitted_here: 7
+  unspent: 13
+  why_unspent: The slot-5 shortlist named seven admissible candidates in total and all seven are admitted.
+    Its own read of the readable pool was 12-15 admissible, so the remaining 5-8 are NOT refusals - they
+    are papers the shortlist never got to. Re-running slot 5's triage over the 267-publication readable
+    pool is the action that would spend them, and it is a shortlist task rather than a curation one.
 - criterion: E3
   budget: 20
-  admitted_here: 3
-  unspent: 17
+  admitted_here: 4
+  unspent: 16
+  why_unspent: The chemostat/carbon-balance standard is rare - 'chemostat' appears in 6 of the 91 pool
+    full texts and more than once in 2 of them. Slot 1's remaining runners-up are each rejected there
+    with a stated reason, and admitting them would set the standard the rest of the layer is read against
+    too low. Four is close to everything in the readable pool that meets the bar.
 - criterion: E4
   budget: 15
   admitted_here: 11
   unspent: 4
+  why_unspent: The one criterion the 127-PDF delivery materially fixed, and it is now at its admissible
+    ceiling. 15 further E4-tagged papers are on the download queue. doi:10.1016/j.fm.2023.104288 was
+    read for a twelfth place and not admitted - lager yeast plus a dipeptide supplement is a nutritional
+    intervention, not a transferable mechanism, and B.3.4 would have no argument to make for a C4 alcohol.
 records:
 - publication_id: doi:10.1186/1475-2859-11-131
   doi: 10.1186/1475-2859-11-131
@@ -1132,6 +1188,1040 @@ records:
     note: The load-bearing sentence for the pick, and note its own hedge - 'A likely reason'. The paper
       offers this as an explanation, not as a demonstration, and the order-of-magnitude NADH/NAD+ figure
       is CITED from another study, not measured here.
+- publication_id: doi:10.1186/s13068-023-02309-z
+  doi: 10.1186/s13068-023-02309-z
+  pmid: '37031180'
+  title: Engineering yeast mitochondrial metabolism for 3-hydroxypropionate production.
+  year: 2023
+  journal: Biotechnology for biofuels and bioproducts
+  admitted_criterion: E5
+  slot: 6
+  current_db_tag: E5
+  action: confirm (slot-6 re-run rank 2, the runner-up; admitted 2026-09-22 as the COMPARTMENT-CORRECT
+    half of the slot's question, which rank 1 cannot supply)
+  why_this_criterion: 'B.3.5 admits ''POS5 (mitochondrial NADH kinase) - expression level, overexpression
+    phenotypes, pos5Δ consequences, and any measured matrix NADPH response'', and this is the readable
+    pool''s ONLY functional test of DUET''s actual architecture: a heterologous NADPH-consuming pathway
+    (malonyl-CoA reductase) targeted INTO the matrix of CEN.PK 113-5D, with NATIVE, matrix-resident POS5
+    overexpressed against it. That is precisely the half of slot 6 that the layer''s rank-1 E5 record
+    doi:10.1016/j.mec.2024.e00245 CANNOT supply, because that paper''s Pos5 has its targeting sequence
+    deleted and is cytosolic by construction. POS5 alone raised 3-HP titre by 23.4% while biomass fell
+    13.6%; POS5 with IDP1 gave +33%; ALD4 did nothing and MAE1 was negative. The paper also names the
+    whole matrix-NADPH enzyme set in one sentence and states Pos5''s primacy among them. It is admitted
+    as the corpus''s best available POSITIVE evidence for G.8''s POS5-capacity hypothesis, held in the
+    layer alongside rank 1''s adverse evidence rather than instead of it (J.4 - disputes are stored, not
+    resolved). The two records contradict each other in no respect: one measures what raising matrix Pos5
+    buys, the other measures the metabolic state in which cytosolic Pos5 stops helping.'
+  what_it_lacks: 'NO COFACTOR IS MEASURED ANYWHERE IN IT. Not matrix NADPH, not matrix NADH, not NADPH/NADP+,
+    not ATP. Every redox claim is read off 3-HP titre, which also moves with expression burden, growth
+    rate and carbon uptake. This is the same defect as the slot''s rank-1 record and is stated in the
+    same words because it is the same defect - and it is the fifth record in this layer to carry it, which
+    is the finding recorded in the open knowledge_gap. THE ATP COST OF POS5 IS ASSERTED FROM ENZYMOLOGY,
+    NOT MEASURED: the -13.6% biomass is its only shadow in the data and it is uncontrolled, because pPOS5
+    is a plasmid and no isogenic empty-plasmid arm is reported for it, so plasmid burden is not separated
+    from Pos5 activity. MATRIX LOCALISATION OF MCR IS NOT VERIFIED IN THIS PAPER by fractionation or microscopy;
+    the constructs are carried over from a previous study (evidence[4]) and the localisation rests on
+    the targeting sequence plus a titre difference against a cytosolic control. The product is 3-HP via
+    malonyl-CoA, not the Ehrlich pathway - no Ilv5, no KARI, no ADH step - so it shares the compartment
+    and a cofactor requirement with DUET and nothing else. AND THERE IS NO ETHANOL ANYWHERE IN IT: cells
+    are glucose-grown throughout, there is no Adh3 and no shuttle, and the paper never touches how reducing
+    equivalents REACH the matrix, which is slot 6''s literal question. It answers only what happens to
+    them once they are there. No deposited data of any kind.'
+  measurement_bearing: true
+  evidence_ceiling: L3, and here the cap is the PRODUCT and the PATHWAY rather than the compartment. 'Overexpressing
+    native POS5 raises the titre of a matrix-localised NADPH-consuming pathway in a CEN.PK background,
+    at a biomass cost' is a direct measurement in the programme's own organism and lineage and may be
+    stated as one. 'Overexpressing POS5 will raise isobutanol titre from a matrix Ehrlich pathway' is
+    an L3 transfer claim across both the pathway and the product, and the quantity that would settle it
+    - the matrix NADPH pool - is the layer's open knowledge_gap (YAA:GAP:ethanol-0-matrix-nad-p-h-pool-size-and-nad-p-h-nad).
+    B.3.5's own evidence ceiling already caps a matrix-redox assertion resting only on E5 records at L3
+    (J.3); nothing here lifts it.
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Mitochondrial NADPH is generated from NADH by Pos5, whereas re-generation of NADPH from NADP+
+      is carried out by NADP+-dependent dehydrogenases including Ald4, Idp1 and Mae1 [, , ].
+    char_start: 20760
+    char_end: 20940
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The matrix-NADPH enzyme set named in one sentence, with Pos5 as the NADH-to-NADPH route. This
+      is B.3.5's own list, stated by the paper.
+  - quote: Indeed, when the plasmid pPOS5 for POS5 overexpression was transformed into the strain NmC2,
+      the 3-HP titer increased by 23.4%, while the biomass decreased by 13.6% (Fig. A).
+    char_start: 21073
+    char_end: 21247
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The POS5 overexpression phenotype: the titre gain and the biomass cost in the same sentence.
+      The biomass figure is the ONLY shadow of Pos5''s ATP cost anywhere in the paper.'
+  - quote: These results revealed that two routes for NADPH regeneration from NADH or NADP+ could synergistically
+      boost 3-HP titer, with the one from NADH catalyzed by Pos5 as the main contributor.
+    char_start: 22988
+    char_end: 23174
+    occurrences_in_source: 1
+    verify_span: exact
+    note: Pos5's primacy among the matrix NADPH routes, asserted from a titre comparison rather than from
+      a cofactor measurement.
+  - quote: The yeast strain CEN.PK 113-5D was used as the background strain. Genetic manipulations, including
+      gene integration, knockout and promoter replacement, were performed using the GTR-CRISPR system
+      [].
+    char_start: 8801
+    char_end: 8999
+    occurrences_in_source: 1
+    verify_span: exact
+    note: METHODS, strain background. CEN.PK 113-5D, so the organism and the lineage are the programme's.
+  - quote: The intact MCR from Chloroflexus aurantiacus was cloned in pMCR1, while its dissected parts
+      of MCR-N and MCR-C were cloned in pMCR2 in a previous study for mitochondrial localization [].
+    char_start: 9170
+    char_end: 9356
+    occurrences_in_source: 1
+    verify_span: exact
+    note: METHODS, plasmids. The matrix localisation of MCR is inherited from a previous study and is
+      not re-verified here by fractionation or microscopy.
+- publication_id: doi:10.1128/aem.00362-26
+  doi: 10.1128/aem.00362-26
+  pmid: '42429759'
+  title: Mitochondrial localization of key NAD(+)-dependent dehydrogenases explains the exceptionally
+    high biomass yield on ethanol of the yeast Cyberlindnera jadinii.
+  year: 2026
+  journal: Applied and environmental microbiology
+  admitted_criterion: E5
+  slot: 6
+  current_db_tag: E5
+  action: confirm (slot-6 re-run rank 3; admitted 2026-09-22)
+  why_this_criterion: 'B.3.5 admits ''ADH3 and mitochondrial alcohol dehydrogenase generally - localization,
+    kinetics, directionality'' and, in its last clause, ''the respiratory / diauxic-shift physiology of
+    ethanol as a carbon source''. This record sits on both, and it is the only paper in the readable pool
+    that MEASURES the compartment question instead of predicting it: subcellular fractionation partitioning
+    ADH specific activity between a mitochondria-enriched fraction and the cytosol, in aerobic ethanol-limited
+    chemostats, with a label-free DIA proteome giving per-protein abundance for every detected ADH and
+    ALD isozyme. Cyberlindnera jadinii shows ~50% HIGHER ADH activity in the mitochondria-enriched fraction;
+    Ogataea parapolymorpha shows 10-fold LOWER, and the two differ in whether their most abundant ADH
+    carries a predicted targeting sequence. It is admitted for its LOCALISATION LOGIC - that where an
+    NAD+-dependent dehydrogenase sits changes respiratory energy coupling - which is the premise DUET''s
+    architecture assumes and which nothing else in the corpus tests experimentally.'
+  what_it_lacks: 'NOT S. CEREVISIAE, AND THE ENERGETICS DO NOT TRANSFER. THIS IS THE FIRST THING A READER
+    SHOULD WEIGH. The mechanism runs through a proton-pumping Complex I, which the paper states these
+    yeasts have and S. cerevisiae does not (evidence[3]); so the ATP arithmetic does not carry to DUET''s
+    chassis at all, and only the localisation logic carries, as an analogy. THE AUTHORS CONCEDE THEIR
+    OWN FRACTIONATION IS COMPROMISED: only 15 +/- 2% of total ADH activity was recovered in the particulate
+    fraction (evidence[1]), and they state that leakage of matrix enzymes cannot be prevented given the
+    reticulate mitochondrial morphology of ethanol-grown cells (evidence[2]). The headline 50% therefore
+    rests on a preparation the paper itself reports as leaky, and an admission quoting the 50% without
+    that concession would be quoting half a result. LOCALISATION OF THE ABUNDANT ADH IS A SEQUENCE PREDICTION
+    from algorithms, not an import assay and not microscopy. No NADH or NADPH is measured in any compartment;
+    matrix NADH is inferred from stoichiometry plus enzyme location. No POS5, no NAD(H) kinase and no
+    matrix NADPH, so it is silent on the NADH-to-NADPH step DUET calls its single point of failure. No
+    ADH3 and no ethanol-acetaldehyde shuttle as such: the regime is ethanol as a growth substrate under
+    carbon limitation, not ethanol as a redox carrier in a fermenting, glucose-replete cell. n = 2 chemostats;
+    no deposited raw data identified in the stored text. LICENCE: no Creative Commons statement appears
+    in the stored text, so reuse is UNVERIFIED - check before redistributing any figure or table from
+    it.'
+  measurement_bearing: true
+  evidence_ceiling: L3, and the cap is the ORGANISM. 'Intramitochondrial localisation of ADH is associated
+    with a higher biomass yield on ethanol in a Complex-I-bearing yeast' is this paper's own measurement.
+    'Adh3's matrix localisation is therefore energetically favourable in S. cerevisiae' DOES NOT FOLLOW
+    and this record must never be cited for it, because S. cerevisiae lacks Complex I and Complex I is
+    the entire mechanism. What transfers at L3 is the weaker and still useful claim that the compartment
+    of an NAD+-dependent dehydrogenase is a design variable with measurable consequences.
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Proteome analyses showed that the most abundant ADH isozyme in C. jadinii and O. parapolymorpha
+      contained and lacked a predicted mitochondrial targeting sequence, respectively. The ADH protein
+      with the highest prevalence in ethanol-limited cultures of C. jadinii was predicted to be mitochondrial
+      and accounted for almost 4% of the detected proteome.
+    char_start: 913
+    char_end: 1263
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The localisation result as the abstract states it. Note 'predicted to be mitochondrial' - the
+      localisation is a sequence prediction, not an import assay.
+  - quote: In contrast, the specific activity of ADH in the particulate fraction of C. jadinii homogenates
+      was approximately 50% higher than in the homogenate and soluble fraction (). However, only 15 ±
+      2% of the total activity of ADH present in the homogenate was recovered in the particulate fraction
+      () compared to 1.3 ± 0.7% in O. parapolymorpha ().
+    char_start: 29132
+    char_end: 29474
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The fractionation measurement AND its own recovery figure in one span. 15 +/- 2% recovery is
+      why the 50% number is weaker than it looks.
+  - quote: This mitochondrial morphology makes it unlikely that leakage of matrix enzymes during cell
+      fractionation can be prevented.
+    char_start: 31460
+    char_end: 31582
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The authors' own concession that the preparation leaks. Quoted because an admission citing the
+      50% figure without this sentence would be citing half a result.
+  - quote: Multiple non-Saccharomyces yeast species show higher biomass yields on ethanol than S. cerevisiae
+      (). Such yeasts invariably harbor the genes encoding at least 35 subunits of a Complex I NADH dehydrogenase
+      (“Complex I”) (, ).
+    char_start: 6903
+    char_end: 7128
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'WHY THE ENERGETICS DO NOT TRANSFER, in the paper''s own words: the mechanism runs through a
+      Complex I that S. cerevisiae does not have.'
+- publication_id: doi:10.1371/journal.pone.0346295
+  doi: 10.1371/journal.pone.0346295
+  pmid: '41926382'
+  title: Mitochondrial NAD kinase Pos5 is required for CoQ biosynthesis in yeasts.
+  year: 2026
+  journal: PloS one
+  admitted_criterion: E5
+  slot: 6
+  current_db_tag: E5
+  action: confirm (slot-6 re-run rank 4; admitted 2026-09-22)
+  why_this_criterion: 'B.3.5 admits ''pos5Δ consequences'' in as many words, and this is the only readable
+    paper whose SUBJECT is Pos5. It carries an S. cerevisiae ΔScpos5 arm in its own right - CoQ6 at 0.2-fold
+    of wild type - and its value to the programme is as a WARNING rather than as an anchor, which is why
+    it earns an E5 line at all: Pos5 has a second, essential job, supplying NADPH to coenzyme Q biosynthesis,
+    so diverting Pos5 output to Ilv5 may compete with respiratory-chain assembly. That is a named, mechanistic
+    risk against G.8''s POS5-capacity hypothesis which no other record in the layer supplies, and it is
+    exactly the kind of counter-evidence E5 exists to capture (J.4 - disputes are stored, not resolved).
+    It also pairs with the slot''s rank-2 record, which reports a 13.6% biomass cost for POS5 overexpression
+    without naming a cause; a competing essential demand on Pos5 output is one candidate cause, and neither
+    paper tests it.'
+  what_it_lacks: 'THE PRIMARY ORGANISM IS S. POMBE. The S. cerevisiae arm is a single confirmatory CoQ
+    measurement (evidence[1]), not the study. THE READOUT IS COENZYME Q, NOT NADPH: no cofactor is measured
+    in any compartment, so the claim that Pos5 supplies NADPH to Coq6 is carried by a deletion phenotype
+    plus other laboratories'' enzymology, not by anything measured here. Deletion phenotypes on rich YES
+    and YEGES media, not a fermentation and not a named process condition - nothing in it is condition-annotated
+    in the sense the atlas means, so no row from it can carry the condition facets the rest of the layer
+    uses. It says nothing about ethanol, Adh3, the shuttle, or how reducing equivalents reach the matrix.
+    AND THE DECISIVE LOGICAL LIMIT: a pos5-null phenotype bounds what Pos5 is NECESSARY for; it says nothing
+    about what extra Pos5 capacity would buy, which is the G.8 question. No deposited data stated in the
+    stored text. 2026, and the S. cerevisiae result is unreplicated by anyone else.'
+  measurement_bearing: true
+  evidence_ceiling: L3. 'Loss of Pos5 lowers CoQ content roughly fivefold in both S. pombe and S. cerevisiae'
+    is a direct measurement and may be stated as one. 'Overexpressing Pos5 for DUET will compete with
+    CoQ biosynthesis' runs from a null phenotype to an overexpression phenotype, which is a direction
+    this experiment cannot support in principle; it is recorded as a risk to be tested, never as a result.
+    The cross-species step (S. pombe to S. cerevisiae) is separately L3 and is only partially discharged
+    by the complementation experiment.
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: we screened the Bioneer gene-deletion library and found that the Δpos5 strain produced only
+      0.2-fold of the wild-type CoQ10 level. Pos5 shares homology with Saccharomyces cerevisiae Pos5 (ScPos5),
+      a mitochondrial NADH (or NAD+) kinase that generates NADPH (or NADP+).
+    char_start: 291
+    char_end: 558
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The pos5-delta phenotype and the identity of ScPos5 as the mitochondrial NADH kinase, which
+      is the B.3.5 clause this record is admitted under.
+  - quote: However, since the role of ScPos5 in CoQ biosynthesis has never been documented, we quantified
+      CoQ levels in a ΔScpos5 strain. CoQ6 levels in ΔScpos5 were decreased to 0.2-fold of those in the
+      wild-type strain ( and ), which is similar to the CoQ deficiency observed in the S. pombe Δpos5
+      mutant ().
+    char_start: 23426
+    char_end: 23725
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The S. cerevisiae arm, with the authors' own statement that ScPos5's role in CoQ biosynthesis
+      had never been documented. This is the whole S. cerevisiae content of the paper.
+  - quote: The Δpos5 strain failed to grow on YEGES medium containing glycerol and ethanol as non-fermentable
+      carbon sources and showed retarded growth on YES containing hydrogen peroxide as well as on minimal
+      medium ().
+    char_start: 17449
+    char_end: 17658
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The respiratory-deficiency phenotype. It bounds what Pos5 is NECESSARY for, which is not the
+      question G.8 asks.
+- publication_id: doi:10.1186/1471-2164-9-170
+  doi: 10.1186/1471-2164-9-170
+  pmid: '18412983'
+  title: Multiway real-time PCR gene expression profiling in yeast Saccharomyces cerevisiae reveals altered
+    transcriptional response of ADH-genes to glucose stimuli.
+  year: 2008
+  journal: BMC genomics
+  admitted_criterion: E5
+  slot: 6
+  current_db_tag: E5
+  action: confirm (slot-6 re-run rank 5; admitted 2026-09-22)
+  why_this_criterion: 'B.3.5 admits ADH3 directionality and the respiratory / diauxic-shift physiology
+    of ethanol as a carbon source, and this record sits on the join between them: four CEN.PK-derived
+    strains spanning a range of glycolytic rates, grown on ethanol and pulsed with glucose, with ADH3-ADH6
+    transcript time courses across the transition at eight time points. It is the ONLY ADH3 time course
+    in the readable pool, and the slots document''s own statement of need for slot 6 is that ''we currently
+    have no transcriptomic anchor for matrix redox at all''. A weak anchor in the right place beats no
+    anchor. The finding that matters to the programme is directional and ADVERSE: ADH3 clusters with the
+    glucose-REPRESSED genes while the fermentative ADHs are induced - the matrix ADH goes down exactly
+    when the chassis is fermenting. Read with the slot''s rank-1 record, the corpus''s current expectation
+    is that DUET''s matrix redox route would be asked to run in the two states where both of its components
+    are least available. Whether that is true is the measurement nobody has made; that it is the corpus''s
+    expectation is itself worth recording.'
+  what_it_lacks: 'A CHEMOMETRICS METHODS PAPER. ADH3 is one of 18 genes measured, it is never followed
+    up, and the ADH result is presented as a demonstration of matrix-augmented PCA rather than as a biological
+    claim. TRANSCRIPT ONLY: no protein, no enzyme activity, no compartment measurement, no cofactor. Glucose
+    repression of a transcript is not loss of Adh3 activity, and the paper does not bridge that gap. ITS
+    OWN CORROBORATION POINTS THE OTHER WAY AND IS NOT RECONCILED - the text reads the repression as ''consistent
+    with previous studies, which report lower Adh3 activity during respiratory growth when compared to
+    fermentative growth'' (evidence[1]), which is the opposite direction from its own result, and nothing
+    in the paper resolves it. Anyone quoting the ADH3 direction from this record must quote that sentence
+    with it. The four strains differ in glycolytic capacity BY CONSTRUCTION - HXT1-HXT7, GAL2, STL1 and
+    three maltose permeases deleted, with native or chimeric transporters put back - which is the paper''s
+    point but confounds a straight wild-type read; the ''wild type'' is KOY.PK2-1C83, not CEN.PK113-7D.
+    2008-era reporting: fold changes live in figures and additional files rather than in a table, and
+    there is no deposit.'
+  measurement_bearing: true
+  evidence_ceiling: L3 and, for anything about flux, below it. 'ADH3 transcript falls after a glucose
+    pulse in ethanol-grown CEN.PK-derived strains' is the measurement. 'Adh3 will not carry ethanol-oxidising
+    flux in a fermenting DUET chassis' is two inferences away - transcript to protein, protein to flux
+    - and is recorded as the corpus's current expectation, which is precisely the thing the unmade matrix
+    measurement would falsify or confirm. The paper's own unreconciled corroboration (evidence[1]) means
+    even the direction should be carried with a caveat.
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Of particular interest is our finding that ADH4and ADH6show a behavior typical of glucose-induced
+      genes, while ADH3and ADH5are repressed after glucose addition.
+    char_start: 1207
+    char_end: 1367
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The ADH3 direction, and it is adverse to the architecture: the matrix ADH is repressed by glucose
+      while the fermentative ADHs are induced.'
+  - quote: Repression of ADH3after glucose addition is consistent with previous studies, which report
+      lower Adh3 activity during respiratory growth when compared to fermentative growth [].
+    char_start: 19784
+    char_end: 19961
+    occurrences_in_source: 1
+    verify_span: exact
+    note: THE PAPER'S OWN CORROBORATION POINTS THE OTHER WAY AND IS NOT RECONCILED. It reads its glucose-repression
+      result as consistent with LOWER Adh3 activity during RESPIRATORY growth, which is the opposite direction.
+      Anyone quoting the ADH3 direction from this record must quote this sentence with it.
+  - quote: Cells were grown in 1% ethanol and 5× concentration of minimal media [] until an optical density
+      (OD) of 1–1.5 at 610 nm. Glucose was pulsed to a final concentration of 5% (w/v) and samples for
+      RNA extraction were taken at 0 min just before the glucose pulse and then at 1, 5, 10, 20, 30 and
+      60 min after the pulse.
+    char_start: 42708
+    char_end: 43023
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'METHODS. The regime: ethanol-grown cells pulsed with glucose and sampled across one hour. That
+      is the diauxic transition B.3.5''s last clause names.'
+- publication_id: doi:10.1186/s12934-015-0305-6
+  doi: 10.1186/s12934-015-0305-6
+  pmid: '26253003'
+  title: Adaptive mutations in sugar metabolism restore growth on glucose in a pyruvate decarboxylase
+    negative yeast strain.
+  year: 2015
+  journal: Microbial cell factories
+  admitted_criterion: E1
+  slot: 2
+  current_db_tag: E1 + E5
+  action: 'confirm as E1 (slot-2 runner-up, admitted 2026-09-22). The paper also carries an E5 screening
+    row; installing this record sets EVERY ethanol-tier row to E1, so the E5 tag is spent. That is recorded
+    here rather than left to be discovered: the paper measures no matrix cofactor, no ADH3, no POS5 and
+    no shuttle, so it would not survive B.3.5 in any case.'
+  why_this_criterion: 'B.3.1''s core content measured rather than reviewed, and it supplies the counterfactual''s
+    EVOLUTIONARY half: a pdc1Δ pdc5Δ pdc6Δ CEN.PK-derived strain evolved in three independent serial-transfer
+    lines to grow on glucose, whole-genome sequenced, converging on MTH1, HXT2, CIT1 and RPD3; the MTH1-81D
+    allele is then reverse-engineered into the unevolved strain and CIT1 deleted on top of it. It is the
+    complement to the layer''s existing E1 anchor doi:10.1186/1475-2859-11-131, which supplies a DIFFERENT
+    MTH1 allele (the ΔT internal deletion) reached by a different route in a different laboratory - convergence
+    on the same gene by two independent evolutions is a stronger statement about the Pdc-minus chassis
+    than either paper alone. And it is the only readable E1 record that puts a NUMBER on how much of the
+    recovered growth a single suppressor allele actually buys.'
+  what_it_lacks: 'THE REVERSE-ENGINEERED GROWTH IS POOR AND THE PAPER SAYS SO. MTH1-81D alone gives 0.053
+    h-1 against ~0.14 h-1 for the evolved lines - about 35% of it (evidence[2]) - so most of the evolved
+    phenotype is unexplained and the mechanism is a partial account, not a solution. THE C2 AUXOTROPHY
+    IS NOT SOLVED HERE EITHER: it is worked around by a proposed Cit1/Ach1 acetate route argued from structure
+    prediction and competition logic, with no flux measurement and no isotope work behind it. NO SEQUENCE
+    ACCESSION IS GIVEN for the genome sequencing, so the variant calls cannot be re-derived and the convergence
+    claim cannot be independently checked. Aerobic shake flasks on minimal glucose: no chemostat, no carbon
+    balance, no product yields, so nothing here calibrates the cost of Pdc-minus in the quantities B.3.2
+    and B.3.3 ask for - it reports a growth rate and nothing else. And the standing E1 caveat applies
+    with full force: this is the architecture DUET rejected, so nothing in this record may be used to
+    characterise the DUET chassis (B.3.1), and any assertion about DUET derived from it is a cross-chassis
+    inference capped at L3 (J.3).'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: However, it cannot grow on glucose as the sole carbon source, and requires supplementation
+      of C2 compounds to the medium in order to meet the requirement for cytosolic acetyl-CoA for biosynthesis
+      of fatty acids and ergosterol.
+    char_start: 376
+    char_end: 602
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The C2 auxotrophy and the glucose-growth defect stated together, which is B.3.1's core counterfactual
+      content.
+  - quote: Reverse engineering of the non-evolved Pdc negative strain through introduction of the MTH181D
+      allele restored its growth on glucose at a maximum specific rate of 0.053 h−1 in minimal medium
+      with 2% glucose, and the CIT1 deletion in the reverse engineered strain further increased the maximum
+      specific growth rate to 0.069 h−1.
+    char_start: 1369
+    char_end: 1696
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The reverse-engineering result: what one suppressor allele, and then one further deletion,
+      actually buy in h-1.'
+  - quote: The MTH181D mutation contributes around 35% of the maximum specific growth rate in the evolved
+      E1 strains, indicating there are likely other genetic changes that contribute to their growth recovery.
+    char_start: 12684
+    char_end: 12882
+    occurrences_in_source: 1
+    verify_span: exact
+    note: THE LIMIT OF THE EXPLANATION, in the authors' own words. MTH1-81D accounts for about 35% of
+      the evolved growth rate, so most of the evolved phenotype is unexplained.
+- publication_id: doi:10.1186/s12934-021-01594-3
+  doi: 10.1186/s12934-021-01594-3
+  pmid: '34098954'
+  title: In-situ muconic acid extraction reveals sugar consumption bottleneck in a xylose-utilizing Saccharomyces
+    cerevisiae strain.
+  year: 2021
+  journal: Microbial cell factories
+  admitted_criterion: E1
+  slot: 2
+  current_db_tag: E1
+  action: confirm (slot-2 runner-up; admitted 2026-09-22)
+  why_this_criterion: The Pdc-minus workaround FAILING in an industrially shaped, DIPLOID background,
+    which is the reality check the rest of the E1 pool does not supply. Both copies of PDC1, PDC5 and
+    PDC6 are replaced in the xylose-fermenting, inhibitor-tolerant industrial strain GSE16-T18, with a
+    different MTH1 internal deletion (MTH1ΔM41-T78) from the two alleles the layer's other E1 records
+    carry. The authors state in their own discussion that the deletion 'only partially overcame the C2
+    requirement and ethanol addition was still necessary for efficient sugar consumption', and add that
+    no published approach fully overcomes it; the measured form of the same finding is that the pdc-negative
+    isolates consume glucose far more slowly than their Pdc-positive parent DESPITE both the MTH1 allele
+    and ethanol in the medium. For a criterion whose job is to cost the incumbent architecture, a failure
+    in a realistic background is worth more than a success in a laboratory one. It is also the only E1
+    candidate in the readable pool with a deposited accession (PRJNA699459).
+  what_it_lacks: 'THE PDC CONTENT IS INCIDENTAL TO A MUCONIC ACID PAPER. The deletions are a means of
+    eliminating ethanol, not the object of study, so there is no characterisation of Pdc-minus physiology
+    at all - no growth-rate series, no carbon balance, no C2 titration, no comparison against an isogenic
+    Pdc-positive control under matched conditions. THE SUGAR-CONSUMPTION ARREST THE TITLE ADVERTISES IS
+    EXPLICITLY LEFT UNEXPLAINED: the authors exclude muconic acid toxicity and loss of viability and then
+    name the cause as ''an unknown, possibly metabolic bottleneck'', so the paper''s headline finding
+    is a negative result with no mechanism and cannot be attributed to the PDC deletions rather than to
+    the heterologous pathway. Compulsory aerobic conditions throughout, because the catechol 1,2-dioxygenase
+    consumes oxygen - the opposite of the anaerobic regime the ethanol layer is otherwise read against.
+    The strain is DSM-lineage industrial and its availability is not stated. The deposited BioProject
+    URL in the stored text contains a typo (''nih.giv''), reproduced exactly in evidence[2] because correcting
+    it would break the offsets.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Second, although we had engineered an internal deletion in MTH1, it only partially overcame
+      the C2 requirement and ethanol addition was still necessary for efficient sugar consumption. Other
+      approaches to address the C2 requirement have been proposed, but none of these fully overcame the
+      C2 problem [, ].
+    char_start: 56990
+    char_end: 57295
+    occurrences_in_source: 1
+    verify_span: exact
+    note: THE LOAD-BEARING SENTENCE. The MTH1 workaround only PARTIALLY overcomes the C2 requirement in
+      a diploid industrial background, ethanol was still required, and the authors state that no published
+      approach fully overcomes it.
+  - quote: All three TN6 isolates showed much slower glucose consumption rates than TN5, reflecting their
+      lower glucose tolerance and utilization despite the presence of the MTH1 partial deletion and ethanol
+      as C2 source in the medium.
+    char_start: 30288
+    char_end: 30512
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The measured form of the same finding: the pdc-negative isolates consume glucose far more slowly
+      than their parent DESPITE both the MTH1 deletion and ethanol in the medium.'
+  - quote: The data have been deposited with links to the BioProject accession number PRJNA699459 in the
+      NCBI BioProject database (https://www.ncbi.nlm.nih.giv/bioproject/).
+    char_start: 22687
+    char_end: 22849
+    occurrences_in_source: 1
+    verify_span: exact
+    note: Data availability. The URL is misspelled 'nih.giv' in the stored text and is reproduced exactly,
+      because cleaning it would break the offsets.
+- publication_id: doi:10.1002/elsc.201900080
+  doi: 10.1002/elsc.201900080
+  pmid: '32624964'
+  title: Evaluation of pyruvate decarboxylase-negative Saccharomyces cerevisiae strains for the production
+    of succinic acid.
+  year: 2019
+  journal: Engineering in life sciences
+  admitted_criterion: E1
+  slot: 2
+  current_db_tag: E1
+  action: confirm (slot-2 pool candidate; admitted 2026-09-22)
+  why_this_criterion: 'The REDOX half of B.3.1, which the criterion names explicitly - ''the redox consequences
+    of removing the principal NADH sink - including the glycerol branch (GPD1/GPD2) that compensates''
+    - and which no other admitted E1 record touches. The TAM strain (pdc1Δ pdc5Δ pdc6Δ, previously evolved
+    to C2 independence and glucose tolerance) is run head to head against its CEN.PK 111-61A reference,
+    and GPD1 and FUM1 are then deleted on top of it to chase the glycerol carbon loss. Two results are
+    this record''s value, and both are negative ones: glycerol formation is NOT abolished by GPD1 deletion
+    because GPD2 remains, and deleting GPD2 as well is rejected by the authors because it makes cells
+    osmosensitive and incapable of anaerobic growth. That is the compensating-sink argument measured,
+    together with the reason it cannot simply be closed - which is the fact a Pdc-minus proposal has to
+    answer and usually does not.'
+  what_it_lacks: 'A SUCCINATE PAPER. The Pdc-minus background is a chassis choice, not the subject, so
+    the cost of PDC deletion is never isolated: the TAM and reference strains differ in their evolutionary
+    history as well as in PDC, and the TAM strain here is ALREADY evolved to C2 independence, so this
+    record cannot speak to the C2 auxotrophy at all - it is the one E1 record that deliberately starts
+    after that problem has been solved by someone else. Deep-well plates shaken at 90 rpm under conditions
+    called ''microaerobic'' with no measured oxygen transfer rate, on mineral salt medium with 50 g/L
+    glucose plus 22 mM formate - so the redox state is manipulated by two means at once, oxygen limitation
+    and formate, and neither is quantified as a cofactor. NO NADH, NADPH OR ATP IS MEASURED ANYWHERE:
+    ''NADH is limiting'' (evidence[2]) is inferred from product titres, which is the same silence documented
+    under E5. Titres are small - a maximal 2.2 g/L succinate - and the GPD1/FUM1 effects are single-digit
+    shifts on them. No accession, and the growth deficiency attributed to FUM1 deletion (~14%) rests on
+    a single plate-format experiment.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: This strain also had previously been evolved to be independent of the requirement of a C2 carbon
+      source (e.g., acetate or ethanol) and does not exhibit glucose sensitivity, both of which are characteristics
+      associated with pyruvate decarboxylase deletion mutants , .
+    char_start: 4949
+    char_end: 5215
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The TAM background: a pdc1/pdc5/pdc6 strain already EVOLVED to C2 independence and glucose
+      tolerance. That is why this record speaks to the redox cost and not to the C2 auxotrophy.'
+  - quote: Intriguingly, the glycerol titer increased in the strains deficient in FUM1 and was not completely
+      abolished by GPD1 deletion (Table ). Residual glycerol formation was also observed by Yan et al.
+      and is explained by the GPD1 paralog GPD2 . The additional deletion of GPD2 was, however, not considered
+      as it results in an osmosensitive phenotype and renders cells incapable of anaerobic growth .
+    char_start: 22133
+    char_end: 22527
+    occurrences_in_source: 1
+    verify_span: exact
+    note: B.3.1's glycerol clause, measured. GPD1 deletion does not abolish glycerol because GPD2 remains,
+      and the authors reject deleting GPD2 because it costs osmotolerance and anaerobic growth. The compensating
+      sink cannot simply be closed.
+  - quote: Here we show that NADH is limiting and that reducing competition for this crucial cofactor
+      with the respiratory chain and increasing its formation by formate oxidation improves succinate
+      synthesis.
+    char_start: 6590
+    char_end: 6787
+    occurrences_in_source: 1
+    verify_span: exact
+    note: '''NADH is limiting'' - inferred from product titres, not from any measured cofactor. Quoted
+      with that caveat on its face.'
+- publication_id: doi:10.1186/1754-6834-6-158
+  doi: 10.1186/1754-6834-6-158
+  pmid: '24206573'
+  title: Evaluation of the fermentation of high gravity thick sugar beet juice worts for efficient bioethanol
+    production.
+  year: 2013
+  journal: Biotechnology for biofuels
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm (slot-5 pool note; admitted 2026-09-22)
+  why_this_criterion: 'The highest yield FRACTION in the E2 pool, obtained with ETHANOL RED by name, which
+    makes it the yield-side companion to doi:10.1186/s13068-015-0216-0''s titre-side Ethanol Red control.
+    B.3.2 asks for yield ''as a fraction of the 0.511 g/g theoretical maximum'' and this record states
+    it directly: 94.9 +/- 2.8% of theoretical with 96.5 +/- 2.9% sugar intake at 250 g/kg extract, reaching
+    12.4 +/- 0.3% (v/v) at 94 h. It also bounds the ceiling FROM ABOVE, which no other E2 record in the
+    layer does: raising the extract to 280 g/kg made the process worse, so the record carries both the
+    optimum and the point past which more gravity costs efficiency. For a criterion whose purpose is to
+    calibrate what ''good'' means, the turning point is as useful as the maximum.'
+  what_it_lacks: 'THICK SUGAR BEET JUICE WORT, not a defined medium, and the substrate is characterised
+    by ''extract content'' in g/kg rather than by a sugar composition, so the fermentation is not reproducible
+    from the paper and the g/kg basis is not directly comparable with the layer''s g/L records. The yield
+    is a percentage of theoretical, not a g/g, and needs the paper''s own conversion before it can sit
+    beside the other E2 numbers. THE ABSTRACT MIXES ITS OWN UNITS - ''from 250 g/L to 280 g/kg'' (evidence[2])
+    - which is exactly the class of hazard the slot-5 shortlist flagged for the %v/v-versus-%w/v case;
+    read the body tables, not the abstract. Nutrient supplementation (diammonium hydrogen phosphate) and
+    a 2 g/L inoculum are part of the optimum, so the number is a PROCESS result: nothing in it is attributable
+    to Ethanol Red as opposed to the process built around it, and there is no comparator strain under
+    the same conditions. No microbiological or genetic characterisation of any kind, so it contributes
+    nothing to slot 7.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: The highest ethanol yield (94.9 ± 2.8% of the theoretical yield) and sugars intake of 96.5
+      ± 2.9% were obtained after the fermentation of wort with an extract content of 250 g/kg supplemented
+      with diammonium hydrogen phosphate (0.3 g/L of wort) and inoculated with 2 g of Ethanol Red dry
+      yeast per L of wort.
+    char_start: 1113
+    char_end: 1421
+    occurrences_in_source: 1
+    verify_span: exact
+    note: Yield as a fraction of theoretical, with Ethanol Red named. That is the form B.3.2 asks for.
+  - quote: After 94 h of fermentation, ethanol concentration in the wort reached 12.4 ± 0.3% (v/v). On
+      completion of the process, the real extract concentration of wort decreased from 250 g/kg to approximately
+      50 g/kg (by 80%).
+    char_start: 11501
+    char_end: 11717
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The titre and the extract drawdown at the optimum.
+  - quote: An increase in extract content in the fermentation medium from 250 g/L to 280 g/kg resulted
+      in decreased efficiency of the process.
+    char_start: 1422
+    char_end: 1553
+    occurrences_in_source: 1
+    verify_span: exact
+    note: THE CEILING BOUNDED FROM ABOVE - more gravity made the process worse - and, in the same sentence,
+      the abstract's own unit slip from g/L to g/kg. Read the body tables, not this sentence.
+- publication_id: doi:10.1186/1754-6834-5-61
+  doi: 10.1186/1754-6834-5-61
+  pmid: '22917193'
+  title: Very high gravity ethanol fermentation by flocculating yeast under redox potential-controlled
+    conditions.
+  year: 2012
+  journal: Biotechnology for biofuels
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm (slot-5 pool note; admitted 2026-09-22)
+  why_this_criterion: 'The cleanest PURE-SUGAR VHG record in the pool, and the only admitted E2 record
+    whose substrate is glucose alone: batch fermentation at 201 +/- 3.1, 252 +/- 2.9 and 298 +/- 3.8 g/L
+    glucose, reaching 131.0 +/- 1.8 g/L ethanol at 72 h on the 298 g/L charge, with YPS reported in g/g.
+    Every other E2 record in the layer runs on cane juice, molasses, corn paste, beet wort or corn syrup,
+    so this is the one that separates the FERMENTATION ceiling from the FEEDSTOCK - which is what the
+    programme needs when it asks what a sugar-to-alcohol process in yeast can do in principle.'
+  what_it_lacks: 'THE STRAIN IS UNNAMED AND UNOBTAINABLE. It is described only as ''developed at Dr. Bai''s
+    lab at Dalian University of Technology'' (evidence[2]) with no deposit, no accession and no genotype,
+    so nothing here can be reproduced or extended, and it is FLOCCULATING, a morphology none of the programme''s
+    strains share and one the paper itself shows changes the measured variable. THE CEILING IS CONDITIONAL
+    ON AN INTERVENTION: the headline number requires redox potential held at -150 mV, and without ORP
+    control the paper reports 24.0 and 17.0 g/L glucose left unfermented at the two LOWER gravities (evidence[1]).
+    So this is a record of what VHG fermentation can do WITH redox-potential control, not of what a yeast
+    does. YPD-based medium with yeast extract and peptone, not defined. One fermentor per condition with
+    no replication stated. And the ORP intervention is a redox manipulation reported without a single
+    cofactor measurement, which is the same silence E5 documents from the other end of the layer.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: As high as 131.0 ± 1.8 g/L ethanol was produced at 72 h when ORP was controlled at −150 mV
+      for the VHG fermentation with medium containing 298 ± 3.8 g/L glucose, since yeast cell viability
+      was improved more significantly.
+    char_start: 1489
+    char_end: 1710
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The pool''s highest pure-glucose VHG titre, with its condition attached: it requires ORP held
+      at -150 mV.'
+  - quote: In contrast, there were 24.0 ± 0.4 and 17.0 ± 0.3 g/L glucose remained unfermented without
+      ORP control.
+    char_start: 1385
+    char_end: 1488
+    occurrences_in_source: 1
+    verify_span: exact
+    note: What happens WITHOUT the intervention. This is why the record is a ceiling for a controlled
+      process and not for a yeast.
+  - quote: The flocculating yeast strain was developed at Dr. Bai’s lab at Dalian University of Technology
+      [].
+    char_start: 16950
+    char_end: 17049
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The strain, such as it is. Unnamed, undeposited, no genotype - so nothing here can be reproduced
+      or extended.
+- publication_id: doi:10.1186/s12934-024-02401-5
+  doi: 10.1186/s12934-024-02401-5
+  pmid: '38724968'
+  title: Key role of K(+) and Ca(2+) in high-yield ethanol production by S. Cerevisiae from concentrated
+    sugarcane molasses.
+  year: 2024
+  journal: Microbial cell factories
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm (slot-5 pool note; admitted 2026-09-22)
+  why_this_criterion: The molasses arm of the performance ceiling, and the only E2 record that identifies
+    WHAT limits it rather than only reporting where it lands. Adaptive laboratory evolution and ARTP mutagenesis
+    are used to separate the limiting factors of concentrated molasses fermentation, with K+ and Ca2+
+    identified as the dominant pair, and the resulting strain reaches 111.65 g/L ethanol at 95.53% sugar-to-alcohol
+    conversion from 250 g/L total fermentable sugars in a 5 L fermenter. B.3.2 asks for the conditions
+    as well as the number, and the ionic composition of molasses is the condition this record supplies
+    and the layer's other cane-based record (doi:10.1186/s13068-018-1239-0) assumes.
+  what_it_lacks: THE STRAIN IS AN ARTP-MUTAGENESIS AND ALE PRODUCT (NGTM-F1), not a commercial reference,
+    so the number calibrates what a purpose-selected mutant reached and not what the industry runs - and
+    no industrial comparator strain is fermented alongside it, so it cannot be placed against Ethanol
+    Red or PE-2. THE PAPER CALLS A TITRE A YIELD in its own abstract - 'giving a yield of 111.65 g/L'
+    (evidence[0]) - and the 95.53% figure is a conversion percentage whose basis is not restated at the
+    point of use; neither can be entered as a g/g without going back to the body. Molasses, so the substrate
+    is not defined, and its K+/Ca2+ content is the variable of interest rather than a controlled background,
+    which makes the record internally coherent and externally hard to compare. The mutagenesis is physical
+    and untargeted; the comparative genomics and GO enrichment that follow are correlative and no variant
+    is validated by reconstruction, so the 'why' half of the paper is weaker than the 'what'.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Additionally, S. cerevisiae NGTM-F1 was used with 250 g/L (TFS) sugarcane molasses to synthesize
+      ethanol in a 5-L fermenter, giving a yield of 111.65 g/L, the conversion of sugar to alcohol reached
+      95.53%.
+    char_start: 1351
+    char_end: 1556
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The molasses ceiling. Note that the paper calls a TITRE a yield in its own abstract.
+  - quote: We identified high osmotic pressure, high temperature, high alcohol levels, and high concentrations
+      of K+, Ca2+, K+ and Ca2+ (K+&Ca2+), and sugarcane molasses as the main limiting factors.
+    char_start: 772
+    char_end: 960
+    occurrences_in_source: 1
+    verify_span: exact
+    note: What limits the process - the part of this record that the other E2 papers assume rather than
+      measure.
+- publication_id: doi:10.1007/s00253-025-13446-w
+  doi: 10.1007/s00253-025-13446-w
+  pmid: '40105951'
+  title: Engineered S. cerevisiae construction for high-gravity ethanol production and targeted metabolomics.
+  year: 2025
+  journal: Applied microbiology and biotechnology
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm (slot-5 pool note; admitted 2026-09-22, WITH the unit hazard on the record's face)
+  why_this_criterion: 'The upper bound of the pool''s titres, and the only E2 record whose gravity is
+    charged as a DEFINED sugar: 400 g/L sucrose giving 135 g/L ethanol, and 400 g/L corn syrup by SSF
+    giving 145 g/L. It is also the one E2 record whose strain carries deletions the ethanol layer cares
+    about for a second reason - GPD2 and FPS1, the glycerol dehydrogenase paralogue and the glycerol exporter
+    - so it doubles as a measurement of what closing the glycerol sink buys on titre, which is the quantity
+    B.3.1''s redox clause asks about from the opposite direction and which doi:10.1002/elsc.201900080
+    answers only negatively. The second reason this record is admitted is the UNIT TRAP it carries, which
+    is worth more to a later reader than the titre is.'
+  what_it_lacks: 'A SEVENFOLD CRISPR KNOCKOUT (GPD2, FPS1, ADH2, DLD3, ERG5, NTH1, AMS1), which is not
+    an industrial reference strain: the ceiling it reports is a constructed one, and B.3.2''s ''industrial''
+    half is simply not met - it qualifies on the very-high-gravity half alone. THE UNIT TRAP IS ON THE
+    PAPER''S OWN FACE AND IS THE REASON TO READ THIS RECORD CAREFULLY: its key points read ''The ethanol
+    yield of 145 g/L'' (evidence[1]), which is a TITRE, and the ''sugar-ethanol conversion rate of 41.1%''
+    is a g/g figure (0.411, about 80% of the 0.511 g/g theoretical maximum) and NOT a percentage of theoretical.
+    Reading 41.1% as a fraction of theoretical would understate the strain by a factor of two, and it
+    is an easy mistake to make from the abstract alone. Seven simultaneous deletions means no single contribution
+    is isolated, so nothing here attributes the gain to the glycerol branch specifically; the targeted
+    metabolomics that follows is associative. SSF conflates saccharification with fermentation, so the
+    corn-syrup number is a process result and not a fermentation ceiling. No accession.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Under high-gravity fermentation with 400 g/L of sucrose, S. cerevisiae GFADENA produced 135
+      g/L ethanol, which increased 17% compared with the wild-type strain. In addition, S. cerevisiae
+      GFADENA produced 145 g/L of ethanol by simultaneous saccharification and fermentation (SSF) using
+      400 g/L of corn syrup with a sugar-ethanol conversion rate of 41.1%.
+    char_start: 496
+    char_end: 850
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'Both ceilings: 135 g/L on defined sucrose and 145 g/L by SSF on corn syrup. The 41.1% is a
+      g/g conversion (0.411), NOT a percentage of theoretical.'
+  - quote: • The ethanol yield of 145 g/L was produced using 400 g/L corn syrup by the SSF method
+    char_start: 1988
+    char_end: 2074
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'THE UNIT TRAP ON THE PAPER''S OWN FACE: 145 g/L is a titre and is called a yield in the key
+      points. Recorded because a later reader would not catch it.'
+- publication_id: doi:10.1186/1752-0509-4-12
+  doi: 10.1186/1752-0509-4-12
+  pmid: '20167065'
+  title: Transcriptional regulation of respiration in yeast metabolizing differently repressive carbon
+    substrates.
+  year: 2010
+  journal: BMC systems biology
+  admitted_criterion: E3
+  slot: 1
+  current_db_tag: E3
+  action: confirm (slot-1 runner-up; admitted 2026-09-22)
+  why_this_criterion: 'B.3.3 names S288C-background wild types among the baselines the programme will
+    use, and this is the pool''s only 13C metabolic-flux dataset for a genuine PROTOTROPHIC wild type
+    (FY4), with uptake rate, biomass yield, growth rate and a quantified degree of respiration reported
+    per carbon source in one table under one protocol. It supplies the axis the layer''s other three E3
+    records do not: a GRADED respiratory-fermentative series - glucose, mannose, galactose, pyruvate -
+    measured in one background, which is what turns ''respiratory'' and ''fermentative'' from labels into
+    a scale. That scale is directly load-bearing for E5, because the degree of respiration is the state
+    in which Adh3 would be carrying flux, and the layer currently has that state named in prose and quantified
+    nowhere.'
+  what_it_lacks: 'MICROSCALE BATCH IN 96-DEEP-WELL PLATES, not a chemostat, so there is no dilution rate
+    and B.3.3''s own stated preference is not met - this record is two steps from the ideal where the
+    layer''s strongest E3 record (doi:10.1093/femsyr/fow006) is one. AEROBIC ONLY: the axis varied here
+    is carbon source, not oxygen, so it does not supply the anaerobic half of slot 1''s question and must
+    not be read as if it did. No ethanol or glycerol yields appear in the physiology table - they sit
+    inside the flux additional files - and NO CLOSED CARBON BALANCE IS REPORTED, which is the standard
+    the rest of the layer''s E3 records are held to. The degree of respiration is in arbitrary units,
+    so it orders conditions without converting them and cannot be compared with any other paper''s respiratory
+    measure. No deposited omics; the 40 GFP-fusion abundances are in-house measurements presented as figures.
+    And the transcription-factor conclusions rest on a probabilistic inference over a known regulatory
+    network rather than on direct measurement - a different kind of claim from the physiology table, and
+    it must not be quoted with the same confidence.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: To elucidate the transcriptional regulation of respiration, we grew wild-type S. cerevisiaeFY4
+      in aerobic microscale batch cultures (96-deep-well plates) on minimal medium with either glucose,
+      mannose, galactose or pyruvate as sole carbon source.
+    char_start: 5070
+    char_end: 5316
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The design and its limit in one sentence: a prototrophic wild type, but microscale batch in
+      deep-well plates, aerobic only.'
+  - quote: 'c-source | uptake rate [mmol/g/h] | biomass yield[g(cdw)/g(c - source)] | growth rate [1/h]
+      | degree of respiration [AU]
+
+
+      glucose | -16.3 ± 1.1 | 0.11 ± 0.01 | 0.33 ± 0.01 | 0.00 ± 0.00
+
+
+      mannose | -12.8 ± 1.1 | 0.14 ± 0.03 | 0.32 ± 0.01 | 0.06 ± 0.00
+
+
+      galactose | -4.5 ± 0.3 | 0.25 ± 0.02 | 0.20 ± 0.01 | 6.90 ± 1.30
+
+
+      pyruvate | -2.5 ± 0.4 | 0.45 ± 0.04 | 0.10 ± 0.01 | 13.30 ± 2.66'
+    char_start: 6368
+    char_end: 6750
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The physiology table. Biomass yield, growth rate and a quantified degree of respiration across
+      a graded respiratory-fermentative series in one background. The degree of respiration is in arbitrary
+      units, so it orders conditions without converting them.
+- publication_id: doi:10.1111/1751-7915.70244
+  doi: 10.1111/1751-7915.70244
+  pmid: '41074565'
+  title: Chromosome III Aneuploidy Enhances Ethanol Tolerance in Industrial Saccharomyces cerevisiae by
+    Increasing the TUP1 Copy Number.
+  year: 2025
+  journal: Microbial biotechnology
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm (slot-7 not_shortlisted_but_notable; admitted 2026-09-22 with its strain-provenance
+    objection recorded)
+  why_this_criterion: 'The only record in the pool that proposes a MECHANISM for chromosome III aneuploidy
+    and tests it, which is what lifts it out of B.3.6''s exclusion of bare tolerance QTL mapping. It is
+    the direct successor to the layer''s existing E6 record doi:10.1371/journal.pgen.1005635, which established
+    chromosome III aneuploidy as a recurrent route to high ethanol tolerance without saying why: RNA-seq
+    of a 3xChrIII strain against its 2xChrIII derivative at 0, 6 and 10% ethanol identifies TUP1 as the
+    sole enriched chromosome III transcription factor, and deleting one of the three TUP1 copies lowers
+    tolerance toward the 2xChrIII level. Reads are deposited (PRJNA1153811). It also serves the slots
+    document''s own prediction that the industrial advantage is polygenic with a copy-number contribution,
+    by naming a dosage-sensitive component of one.'
+  what_it_lacks: 'THE TITLE''S ''INDUSTRIAL'' IS NOT SUPPORTED BY THE STRAINS, AND THIS IS THE FIRST THING
+    A READER SHOULD WEIGH. 2-200-2 is a laboratory strain - an FY5/S288C derivative from an ethanol evolution
+    experiment, carrying a hypermutator MSH2 insertion plus indels in ASG1 and PET123 and three FLO deletions
+    (evidence[1]). No industrial strain appears anywhere in the paper, so admitting it on its title would
+    be admitting a claim the data do not make. IT IS A SINGLE-GENE EXPLANATION OF A POLYGENIC PHENOMENON,
+    which the slots document says to treat with suspicion rather than enthusiasm, and the test is ONE-DIRECTIONAL:
+    removing a TUP1 copy lowers tolerance, but nothing here shows that ADDING TUP1 to a euploid strain
+    raises it, which is the claim the title implies. THE EFFECT IS SMALL AND THE BACKGROUND IS NOISY -
+    MIC moves from 11.44 to 10.23 - measured in a hypermutator carrying other uncharacterised mutations.
+    AND IT IS NOT INDEPENDENT OF THE LAYER''S OTHER CHROMOSOME III RECORD: 2-200-2 comes from the same
+    evolution experiment as doi:10.1371/journal.pgen.1005635''s clones, so the two E6 records are one
+    lineage read twice, and that cost is recorded here rather than left to be rediscovered.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Our analysis identified TUP1, located on chromosome III, as a key regulator of the ethanol
+      stress response. Deleting one copy of TUP1 in the tolerant strain diminished its ethanol tolerance,
+      suggesting that chromosome III aneuploidy in ethanol‐tolerant strains enhances adaptive responses
+      by increasing TUP1 copy number.
+    char_start: 629
+    char_end: 949
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The mechanism and the test, and the test is one-directional: removing a TUP1 copy lowers tolerance.
+      Nothing here adds TUP1 to a euploid strain.'
+  - quote: S. cerevisiae strain 2‐200‐2 (MATα/α) was originally obtained from Voordeckers et al. (), and
+      used in this study. This strain was derived from FY5 (MATα), a background in which the FLO1, FLO10
+      and FLO11 genes had been deleted. Following these deletions, the strain underwent 200 generations
+      of adaptive evolution under ethanol stress. The evolved strain, 2‐200‐2, exhibits a hypermutator
+      phenotype resulting from an insertion in MSH2, and carries additional genetic alterations, including
+      aneuploidy of chromosome III and indels in ASG1 and PET123.
+    char_start: 6792
+    char_end: 7340
+    occurrences_in_source: 1
+    verify_span: exact
+    note: THE STRAIN PROVENANCE, WHICH CONTRADICTS THE TITLE'S 'INDUSTRIAL'. An FY5/S288C laboratory derivative,
+      hypermutator, carrying other uncharacterised mutations - and from the same evolution experiment
+      as the layer's other chromosome III record.
+  - quote: The information about the sequences area available in BioProject ID PRJNA1153811.
+    char_start: 8732
+    char_end: 8813
+    occurrences_in_source: 1
+    verify_span: exact
+    note: Data availability. The stored text reads 'sequences area available'; reproduced exactly.
+- publication_id: doi:10.1186/s12864-019-5959-8
+  doi: 10.1186/s12864-019-5959-8
+  pmid: '31462217'
+  title: Natural allelic variations of Saccharomyces cerevisiae impact stuck fermentation due to the combined
+    effect of ethanol and temperature; a QTL-mapping study.
+  year: 2019
+  journal: BMC genomics
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm (slot-7 not_shortlisted_but_notable; admitted 2026-09-22)
+  why_this_criterion: 'The only E6 record in the layer that takes natural allelic variation all the way
+    to a FERMENTATION ENDPOINT and then validates causality on it: three QTLs for stuck fermentation under
+    combined high gravity (over 240 g/L sugar) and high temperature (over 28 C), two of them dissected
+    to causative genes - VHS1 and OYE2, both stop-codon insertions - by reciprocal hemizygosity. B.3.6
+    excludes bare tolerance QTL mapping; reciprocal hemizygosity on a completion endpoint is what takes
+    it out of the exclusion, and it is the same standard that admitted doi:10.1101/gr.131698.111. The
+    endpoint is the reason to prefer it: the layer''s other E6 records score tolerance as growth, and
+    FINISHING a fermentation is the trait the programme actually needs from an industrial strain.'
+  what_it_lacks: 'WINE STRAINS AND WINE CONDITIONS. The parents are B-1A and G-4A and the medium is a
+    synthetic grape must at 260 g/L sugar (evidence[1]); neither Ethanol Red nor CEN.PK appears anywhere,
+    and transfer to a first-generation bioethanol chassis is an extra inferential step this paper does
+    not take. THE PHENOTYPE IS STUCK FERMENTATION UNDER COMBINED ETHANOL AND TEMPERATURE STRESS, not ethanol
+    tolerance as such: the combination is the paper''s own framing, so the ethanol contribution is never
+    separated from the thermal one and no allele here can be called an ethanol-tolerance allele. THE THIRD
+    QTL IS LEFT UNRESOLVED AND IT IS THE INTERESTING ONE - a subtelomeric region of chromosome XV, which
+    is exactly where the Ethanol Red proxy genome cannot be called at N50 189 kb. So the one locus this
+    record leaves open is the one the programme''s computable layer is structurally blind to. Effects
+    are confined to the late, stationary phase. ''Reciprocal Hemyzygous Assay'' is the stored text''s
+    own spelling and is reproduced exactly in evidence[0].'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: The precision of mapping allows the identification of two causative genes VHS1 and OYE2 characterized
+      by stop-codon insertion. The phenotypic effect of these allelic variations was validated by Reciprocal
+      Hemyzygous Assay in high gravity fermentations (> 240 g/L of sugar) carried out at high temperatures
+      (> 28 °C).
+    char_start: 925
+    char_end: 1241
+    occurrences_in_source: 1
+    verify_span: exact
+    note: Causality taken to allele level by reciprocal hemizygosity, on a FERMENTATION COMPLETION endpoint
+      under stated gravity and temperature. 'Hemyzygous' is the stored text's own spelling.
+  - quote: The parental strains (B-1A, G-4A), the hybrid H4, and 77 H4-meiotic segregants were fermented
+      in a synthetic grape must containing 260 g/L of sugar at 28 °C (see ).
+    char_start: 10900
+    char_end: 11064
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The conditions and the material: synthetic grape must, wine parents. This is the transfer step
+      the record does not take.'
+- publication_id: doi:10.3389/fgene.2019.00782
+  doi: 10.3389/fgene.2019.00782
+  pmid: '31572430'
+  title: Controlled Reduction of Genomic Heterozygosity in an Industrial Yeast Strain Reveals Wide Cryptic
+    Phenotypic Variation.
+  year: 2019
+  journal: Frontiers in genetics
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm (slot-7 not_shortlisted_but_notable; admitted 2026-09-22 as an ARCHITECTURE record,
+    not a phenotype one)
+  why_this_criterion: 'The strongest treatment in the pool of a genuine industrial hyper-producer''s genome
+    ARCHITECTURE rather than its gene list: PE-2/JAY270, the sugarcane distillery strain, with heterozygosity
+    deliberately reduced by inbreeding and by targeted uniparental disomy of chromosomes IV, XIV and XV,
+    and the phenotypic consequences measured in each configuration. It bears directly on the slot''s framing
+    question - whether an industrial strain''s advantage lives in its heterozygous CONFIGURATION rather
+    than in any individual allele - and it answers yes for at least two traits, which is a different and
+    more structural kind of answer than the allele-level records supply. The slots document predicts the
+    answer will be polygenic with a copy-number contribution and warns against single-gene explanations;
+    this is the record that shows what that looks like when tested. It is also the only E6 record about
+    a named industrial bioethanol strain other than the two Ethanol Red ones.'
+  what_it_lacks: 'THE TRAITS MEASURED ARE NOT ETHANOL TRAITS. Heat stress tolerance and competitive growth
+    are the two phenotypes (evidence[1]); neither ethanol tolerance nor ethanol yield is scored anywhere
+    in the paper. So this record CANNOT answer ''why is PE-2 a good ethanol producer'' and must never
+    be cited as if it could - its contribution is that heterozygosity carries wide cryptic phenotypic
+    variation in this strain, not that it carries the ethanol phenotype. THE QTLs ARE BROAD GENOMIC REGIONS
+    WITH NO GENE-LEVEL VALIDATION and no reciprocal hemizygosity, so unlike the layer''s other two causal
+    E6 records this one stops at association. PE-2/JAY270 is not Ethanol Red, so every conclusion drawn
+    for the programme is a second proxy layered on the first. AND THE METHOD DESTROYS WHAT IT STUDIES:
+    inbreeding and uniparental disomy are laboratory manipulations that remove the heterozygous configuration,
+    so the inference runs from what BREAKING heterozygosity costs - which bounds its contribution without
+    identifying it.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: One such case is the PE-2/JAY270 strain, a natural hybrid widely adopted by sugarcane bioethanol
+      distilleries for its ability to thrive under harsh biotic and abiotic stresses during industrial
+      scale fermentation, however, it is not known whether or how the heterozygous configuration of the
+      JAY270 genome contributes to its many desirable traits.
+    char_start: 393
+    char_end: 740
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The slot's framing question, asked about a real industrial bioethanol strain, with the authors'
+      statement that the answer is not known.
+  - quote: 'Unique combinations of homozygous alleles in each inbred strain revealed wide phenotypic variation
+      for at least two important industrial traits: Heat stress tolerance and competitive growth. Quantitative
+      trait loci analyses allowed the identification of broad genomic regions where genetic polymorphisms
+      potentially impacted these traits, and there was no overlap between the loci associated with each.'
+    char_start: 1010
+    char_end: 1412
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'WHAT WAS ACTUALLY MEASURED: heat stress tolerance and competitive growth. Not ethanol tolerance
+      and not ethanol yield - and the QTLs are broad regions with no gene-level validation.'
+- publication_id: doi:10.1534/g3.116.029389
+  doi: 10.1534/g3.116.029389
+  pmid: '27172212'
+  title: Genome Sequence and Analysis of a Stress-Tolerant, Wild-Derived Strain of Saccharomyces cerevisiae
+    Used in Biofuels Research.
+  year: 2016
+  journal: G3 (Bethesda, Md.)
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm (slot-7 not_shortlisted_but_notable; admitted 2026-09-22 as the record that BOUNDS the
+    Ethanol Red proxy decision)
+  why_this_criterion: 'The record that bounds the Ethanol Red proxy decision, which the slots document
+    flags as a standing consequence to be repeated wherever a result leans on it. At contig N50 693 kb,
+    with most chromosomes, the mitochondrial genome and the 2-micron plasmid complete, this assembly recovers
+    92 genes absent from S288c with over 70% of them expressed - in exactly the subtelomeric regions the
+    paper states most shotgun strategies handle poorly. Ethanol Red''s public assembly is scaffold-level
+    at N50 189 kb, so this is the measured statement of what the proxy genome is blind to and what long
+    reads would buy, which the slots document asserts and nothing else in the layer demonstrates. It also
+    states the field-wide gap slot 7 exists to close, naming PE-2 and Ethanol Red and saying in as many
+    words that the causal variants behind their tolerance have generally remained unclear (evidence[1]).
+    Deposited: LBMA00000000 and PRJNA279877.'
+  what_it_lacks: 'NOT ETHANOL RED, NOT AN ETHANOL PHENOTYPE, AND NO CAUSAL TEST OF ANYTHING. GLBRCY22-3
+    is a wild banana isolate (from NRRL YB-210) engineered for xylose metabolism; the stress it is characterised
+    against is AFEX corn stover hydrolysate, not ethanol; and the 92 novel genes are annotated and expression-checked
+    but not functionally validated - ''predicted to encode proteins whose functions are related to carbon
+    metabolism or stress tolerance'' is the strongest claim the paper makes about them. So it answers
+    a METHODOLOGICAL question about assembly quality and a bibliographic one about the field''s gap, and
+    answers no biological question this slot asks. IT SUPPLIES NO ETHANOL RED DATA AT ALL: the inference
+    to the proxy''s blind spot is the atlas''s, drawn from two N50 figures in two different papers, and
+    is not this paper''s claim. Its measurements are assembly statistics and gene counts, not physiology,
+    so nothing in it belongs in a fermentation comparison and no row from it can carry a condition.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Specifically, the contig N50 is 693 kbp, and the sequences of most chromosomes, the mitochondrial
+      genome, and the 2-micron plasmid are complete. Our annotation predicts 92 genes that are not present
+      in the reference genome of the laboratory strain S288c, over 70% of which were expressed.
+    char_start: 1042
+    char_end: 1330
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The assembly quality and what it recovers. Against Ethanol Red's scaffold-level N50 of 189 kb,
+      this is the measured statement of what the proxy genome cannot see.
+  - quote: industrial S. cerevisiae strains have been selected for their robust tolerance phenotypes and
+      further developed for lignocellulosic ethanol production, including the strains PE-2 () and Ethanol
+      Red (). The genome sequences of several bioethanol production strains, including the PE-2-derivative
+      JAY291 (), have been published, but the identities of the genes and variants that confer stress
+      tolerance and other industrially desirable properties have generally remained unclear (; ; ; ; ).
+    char_start: 3043
+    char_end: 3531
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The field-wide gap slot 7 exists to close, naming PE-2 and Ethanol Red: the causal variants
+      behind industrial tolerance have generally remained unclear.'
+  - quote: This Whole Genome Shotgun project has been deposited at DDBJ/EMBL/GenBank under the accession
+      LBMA00000000. The version described in this paper is version LBMA01000000. All DNA and RNA sequencing
+      reads have been deposited in the NCBI SRA under BioProject PRJNA279877.
+    char_start: 11254
+    char_end: 11521
+    occurrences_in_source: 1
+    verify_span: exact
+    note: Data availability.
 open_gaps:
 - gap: matrix NAD(P)H pool size and NAD(P)H/NAD(P)+ ratio in living Saccharomyces cerevisiae, measured
     compartment-resolved under a named growth condition
