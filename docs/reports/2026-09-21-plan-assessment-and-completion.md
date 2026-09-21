@@ -329,25 +329,37 @@ same window as an already-resident instance. The whole reason the calibration co
 configured model was that a different `num_ctx` needed a *second* 16 GB instance that did not fit,
 and Ollama blocked indefinitely rather than erroring. At one kind, no second instance is needed.
 
-Against `doi:10.1016/j.jbc.2026.113228`, where the capable tier found 36 records:
+Against `doi:10.1016/j.jbc.2026.113228`, per record kind, with Opus 5 at all kinds as the ground
+truth:
 
-| tier | schema | strains found | note |
-|---|---|---|---|
-| Opus 5 (capable) | all kinds | 3 | the ground truth |
-| `qwen2.5:7b-instruct` | **one kind** | **0** | 0 records on *all seven* kinds, 0 validation failures |
-| **`qwen3.6:27b`** (configured) | **one kind** | **4** | all span-verified; 375 s, 100% GPU |
+| kind | Opus 5 | `qwen2.5:7b` (1 kind) | `qwen3.6:27b` (1 kind) | 27B wall-clock |
+|---|---|---|---|---|
+| strains | 3 | 0 | **4** | 375 s |
+| modifications | 5 | 0 | **0** | 128 s |
+| bottlenecks | 2 | 0 | **0** | 131 s |
+| measurements | 9 | 0 | **could not run** — needed 8,359 tokens against `num_ctx` 8,192 | — |
 
-Two conclusions, and they point in opposite directions from each other:
+**Read this carefully, because the first three rows say different things.**
 
-* **Narrowing does not rescue the 7B.** It returns well-formed empty arrays for every kind — it is
-  not failing, it is declining. §3a's recall verdict stands *for the model it actually tested*.
-* **But §3a tested the wrong model, and said so.** The 7B is the *triage* model. The configured
-  extraction model produces records in the right range the moment it can be run at all. **The
-  calibration's 0.3% is not a measurement of the local tier; it is a measurement of the triage
-  model doing a job it was never assigned.**
+* **Narrowing does not rescue the 7B.** Well-formed empty arrays on all seven kinds, 0 validation
+  failures — it declines rather than fails. §3a's verdict stands for the model it tested.
+* **The 27B runs, and on `strains` it matches the capable tier** (4 span-verified against 3). That
+  is the first output the *configured* extraction model has ever produced in this project.
+* **And on `modifications` and `bottlenecks` it returns nothing**, where Opus found 5 and 2. Those
+  two ran cleanly in ~130 s each and came back empty, so that is recall, not a context failure.
+* **`measurements` — the highest-value kind — missed the context by 167 tokens.** Its schema is the
+  largest, and at an 8,000-character window it needs 8,359 against 8,192. Raising `num_ctx` fixes
+  it, but only by reintroducing the second-instance problem unless the resident instance is started
+  at the higher value.
 
-So the routing question is **re-opened, not settled**. What is settled is that the schema was
-blocking the experiment that would answer it.
+**So the honest verdict is narrower than "local is back".** What the experiment establishes is
+that §3a measured the **triage** model — the real one could not start — so **its 0.3% was never a
+measurement of the local tier.** What it does *not* establish is that the local tier is usable:
+on the three kinds that ran, the 27B matched on one and scored zero on two.
+
+The routing question is therefore **re-opened and still open**. It needs a proper run of the 27B
+across the frozen 20-paper set at a context sized for the largest schema — which is now possible,
+and was not this morning.
 
 ### 3b.3 The cheap consequence for the capable tier
 
