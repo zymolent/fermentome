@@ -45,6 +45,25 @@ collapsed, and numbers go through a decimal normal form so `30` and `30.0` conve
 **not** folded. Whether `"YPD"` and `"ypd"` name the same medium is a synonymy question, and
 answering it inside a hash would silently merge two contexts on a guess -- the same class of
 mistake this whole module exists to refuse.
+
+## What the 2026-09-22 curation pass found, and why it still wrote nothing
+
+The six accepted `conditions` records across four papers were worked through against the stored
+full texts; the decision, with a verified span per context, is
+`docs/drafts/contexts/2026-09-22-decided-groupings.json`. Two facet records were refused outright
+and the one multi-record candidate the proposal offered was rejected as offered and split into
+three. Four contexts were decided and **none was written**, for three reasons that are worth
+having in the source rather than only in a draft:
+
+* PLAN.md L.5 forbids an agent writing Zone R or Zone H, and :mod:`fermdb.curate.promote`
+  enforces exactly that for every other record kind -- *"reserves promotion for a person"*. A
+  `condition_context` is canonical data. A writer here that skipped that guard would be the
+  automatic grouper with the human-shaped button removed entirely.
+* `condition_context.context_hash` is UNIQUE and the table is immutable, so a row written ahead
+  of the curator does not merely risk being wrong, it **occupies the hash slot** the curator's
+  approved row needs, and nothing can take it back without a delete.
+* One decided context hashes identically to a real, different vessel in its own paper. See
+  :func:`collisions_if_dropped`.
 """
 
 from __future__ import annotations
@@ -61,6 +80,7 @@ from typing import Any, Final
 
 __all__ = [
     "CLASS_DEFINING_FACETS",
+    "EVERYTHING_DROPPED",
     "FACET_STATES",
     "UNRECORDED_TOKENS",
     "Basis",
@@ -70,9 +90,11 @@ __all__ = [
     "FacetRecord",
     "Note",
     "build_context_page",
+    "collisions_if_dropped",
     "context_hash",
     "context_proposal",
     "context_proposals",
+    "facets_without",
     "load_approval",
     "load_condition_facets",
     "page_payload",
@@ -667,6 +689,58 @@ def load_approval(document: Mapping[str, Any]) -> tuple[tuple[str, str, tuple[Fa
             "Merge them, or record what actually differs -- an unrecorded difference is not one"
         )
     return tuple(out)
+
+
+# -------------------------------------------------------------- what a facet with no home costs
+
+
+#: The key :func:`collisions_if_dropped` files a context under when every one of its facets was
+#: dropped. Such a context is not merely at risk of colliding: it has become the empty context
+#: :func:`context_hash` refuses outright, and every other emptied context is the same nothing.
+EVERYTHING_DROPPED: Final[str] = "*"
+
+
+def facets_without(facets: Iterable[Facet], names: Iterable[str]) -> tuple[Facet, ...]:
+    """`facets` with the named ones removed -- what a context becomes when a facet has no home.
+
+    Removal, not blanking. A facet the row cannot store is not stored as `'unknown'`: PLAN.md C.5
+    keeps "never recorded" and "recorded and unresolvable" apart, and writing the second when the
+    truth is that the schema has nowhere to put the first would be that coercion done by a
+    limitation rather than by a curator.
+    """
+    excluded = {name.strip() for name in names}
+    return tuple(facet for facet in facets if facet.name.strip() not in excluded)
+
+
+def collisions_if_dropped(
+    approved: Sequence[tuple[str, str, tuple[Facet, ...]]],
+    dropped: Iterable[str],
+) -> tuple[tuple[str, ...], ...]:
+    """Which approved contexts become one row once the named facets are dropped from the hash.
+
+    The check that has to pass before anything is written, because the answer is not visible by
+    reading the rows. PLAN.md C.5's 2026-09-20 amendment makes `carbon_regime` and
+    `in_situ_product_removal` class-defining and part of `context_hash`; neither has a
+    `condition_context` column or a row in `data/vocabularies/condition_facets.tsv`. Pass them
+    here and a curator learns, before the insert rather than at aggregation time, whether two of
+    the contexts they are about to approve differ *only* by a facet the atlas cannot yet hold --
+    a stripped vessel and a sealed one arriving as one row, with every measurement under both then
+    pooled.
+
+    Takes what :func:`load_approval` returns and gives back the label groups that collapse,
+    largest first then alphabetical; a group of one is not a collision and is not returned, so an
+    empty result is the clean answer. Contexts left with no facets at all are returned as one
+    group under :data:`EVERYTHING_DROPPED`, because they have collapsed into the empty context
+    :func:`context_hash` refuses -- the same finding, arrived at from the other end.
+    """
+    names = list(dropped)
+    grouped: dict[str, list[str]] = {}
+    for label, _, facets in approved:
+        kept = facets_without(facets, names)
+        key = context_hash(kept) if kept else EVERYTHING_DROPPED
+        grouped.setdefault(key, []).append(label)
+    collisions = [tuple(sorted(labels)) for labels in grouped.values() if len(labels) > 1]
+    return tuple(sorted(collisions, key=lambda group: (-len(group), group)))
 
 
 # -------------------------------------------------------------------------------- the one pass

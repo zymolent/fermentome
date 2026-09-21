@@ -1,0 +1,109 @@
+{
+  "decided_on": "2026-09-22",
+  "decided_by": "curation agent, on the owner's delegation of the grouping decision",
+  "source": "the 6 accepted 'conditions' curation tasks in the atlas at v12, across 4 publications",
+  "written": false,
+  "why_not_written": [
+    "PLAN.md L.5 forbids an agent writing Zone R or Zone H, and curate.promote enforces exactly that for every other record kind ('reserves promotion for a person'). A condition_context is canonical Zone R/H data.",
+    "condition_context.context_hash is UNIQUE and the table is immutable, so an agent-written row permanently occupies the hash slot that the curator's approved row needs.",
+    "'btre-2026-ynb-150' below hashes identically to this same paper's 5-L bioreactor run on every facet an accepted record names today, and the paper itself says the bioreactor number is depressed by gas stripping -- the facet with no column."
+  ],
+  "documents": [
+    {
+      "publication_id": "doi:10.1016/j.btre.2026.e00959",
+      "proposal_basis_offered": "same_strain_as_reported, one candidate holding all three facet records",
+      "decision": "REJECTED AS OFFERED, split into three. The paper's own comparison is between these media and these sugar levels, so grouping all three under the strain would build one context out of the three vessels whose difference is the paper's result.",
+      "contexts": [
+        {
+          "label": "btre-2026-ypd-100",
+          "from_task": "YAA:CTASK:cc5eef0481e84229817844b7034b2742",
+          "record_path": "conditions[2]",
+          "span": {"char_start": 27005, "char_end": 27123, "section": "results_and_discussion"},
+          "quote": "The isobutanol yield from IbOH-1bat1∆ was 0.215 ± 0.04 g/L in YPD medium with 100 g/L of glucose after 72 h of culture",
+          "facets": [
+            {"name": "medium_name", "state": "recorded", "value": "YPD",
+             "as_reported": "YPD with 100 g/L glucose"},
+            {"name": "total_sugar_g_l", "state": "recorded", "value": 100,
+             "as_reported": "100 g/L of glucose"}
+          ]
+        },
+        {
+          "label": "btre-2026-ynb-100",
+          "from_task": "YAA:CTASK:58c765f0965448e0adb2abfaf63e2526",
+          "record_path": "conditions[0]",
+          "span": {"char_start": 27129, "char_end": 27324, "section": "results_and_discussion"},
+          "quote": "In contrast, fermentation using YNB medium supplemented with 100 g/L of glucose resulted in an isobutanol concentration of 0.866 ± 0.042 g/L by the IbOH-1bat1Δ cells after 72 hours of cultivation",
+          "span_note": "the stored span on the task is 27209-27324, which begins after the words that name the medium and the sugar. The span recorded here is widened to the sentence that actually carries them.",
+          "facets": [
+            {"name": "medium_name", "state": "recorded", "value": "YNB",
+             "as_reported": "YNB with 100 g/L glucose"},
+            {"name": "total_sugar_g_l", "state": "recorded", "value": 100,
+             "as_reported": "100 g/L of glucose"}
+          ]
+        },
+        {
+          "label": "btre-2026-ynb-150",
+          "from_task": "YAA:CTASK:bac30707a9d842aba597069f2a47276f",
+          "record_path": "conditions[1]",
+          "span": {"char_start": 29098, "char_end": 29275, "section": "results_and_discussion"},
+          "quote": "increasing the glucose concentration in YNB medium from 100 g/L to 150 g/L boosted the isobutanol titer from 0.866 ± 0.042 g/L to 1.001 ± 0.038 g/L following 72 h of cultivation",
+          "collides_with": "the same paper's 5-L bioreactor run (span 15349-15760): YNB-based medium, 150 g/L glucose, 3 L working volume, 250 rpm, 1.5 vvm, 72 h -- and gas-stripped. Identical on medium_name and total_sugar_g_l, which are the only facets an accepted record names.",
+          "facets": [
+            {"name": "medium_name", "state": "recorded", "value": "YNB",
+             "as_reported": "YNB with 150 g/L glucose"},
+            {"name": "total_sugar_g_l", "state": "recorded", "value": 150,
+             "as_reported": "150 g/L glucose"}
+          ]
+        }
+      ]
+    },
+    {
+      "publication_id": "doi:10.1186/s13068-019-1486-8",
+      "proposal_basis_offered": "same_strain_as_reported, one facet record",
+      "decision": "ACCEPTED as one context of one facet record, split into the two facets its own accepted string states. Strain attribution checked and correct: the 0.22 g/L number is JWY0 (∆ilv2).",
+      "contexts": [
+        {
+          "label": "s13068-2019-jwy0-flask",
+          "from_task": "YAA:CTASK:fb810733ec904e89971d19546d4272d4",
+          "record_path": "conditions[0]",
+          "span": {"char_start": 1522, "char_end": 1645, "section": "abstract_results"},
+          "quote": "leading to a 22-fold increase of isobutanol production up to 0.22 g/L (5.28 mg/g glucose) with aerobic shake flask cultures",
+          "corroborating_span": {
+            "char_start": 12304, "char_end": 12406, "section": "figure_legend",
+            "quote": "aerobically at 30 °C in shake flasks in selective SCD medium without valine containing 40 g/L glucose"
+          },
+          "span_note": "the stored span sits in the structured abstract's Results, not the Results section. The figure legend above states the same conditions in the body and is recorded as corroboration.",
+          "facets": [
+            {"name": "aeration_class", "state": "recorded", "value": "aerobic",
+             "as_reported": "aerobic shake flask"},
+            {"name": "vessel_type", "state": "recorded", "value": "shake_flask",
+             "as_reported": "aerobic shake flask"}
+          ]
+        }
+      ]
+    }
+  ],
+  "refused": [
+    {
+      "publication_id": "doi:10.1016/j.meteno.2016.03.004",
+      "task": "YAA:CTASK:9ced227d73114f6eb43b637f189bdd24",
+      "facet": "carbon_sources",
+      "value_as_reported": "2% glucose or galactose",
+      "verified_span": {"char_start": 11808, "char_end": 11856, "section": "methods"},
+      "quote": "supplemented with either 2% glucose or galactose",
+      "reason": "the accepted value is a disjunction, and the source's own word is 'either'. 2% glucose and 2% galactose are two contexts, not one, and galactose is the inducer in this design -- so the two are not even interchangeable. Nothing in the record says which measurements were taken under which, and a context named 'glucose or galactose' is a vessel that never existed. Its measurements stay at condition_context = NULL (PLAN.md C.7)."
+    },
+    {
+      "publication_id": "doi:10.1186/1475-2859-12-119",
+      "task": "YAA:CTASK:b1accb1781574a6b89028f93c7e3c8e0",
+      "facet": "total_sugar_g_l",
+      "value_as_reported": "100 g/L glucose",
+      "reason": "three independent defects. (1) Strain attribution is contradicted by the paper: the record carries strain_name_as_reported = 'BSW191', but the 50-mL 100 g/L batch run is BSW205/BSW206 ('In a batch fermentation test at the 50-mL scale from 100 g/L glucose using the two integrated strains'); BSW191's own experiment is the 5-mL SD screen at 83 mg/L. (2) The paper contradicts itself on the medium for that run -- Results and the Fig. 6 legend say 'inoculated in 50 mL of SD medium containing 100 g/L glucose' (char 22609), Methods say 'inoculated into 50 mL of YP medium (containing 10 g/L yeast extract and 20 g/L peptone) with 100 g/L glucose' (char 31756). (3) With medium unusable and the strain wrong, what remains is a bare total_sugar_g_l = 100 context, which would deduplicate onto any other bare 100 g/L context from any vessel in any paper."
+    }
+  ],
+  "storage_gap": {
+    "contexts_affected": 4,
+    "note": "none of the four records carbon_regime or in_situ_product_removal, so all four hash without two facets PLAN.md C.5's 2026-09-20 amendment calls class-defining. No two of the four collide with each other. One of them, btre-2026-ynb-150, collides with a real un-curated context in its own paper.",
+    "storage_finding": "condition_context_facet is a generic (context_id, facet, value, value_state, as_reported) table whose stated purpose is 'facets with no first-class column above'. It can hold carbon_regime and in_situ_product_removal today without a migration. What is actually missing is not storage: it is the typed column with its CHECK enum, and the row in data/vocabularies/condition_facets.tsv that pins the facet name. context_hash is a function of the facet name, so an unpinned name is the thing that silently stops two spellings deduplicating."
+  }
+}

@@ -505,3 +505,146 @@ def test_two_class_defining_facets_have_nowhere_to_be_stored_yet() -> None:
         assert facet not in columns
     assert "aeration_class" in known
     assert "aeration_class" in columns
+
+
+def test_dropping_a_facet_with_no_home_merges_the_two_contexts_it_told_apart() -> None:
+    """The cost of the missing columns, made a number instead of a warning.
+
+    DUET's case exactly: one vessel stripped continuously with waste CO2, one sealed, identical in
+    every other respect. With `in_situ_product_removal` in the hash they are two contexts. Drop it
+    — which is what writing a row today does, because there is no column — and they are one, and
+    every titer under both is pooled across the difference that explains them.
+    """
+    document = {
+        "contexts": [
+            {
+                "label": "stripped",
+                "facets": [
+                    {"name": "medium_name", "state": "recorded", "value": "YNB"},
+                    {
+                        "name": "in_situ_product_removal",
+                        "state": "recorded",
+                        "value": "gas_stripping",
+                    },
+                ],
+            },
+            {
+                "label": "sealed",
+                "facets": [
+                    {"name": "medium_name", "state": "recorded", "value": "YNB"},
+                    {"name": "in_situ_product_removal", "state": "recorded", "value": "none"},
+                ],
+            },
+        ]
+    }
+    approved = C.load_approval(document)
+    assert C.collisions_if_dropped(approved, []) == ()
+    assert C.collisions_if_dropped(approved, ["in_situ_product_removal"]) == (
+        ("sealed", "stripped"),
+    )
+
+
+def test_a_context_made_only_of_facets_with_no_home_collapses_to_the_empty_context() -> None:
+    """The same finding from the other end: drop every facet a context has and what is left is
+    the empty context `context_hash` refuses, not a thinner context."""
+    document = {
+        "contexts": [
+            {
+                "label": "regime only",
+                "facets": [{"name": "carbon_regime", "state": "recorded", "value": "SEQUENTIAL"}],
+            },
+            {
+                "label": "removal only",
+                "facets": [{"name": "in_situ_product_removal", "state": "unknown"}],
+            },
+        ]
+    }
+    approved = C.load_approval(document)
+    collisions = C.collisions_if_dropped(approved, C.CLASS_DEFINING_FACETS)
+    assert collisions == (("regime only", "removal only"),)
+
+
+def test_a_facet_with_no_home_is_removed_rather_than_stored_as_unknown() -> None:
+    """`'unknown'` is a recorded fact about the source. "the schema has nowhere to put this" is a
+    fact about the schema. Writing the second as the first is PLAN.md C.5's coercion performed by
+    a limitation, so the facet comes out of the set entirely."""
+    facets = [
+        C.Facet("medium_name", "recorded", "YNB"),
+        C.Facet("carbon_regime", "recorded", "SINGLE"),
+    ]
+    kept = C.facets_without(facets, ["carbon_regime"])
+    assert [f.name for f in kept] == ["medium_name"]
+    assert C.context_hash(kept) == C.context_hash([C.Facet("medium_name", "recorded", "YNB")])
+
+
+# ------------------------------------------------------- the 2026-09-22 decision, kept testable
+
+DECIDED = REPO_ROOT / "docs" / "drafts" / "contexts" / "2026-09-22-decided-groupings.json"
+
+
+def _decided() -> dict[str, object]:
+    loaded = json.loads(DECIDED.read_text(encoding="utf-8"))
+    assert isinstance(loaded, dict)
+    return loaded
+
+
+def test_every_decided_context_validates_and_hashes_apart_within_its_paper() -> None:
+    """The curation decision, in the repo and under test rather than in a report.
+
+    Each document goes through `load_approval`, so every refusal in this module applies to it: a
+    facet with no state, a value that is really a state, one facet recorded twice, two contexts
+    that hash alike. If a later edit to the decision breaks any of those, it breaks here.
+    """
+    documents = _decided()["documents"]
+    assert isinstance(documents, list) and len(documents) == 2
+    labels: list[str] = []
+    for document in documents:
+        assert isinstance(document, dict)
+        for label, digest, facets in C.load_approval(document):
+            assert facets, f"{label} approved with no facets"
+            assert len(digest) == 64
+            labels.append(label)
+    assert len(labels) == 4
+
+
+def test_the_decision_records_that_nothing_was_written_and_why() -> None:
+    """A decision that says "written" without saying who wrote it is the one an agent makes about
+    its own output. PLAN.md L.5 reserves that write for a person, and `curate.promote` refuses a
+    non-human promoter for every other record kind — this file is not the exception."""
+    decided = _decided()
+    assert decided["written"] is False
+    reasons = decided["why_not_written"]
+    assert isinstance(reasons, list) and len(reasons) >= 3
+
+
+def test_two_of_the_decided_contexts_would_be_told_apart_only_by_a_facet_with_no_home() -> None:
+    """The concrete instance behind the refusal to write, not a hypothetical.
+
+    `doi:10.1016/j.btre.2026.e00959` ran YNB + 150 g/L glucose twice: in a 10 mL shake flask, and
+    in a 5-L bioreactor at 1.5 vvm whose isobutanol the paper says is being removed as it forms
+    ("continuous aeration and agitation cause the volatile isobutanol to be removed from the
+    liquid phase"). On the facets an accepted `conditions` record names today, those two vessels
+    are one hash — and `condition_context.context_hash` is UNIQUE and the table immutable, so
+    writing the flask would take the slot the bioreactor needs.
+    """
+    flask = [
+        C.Facet("medium_name", "recorded", "YNB"),
+        C.Facet("total_sugar_g_l", "recorded", 150),
+    ]
+    bioreactor = [
+        C.Facet("medium_name", "recorded", "YNB"),
+        C.Facet("total_sugar_g_l", "recorded", 150),
+        C.Facet("in_situ_product_removal", "recorded", "gas_stripping"),
+        C.Facet("vvm", "recorded", 1.5),
+    ]
+    assert C.context_hash(flask) != C.context_hash(bioreactor)
+    assert C.context_hash(flask) == C.context_hash(
+        C.facets_without(bioreactor, ["in_situ_product_removal", "vvm"])
+    )
+
+
+def test_no_condition_context_was_written_by_this_pass() -> None:
+    """The property the whole decision rests on, asserted against a fresh atlas rather than
+    argued. If a writer ever lands in this module, it lands with this test failing."""
+    assert not hasattr(C, "write_approval")
+    assert not hasattr(C, "write_contexts")
