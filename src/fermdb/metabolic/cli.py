@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import textwrap
 from datetime import UTC, datetime
 
 from ..annotate.ontology import annotations_for, write_annotations
@@ -24,6 +25,12 @@ from .mtdna_loci import (
     non_displacing_loci,
     write_loci,
     write_programme_gaps,
+)
+from .recall import (
+    MATCHING_RULE,
+    describe_report,
+    load_configurations,
+    recall_report,
 )
 from .routes import (
     OBJECTIVES,
@@ -258,6 +265,56 @@ def cmd_atlas_explain(args: argparse.Namespace) -> int:
     return 0
 
 
+def _wrap(text: str, width: int = 92) -> list[str]:
+    """Wrap a rule clause for the terminal. The clauses are the output that matters most in
+    `atlas recall --rule`, so they get one obvious width rather than the terminal's."""
+    return textwrap.wrap(text, width=width)
+
+
+def cmd_atlas_recall(args: argparse.Namespace) -> int:
+    """PLAN.md phase 3's first acceptance clause: does the enumerator re-discover the literature?
+
+    Read-only, and deliberately so — this command reports on the atlas, it does not add to it.
+    `create=False` because an absent database must be heard about: opening one would create an
+    empty atlas and print "0 configurations", which reads as "phase 1 has curated nothing" when
+    it means "you are pointed at the wrong file".
+    """
+    settings = Settings.load()
+    if args.rule:
+        print("THE MATCHING RULE, in the order the clauses are applied. First one wins.")
+        print()
+        for index, clause in enumerate(MATCHING_RULE, start=1):
+            print(f"{index}. {clause.name}  ->  {clause.outcome}")
+            for line in _wrap(clause.text):
+                print(f"     {line}")
+            print()
+        return 0
+
+    parts = load_parts(settings)
+    # No chassis. A chassis gate excludes routes for THIS chassis, which is not a statement about
+    # whether the enumerator can express somebody else's published build — and depressing recall
+    # with it would attribute a curation question to the ranker.
+    routes = enumerate_routes(parts)
+
+    conn = open_db(settings.db_file, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        configurations = load_configurations(conn)
+    finally:
+        conn.close()
+
+    chassis = selected_profile(load_profiles(settings))
+    organism = chassis.organism_id if chassis is not None else None
+    report = recall_report(configurations, parts, routes, chassis_organism_id=organism)
+
+    for line in describe_report(report):
+        print(line)
+    print()
+    print(f"scope: routes enumerated against no chassis; host organism {organism or 'unset'}")
+    print("rule:  fermdb atlas recall --rule")
+    return 0
+
+
 def cmd_atlas_annotate(_args: argparse.Namespace) -> int:
     """Fetch GO/Pfam/InterPro/EC for every resolved gene. Cached, so a re-run costs no requests."""
     settings = Settings.load()
@@ -325,6 +382,18 @@ def add_atlas_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
     p_explain.add_argument("--limit", type=int, default=3, help="how many matches to explain")
     p_explain.add_argument("--objective", choices=OBJECTIVES, default="easiest")
     p_explain.set_defaults(func=cmd_atlas_explain)
+
+    p_recall = atlas_sub.add_parser(
+        "recall",
+        help="phase 3 acceptance: does the enumerator re-discover every published configuration?",
+    )
+    p_recall.add_argument(
+        "--rule",
+        action="store_true",
+        help="print the matching rule clause by clause and exit, without touching the database. "
+        "The rule is the deliverable: a recall figure read without it means nothing",
+    )
+    p_recall.set_defaults(func=cmd_atlas_recall)
 
     p_chassis = atlas_sub.add_parser(
         "chassis", help="load the curated chassis profiles and show what is not recorded"

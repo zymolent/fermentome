@@ -18,6 +18,7 @@ claim than "not yet looked".
 from __future__ import annotations
 
 import sqlite3
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -172,6 +173,126 @@ def test_ranking_is_explainable_by_a_named_term(routes: list) -> None:
     reason = explain(best)
     for term in ("transport_gaps", "cofactor_risks", "feasibility", "evidence", "toxicity"):
         assert term in reason
+
+
+# ------------------------------------------- PLAN.md phase 3: "every rank is explainable term
+# by term". Stronger than "the explanation mentions some terms": the term that actually decided
+# each adjacent pair in the ranking must be one the explanation prints.
+
+
+def _ranking_terms(route) -> dict:  # noqa: ANN001 - a Route, but the fixture hands them as `list`
+    """The terms `rank` orders by, as a dict, in the order it consults them.
+
+    Kept beside the test rather than imported from `rank` on purpose: if this drifts from the
+    real sort key, the test below fails, which is the alarm we want. A helper that asked `rank`
+    for its own key would agree with itself whatever the key became.
+    """
+    return {
+        "transport_gaps": len(route.transport_gaps),
+        "cofactor_risks": len(route.cofactor_risks),
+        "feasibility": -(route.score_feasibility or 0.0),
+        "chassis_gates": len([g for g in route.chassis_gates if not g.excludes]),
+        "construction_requirements": len(route.construction_requirements),
+    }
+
+
+def test_every_adjacent_pair_in_the_ranking_is_separated_by_a_printed_term(routes: list) -> None:
+    """Take every consecutive pair in the ranked list, find the FIRST term on which they differ,
+    and require that `explain` prints that term for both. A ranking whose deciding term is absent
+    from the explanation is ordered for a reason the reader cannot see, which is the specific
+    failure the five-score-columns-and-no-total schema exists to prevent."""
+    ordered = rank(routes)
+    assert len(ordered) == len(routes)
+    for upper, lower in zip(ordered, ordered[1:], strict=False):
+        above, below = _ranking_terms(upper), _ranking_terms(lower)
+        differing = [term for term in above if above[term] != below[term]]
+        if not differing:
+            # Identical on every named term; `rank` falls back to the route id purely to make the
+            # order deterministic, and that tie is not a claim about the routes.
+            continue
+        term = differing[0]
+        assert above[term] < below[term], f"{term} put {upper.id} above {lower.id} the wrong way"
+        assert term in explain(upper) and term in explain(lower), (
+            f"{term} decided {upper.id} against {lower.id} and `explain` does not print it"
+        )
+
+
+def test_the_chassis_term_is_printed_because_the_ranker_uses_it(parts: tuple) -> None:
+    """The gap this test was written for. `rank`'s fourth key counts the chassis gates a route
+    carries, and for the selected profile only strategy E carries any — so under a real chassis
+    two routes can be separated by a term the explanation used not to contain."""
+    from fermdb.config import Settings
+    from fermdb.metabolic.chassis import gates_for, load_profiles, selected_profile
+
+    chassis = selected_profile(load_profiles(Settings.load()))
+    assert chassis is not None, "the curated file marks one profile selected"
+    gated = [
+        strategy
+        for strategy in STRATEGY_PLANS
+        if any(not g.excludes for g in gates_for(chassis, strategy=strategy))
+    ]
+    assert gated, "the selected chassis gates at least one strategy, or this test proves nothing"
+
+    with_chassis = enumerate_routes(parts, chassis=chassis)
+    burdened = next(r for r in with_chassis if r.strategy in gated)
+    assert "chassis_gates=" in explain(burdened)
+    assert f"chassis_gates={len(burdened.chassis_gates)}" in explain(burdened)
+
+
+# ----------------------------------------- PLAN.md phase 3: per-compartment redox balance
+#
+# THIS CLAUSE DOES NOT PASS, and these tests pin the honest state rather than dressing it up.
+# `cofactor_demand` computes the per-compartment demand the clause turns on, and NOTHING acts on
+# it: `balance_status` is the constant 'pass' and the only exclusions that exist come from the
+# chassis. See docs/drafts/phase3/ACCEPTANCE.md, decision D1 — whether an unverified compartment
+# cofactor map may exclude a route is the owner's call, not this module's.
+
+
+def test_no_route_is_excluded_for_a_redox_reason_and_that_is_unimplemented_not_clean(
+    routes: list,
+) -> None:
+    """The per-compartment redox gate of G.7's table is not built. Every exclusion reachable
+    today comes from `chassis.gates_for`, and `balance_status` is a literal.
+
+    This is deliberately written as an assertion so it fails the day somebody implements the gate
+    and forgets to come back and revise the acceptance note."""
+    assert all(r.balance_status == "pass" for r in routes)
+    assert all(not r.excluded_because for r in routes)
+
+
+def test_the_per_compartment_demand_that_the_gate_would_need_is_computed(routes: list) -> None:
+    """Half of the clause DOES exist: the demand is tallied per (compartment, cofactor), which is
+    the quantity a redox gate would test. What is missing is a supply figure to test it against —
+    COFACTOR_POOLS says which cofactors a compartment has, never how much."""
+    matrix_routes = [r for r in routes if r.strategy == "C_mitochondrial_ehrlich"]
+    assert any(
+        count >= 2
+        for route in matrix_routes
+        for (compartment, _), count in route.redox_demand.items()
+        if compartment == "mitochondrial_matrix"
+    ), "a route concentrating two demands in one compartment is exactly what the gate is for"
+
+
+def test_an_exclusion_names_its_cause_wherever_one_can_occur(parts: tuple) -> None:
+    """The clause says a violating route is 'excluded with the imbalance named'. No redox
+    exclusion exists to test, but the exclusion MECHANISM is testable: `excluded_because` carries
+    sentences, and `explain` leads with them rather than printing a rank for a dead route."""
+    from fermdb.metabolic.chassis import ChassisGate
+    from fermdb.metabolic.routes import Route
+
+    route = enumerate_routes(parts, strategies=["A_native_split"])[0]
+    dead = replace(
+        route,
+        excluded_because=("redox: mitochondrial_matrix wants 2 NADPH and supplies 0",),
+        chassis_gates=(
+            ChassisGate(kind="test", severity="disqualifying", message="stands in for a gate"),
+        ),
+    )
+    assert isinstance(dead, Route)
+    assert not dead.viable
+    reason = explain(dead)
+    assert reason.startswith("EXCLUDED:")
+    assert "mitochondrial_matrix" in reason and "NADPH" in reason
 
 
 def test_ranking_prefers_no_transport_gap_over_higher_feasibility(routes: list) -> None:
@@ -359,6 +480,63 @@ def test_the_plan_prefers_the_site_that_displaces_nothing(routes: list) -> None:
     assert any("respiration kept" in line for line in plan)
     # and it must still say what the alternative costs, or the reader cannot weigh it
     assert any("would instead displace" in line for line in plan)
+
+
+def test_every_strategy_e_route_names_all_four_things_not_just_one_of_them(routes: list) -> None:
+    """The clause says "**each** names its locus, leader, displaced gene and recoding
+    requirement". The test above checks one route; this checks all 120, and checks all four
+    nouns rather than whichever happens to appear.
+
+    'Displaced gene' is satisfied either by naming the gene or by saying the site displaces
+    nothing — the second is a stronger answer and is the one the free locus gives, but it has to
+    be *said*, because silence about displacement reads as "no displacement" and is not.
+    """
+    from fermdb.config import Settings
+    from fermdb.metabolic.mtdna_loci import load_activator_map
+    from fermdb.metabolic.routes import insertion_plan
+
+    loci = load_activator_map(Settings.load())
+    mtdna = [r for r in routes if r.strategy == "E_mtdna_encoded"]
+    assert len(mtdna) == len(routes) // len(STRATEGY_PLANS)
+
+    for route in mtdna:
+        carried = [s for s in route.steps if s.needs_recoding]
+        plan = insertion_plan(route.steps, loci)
+        assert plan, route.id
+        # one line per gene actually carried in the mtDNA, plus the alternatives line
+        per_step = [line for line in plan if not line.startswith("alternative:")]
+        assert len(per_step) == len(carried) == 2, route.id
+        for line in per_step:
+            assert "locus " in line, f"no locus named: {line}"
+            assert "leader " in line, f"no leader named: {line}"
+            assert "activator " in line, f"no activator named: {line}"
+            assert "displaces " in line, f"nothing said about displacement: {line}"
+            assert "recode to NCBI table 3" in line, f"no recoding requirement: {line}"
+        body = " ".join(plan)
+        assert any(locus.locus in body for locus in loci), route.id
+
+
+def test_strategy_e_is_reachable_but_costly_rather_than_dropped_or_flattered(routes: list) -> None:
+    """Three claims in one clause, so three assertions.
+
+    *Not dropped*: every E route is viable and appears in the ranked list.
+    *Costly*: every E route carries a construction requirement and the worst feasibility of any
+    strategy, so nothing about it is free.
+    *Not flattered*: no E route reaches the top of the ranking.
+    """
+    ordered = rank(routes)
+    mtdna = [r for r in routes if r.strategy == "E_mtdna_encoded"]
+    ranked_ids = {r.id for r in ordered}
+
+    assert all(r.viable for r in mtdna)
+    assert all(r.id in ranked_ids for r in mtdna), "a costly route is still an offered route"
+
+    assert all(r.construction_requirements for r in mtdna)
+    worst = min(p.feasibility for p in STRATEGY_PLANS.values())
+    assert all(r.score_feasibility == worst for r in mtdna)
+    assert STRATEGY_PLANS["E_mtdna_encoded"].feasibility_reason.strip()
+
+    assert ordered[0].strategy != "E_mtdna_encoded"
 
 
 def test_a_route_with_nothing_in_mtdna_has_no_insertion_plan(routes: list) -> None:

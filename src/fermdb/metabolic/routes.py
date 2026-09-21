@@ -544,6 +544,12 @@ def explain(
         f"programme_fit={'unrecorded' if fit is None else format(fit, '.2f')}",
         f"transport_gaps={len(route.transport_gaps)}",
         f"cofactor_risks={len(route.cofactor_risks)}",
+        # The fourth key of `rank`, and it was the one term the ranker used and `explain` did not
+        # print. PLAN.md phase 3 asks that "every rank is explainable term by term"; with this
+        # missing, two routes separated ONLY by a chassis gate -- which is exactly what happens to
+        # strategy E under a chassis with mtDNA tooling recorded -- were ordered for a reason the
+        # explanation did not contain.
+        f"chassis_gates={len([g for g in route.chassis_gates if not g.excludes])}",
         f"construction_requirements={len(route.construction_requirements)}",
         "evidence=unknown (nothing extracted yet)",
         "toxicity=unknown (no tolerance measurement)",
