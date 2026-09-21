@@ -337,29 +337,40 @@ truth:
 | strains | 3 | 0 | **4** | 375 s |
 | modifications | 5 | 0 | **0** | 128 s |
 | bottlenecks | 2 | 0 | **0** | 131 s |
-| measurements | 9 | 0 | **could not run** — needed 8,359 tokens against `num_ctx` 8,192 | — |
+| measurements | 9 | 0 | **0** (re-run at `num_ctx` 12,288) | 4 attempts |
+| **total** | **19** | **0** | **4** | |
 
-**Read this carefully, because the first three rows say different things.**
+Every one of those ran cleanly and returned well-formed output. Nothing timed out, nothing failed
+validation. The zeros are recall.
 
-* **Narrowing does not rescue the 7B.** Well-formed empty arrays on all seven kinds, 0 validation
-  failures — it declines rather than fails. §3a's verdict stands for the model it tested.
-* **The 27B runs, and on `strains` it matches the capable tier** (4 span-verified against 3). That
-  is the first output the *configured* extraction model has ever produced in this project.
-* **And on `modifications` and `bottlenecks` it returns nothing**, where Opus found 5 and 2. Those
-  two ran cleanly in ~130 s each and came back empty, so that is recall, not a context failure.
-* **`measurements` — the highest-value kind — missed the context by 167 tokens.** Its schema is the
-  largest, and at an 8,000-character window it needs 8,359 against 8,192. Raising `num_ctx` fixes
-  it, but only by reintroducing the second-instance problem unless the resident instance is started
-  at the higher value.
+*(`measurements` first refused at `num_ctx` 8,192 — it needs 8,359 tokens, missing by 167, because
+its schema is the largest of the seven. The guard **refused rather than truncating**, which is
+exactly what it is for: Ollama would have silently kept the end of the prompt — the excerpt — and
+dropped the instructions, returning something shapeless that is indistinguishable from "this paper
+reports nothing". Re-run at 12,288 it produced 0 records, so the context miss was not hiding a
+result.)*
 
-**So the honest verdict is narrower than "local is back".** What the experiment establishes is
-that §3a measured the **triage** model — the real one could not start — so **its 0.3% was never a
-measurement of the local tier.** What it does *not* establish is that the local tier is usable:
-on the three kinds that ran, the 27B matched on one and scored zero on two.
+**Three findings, and they do not all point the same way.**
 
-The routing question is therefore **re-opened and still open**. It needs a proper run of the 27B
-across the frozen 20-paper set at a context sized for the largest schema — which is now possible,
-and was not this morning.
+1. **Narrowing does not rescue the 7B.** Empty arrays on all seven kinds, 0 validation failures —
+   it declines rather than fails.
+2. **§3a measured the wrong model, and that part of its verdict must be withdrawn.** The 7B is the
+   *triage* model; it was tested only because the real one could not start. **Its 0.3% was never a
+   measurement of the local tier.**
+3. **But the configured model does not rescue it either.** `qwen3.6:27b` found **4 of 19** records
+   across the four kinds and returned **zero on three of the four**. It matched the capable tier on
+   `strains` — a named entity that appears in tables — and found nothing at all where a record
+   needs a number, a unit and a context assembled together.
+
+**So the routing verdict converges with §3a's, now resting on the right model: phase 1 routes
+through the capable tier.** The difference is that this is a conclusion about the extraction model
+rather than an accident of which model happened to load, and the margin (4 of 19, zero on three
+kinds of four) is wide enough not to be sampling.
+
+The one genuinely open thread is narrower and worth naming: the 27B *can* do `strains`. A per-kind
+routing split — local for the entity kinds, capable for the quantitative ones — is a real
+possibility that this run neither establishes nor excludes, on one paper. It would need the frozen
+20-paper set, and it is now runnable where it was not this morning.
 
 ### 3b.3 The cheap consequence for the capable tier
 
