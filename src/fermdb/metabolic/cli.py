@@ -200,13 +200,15 @@ def cmd_atlas_routes(args: argparse.Namespace) -> int:
     print(f"{len(routes)} routes enumerated, {len(ordered)} viable, {len(excluded)} excluded")
     print(f"ranked by objective={args.objective} ({_OBJECTIVE_MEANS[args.objective]})")
     print()
-    print(f"{'#':>4}  {'strategy':28}{'gaps':>5}{'risks':>7}{'feas':>7}  {'redox':10}parts")
+    # 12, not 10: `unbalanced` is exactly 10 characters, so a 10-wide field left no separator and
+    # the status ran straight into the parts chain.
+    print(f"{'#':>4}  {'strategy':28}{'gaps':>5}{'risks':>7}{'feas':>7}  {'redox':12}parts")
     for index, route in enumerate(ordered[: args.limit], start=1):
         chain = " + ".join(step.part.id for step in route.steps)
         print(
             f"{index:>4}  {route.strategy:28}{len(route.transport_gaps):>5}"
             f"{len(route.cofactor_risks):>7}{route.score_feasibility or 0:>7.2f}  "
-            f"{route.redox_balance.status:10}{chain}"
+            f"{route.redox_balance.status:12}{chain}"
         )
     if excluded:
         print()
@@ -402,8 +404,10 @@ def add_atlas_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         choices=OBJECTIVES,
         default="easiest",
         help="which question to rank by: 'easiest' (least trouble to build) or 'programme' "
-        "(what this programme is trying to build). They are different questions; the default "
-        "answers the first, and programme_fit is unrecorded so both currently agree",
+        "(what this programme is trying to build). They are different questions, and since "
+        "programme_fit was filled in on 2026-09-22 they give different answers: 'easiest' ranks "
+        "B first, 'programme' ranks C first. Neither drops a route -- programme fit is a sort "
+        "key, never a filter",
     )
     p_routes.set_defaults(func=cmd_atlas_routes)
 

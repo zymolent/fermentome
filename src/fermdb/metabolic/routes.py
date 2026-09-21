@@ -1172,11 +1172,12 @@ OBJECTIVES: Final[tuple[str, ...]] = ("easiest", "programme")
 #: it into ``feasibility`` would destroy the first distinction to express the third, which is why
 #: the obvious fix -- making feasibility chassis-aware -- is the wrong one.
 #:
-#: WHY EVERY VALUE IS None. These numbers encode design intent, and design intent is the owner's
-#: to state, not the atlas's to infer. Seeded None so that ``objective="programme"`` currently
-#: reproduces ``objective="easiest"`` exactly: the mechanism exists, and it changes nothing until
-#: somebody fills it in. ``docs/design/DUET_TARGET.md`` §5 is where the reasoning for a value
-#: would have to come from.
+#: WHY EVERY VALUE WAS None UNTIL 2026-09-22 (superseded -- the values below are filled in now,
+#: and the two objectives no longer agree). These numbers encode design intent, and design intent
+#: is the owner's to state, not the atlas's to infer. They were seeded None so that
+#: ``objective="programme"`` reproduced ``objective="easiest"`` exactly: the mechanism existed and
+#: changed nothing until somebody filled it in. ``docs/design/DUET_TARGET.md`` §5 is where the
+#: reasoning for a value had to come from, and is where these came from.
 #:
 #: THE OBSERVATION THIS EXISTS FOR (handover, 2026-09-21): confirming the chassis is rho+ cleared
 #: strategy C's chassis gate and the ranking did not move, because ``rank`` separates B from C at
