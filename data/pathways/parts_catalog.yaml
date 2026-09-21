@@ -37,10 +37,25 @@
 # Two obligations come with that exception, and both are visible in the entry:
 #
 #   * a field the source does not support is left `unknown`, never completed from memory. Adh7's
-#     cofactor preference is exactly such a field, and 'unknown' is a real answer here: the route
-#     enumerator skips it rather than scoring a demand nobody has checked.
+#     cofactor preference WAS exactly such a field: the Cell Systems paper the rest of the entry
+#     comes from states which step Adh7 runs and where, and says nothing at all about its cofactor,
+#     so the field read `unknown` and the enumerator skipped it rather than scoring a demand nobody
+#     had checked. It now reads `NADPH` -- not from memory, but from a SECOND paper
+#     (`doi:10.1128/aem.00362-26`) that states it in a sentence quoted in the entry. The rule is
+#     unchanged and the entry obeys it: a field is filled from a source or it is left `unknown`.
+#     What the entry must additionally do, and does, is say out loud that the field came from a
+#     different paper than the rest of it -- see CROSS-SOURCE FIELDS below.
 #   * `medium`, not `high`. One paper's report of its own construction, quoted, and confirmed by
 #     nothing else.
+#
+# CROSS-SOURCE FIELDS (2026-09-22, owner-approved for `adh7_native.cofactor_preference`). An entry
+# whose fields come from more than one publication is how a catalog drifts if it is not labelled:
+# the entry names a DOI, a reader assumes the DOI, and one field silently belongs to somebody else.
+# So where a field is grounded in a paper other than the entry's principal source, the entry must
+# (a) list every DOI it draws on, (b) name which field came from which, and (c) say that the
+# cofactor -- or whatever the field is -- was NOT stated by the principal source. `evidence_spans`
+# carries the `publication` per quote for the same reason, so the split is machine-readable as well
+# as stated in prose. `adh7_native` is the file's first and, today, only such entry.
 #
 # 2026-09-22: THE THREE `cofactor_cycle` ENTRIES AT THE FOOT OF THIS FILE NOW MEET THE SAME
 # STANDARD. `pos5_native` and `adh3_native` existed but were recalled rather than read; they have
@@ -49,6 +64,49 @@
 # field left `unknown` because no source in the corpus states it. They are also the parts the
 # route enumerator's optional sixth role draws on, so the standard matters more here than
 # elsewhere: a redox claim in this section is what decides whether a route's balance closes.
+#
+# ---------------------------------------------------------------------------------------------
+# 2026-09-22, LATER: EVERY QUOTE IN THIS FILE IS NOW A SLICE, AND `evidence_spans` IS WHY.
+# ---------------------------------------------------------------------------------------------
+#
+# WHAT WENT WRONG. `docs/drafts/PROVENANCE_SWEEP.md` §3 swept all 1,912 quoted spans in the repo
+# and found exactly one promoted artifact affected -- this file. The re-grounding above was done by
+# RETYPING sentences off the rendered paper instead of SLICING them out of what
+# `fermdb.extract.harness.load_source_text` returns for the stored `fulltext_asset`. Every sentence
+# really is in the paper it is attributed to, so nothing here was fabricated; but a retyped
+# sentence is not a span, and `fermdb.llm.validate.verify_span` rejects all of them. The artefacts
+# that were silently cleaned away were: the `fi` ligature (`ﬁve` -> "five"), letter-spaced `a n d`
+# (-> "and"), a line-break hyphenation (`tar-\ngeted` -> "targeted"), empty citation markers
+# (`()`, `[,]`) deleted, en-dashes flattened to hyphens, a lower-case `r` capitalised, a Greek
+# `Δ` typed as `D` -- and, worst, ONE ELLIPSIS SPLICE, two words elided from the middle of a
+# sentence of `doi:10.1007/s00253-015-7266-x`. `activator_map.yaml`'s DESPLICED note of
+# 2026-09-21 had condemned exactly that a day earlier: an elided quote cannot be re-resolved at an
+# offset, so it is not evidence.
+#
+# WHAT WAS DONE. Every quote was re-cut directly from `load_source_text` output and re-checked with
+# `verify_span` at its own offsets, exact, with no normalisation. **Eleven** were repaired -- the
+# eight the sweep named, plus three its quote extractor missed and which are the same defect: the
+# `ﬁve` ligature in `adh7_native`'s "natural compartments" quote, `pos5Δ17` typed as `pos5D17` in
+# the absence note below, and a SECOND ellipsis splice, also in that note. The spliced quotes are
+# now contiguous slices, not shortened ones: a splice is never repaired by tightening the ellipsis.
+#
+# HOW IT IS KEPT HONEST FROM NOW ON. Every entry that quotes a paper carries an `evidence_spans:`
+# list, and every quote in an ENTRY's prose also appears there with `char_start`, `char_end`,
+# `occurrences_in_source` and `verify_span: exact`. (Quotes in this file's COMMENT blocks -- the
+# two "NOT CURATED HERE" notes below -- belong to no entry and so have nowhere to hang a span list.
+# They were re-cut and re-checked by the same method and each names its DOI inline; the offsets
+# are recorded in the commit rather than in the file.) That is the shape
+# `docs/drafts/ethanol/phase2_admissions.yaml` and `configurations/host_resolution.yaml` use, and
+# sweep §5 names them as the two files that do it right: 655 of the repo's 1,912 quotes claim
+# offset verification in a header while recording no offsets, so the claim cannot be falsified from
+# the file. These can be. `load_parts` does not read `evidence_spans` -- it is provenance for a
+# reader and a re-checker, not an input to enumeration.
+#
+# THE STORE'S ARTEFACTS ARE PRESERVED ON PURPOSE, ligatures, stray spaces and hyphenation included.
+# They look like typos and they are not: they are what the stored text says, and cleaning one
+# breaks the offset beside it. Two quotes below therefore carry a literal newline and cannot be
+# written inside a folded scalar at all; they live only in `evidence_spans`, and the prose points
+# at them rather than paraphrasing them inside quote marks.
 
 version: 1
 zone: I
@@ -154,6 +212,18 @@ parts:
       "does an NADH KARI help" are separated rather than confounded. The same variant appears as
       plasmid pRS62N-IlvC6E6 in 10.1186/s13068-019-1486-8 (Wess et al.), so it is in use across
       the corpus. Cofactor preference is the paper's claim, not an independent measurement.
+
+      ("does the matrix help" and "does an NADH KARI help" above are this file's own words, naming
+      the two questions the 2x2 separates. They are not quotations of the paper and no span is
+      recorded for them.)
+    evidence_spans:
+      - publication: "doi:10.1016/j.synbio.2022.02.007"
+        quote: "the E. coli KARI variant, ilvC6E6, that was previously engineered with improved\
+          \ specificity towards NADH"
+        char_start: 8381
+        char_end: 8485
+        occurrences_in_source: 1
+        verify_span: exact
     confidence: unverified
 
   - id: ilvc_p2d1a1_ecoli
@@ -167,12 +237,26 @@ parts:
     engineered_switch: true
     oxygen_sensitivity: insensitive
     evidence: >-
-      "Ec_ilvC(P2D1-A1), encoding an engineered NADH-dependent KARI from E. coli", integrated as
-      a single copy in a cytosolic isobutanol strain in 10.1038/s41467-021-27852-x. The same
-      construction deletes TMA29 (see the note on the acetolactate drain in
-      isobutanol_valine_ehrlich.yaml) and overexpresses AFT1 for iron utilisation, because the
-      Lactococcus DHAD alongside it needs Fe-S clusters. Cofactor preference is the paper's
-      claim, not an independent measurement.
+      RE-SLICED 2026-09-22 (see the header note). "Ec_ilvCP2D1-A1, encoding an engineered
+      NADH-dependent KARI from E. coli", integrated as a single copy in a cytosolic isobutanol
+      strain in 10.1038/s41467-021-27852-x. The same construction deletes TMA29 (see the note on
+      the acetolactate drain in isobutanol_valine_ehrlich.yaml) and overexpresses AFT1 for iron
+      utilisation, because the Lactococcus DHAD alongside it needs Fe-S clusters. Cofactor
+      preference is the paper's claim, not an independent measurement.
+
+      THE PARENTHESES THIS QUOTE USED TO CARRY WERE THE CURATOR'S, NOT THE PAPER'S. The rendered
+      article sets P2D1-A1 as a superscript on Ec_ilvC; the stored text layer has no superscripts,
+      so it reads the variant flat as `Ec_ilvCP2D1-A1` and the earlier `Ec_ilvC(P2D1-A1)` was a
+      typographic repair made inside quote marks. The gene is the same gene either way -- this is a
+      provenance defect, not an identity one -- but the span is the flat spelling and that is what
+      is quoted now.
+    evidence_spans:
+      - publication: "doi:10.1038/s41467-021-27852-x"
+        quote: "Ec_ilvCP2D1-A1, encoding an engineered NADH-dependent KARI from E. coli"
+        char_start: 28166
+        char_end: 28237
+        occurrences_in_source: 1
+        verify_span: exact
     confidence: unverified
 
   # ---- DHAD: 2,3-dihydroxyisovalerate -> 2-ketoisovalerate ------------------------------------
@@ -256,51 +340,122 @@ parts:
       relying on cytosolic NADH.
     confidence: unverified
 
-  # THE ONE ENTRY IN THIS FILE THAT WAS READ RATHER THAN RECALLED. Everything the paper does not
-  # say is left 'unknown' instead of being filled in from background knowledge, and the confidence
-  # is 'medium' rather than 'unverified' -- see the CONFIDENCE note in the header for why both
-  # halves of that matter.
+  # THE FIRST ENTRY IN THIS FILE THAT WAS READ RATHER THAN RECALLED, and now also the first whose
+  # fields come from TWO papers. Everything no source states is still left 'unknown' instead of
+  # being filled in from background knowledge, and the confidence is 'medium' rather than
+  # 'unverified' -- see the CONFIDENCE note in the header for why both halves of that matter, and
+  # the CROSS-SOURCE FIELDS note for what the second paper obliges this entry to say out loud.
   - id: adh7_native
     step_role: ADH
     source_organism: "Saccharomyces cerevisiae"
     genes: [ADH7]
     native_compartment: cytosol
     sequence_encoding_genome: nuclear
-    cofactor_preference: unknown
+    # FROM A DIFFERENT PAPER THAN THE REST OF THIS ENTRY. 10.1128/aem.00362-26, not the cels-2019
+    # paper the other fields come from. See the NOT FROM THE PRINCIPAL SOURCE block below.
+    cofactor_preference: NADPH
     oxygen_sensitivity: unknown
     evidence: >-
-      READ FROM THE STORED FULL TEXT of 10.1016/j.cels.2019.10.006 (Kuroda et al., Cell Systems
-      9:534-547) -- the paper whose two published configurations the recall harness reported as
-      catalog gaps, because no part carried 'ADH7'. Its Methods describe the five-gene plasmid:
-      "The 2 m plasmid introduced, pJA184 (Avalos et al., 2013), contains ILV2, ILV3, ILV5, with
-      their gene products targeted to mitochondria; and an a-ketoacid decarboxylase (KDC) from
-      Lactococcus lactis (LlKivD) and an alcohol dehydrogenase (ADH7), with their gene products
-      targeted to the cytosol." The Results name the organism: "we overexpressed five genes in the
-      isobutanol biosynthetic pathway, ILV2, ILV3, ILV5, and ADH7 from S. cerevisiae and
-      2-ketoacid decarboxylase (KDC) from Lactococcus lactis". So ADH7 is this build's ADH step,
-      it is the yeast gene, it sits downstream of LlKivD, and the strain carrying it reaches
-      809 +/- 27 mg/L isobutanol. (Quotations are from the stored PDF text layer, which renders
-      the Greek alpha as 'a' and "2 um" as "2 m".)
+      TWO SOURCES, AND THE ENTRY SAYS WHICH FIELD CAME FROM WHICH.
+      PRINCIPAL SOURCE 10.1016/j.cels.2019.10.006 (Kuroda et al., Cell Systems 9:534-547) --
+      step role, native_compartment, sequence_encoding_genome, titer.
+      COFACTOR SOURCE 10.1128/aem.00362-26 -- cofactor_preference, and nothing else.
+      Neither field is recalled and neither paper is asked for what it does not say.
+
+      READ FROM THE STORED FULL TEXT of 10.1016/j.cels.2019.10.006 -- the paper whose two
+      published configurations the recall harness reported as catalog gaps, because no part
+      carried 'ADH7'. Its Methods describe the five-gene plasmid and its Results name the organism.
+      Both sentences are recorded verbatim, with their offsets, in `evidence_spans` below rather
+      than inline here: each carries a line break from the stored PDF text layer, and a quote that
+      crosses a newline cannot be written inside a folded YAML scalar without being altered --
+      which is exactly the alteration that made these two quotes fail the provenance sweep the
+      first time. Between them they establish that ADH7 is this build's ADH step, that it is the
+      yeast gene, that it sits downstream of LlKivD, and that the strain carrying it reaches
+      809 +/- 27 mg/L isobutanol. (The stored PDF text layer renders the Greek alpha as 'a', "2 um"
+      as "2 m", the `fi` ligature as `ﬁ`, and letter-spaces `and` as `a n d`; all of that is
+      reproduced in the spans exactly, because cleaning it would break the offsets.)
 
       native_compartment is the paper's own word, not an inference: pJA184 is used "for expression
-      of the five genes in their natural compartments", and the sentence above says ADH7's gene
+      of the ﬁve genes in their natural compartments", and the Methods span says ADH7's gene
       product goes to the cytosol. sequence_encoding_genome is nuclear because the gene is carried
       on a 2 um URA3 plasmid -- replicated and read in the nucleus, under NCBI table 1. Nothing in
       this build is mtDNA-encoded.
 
-      NOT RECORDED, DELIBERATELY. cofactor_preference and oxygen_sensitivity are 'unknown' because
-      this paper states neither. It does measure intracellular NADPH/NADP+, but only for the
-      tolerance screen, and it makes no claim about which cofactor Adh7 uses; writing 'NADPH' here
-      from memory would hide an unchecked claim inside a checked entry, which is the one thing
-      this entry exists not to do. 'unknown' is also the value the enumerator handles correctly:
-      routes.py skips it in both the cofactor gate and the per-compartment demand tally, so this
-      part asserts no redox demand nobody has checked.
+      COFACTOR_PREFERENCE IS NADPH, AND IT IS NOT FROM THE PRINCIPAL SOURCE. This field read
+      'unknown' until 2026-09-22 and the reason was sound: the cels-2019 paper is silent on it. It
+      measures intracellular NADPH/NADP+, but only for the tolerance screen, and it makes no claim
+      about which cofactor Adh7 uses -- so writing 'NADPH' from memory would have hidden an
+      unchecked claim inside a checked entry. It is now written from a source instead. The owner
+      approved grounding it in 10.1128/aem.00362-26, which surveys the family in one sentence:
+      "The S. cerevisiae genome harbors seven ADH-encoding genes, of which Adh1-5 are
+      NAD+-dependent, while Adh6 and Adh7 are NADP+-dependent enzymes with very low activities
+      towards ethanol". Adh7 is named in it explicitly, and NADP+-dependent in the oxidative
+      direction is NADPH-consuming in the reductive one, which is the direction this step runs.
+      A READER MUST NOT TAKE THIS FIELD ON THE CELS PAPER'S AUTHORITY: that paper does not support
+      it, the AEM paper does, and both DOIs are listed above and in `evidence_spans` per quote so
+      the split is machine-readable and not only stated here. Note also what the same sentence
+      says and this entry does NOT claim: Adh7 has "very low activities towards ethanol". That is
+      a statement about ethanol, not about isobutyraldehyde, and it is not transcribed into any
+      field. It is a real caveat on a part that a published build nevertheless used for this step,
+      and it belongs in the open rather than in a footnote.
 
-      CONFIDENCE 'medium', not 'high': every claim above is one paper's own report of its own
-      construction, quoted from the corpus copy, and none of it has been confirmed against a
-      second source or a measurement. The `zone` this part is stored under is still 'I', because
-      `write_parts` stamps the whole catalog that way; that is a property of the loader, not a
-      statement that this entry is unchecked.
+      STILL NOT RECORDED, DELIBERATELY. oxygen_sensitivity remains 'unknown'. Neither paper states
+      it, and neither is asked to: the AEM paper was read for the cofactor and read for nothing
+      else, because a source consulted for one field does not thereby license the others.
+
+      WHAT THIS CHANGES DOWNSTREAM, stated because it is large. 'unknown' was the value the
+      enumerator skipped -- routes.py passes over it in `_cofactor_gate` and in `cofactor_demand`,
+      and `redox_balance` reports the whole route `unknown` rather than guessing. One quarter of
+      the catalog's ADH parts is this one, so 1,600 of the 6,400 enumerated routes carried an
+      unknown redox verdict for want of this single field. They are now evaluated, and NADPH
+      rather than NADH also moves the ADH step's arithmetic: the demand lands in the NADP pool of
+      the step's compartment instead of the NAD pool, which is a different engineering problem in
+      the same place. The number of routes did not change; what changed is that 1,600 of them can
+      now be read.
+
+      CONFIDENCE 'medium', not 'high': every claim above is a paper's own report, quoted from the
+      corpus copy, and none of it has been confirmed by a measurement made here. Two papers rather
+      than one does not make it 'high' either -- they are consulted for disjoint fields, so neither
+      confirms the other. The `zone` this part is stored under is still 'I', because `write_parts`
+      stamps the whole catalog that way; that is a property of the loader, not a statement that
+      this entry is unchecked.
+    evidence_spans:
+      - publication: "doi:10.1016/j.cels.2019.10.006"
+        note: "Methods. Carries a line-break hyphenation (`tar-\\ngeted`) and the spacing around\
+          \ the citation, both preserved."
+        quote: "The 2 m plasmid introduced, pJA184 ( Avalos et al., 2013 ), contains ILV2, ILV3,\
+          \ ILV5 , with their gene products tar-\ngeted to mitochondria; and an a-ketoacid\
+          \ decarboxylase (KDC) from Lactococcus lactis (LlKivD) and an alcohol dehydrogenase\n\
+          (ADH7), with their gene products targeted to the cytosol."
+        char_start: 91776
+        char_end: 92074
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1016/j.cels.2019.10.006"
+        note: "Results. Carries the `ﬁ` ligature and the letter-spaced `a n d`, both preserved."
+        quote: "we overexpressed ﬁve genes in the isobutanol biosynthetic\npathway, ILV2,\
+          \ ILV3, ILV5,a n d ADH7 from S. cerevisiae and\n2-ketoacid decarboxylase (KDC) from\
+          \ Lactococcus lactis"
+        char_start: 35510
+        char_end: 35682
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1016/j.cels.2019.10.006"
+        note: "Methods. The basis for native_compartment; `ﬁve` carries the ligature."
+        quote: "for expression of the ﬁve genes in their natural compartments"
+        char_start: 92161
+        char_end: 92222
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1128/aem.00362-26"
+        note: "THE COFACTOR FIELD, and the only field this publication supports."
+        quote: "The S. cerevisiae genome harbors seven ADH-encoding genes, of which Adh1-5 are\
+          \ NAD+-dependent, while Adh6 and Adh7 are NADP+-dependent enzymes with very low\
+          \ activities towards ethanol"
+        char_start: 21890
+        char_end: 22073
+        occurrences_in_source: 1
+        verify_span: exact
     confidence: medium
 
   - id: adha_lactococcus
@@ -335,12 +490,107 @@ parts:
   # NOT CURATED HERE, DELIBERATELY: a cytosolic Pos5. The corpus treats it as its own construct
   # rather than as a relocalization -- "a cytosolic version of the mitochondrial NADH kinase from
   # Saccharomyces cerevisiae (cPOS5)" (10.1186/s12934-023-02123-0), and "the truncated gene
-  # pos5D17" in 10.1016/j.synbio.2025.04.016 -- and that is also how this catalog would have to
-  # hold it, because a cofactor-cycle step takes its compartment from its part. It is left out for
-  # now because the enumerated route count doubles with each part added to this section, and
-  # because 10.1016/j.mec.2024.e00245 reports the intervention as equivocal: "Whereas cytosolic
-  # Pos5 expression showed positive effects in some studies ... it was described as rather
+  # pos5Δ17 encoding mitochondrial NADH kinase" in 10.1016/j.synbio.2025.04.016 -- and that is also
+  # how this catalog would have to hold it, because a cofactor-cycle step takes its compartment
+  # from its part. It is left out for now because the enumerated route count doubles with each part
+  # added to this section, and because 10.1016/j.mec.2024.e00245 reports the intervention as
+  # equivocal: "Whereas cytosolic Pos5 expression showed positive effects in some studies, e.g for
+  # the production of protopanaxadiol () and 1,2,4-butanetriol (), it was described as rather
   # detrimental by other authors". Recorded as an absence with its reason, per CONVENTIONS.md.
+  # (Both quotes in this paragraph were re-sliced 2026-09-22: `pos5D17` was a Greek Δ typed as a D,
+  # and the equivocal sentence was an ELLIPSIS SPLICE. It is now the whole contiguous sentence,
+  # named examples included -- a splice is repaired by widening it, never by tightening it.)
+  #
+  # ---------------------------------------------------------------------------------------------
+  # NOT CURATED HERE EITHER, AND THIS ONE IS A FINDING: A CYTOSOLIC NADH-REGENERATING PART.
+  # (Investigated 2026-09-22 under an owner approval to add one. It was not added. Here is why,
+  # because the reason is more useful than the part would have been.)
+  # ---------------------------------------------------------------------------------------------
+  #
+  # WHAT WAS ASKED FOR. After `adh7_native` gained its cofactor, no route in the atlas comes back
+  # `balanced`, and the reason is arithmetic rather than structural: a route spends TWO reducing
+  # equivalents (the KARI and the ADH) and the only curated cofactor-cycle reaction that SUPPLIES
+  # one is `adh3_matrix`, which supplies one. Pos5 moves a debt between pools; Gpd deepens it. On
+  # the routes where the matrix closes completely -- the DUET result -- the single surviving open
+  # bucket is **cytosolic NADH**. So: curate a part that regenerates cytosolic NADH, and `balanced`
+  # becomes a verdict a route can earn.
+  #
+  # WHY THAT BUCKET IS OPEN, AND IT IS NOT BECAUSE A PART IS MISSING. It is open because of where
+  # this atlas draws its system boundary. `ethanol_reference.yaml` says so in its own header:
+  # "Glycolysis upstream of pyruvate is deliberately not enumerated." Glycolysis is what supplies
+  # cytosolic NADH in a real cell, and the corpus states the consequence for THIS pathway exactly,
+  # in a paper this file already cites twice -- 10.1186/s13068-019-1486-8: "only one of the two
+  # glycolytic NADH molecules can be reoxidized via isobutyraldehyde reduction. The other redox
+  # reaction, catalyzed by Ilv5, is specific for NADPH, and S. cerevisiae cells do not have
+  # transhydrogenase activity for converting NADPH into NADH". TWO glycolytic NADH per glucose
+  # arrive in the cytosol; the route can spend one of them on the ADH step. That is the same single
+  # cytosolic NADH the atlas reports as short -- read from the other side. It is a BOUNDARY TERM of
+  # a model that starts at pyruvate, not an enzyme nobody has curated.
+  #
+  # This is also why the NADH-preferring KARIs already in this catalog exist.
+  # 10.1016/j.synbio.2022.02.007 builds its 2x2 with "used either a redox-imbalanced
+  # (NADPH-dependent) or redox-balanced (NADH-dependent) ketol-acid reductoisomerase enzyme" --
+  # and what a redox-BALANCED cytosolic route is balanced AGAINST is glycolysis, not a regenerator
+  # anybody installed. `ilvc6e6_ecoli` and `ilvc_p2d1a1_ecoli` are the atlas's expression of that
+  # move, and they are already here.
+  #
+  # THE CANDIDATES, AND WHY EACH FAILS THE TEST -- IS THIS AN ENZYME A BUILDER INSTALLS?
+  #
+  #   * Glycolytic GAPDH (TDH1/2/3) is where the NADH actually comes from, and it is the one
+  #     candidate that is definitely NOT a part. A part in this file is a candidate a builder
+  #     CHOOSES for a step role; glycolysis is not optional and nobody installs it. Note what the
+  #     literature does instead when it touches this step -- 10.1186/s13068-015-0291-2 ran a GSMM
+  #     to "predict the key target of redox status modulation to be glyceraldehyde-3-phosphate
+  #     dehydrogenase (GAPDH). Then, a NADP+ dependent glyceraldehyde-3-phosphate dehydrogenase
+  #     (GAPDN) pathway was designed and constructed using gapN from Clostridium acetobutylicum".
+  #     That REPLACES a glycolytic step and moves supply from NADH to NADPH: the opposite direction
+  #     to the one that would close this bucket, and a modification of the boundary rather than an
+  #     addition to the parts list.
+  #
+  #   * Formate dehydrogenase is the strongest candidate and still fails. It is genuinely installed
+  #     by builders, including into an isobutanol strain in this corpus:
+  #     10.1016/j.biortech.2017.05.197 introduces an fdh from C. boidinii, described there as a
+  #     formate dehydrogenase that forms NADH from NAD+ and formate (paraphrased, NOT quoted --
+  #     the sentence is broken across a line in the stored PDF text at [23432, 23528), and a quote
+  #     that crosses a newline cannot be written in a YAML comment without being altered, which is
+  #     the whole defect this file just finished repairing). 10.1016/j.synbio.2021.12.010 gives the
+  #     yeast reaction with its EC number and full stoichiometry, and note which direction the
+  #     literature moves in: "To prevent NADH formation by the yeast formate dehydrogenases Fdh1
+  #     and Fdh2 (EC 1.17.1.9: formate + NAD+ → CO2 + NADH; []), it was proposed to delete FDH1 and
+  #     FDH2 from PFL/A-ALD expressing strains". Two things are wrong with curating it here. FIRST,
+  #     note the direction of that second sentence: as with GPD, the published move is to DELETE the
+  #     gene. SECOND and decisive: formate is a FED COSUBSTRATE. It is not produced by any route in
+  #     this atlas and appears in no curated pathway file. An Fdh part would close the cytosolic
+  #     bucket by importing reducing power across the same system boundary the bucket is open
+  #     because of -- so the route would report `balanced` while being balanced only by a feedstock
+  #     term the model cannot see. That is a worse outcome than an honest open bucket, because
+  #     `balanced` is, as `routes.py` puts it, the one verdict in this module nobody would go back
+  #     and re-derive.
+  #
+  #   * A cytosolic ethanol-oxidising Adh (the cytosolic half of the shuttle `adh3_native` quotes)
+  #     has the same defect one step further back: its ethanol comes from glycolysis via Pdc.
+  #
+  # AND THE MECHANICAL CONSEQUENCE, MEASURED RATHER THAN PREDICTED. A `cofactor_cycle` step is
+  # resolved to a curated reaction BY GENE SYMBOL (see two paragraphs above, and `_reactions_for`
+  # in routes.py). Exactly three curated `cofactor_cycle` reactions exist -- `adh3_matrix` (ADH3),
+  # `pos5_nadh_kinase` (POS5), `gpd_glycerol3p` (GPD1/GPD2) -- and all three live in
+  # `ethanol_reference.yaml`. A new part carrying a gene none of them names narrows the candidate
+  # set to zero, so all three come back, they disagree on the stoichiometry, and the step is
+  # reported `unknown`. Adding an `fdh1_fdh2_native` part to THIS FILE ALONE was tried and
+  # measured against the catalog as it stands today: routes 6,400 -> 12,800, unknown verdicts
+  # 0 -> 6,400, balanced 0 -> 0. Every one of the 6,400 routes carrying the new part goes dark,
+  # and not one route closes. That is the exact opposite of what the part was for. A cytosolic
+  # NADH part is therefore not a one-file change at all: it needs a curated, gene-keyed
+  # `cofactor_cycle` reaction in `ethanol_reference.yaml` first, and that file is not in this
+  # task's scope.
+  #
+  # THE CONCLUSION, RECORDED AS AN ABSENCE WITH ITS REASON PER CONVENTIONS.md. Cytosolic NADH
+  # belongs in this model as a BOUNDARY CONDITION -- a supply term of the glycolysis the atlas
+  # deliberately does not enumerate -- and not as a part. The honest way to let a route close in
+  # the cytosol is to curate that supply (a bounded glycolytic NADH term, or the measured
+  # per-compartment supply figure decision D1 option (b) asks for), not to install an enzyme
+  # nobody would ever install. Until then the open cytosolic bucket is the correct answer and is
+  # the atlas telling the truth about where its boundary is.
 
   - id: pos5_native
     step_role: cofactor_cycle
@@ -351,10 +601,13 @@ parts:
     cofactor_preference: NADH
     oxygen_sensitivity: unknown
     evidence: >-
-      RE-GROUNDED 2026-09-22 against the stored corpus; this entry used to assert the same facts
-      from background knowledge. 10.1016/j.mec.2024.e00245 states the two that decide routes in one
-      sentence: "the kinase Pos5 - naturally a mitochondrial enzyme - is regarded as particularly
-      suitable, as it strongly prefers NADH over NAD+". That is the basis for both
+      RE-GROUNDED 2026-09-22 against the stored corpus, and RE-SLICED the same day (see the header
+      note: the quotes below were originally retyped off the rendered paper, and two of them lost
+      an artefact in the process). 10.1016/j.mec.2024.e00245 states the two facts that decide
+      routes in one sentence: "the kinase Pos5 – naturally a mitochondrial enzyme – is regarded as
+      particularly suitable, as it strongly prefers NADH over NAD+". (Those are EN-DASHES, which is
+      what the stored text has; the earlier copy of this quote had flattened them to hyphens and so
+      was not a span.) That is the basis for both
       native_compartment and cofactor_preference, and neither is recalled. The same paragraph gives
       the cost the route ranker cannot see: "the kinase consumes ATP and decreases the amount of
       NADH available for respiration".
@@ -373,10 +626,13 @@ parts:
       presequence-targeted construct of it needs no recoding.
 
       NOT RECORDED, DELIBERATELY. oxygen_sensitivity is 'unknown'. It used to say 'insensitive',
-      which was recalled. "Required for the response to oxidative stress" is a statement about the
+      which was recalled. "required for the response to oxidative stress" is a statement about the
       cell's need for Pos5 under oxidative stress and is NOT a statement about whether the enzyme
       itself is oxygen-labile; reading the second out of the first would be exactly the inference
-      this file exists to refuse. native_compartment is 'mitochondrial_matrix' because that is the
+      this file exists to refuse. (The lower-case 'r' is the store's: this clause sits mid-sentence
+      in 10.1186/1475-2859-10-27 and the earlier copy had capitalised it to open a sentence here,
+      which is a small edit and still an edit made inside quote marks.) native_compartment is
+      'mitochondrial_matrix' because that is the
       compartment term the atlas has and the one the curated `pos5_nadh_kinase` reaction is written
       for; the sources quoted say "mitochondrial" and do not resolve matrix against intermembrane
       space, so the sub-compartment claim is the atlas's own and is weaker than the rest.
@@ -389,6 +645,52 @@ parts:
       CONFIDENCE 'medium', not 'high': every claim above is quoted from the corpus copy of a paper
       that is reporting or reviewing somebody's construction, and none of it has been confirmed by
       a measurement in this atlas.
+    evidence_spans:
+      - publication: "doi:10.1016/j.mec.2024.e00245"
+        note: "The basis for native_compartment and cofactor_preference. EN-DASHES, not hyphens."
+        quote: "the kinase Pos5 – naturally a mitochondrial enzyme – is regarded as\
+          \ particularly suitable, as it strongly prefers NADH over NAD+"
+        char_start: 7046
+        char_end: 7174
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1016/j.mec.2024.e00245"
+        note: "The cost the route ranker cannot see."
+        quote: "the kinase consumes ATP and decreases the amount of NADH available for respiration"
+        char_start: 7417
+        char_end: 7499
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1186/1475-2859-10-27"
+        note: "What the enzyme does. The short form quoted in the oxygen_sensitivity paragraph is\
+          \ the tail of this same span, lower-case `r` and all: [42834, 42879)."
+        quote: "Pos5 is mitochondrial NADH kinase and phosphorylates NADH and NAD(+) with lower\
+          \ specificity and it is required for the response to oxidative stress"
+        char_start: 42732
+        char_end: 42879
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1128/spectrum.00108-23"
+        quote: "Pos5 is an NADH kinase responsible for the production of mitochondrial NADPH"
+        char_start: 40977
+        char_end: 41053
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1186/s13068-019-1356-4"
+        note: "Pos5 used as a redox intervention in another host."
+        quote: "constructed a NADPH-regenerating system from NADH by expressing NADH kinase\
+          \ (Pos5p) from S. cerevisiae"
+        char_start: 20154
+        char_end: 20256
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1186/s13068-019-1356-4"
+        note: "Where source_organism comes from."
+        quote: "The gene POS5 was amplified from Saccharomyces cerevisiae genome"
+        char_start: 27606
+        char_end: 27670
+        occurrences_in_source: 1
+        verify_span: exact
     confidence: medium
 
   - id: adh3_native
@@ -400,7 +702,10 @@ parts:
     cofactor_preference: NADH
     oxygen_sensitivity: unknown
     evidence: >-
-      RE-GROUNDED 2026-09-22 against the stored corpus. 10.1128/aem.00362-26 gives the compartment
+      RE-GROUNDED 2026-09-22 against the stored corpus, and RE-SLICED the same day -- including the
+      ONE ELLIPSIS SPLICE the provenance sweep found in this repo's promoted data, which was in the
+      sequence_encoding_genome paragraph below. See the header note.
+      10.1128/aem.00362-26 gives the compartment
       and the job in one sentence -- "Adh3 is located in the mitochondrial matrix, where it plays a
       role in anaerobic balancing of the NAD+/NADH ratio" -- and the cofactor two sentences
       earlier, surveying the family: "The S. cerevisiae genome harbors seven ADH-encoding genes, of
@@ -411,7 +716,7 @@ parts:
       The direction that makes it a cofactor-cycle part, rather than a sixth alcohol dehydrogenase
       competing for the ADH step, is the one the corpus describes: 10.1128/spectrum.03519-22 --
       "This reaction is catalyzed by ADH3-encoded mitochondrial alcohol dehydrogenase in
-      Saccharomyces and helps to regenerate mitochondrial NAD+ at the level of the
+      Saccharomyces () and helps to regenerate mitochondrial NAD+ at the level of the
       ethanol-acetaldehyde shuttle"; 10.1186/s13068-016-0583-1 -- "ADH3, which encodes a
       mitochondrial alcohol dehydrogenase involved in NADH shuttling to the cytosol under anaerobic
       conditions". DUET runs that shuttle the other way, and the reason it can is quoted in
@@ -421,11 +726,21 @@ parts:
       power arrives without a carrier, which is why CARRIER_KNOWN in routes.py records ethanol
       crossing in both directions and records nothing for NADH.
 
-      sequence_encoding_genome is nuclear -- 10.1007/s00253-015-7266-x searches "The D. bruxellensis
-      ADH3 protein sequence ... for mitochondrial-targeting motifs by pairwise alignment with S.
-      cerevisiae ADH3 sequence", which is a presequence on a nuclear gene, not an mtDNA-carried
-      one. It therefore reads under NCBI table 1 and needs no recoding, which is the distinction
-      this project has been wrong about before.
+      sequence_encoding_genome is nuclear -- 10.1007/s00253-015-7266-x reports that "The D.
+      bruxellensis ADH3 protein sequence was searched for mitochondrial-targeting motifs by
+      pairwise alignment with S. cerevisiae ADH3 sequence", which is a presequence on a nuclear
+      gene, not an mtDNA-carried one. It therefore reads under NCBI table 1 and needs no recoding,
+      which is the distinction this project has been wrong about before.
+
+      THE SPLICE THIS QUOTE USED TO BE, named rather than quietly fixed. It read "The D.
+      bruxellensis ADH3 protein sequence ... for mitochondrial-targeting motifs by pairwise
+      alignment with S. cerevisiae ADH3 sequence": the two words "was searched" had been elided
+      from the middle and replaced by an ellipsis inside quote marks. The material was always in
+      the paper; the SPAN was not, and an elided quote cannot be re-resolved at an offset, so it
+      is not evidence. It is now the contiguous span -- WIDENED to include the elided words, not
+      narrowed to avoid them -- and it stops short of "using EMBOSS ClustalW2", which is where the
+      sentence continues in the store and is simply not needed for this claim. Ending a quote early
+      is fine; cutting a hole in its middle is not.
 
       NOT RECORDED, DELIBERATELY. oxygen_sensitivity is 'unknown'; it used to say 'insensitive' and
       no source in the corpus states it. The sources above describe Adh3's role under ANAEROBIC
@@ -436,6 +751,65 @@ parts:
 
       CONFIDENCE 'medium', not 'high': quoted from four papers, none of which measured Adh3 for
       this purpose, and none confirmed here.
+    evidence_spans:
+      - publication: "doi:10.1128/aem.00362-26"
+        note: "Compartment and job."
+        quote: "Adh3 is located in the mitochondrial matrix, where it plays a role in anaerobic\
+          \ balancing of the NAD+/NADH ratio"
+        char_start: 22192
+        char_end: 22304
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1128/aem.00362-26"
+        note: "The family survey Adh3's NADH preference is read off. The same span grounds\
+          \ adh7_native.cofactor_preference, from its other half."
+        quote: "The S. cerevisiae genome harbors seven ADH-encoding genes, of which Adh1-5 are\
+          \ NAD+-dependent, while Adh6 and Adh7 are NADP+-dependent enzymes with very low\
+          \ activities towards ethanol"
+        char_start: 21890
+        char_end: 22073
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1128/spectrum.03519-22"
+        note: "The direction. `()` is an empty citation marker in the stored text and is kept:\
+          \ deleting it is what made the earlier copy of this quote not a span."
+        quote: "This reaction is catalyzed by ADH3-encoded mitochondrial alcohol dehydrogenase in\
+          \ Saccharomyces () and helps to regenerate mitochondrial NAD+ at the level of the\
+          \ ethanol-acetaldehyde shuttle"
+        char_start: 22749
+        char_end: 22939
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1186/s13068-016-0583-1"
+        quote: "ADH3, which encodes a mitochondrial alcohol dehydrogenase involved in NADH\
+          \ shuttling to the cytosol under anaerobic conditions"
+        char_start: 45145
+        char_end: 45271
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1111/1751-7915.12160"
+        note: "Why the shuttle needs no carrier."
+        quote: "can freely diffuse through mitochondrial membranes"
+        char_start: 15823
+        char_end: 15873
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1111/1751-7915.12160"
+        quote: "are oxidized or reduced by cytosolic or mitochondrial alcohol dehydrogenases\
+          \ transferring the NADH excess from one cellular compartment to the other"
+        char_start: 15875
+        char_end: 16023
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1007/s00253-015-7266-x"
+        note: "DESPLICED 2026-09-22. This is the one ellipsis splice the provenance sweep found in\
+          \ promoted data. The two elided words were `was searched`; the span below is contiguous."
+        quote: "The D. bruxellensis ADH3 protein sequence was searched for mitochondrial-targeting\
+          \ motifs by pairwise alignment with S. cerevisiae ADH3 sequence"
+        char_start: 11765
+        char_end: 11909
+        occurrences_in_source: 1
+        verify_span: exact
     confidence: medium
 
   - id: gpd1_gpd2_native
@@ -447,13 +821,15 @@ parts:
     cofactor_preference: NADH
     oxygen_sensitivity: unknown
     evidence: >-
-      NEW 2026-09-22, and read rather than recalled. The reaction, the cofactor and the EC number
-      are one sentence of 10.1016/j.synbio.2021.12.010: anaerobic S. cerevisiae cultures "rely on
-      NADH-dependent reduction of the glycolytic intermediate dihydroxyacetone-phosphate to
-      glycerol-3-phosphate, in a reaction catalysed by NAD+-dependent glycerol-3-phosphate
-      dehydrogenase (Gpd1, Gpd2, EC 1.1.1.8)". That matches the curated `gpd_glycerol3p` reaction
-      in ethanol_reference.yaml term for term, which is what lets the enumerator resolve this part
-      to that reaction by gene symbol.
+      NEW 2026-09-22, and read rather than recalled; RE-SLICED the same day (see the header note).
+      The reaction, the cofactor and the EC number are one sentence of 10.1016/j.synbio.2021.12.010:
+      anaerobic S. cerevisiae cultures "rely on NADH-dependent reduction of the glycolytic
+      intermediate dihydroxyacetone-phosphate to glycerol-3-phosphate, in a reaction catalysed by
+      NAD+-dependent glycerol-3-phosphate dehydrogenase (Gpd1, Gpd2, EC 1.1.1.8 [,])". That matches
+      the curated `gpd_glycerol3p` reaction in ethanol_reference.yaml term for term, which is what
+      lets the enumerator resolve this part to that reaction by gene symbol. The `[,]` is an empty
+      citation marker the JATS-to-text conversion leaves behind; deleting it is what made the
+      earlier copy of this quote not a span, so it stays.
 
       IT IS A SINK FOR REDUCING POWER, NOT A SOURCE, and that is the point of curating it. The same
       paper: "due to the essential role of glycerol formation in NADH redox-cofactor balancing in
@@ -483,4 +859,37 @@ parts:
       CONFIDENCE 'medium', not 'high': three papers quoted, one of them a review, none of them a
       measurement made or checked here -- and one field ('cytosol') where two of the sources do not
       fully agree, said out loud rather than smoothed over.
+    evidence_spans:
+      - publication: "doi:10.1016/j.synbio.2021.12.010"
+        note: "Reaction, cofactor and EC number. `[,]` is an empty citation marker and is kept."
+        quote: "rely on NADH-dependent reduction of the glycolytic intermediate\
+          \ dihydroxyacetone-phosphate to glycerol-3-phosphate, in a reaction catalysed by\
+          \ NAD+-dependent glycerol-3-phosphate dehydrogenase (Gpd1, Gpd2, EC 1.1.1.8 [,])"
+        char_start: 5340
+        char_end: 5561
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1016/j.synbio.2021.12.010"
+        note: "Why it is a sink and not a source."
+        quote: "due to the essential role of glycerol formation in NADH redox-cofactor balancing\
+          \ in non-respiratory cultures, double deletion of GPD1 and GPD2 prevents anaerobic growth"
+        char_start: 19812
+        char_end: 19980
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1186/s13068-019-1486-8"
+        note: "The published move is to DELETE this part."
+        quote: "deletion of glycerol-3-phosphate dehydrogenase genes GPD1 and GPD2 prevented\
+          \ formation of glycerol and increased isobutanol production up to 1.32 g/L"
+        char_start: 2157
+        char_end: 2306
+        occurrences_in_source: 1
+        verify_span: exact
+      - publication: "doi:10.1093/femsyr/foac007"
+        note: "The source the native_compartment field is weakest against."
+        quote: "Gpd1 is mainly located in peroxisomes and Gpd2 in the cytosol and in mitochondria"
+        char_start: 39092
+        char_end: 39173
+        occurrences_in_source: 1
+        verify_span: exact
     confidence: medium
