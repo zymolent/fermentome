@@ -195,6 +195,52 @@ Each is reversible, spends nothing, touches no bench, and promotes nothing a hum
 | **D11** | **Write both missing promoters; make both refuse rather than default.** | A kind with no promoter is a proposal that can never become a row. Refusing loudly is the house pattern (`strain.organism_id`, `bottleneck.observation_type`) |
 | **D12** | **Do not promote the one `pathway_configurations` proposal.** | Its paper is *"Mitochondrial targeting increases specific activity of a heterologous valine assimilation pathway"* — bacterial BCKAD/ACD targeted to the matrix, measuring **enzyme specific activity, not a titer**. The curator had already written the warning into the payload. `C_mitochondrial_ehrlich` is the wrong strategy and the vocabulary has no right one. See §6 |
 | **D13** | **Diagnose the Milvus abort before running the lit-agent pipeline — done, and it is benign.** See §6.1 | Both corpora share one server, so pushing 127 papers into a store that had just aborted would have risked the cellulase corpus for no urgency |
+| **D14** | **Add a content check to ingest: refuse a file whose own text does not look like the paper its filename claims.** Threshold calibrated on the labelled batch (118 good: min 71%; 2 wrong-paper: 17%, 44%), not chosen by taste. `--no-title-check` overrides | 3 of 127 were the wrong paper and nothing downstream could catch it. This is the same "report, never guess" rule ingest already applied to filenames it could not match, extended to a failure that actually happened |
+
+---
+
+## 4a. The benchmark set: S.5's headline number was unobtainable, not merely unmeasured
+
+`data/benchmarks/known_positives.yaml` is what PLAN.md S.5 calls *"the headline number for whether
+the atlas works."* The verification wave found its 41 entries had never been checked. The
+reconciliation pass (`docs/drafts/benchmarks/RECONCILIATION.md` +
+`MERGED_known_positives.candidate.yaml`) found something worse and more specific.
+
+**BM-PATH-007 demanded "exactly one" compartment transition while BM-PATH-011 asserted the very
+second transition it denied.** `doi:10.1038/s41598-019-40631-5` settles it in consecutive clauses
+— pyruvate in via the MPC complex, 2-KIV out to the cytosol. BM-PATH-011 was right; BM-PATH-007 is
+now "exactly twice", with the start compartment named so the count has a defined scope, and the
+two entries cross-reference each other so the inconsistency cannot return silently.
+
+The consequence is the part worth keeping: because one entry demanded an exact count the other
+contradicted, **no atlas run could ever have satisfied both — the set had no achievable maximum
+score.** S.5's headline number was not unmeasured, it was *unobtainable*, and the defect would
+have surfaced as a low recovery rate blamed on the extraction pipeline.
+
+**18 of 41 statements are proposed for change**; the other 23 keep statement and expected outcome
+and gain only real evidence. **78 of 78 spans re-resolved exact, 0 absent, 0 spliced** — and three
+draft quotes that failed first pass were *repaired against the source rather than accepted*, which
+is the behaviour that makes the rest of the number mean anything.
+
+Two results worth singling out:
+
+* **BM-MIT-006 was contradicted.** "No established CRISPR-Cas route for editing yeast mtDNA" is
+  outdated; and the mitoTALEN leg was **withdrawn outright rather than restated**, because the only
+  mitoTALEN paper in the corpus is about *plant* mitochondria.
+* **An earlier wave's claim was itself checked and refuted.** The suggestion that PLAN.md's
+  0.411 g/g bound came from a xylose mix-up is wrong: the arithmetic is 1:1 from glucose and 5:6
+  from xylose, **both 0.41142 g/g**. The bound is correct and the carbon-balance check stands —
+  and for DUET specifically, the C5 route carries no yield penalty.
+
+**One thing needs you before the set can serve as the measuring stick.**
+`tests/test_benchmarks.py` has 17 passing and 1 failing against the candidate:
+`test_unverified_entries_say_no_source_was_consulted` requires any `unverified` entry's evidence to
+contain "no source consulted". The file's model has only two states — *nobody looked* and
+*curator-promoted* — and **there is no state for "sources consulted, read and quoted, but not
+promoted"**, which is exactly what an agent operating under L.5 must produce. The agent did not
+game the test, which it could have by quoting the old string; a three-state assertion is proposed
+instead. **Resolving that coupling, then flipping `verified` on the supported entries, is a curator
+act.**
 
 ---
 
@@ -348,7 +394,7 @@ snapshot is cold, and it is also what brings the stack back up.
 | **Re-read the benchmark set for `expected_outcome` strength** | Two independent waves found the same inversion; this is a set-wide re-read, not two fixes | Both instances, quoted |
 | **Which background the strategy-E retention experiment runs in** | BY4741's background petite rate could be read as insert loss. Choosing a background is a bench decision | The transposon/HAP1 attribution, quoted |
 | **Whether to spend slot 6's 45 records at all** | Three passes say the literature has no matrix-redox anchor. Reporting an unspent budget is the slots document's own stated preference | The counts, three ways |
-| **A title/checksum gate on ingest** | 3 of 127 were the wrong paper. Cheap to add; I did not, because it changes acquisition policy | The three DOIs, quarantined |
+| **The benchmark `evidence`/`confidence` coupling** | A test encodes a two-state model that has no room for "read and quoted but not promoted". Relaxing it, then flipping `verified`, is a curator act | The candidate file, the failing test named, and a three-state assertion proposed |
 | **`programme_fit` values per strategy** | Encodes what DUET is trying to be | The mechanism, seeded `unknown` (D1, previous session) |
 | **22.4 GB of excluded `.sra` in S3** | Irreversible and outward-facing | Keys and cost (~$1.10/yr) |
 | **Ploidy** | A cost question, never a gate | Candidates 1–4, each priced |
