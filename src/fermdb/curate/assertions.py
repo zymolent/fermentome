@@ -513,6 +513,13 @@ class AssertionResult:
     created: bool
     evidence_created: int
     level: EvidenceLevel
+    #: What `plan_assertion` would have said, carried through the write instead of being dropped.
+    #: `attach_evidence` discarded these until 2026-09-22, which is how a level demotion reached a
+    #: curator as silence.
+    warnings: tuple[str, ...] = ()
+    #: The level before this write, when there was one. `None` on a newly built assertion, which
+    #: had no level to move from. Present so a caller can see `L2 -> L1` rather than reconstruct it.
+    level_before: EvidenceLevel | None = None
 
 
 # ------------------------------------------------------------------------------------- id rules
@@ -1154,6 +1161,55 @@ def build_assertion(
     )
 
 
+#: The levels in strength order, strongest first. **This is not the numeric order**, and assuming
+#: it was is a mistake worth naming: `L2` outranks `L1` because replication across independent
+#: groups is the stronger claim, while `L3`-`L5` all sit *below* both because they rest on no
+#: direct evidence at all. The sequence is read straight off `assertion_level`'s CASE ladder in
+#: `schema.sql`, which tests each rule in descending strength and returns the first that matches,
+#: so this constant stays true by construction as long as it mirrors that order.
+_LEVEL_STRENGTH: Final[tuple[str, ...]] = ("L2", "L1", "L3", "L4", "L5")
+
+
+def _level_rank(level: str | None) -> int:
+    """Position in `_LEVEL_STRENGTH`, so "did this get weaker" is one comparison.
+
+    `None` sorts last because it is not a level at all. The view returns it for two opposite
+    states -- "no evidence yet" and "direct evidence on both sides, unresolved" -- and neither is
+    stronger than an L5, which at least says something.
+    """
+    if level is None:
+        return len(_LEVEL_STRENGTH)
+    try:
+        return _LEVEL_STRENGTH.index(level)
+    except ValueError:
+        return len(_LEVEL_STRENGTH)
+
+
+def _existing_evidence(conn: sqlite3.Connection, assertion_id: str) -> tuple[EvidenceRequest, ...]:
+    """The evidence an assertion already carries, as requests.
+
+    Only the fields the checks actually read are reconstructed -- type, direction and group. This
+    is not a faithful round-trip of the stored row and is not meant to be: it exists so that
+    `attach_evidence` can ask "does the new item disagree with what is already here", which needs
+    the directions and nothing else. Recreating every column would invite someone to write one of
+    these back.
+    """
+    rows = conn.execute(
+        "SELECT evidence_type, direction, independent_group, publication_id FROM evidence_item "
+        "WHERE assertion_id = ? ORDER BY id",
+        (assertion_id,),
+    ).fetchall()
+    return tuple(
+        EvidenceRequest(
+            evidence_type=str(row["evidence_type"]),
+            direction=row["direction"],
+            independent_group=str(row["independent_group"]),
+            publication_id=row["publication_id"],
+        )
+        for row in rows
+    )
+
+
 def attach_evidence(
     conn: sqlite3.Connection,
     assertion_id: str,
@@ -1184,6 +1240,17 @@ def attach_evidence(
 
     # Re-checked against the stored assertion rather than against a caller-supplied one, so that
     # the direction warning compares the evidence with the statement it will actually support.
+    #
+    # `already` is the evidence the assertion ALREADY carries, and leaving it out was a real
+    # defect (found 2026-09-22 by rehearsal). `_check_evidence_agrees_with_itself` compares the
+    # direct items in `request.evidence` with each other, so a request carrying only the new item
+    # has nothing to disagree with and the check is vacuous on exactly the path a curator takes.
+    # The consequence was silent and expensive: attaching a third group whose direction opposed
+    # the existing two took `assertion_level`'s `n_direct_directions` from 1 to 2 and **demoted
+    # the atlas's only L2 to L1**, with no warning anywhere. Demotion is a legitimate outcome --
+    # a contradicting result is a finding, and J.4 wants a `conflict` row rather than a silent
+    # merge -- but it must be something the curator is told about before they see the level move.
+    already = _existing_evidence(conn, assertion_id)
     stored = AssertionRequest(
         subject_type=str(row["subject_type"]),
         subject_id=str(row["subject_id"]),
@@ -1194,12 +1261,15 @@ def attach_evidence(
         context_id=row["context_id"],
         product_id=row["product_id"],
         direction=row["direction"],
-        evidence=(evidence,),
+        evidence=(*already, evidence),
     )
-    missing, blockers, _ = _check_evidence(conn, stored, evidence, 0)
+    missing, blockers, warnings = _check_evidence(conn, stored, evidence, 0)
     if missing or blockers:
         note = "; ".join([*blockers, *(str(m) for m in missing)])
         raise NotAssertable(f"{assertion_id}: {note}")
+    warnings.extend(_check_evidence_agrees_with_itself(stored))
+    # Read before the insert, so the caller can see a level move rather than infer it.
+    before = level_of(conn, assertion_id)
 
     evidence_id = evidence_id_for(assertion_id, evidence)
     moment = (now or datetime.now(UTC)).astimezone(UTC)
@@ -1217,13 +1287,26 @@ def attach_evidence(
             )
         )
     conn.commit()
+    after = level_of(conn, assertion_id)
+    # Only a move to a WEAKER level warns. Reaching L2 is the happy path and the thing attaching
+    # evidence is usually for; warning on it would bury the demotion warning in noise, and the
+    # caller can see any move at all by comparing `level_before`.
+    if _level_rank(after.level) > _level_rank(before.level):
+        warnings.append(
+            f"attaching this evidence moved the level from {before.level or 'none'} to "
+            f"{after.level or 'none'} ({after.basis}) -- weaker than before. The assertion row "
+            "itself is untouched: the level is a view (PLAN.md J.3), so this is the same "
+            "statement being read differently now that the evidence behind it has changed"
+        )
     return AssertionResult(
         assertion_id=assertion_id,
         evidence_ids=(evidence_id,),
         event_ids=tuple(events),
         created=False,
         evidence_created=1 if created else 0,
-        level=level_of(conn, assertion_id),
+        level=after,
+        warnings=tuple(warnings),
+        level_before=before,
     )
 
 

@@ -42,6 +42,14 @@ addopts = "-q"
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
+# `docs/drafts/calibration/raw/` holds the scripts exactly as they were run, beside the output
+# they produced. They are an artifact, not source: their value is that a later reader can re-run
+# the identical thing and get the identical numbers. Reformatting them to satisfy a linter would
+# quietly edit the record of what was actually executed -- so they are excluded rather than fixed.
+# Until this exclude, `ruff check .` and `ruff format --check .` had been red since 0dc42e7
+# (2026-09-21) on 14 errors in three files, which is long enough that the lint gate had stopped
+# meaning anything.
+exclude = ["docs/drafts/calibration/raw"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

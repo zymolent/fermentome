@@ -555,6 +555,105 @@ def test_a_second_independent_group_changes_the_level_the_view_reports(
     assert A.level_of(atlas, result.assertion_id).level == "L2"
 
 
+def test_attaching_a_contradicting_group_demotes_the_level_and_says_so(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The defect found by rehearsal on 2026-09-22: a demotion arriving as silence.
+
+    Two concordant groups make L2. A third group reporting the opposite direction takes
+    `assertion_level`'s `n_direct_directions` from 1 to 2, and the L2 branch requires <= 1 -- so
+    the level drops back to L1. That is the correct *outcome*; a contradicting result is a
+    finding, and J.4 wants a `conflict` row rather than a quiet merge. What was wrong is that
+    `attach_evidence` discarded `_check_evidence`'s warnings and built its check request with
+    only the new item, so `_check_evidence_agrees_with_itself` had nothing to compare against and
+    the curator was told nothing at all.
+    """
+    # A third paper, added here rather than in the shared fixture: only this test needs a group
+    # that contradicts, and widening the fixture would change what every other test starts from.
+    atlas.executescript(
+        """
+        INSERT INTO publication (id, year, zone, evidence, confidence)
+            VALUES ('doi:10.9999/paper-c', 2022, 'R', 'test fixture', 'low');
+        INSERT INTO span (id, publication_id, char_start, char_end, quoted_text, record_path,
+                          zone)
+            VALUES ('YAA:SPAN:c', 'doi:10.9999/paper-c', 10, 40, 'production fell to 0.40 g/L',
+                    'measurements[0]', 'R');
+        INSERT INTO measurement (id, strain_id, quantity_kind, product_id, value_as_reported,
+                                 unit_as_reported, source_locator, publication_id, zone,
+                                 evidence, confidence)
+            VALUES ('YAA:MEAS:c', 'YAA:STRAIN:host', 'titer', 'YAA:PRODUCT:isobutanol', 0.40,
+                    'g/L', 'figure 3', 'doi:10.9999/paper-c', 'R', 'promoted', 'medium');
+        """
+    )
+    atlas.commit()
+
+    result = A.build_assertion(atlas, _request(), curator=HUMAN, reason="table 2 of paper A")
+    second = A.attach_evidence(
+        atlas,
+        result.assertion_id,
+        _direct(
+            independent_group="lab-liao",
+            publication_id=PUB_B,
+            span_id="YAA:SPAN:b",
+            measurement_id="YAA:MEAS:b",
+        ),
+        curator=HUMAN,
+        reason="paper B reproduces it",
+    )
+    assert second.level.level == "L2"
+    assert second.warnings == (), "two concordant groups have nothing to warn about"
+
+    third = A.attach_evidence(
+        atlas,
+        result.assertion_id,
+        _direct(
+            independent_group="lab-boles",
+            publication_id="doi:10.9999/paper-c",
+            span_id="YAA:SPAN:c",
+            measurement_id="YAA:MEAS:c",
+            direction="decreases",  # the opposite of the two already attached
+        ),
+        curator=HUMAN,
+        reason="paper C reports the opposite effect",
+    )
+    assert third.level.level == "L1", "more than one direction withholds L2"
+    assert third.level_before is not None and third.level_before.level == "L2"
+
+    joined = " ".join(third.warnings)
+    assert "disagree with each other about the direction" in joined
+    assert "from L2 to L1" in joined, "the move itself must be stated, not left to be inferred"
+
+    # J.1 still holds through all of it: the statement was never edited, only read differently.
+    row = atlas.execute("SELECT * FROM assertion WHERE id = ?", (result.assertion_id,)).fetchone()
+    assert row["direction"] == "increases"
+
+
+def test_a_concordant_attach_that_does_not_move_the_level_warns_about_nothing(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The other half of the guard: warnings must stay rare enough to be read.
+
+    A second paper from the same lab adds evidence without adding a group, so the level does not
+    move and nothing disagrees. If this ever starts warning, the demotion warning above stops
+    being noticed.
+    """
+    result = A.build_assertion(atlas, _request(), curator=HUMAN, reason="table 2")
+    second = A.attach_evidence(
+        atlas,
+        result.assertion_id,
+        _direct(
+            independent_group="lab-atsumi",
+            publication_id=PUB_B,
+            span_id="YAA:SPAN:b",
+            measurement_id="YAA:MEAS:b",
+        ),
+        curator=HUMAN,
+        reason="the same group again",
+    )
+    assert second.level.level == second.level_before.level  # type: ignore[union-attr]
+    assert second.warnings == ()
+
+
 def test_a_second_paper_from_the_same_group_does_not_reach_l2(
     atlas: sqlite3.Connection,
 ) -> None:
