@@ -110,9 +110,17 @@ Not *which* strain, but *what its properties are*. `ISOBUTANOL_PROGRAM.md` §6 d
 `chassis_profile` and every field of it is empty, so the 360 enumerated routes are ranked against
 no chassis at all — a generic answer to a specific question. Needed, in rough order of value:
 
+**Ploidy: the owner decided on 2026-09-22 to measure it, when convenient.** It has never been a
+gate and is not one now — `chassis_profile.ploidy_candidates` keeps 1–4 open and each is priced, so
+every route already ranks and the verification burden simply reads as a range rather than a number.
+What measuring buys is that range collapsing: the burden across DUET's ~15 loci spans **1× to 4×**
+until it is known, which is the widest single uncertainty in any build estimate the atlas produces.
+Until the number exists, `ploidy_state` stays `unknown` — which is distinct from a recorded 1, and
+the schema keeps them apart deliberately.
+
 | field | why the ranker needs it |
 |---|---|
-| **ploidy** | DUET names ~15 loci. That is 15 edits in a haploid and 15 x ploidy otherwise, unless editing is genuinely marker-free and multiplex. This single number converts the build into an estimate. |
+| **ploidy** *(owner will measure — 2026-09-22)* | DUET names ~15 loci. That is 15 edits in a haploid and 15 x ploidy otherwise, unless editing is genuinely marker-free and multiplex. This single number converts the build into an estimate. |
 | ρ⁺/ρ⁰ status | DUET is a matrix pathway; a ρ⁰ chassis would be disqualifying, not inconvenient |
 | Pdc status | DUET requires Pdc-**positive** (DUET_TARGET §5.1); confirming it closes the largest determinant of pyruvate availability |
 | existing deletions | how much of the competing set is already gone |

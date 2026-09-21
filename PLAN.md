@@ -2524,6 +2524,45 @@ global sum would collapse the second and lose the only thing worth knowing.
 **per compartment**, printed in `explain` as its own term — not a pooled shortfall magnitude, which
 would add a matrix NADPH to a cytosolic NADH as though the inner membrane passed either.
 
+**AMENDMENT 2026-09-22 — owner direction. No route balances globally, and that deficit is a
+finding rather than a gap to be filled.**
+
+*What this settles:* whether the atlas should curate a cytosolic NADH-regenerating part so that
+`balanced` becomes a verdict a route can earn. **It should not.**
+
+*The measured state:* 6,400 routes, **0 balanced, 6,400 unbalanced, 0 unknown**. Global deficits
+are −1 (1,600 routes), −2 (3,200) or −3 (1,600) and never 0. **320 routes close the mitochondrial
+matrix** and 1,248 have exactly one open bucket anywhere. On the matrix-closing routes that single
+bucket is **cytosolic NADH**.
+
+*Why it is not filled.* Two independent reasons, and the second was measured rather than argued.
+
+**It is a system boundary, not a missing enzyme.** `data/pathways/ethanol_reference.yaml`'s own
+header records that glycolysis upstream of pyruvate is deliberately not enumerated — and glycolysis
+is what supplies cytosolic NADH. The corpus states the consequence for *this* pathway, in a paper
+the parts catalog already cites twice (`doi:10.1186/s13068-019-1486-8`): *"only one of the two
+glycolytic NADH molecules can be reoxidized via isobutyraldehyde reduction. The other redox
+reaction, catalyzed by Ilv5, is specific for NADPH, and S. cerevisiae cells do not have
+transhydrogenase activity for converting NADPH into NADH."* Two glycolytic NADH arrive per glucose;
+the route spends one. **The single equivalent the atlas reports as short is the known redox
+imbalance of the cytosolic route, arrived at from the other side.** It is also why the
+NADH-preferring KARIs exist at all. Erasing it would hide the field's central problem behind a
+green verdict.
+
+**And installing a part makes the model strictly worse.** A `cofactor_cycle` step resolves to a
+curated reaction *by gene symbol*, and only three such reactions exist (`adh3_matrix`,
+`pos5_nadh_kinase`, `gpd_glycerol3p`). A part naming a gene none of them names narrows the
+candidate set to zero, all three come back, they disagree, and the step reports `unknown`.
+Measured: adding a formate-dehydrogenase part takes routes 6,400 → 12,800, `unknown` 0 → 6,400 and
+`balanced` 0 → **0**. Every route carrying it goes dark and not one closes. Formate is a fed
+cosubstrate besides, so such a part would close the bucket by importing reducing power across the
+very boundary the bucket is open because of.
+
+*What would be legitimate, if this is ever revisited:* curate the **supply** rather than an enzyme —
+a bounded glycolytic NADH boundary term with a gene-keyed curated reaction behind it, or the
+measured per-compartment supply figure of D1's option (b). Both are modelling or bench decisions,
+not catalog additions.
+
 ### Phase 3.5 — The decision checkpoint (1 week)
 
 Not a build phase. Produce the five answers of `MITOCHONDRIAL_PROGRAM.md` §5 and a written
