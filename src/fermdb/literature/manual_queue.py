@@ -26,8 +26,10 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Final
 
 from ..config import Settings
+from ..extract.pdf import is_pdf, pdf_to_text
 from . import acquire
 
 __all__ = [
@@ -129,16 +131,117 @@ class IngestMatch:
 
 
 @dataclass(frozen=True)
+class TitleMismatch:
+    """A file whose own text does not look like the paper its filename claims it is."""
+
+    path: Path
+    doi: str | None
+    pmid: str | None
+    expected_title: str
+    overlap: float
+
+
+@dataclass(frozen=True)
 class IngestReport:
     """Everything `ingest_directory` did or could not do, for the CLI (or a test) to report."""
 
     matched: tuple[IngestMatch, ...]
     already_provided: tuple[Path, ...]
     unmatched: tuple[Path, ...]
+    title_mismatched: tuple[TitleMismatch, ...] = ()
+
+
+#: Below this share of the expected title's distinctive words appearing in the document's opening
+#: text, the file is refused rather than stored.
+#:
+#: Why it exists. A batch of 127 owner-supplied PDFs was triaged on 2026-09-21 and **three were a
+#: different paper than the DOI in their filename**. The worst of them is a 1991 JBC paper on the
+#: TIP1 cold-shock gene filed under a *Journal of Bioscience and Bioengineering* DOI -- it is a
+#: yeast stress paper, so an extractor would have found entirely plausible content in it, every
+#: span would have resolved, and the resulting rows would have carried a citation to a paper that
+#: does not contain them. Nothing downstream could have caught that: `verify_span` proves a quote
+#: is really in the stored document, not that the stored document is really the cited one.
+#:
+#: **Calibrated on that batch rather than chosen by taste**, which is the only reason to trust a
+#: number like this. Scored against the 118 checkable correctly-filed PDFs and the two checkable
+#: wrong-paper ones:
+#:
+#:     correctly filed (n=118)   min 71%   5th pct 88%   median 100%
+#:     wrong paper      (n=2)    17%, 44%
+#:
+#: The classes do not overlap, so any threshold in (44%, 71%) separates them perfectly. 0.55 is
+#: the midpoint: 11 points of margin above the worst true negative, 16 below the worst true
+#: positive. Refusing a right paper costs a re-run with ``--no-title-check``; storing a wrong one
+#: costs a citation to a paper that does not contain the rows, and nobody finds that later.
+#:
+#: **What this does NOT catch, stated so it is not mistaken for coverage.** The same batch held 4
+#: preprint manuscripts filed under their published DOI; they score 100%, 100%, 88% and
+#: unreadable, because a preprint *is* the same paper. That is a real provenance problem -- the
+#: published title of one gained the word "Significantly" in review, and this atlas quotes
+#: verbatim -- but it is a `version` field the schema does not have, not a threshold.
+_TITLE_OVERLAP_MIN: Final[float] = 0.55
+
+#: How much of the document's start to read. A cover sheet plus a title page is comfortably inside
+#: this, and it keeps the check cheap enough to run on every file.
+_TITLE_SCAN_CHARS: Final[int] = 4000
+
+#: Words too common in this corpus to distinguish one paper from another. Kept as one string
+#: because a 32-item set literal formats to 32 lines and reads as noise; `_TITLE_STOPWORDS` below
+#: is the frozenset everything actually uses.
+_TITLE_STOPWORD_TEXT: Final[str] = (
+    "a an and as at by during for from in into is its of on or the to via with using "
+    "effect effects role roles study studies analysis production yeast saccharomyces cerevisiae"
+)
+_TITLE_STOPWORDS: Final[frozenset[str]] = frozenset(_TITLE_STOPWORD_TEXT.split())
+
+
+def _title_tokens(title: str) -> set[str]:
+    """The distinctive words of a title, lowercased. Short and common words carry no signal."""
+    words = re.findall(r"[A-Za-z][A-Za-z0-9-]{3,}", title.lower())
+    return {w for w in words if w not in _TITLE_STOPWORDS}
+
+
+def _title_overlap(expected_title: str, document_text: str) -> float | None:
+    """Share of the expected title's distinctive words present in the document's opening text.
+
+    ``None`` means the check could not be run at all -- no stored title, no extractable text, or a
+    title with too few distinctive words to be evidence either way. An unrunnable check must not
+    read as a failed one, so the caller stores the file in that case rather than refusing it.
+    """
+    wanted = _title_tokens(expected_title)
+    if len(wanted) < 3:
+        return None
+    head = document_text[:_TITLE_SCAN_CHARS].lower()
+    if not head.strip():
+        return None
+    found = sum(1 for token in wanted if token in head)
+    return found / len(wanted)
+
+
+def _publication_title(conn: sqlite3.Connection, publication_id: object) -> str:
+    """The stored title for a publication row, or '' when there is none to compare against."""
+    if not publication_id:
+        return ""
+    row = conn.execute("SELECT title FROM publication WHERE id = ?", (publication_id,)).fetchone()
+    return str(row["title"]) if row is not None and row["title"] else ""
+
+
+def _document_text(data: bytes, path: Path) -> str:
+    """The file's own text, as far as it can be read. Never raises -- a check is not a gate."""
+    try:
+        if is_pdf(data):
+            return pdf_to_text(data, source=path.name)
+        return data.decode("utf-8", errors="replace")
+    except Exception:
+        return ""
 
 
 def ingest_directory(
-    conn: sqlite3.Connection, directory: Path, *, settings: Settings
+    conn: sqlite3.Connection,
+    directory: Path,
+    *,
+    settings: Settings,
+    check_titles: bool = True,
 ) -> IngestReport:
     """Match every file directly inside `directory` to a pending queue row and store it.
 
@@ -160,6 +263,7 @@ def ingest_directory(
     matched: list[IngestMatch] = []
     already_provided: list[Path] = []
     unmatched: list[Path] = []
+    title_mismatched: list[TitleMismatch] = []
 
     for path in sorted(candidate for candidate in directory.iterdir() if candidate.is_file()):
         doi, pmid = _extract_identifiers(path.stem)
@@ -186,6 +290,25 @@ def ingest_directory(
 
         data = path.read_bytes()
         media_type = mimetypes.guess_type(path.name)[0]
+
+        # Is this file actually the paper its filename claims? `verify_span` can prove a quote is
+        # really in the stored document; nothing downstream can prove the stored document is
+        # really the cited one, so it is checked here or not at all.
+        if check_titles:
+            expected_title = _publication_title(conn, row["publication_id"])
+            if expected_title:
+                overlap = _title_overlap(expected_title, _document_text(data, path))
+                if overlap is not None and overlap < _TITLE_OVERLAP_MIN:
+                    title_mismatched.append(
+                        TitleMismatch(
+                            path=path,
+                            doi=row["doi"],
+                            pmid=row["pmid"],
+                            expected_title=expected_title,
+                            overlap=overlap,
+                        )
+                    )
+                    continue
         content_path, checksum = acquire.store_bytes_content_addressed(
             settings, data, media_type=media_type
         )
@@ -230,4 +353,5 @@ def ingest_directory(
         matched=tuple(matched),
         already_provided=tuple(already_provided),
         unmatched=tuple(unmatched),
+        title_mismatched=tuple(title_mismatched),
     )

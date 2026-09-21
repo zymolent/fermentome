@@ -78,9 +78,7 @@ def _number(value: str | None) -> float | None:
 #: rather than stored, because `tier` is not descriptive: `curate.promote` consults 'adjacent' to
 #: decide whether a co-reported higher alcohol may become a row at all, and a typo that reached the
 #: column would silently disable that rule for one product.
-_PRODUCT_TIERS: Final[frozenset[str]] = frozenset(
-    {"primary", "reference", "adjacent", "reserved"}
-)
+_PRODUCT_TIERS: Final[frozenset[str]] = frozenset({"primary", "reference", "adjacent", "reserved"})
 
 
 def load_products(conn: sqlite3.Connection, settings: Settings) -> int:

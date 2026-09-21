@@ -22,7 +22,11 @@ placeholder `evidence` with the real source and a re-resolved quote. Steps 4 and
 
 ## Span verification
 
-**76 of 76 re-resolved exact, 0 absent, 0 spliced.**
+**78 of 78 re-resolved exact, 0 absent, 0 spliced.**
+
+(78 span placements across the 41 entries, drawn from 76 distinct quotes — one span, the
+matrix-localization sentence in `doi:10.1038/s41598-019-40631-5`, is cited by three entries and
+was re-resolved for each.)
 
 Every quote that appears in the candidate file or in this report was located in the **real stored
 document** — the text `fermdb.extract.harness.load_source_text` returns for that publication,

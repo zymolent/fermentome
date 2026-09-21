@@ -821,3 +821,130 @@ def test_ingest_directory_rejects_a_missing_directory(
 ) -> None:
     with pytest.raises(FileNotFoundError):
         manual_queue.ingest_directory(conn, tmp_path / "does-not-exist", settings=settings)
+
+
+# --------------------------------------------- is the file actually the paper it claims to be
+#
+# Three of 127 owner-supplied PDFs turned out to be a different paper than the DOI in their
+# filename. `verify_span` cannot catch that: it proves a quote is really in the stored document,
+# never that the stored document is really the cited one. Caught at ingest or not at all.
+
+TITLE = (
+    "Engineered ketol-acid reductoisomerase and alcohol dehydrogenase "
+    "enable anaerobic isobutanol production at theoretical yield"
+)
+
+
+def _queued_paper(conn: sqlite3.Connection, doi: str = "10.1016/j.ymben.2011.02.004") -> str:
+    conn.execute(
+        "INSERT INTO publication (id, doi, title, zone, evidence, confidence) "
+        "VALUES (?,?,?,'R','test','high')",
+        (f"doi:{doi}", doi, TITLE),
+    )
+    return acquire.enqueue_manual_download(
+        conn,
+        doi=doi,
+        pmid=None,
+        why_unavailable="paywalled",
+        title=TITLE,
+        publication_id=f"doi:{doi}",
+    )
+
+
+def _drop(tmp_path: Path, name: str, text: str) -> Path:
+    incoming = tmp_path / "incoming"
+    incoming.mkdir(exist_ok=True)
+    (incoming / name).write_text(text, encoding="utf-8")
+    return incoming
+
+
+def test_a_file_whose_text_matches_its_title_is_stored(
+    conn: sqlite3.Connection, settings: Settings, tmp_path: Path
+) -> None:
+    _queued_paper(conn)
+    incoming = _drop(
+        tmp_path,
+        "10.1016_j.ymben.2011.02.004.txt",
+        "Engineered ketol-acid reductoisomerase and alcohol dehydrogenase "
+        "enable anaerobic isobutanol production at theoretical yield.",
+    )
+    report = manual_queue.ingest_directory(conn, incoming, settings=settings)
+    assert report.title_mismatched == ()
+    assert len(report.matched) == 1
+
+
+def test_a_file_that_is_a_different_paper_is_refused_and_named(
+    conn: sqlite3.Connection, settings: Settings, tmp_path: Path
+) -> None:
+    """The failure that motivated this: plausible content under a DOI it does not belong to."""
+    queue_id = _queued_paper(conn)
+    incoming = _drop(
+        tmp_path,
+        "10.1016_j.ymben.2011.02.004.txt",
+        "Cloning and characterization of a cold-shock inducible TIP1 gene "
+        "from a budding organism, with membrane observations.",
+    )
+    report = manual_queue.ingest_directory(conn, incoming, settings=settings)
+
+    assert report.matched == ()
+    assert len(report.title_mismatched) == 1
+    mismatch = report.title_mismatched[0]
+    assert mismatch.doi == "10.1016/j.ymben.2011.02.004"
+    assert mismatch.expected_title == TITLE
+    assert mismatch.overlap < manual_queue._TITLE_OVERLAP_MIN
+
+    # Refused means nothing was written -- the row stays claimable rather than looking satisfied.
+    row = conn.execute(
+        "SELECT status, fulltext_asset_id FROM manual_download_queue WHERE id = ?", (queue_id,)
+    ).fetchone()
+    assert row["status"] == "pending"
+    assert row["fulltext_asset_id"] is None
+
+
+def test_the_title_check_can_be_turned_off_for_a_file_a_human_has_looked_at(
+    conn: sqlite3.Connection, settings: Settings, tmp_path: Path
+) -> None:
+    _queued_paper(conn)
+    incoming = _drop(tmp_path, "10.1016_j.ymben.2011.02.004.txt", "entirely unrelated prose")
+    report = manual_queue.ingest_directory(conn, incoming, settings=settings, check_titles=False)
+    assert len(report.matched) == 1
+
+
+def test_an_uncheckable_file_is_stored_rather_than_refused(
+    conn: sqlite3.Connection, settings: Settings, tmp_path: Path
+) -> None:
+    """A check that cannot run is not a check that failed.
+
+    Bytes that yield no text -- a scanned page, a PDF this build cannot parse -- must not be read
+    as evidence of the wrong paper, or an OCR regression would silently start rejecting the
+    corpus.
+    """
+    _queued_paper(conn)
+    incoming = tmp_path / "incoming"
+    incoming.mkdir()
+    (incoming / "10.1016_j.ymben.2011.02.004.pdf").write_bytes(b"%PDF-1.4 unparseable")
+    report = manual_queue.ingest_directory(conn, incoming, settings=settings)
+    assert report.title_mismatched == ()
+    assert len(report.matched) == 1
+
+
+def test_a_preprint_of_the_same_paper_is_not_what_this_catches(
+    conn: sqlite3.Connection, settings: Settings, tmp_path: Path
+) -> None:
+    """Stated as a test so the gap is not mistaken for coverage.
+
+    Four of the same 127 PDFs were preprint manuscripts filed under the published DOI. They score
+    high here, correctly -- a preprint is the same paper. It is still a provenance problem, since
+    one published title gained the word "Significantly" in review and this atlas quotes verbatim.
+    Catching it needs a `version` field, not a lower threshold.
+    """
+    _queued_paper(conn)
+    incoming = _drop(
+        tmp_path,
+        "10.1016_j.ymben.2011.02.004.txt",
+        "Engineered ketol-acid reductoisomerase and alcohol dehydrogenase "
+        "enable anaerobic isobutanol production. Preprint, not peer reviewed.",
+    )
+    report = manual_queue.ingest_directory(conn, incoming, settings=settings)
+    assert report.title_mismatched == ()
+    assert len(report.matched) == 1

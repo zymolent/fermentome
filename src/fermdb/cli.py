@@ -316,11 +316,13 @@ def cmd_literature_manual_queue_ingest(args: argparse.Namespace) -> int:
     settings = Settings.load()
     conn = open_db(settings.db_file)
     try:
-        report = ingest_directory(conn, Path(args.dir), settings=settings)
+        report = ingest_directory(
+            conn, Path(args.dir), settings=settings, check_titles=not args.no_title_check
+        )
     finally:
         conn.close()
     _print_ingest_report(report)
-    return 0 if not report.unmatched else 1
+    return 0 if not (report.unmatched or report.title_mismatched) else 1
 
 
 def _print_ingest_report(report: IngestReport) -> None:
@@ -330,6 +332,14 @@ def _print_ingest_report(report: IngestReport) -> None:
         print(f"already provided, skipped: {path.name}")
     for path in report.unmatched:
         print(f"could not match: {path.name}", file=sys.stderr)
+    for mismatch in report.title_mismatched:
+        print(
+            f"NOT STORED, content does not match the DOI it is filed under: "
+            f"{mismatch.path.name} ({mismatch.overlap:.0%} title overlap)\n"
+            f"    expected: {mismatch.expected_title}\n"
+            f"    re-check the file; --no-title-check stores it anyway",
+            file=sys.stderr,
+        )
 
 
 # ---------------------------------------------------------------------------------------------
@@ -737,6 +747,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_mq_ingest.add_argument(
         "--dir", required=True, dest="dir", help="folder of PDFs named by PMID or DOI"
+    )
+    p_mq_ingest.add_argument(
+        "--no-title-check",
+        action="store_true",
+        help="store a file even when its own text does not look like the paper its filename "
+        "claims. Use only after looking at the file: the check exists because 3 of 127 "
+        "owner-supplied PDFs were a different paper than their DOI",
     )
     p_mq_ingest.set_defaults(func=cmd_literature_manual_queue_ingest)
 

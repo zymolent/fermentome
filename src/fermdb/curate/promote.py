@@ -768,9 +768,7 @@ def _plan_higher_alcohol(
             )
         )
     else:
-        row = conn.execute(
-            "SELECT tier FROM product WHERE id = ?", (product_id,)
-        ).fetchone()
+        row = conn.execute("SELECT tier FROM product WHERE id = ?", (product_id,)).fetchone()
         if row is None:
             missing.append(
                 Requirement(
@@ -959,9 +957,7 @@ def _plan_configuration(
             )
         )
     elif (
-        conn.execute(
-            "SELECT 1 FROM compartment_strategy WHERE id = ?", (strategy_id,)
-        ).fetchone()
+        conn.execute("SELECT 1 FROM compartment_strategy WHERE id = ?", (strategy_id,)).fetchone()
         is None
     ):
         missing.append(
@@ -981,9 +977,7 @@ def _plan_configuration(
                 "configuration comparable to another one. A curator names the strain",
             )
         )
-    elif (
-        conn.execute("SELECT 1 FROM strain WHERE id = ?", (host_strain_id,)).fetchone() is None
-    ):
+    elif conn.execute("SELECT 1 FROM strain WHERE id = ?", (host_strain_id,)).fetchone() is None:
         blockers.append(
             f"host strain {host_strain_id!r} is not promoted yet; promote that strain first"
         )
