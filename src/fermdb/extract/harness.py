@@ -813,6 +813,44 @@ def _validate_payload(
 _CONFIDENCE_ORDER: Final[tuple[str, ...]] = ("low", "medium", "high")
 
 
+#: Fields that identify a record for cross-window deduplication, per kind.
+#:
+#: **Why this is not just the whole record.** Windows overlap by design, so a strain named in the
+#: overlap is reported twice. The original key was the whole serialised record, on the reasoning
+#: that spans are in document coordinates by this point and so a repeat "serialises identically
+#: both times". Measured against a real paper, that is false: the model quotes a *different
+#: sentence* for the same strain in each window, so the span differs, so the JSON differs, and the
+#: duplicate survives. On `doi:10.1016/j.ymben.2012.11.008` it produced **85 strain proposals for
+#: 53 distinct strains** -- 32 duplicate curation tasks from one paper, each costing a curator the
+#: same minute or two as a real one.
+#:
+#: A strain is identified by its name: that is already how promotion treats it
+#: (``YAA:STRAIN:<slug>``, so two papers reporting CEN.PK113-7D converge on one row), so collapsing
+#: here only moves that collapse earlier, to where the human cost actually is.
+#:
+#: Every other kind keeps the whole-record key, deliberately. Two measurements with the same value
+#: and unit may be genuinely different measurements under different conditions, and the same paper
+#: showed only 8 whole-record duplicates in 167 measurements -- so the cost of being wrong there is
+#: high and the saving is small. Narrow the identity for another kind only with the same kind of
+#: measurement behind it.
+_IDENTITY_FIELDS: Final[Mapping[str, tuple[str, ...]]] = {
+    "strains": ("name_as_reported",),
+}
+
+
+def _identity_of(kind: str, record: Mapping[str, Any]) -> str:
+    """What makes two records of this kind the same record, for dedup across windows."""
+    fields = _IDENTITY_FIELDS.get(kind)
+    if fields is None:
+        return json.dumps(record, sort_keys=True, default=str)
+    values = [str(record.get(name, "")).strip().casefold() for name in fields]
+    # An identity field the model left blank cannot identify anything, so such a record falls back
+    # to the whole-record key rather than colliding with every other blank one.
+    if not any(values):
+        return json.dumps(record, sort_keys=True, default=str)
+    return "\x00".join(values)
+
+
 def _least_confident(results: Sequence[Any]) -> str | None:
     """The most cautious ``self_confidence`` any window reported.
 
@@ -1125,10 +1163,7 @@ def extract_publication(
             )
 
         for kind, _, record in accepted:
-            # Spans are already in *document* coordinates here, so a record seen twice through the
-            # window overlap serialises identically both times. That is what makes the overlap
-            # free: it costs a duplicate, and the duplicate is exactly detectable.
-            key = (kind, json.dumps(record, sort_keys=True, default=str))
+            key = (kind, _identity_of(kind, record))
             if key in seen:
                 continue
             seen.add(key)

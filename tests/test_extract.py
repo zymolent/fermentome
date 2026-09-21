@@ -1010,6 +1010,83 @@ def test_a_long_document_is_extracted_window_by_window_and_merged(
     assert outcome.stats.attempts >= len(windows)
 
 
+def test_one_strain_quoted_differently_in_two_windows_is_still_one_strain(
+    conn: sqlite3.Connection, settings: Settings, config: LlmConfig
+) -> None:
+    """The duplicate the whole-record key could not see.
+
+    The test above has the model return the *same* quote in both windows, so the records serialise
+    identically and any key catches them. Real models do not do that: asked about the overlap they
+    quote whichever sentence is in front of them, so the span differs, the JSON differs, and the
+    duplicate survives into the curation queue as a second task for the same strain.
+
+    Measured on `doi:10.1016/j.ymben.2012.11.008`: 85 strain proposals for 53 distinct strains.
+    """
+    excerpt = excerpt_of()
+    windows = excerpt.split(200, overlap=60)
+    assert len(windows) >= 3
+
+    # Two different true sentences about the same strain, each in a different window.
+    quotes = ("The engineered strain IBA-7", "strain IBA-7")
+
+    def reply(prompt: str, _model: str, _schema: Mapping[str, Any] | None) -> str:
+        payload = empty_payload()
+        shown = next((w.text for w in windows if w.text and w.text in prompt), None)
+        if shown is None:
+            return json.dumps(payload)
+        for quote in quotes:
+            if quote in shown:
+                start = shown.index(quote)
+                payload["strains"] = [
+                    {
+                        "name_as_reported": "IBA-7",
+                        "role": "engineered",
+                        "span": {
+                            "quote": quote,
+                            "char_start": start,
+                            "char_end": start + len(quote),
+                        },
+                    }
+                ]
+                break
+        return json.dumps(payload)
+
+    outcome = extract_publication(
+        conn,
+        publication_id=PUBLICATION_ID,
+        source_text=DOCUMENT,
+        provider=MockProvider(handler=reply),
+        config=config,
+        settings=settings,
+        max_excerpt_chars=200,
+        window_overlap=60,
+        write=False,
+    )
+    assert [s["name_as_reported"] for s in outcome.payload["strains"]] == ["IBA-7"]
+
+
+def test_a_blank_identity_field_does_not_collapse_unrelated_records() -> None:
+    """A strain the model failed to name cannot identify anything, so it must not act as a key."""
+    from fermdb.extract.harness import _identity_of
+
+    first = {"name_as_reported": "", "role": "engineered", "span": {"quote": "a"}}
+    second = {"name_as_reported": "", "role": "parent", "span": {"quote": "b"}}
+    assert _identity_of("strains", first) != _identity_of("strains", second)
+    # And a named one is identified by its name alone, whatever else differs.
+    named_a = {"name_as_reported": "CEN.PK113-7D", "span": {"quote": "a"}}
+    named_b = {"name_as_reported": "cen.pk113-7d ", "span": {"quote": "b"}}
+    assert _identity_of("strains", named_a) == _identity_of("strains", named_b)
+
+
+def test_measurements_keep_the_whole_record_identity() -> None:
+    """Two measurements with the same number may be different measurements. Deliberate."""
+    from fermdb.extract.harness import _identity_of
+
+    one = {"strain_name_as_reported": "X", "value": 1.0, "span": {"quote": "a"}}
+    two = {"strain_name_as_reported": "X", "value": 1.0, "span": {"quote": "b"}}
+    assert _identity_of("measurements", one) != _identity_of("measurements", two)
+
+
 def test_merged_records_are_renumbered_against_the_merged_payload() -> None:
     """record_path must mean the same thing on the span row, the task and the payload."""
     from fermdb.extract.harness import _normalized_payload

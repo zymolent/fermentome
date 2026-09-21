@@ -386,6 +386,71 @@ the cache key. Two runs over different subsets cannot share a cache entry, and a
 
 ---
 
+## 3c. The vertical slice, costed — and the per-paper estimate corrected twice
+
+The proposal in §7 is to go depth-first: extract only the three record kinds phase 3's acceptance
+test needs (`strains`, `pathway_configurations`, `measurements`) from the landmark papers, rather
+than all seven kinds from 490. Dry-run through the capable tier, nothing written, no task created:
+
+| paper | records | strains | measurements | **configs** | seconds |
+|---|---|---|---|---|---|
+| `jbiotec.2022.09.012` — C6→C5 handover | 31 | 15 | 15 | **1** | 104 |
+| `ymben.2017.10.001` — BAT1/BAT2 | 82 | 23 | 49 | **10** | 560 |
+| `ymben.2012.11.008` — transhydrogenase + NAD kinase | **225** | 53 | 167 | **5** | 587 |
+| `cels.2019.10.006` — PPP + GLN3 | 42 | 29 | 11 | **2** | 150 |
+| **total** | **380** | 120 | 242 | **18** | 1,401 |
+
+*(Those are the totals **after** the cross-window dedup fix of §3c.1. Before it they were 446 and
+186 — 66 of the strain proposals were the same strain counted twice.)*
+
+**The prize is the last column: 18 `pathway_configuration` proposals**, against a table that has
+held zero for the life of the project and that phase 3's acceptance test measures recall against.
+
+**And the estimate has now been wrong twice, both times optimistic.** This morning's figure was 19
+records/paper, from the five papers extracted before. The Bastian run made it 87. This slice makes
+it **111 per paper for three kinds of seven**. Re-running §3's arithmetic on the measured number:
+
+| | |
+|---|---|
+| extractable papers | ~490 |
+| × 95 records (three kinds only, post-dedup) | **~46,500** |
+| at ~1.5 min review | **~1,160 hours ≈ 29 weeks** |
+
+That is *worse* than the all-kinds estimate it was meant to improve on, because per-paper yield is
+enormously variable — 36 to 257 across four papers — and the dense ones dominate. **Narrowing the
+kinds does not bound the review burden; only choosing fewer papers does.** Which is the argument
+for the vertical slice, now made with measured numbers instead of an assumption.
+
+### 3c.1 Checking the dense paper found a real defect
+
+`ymben.2012.11.008` proposing **85 strains** from one paper looked like over-extraction, so it was
+checked rather than trusted. Dumping the payload: **85 strain proposals, 53 distinct names.** The
+measurements were fine — 167 proposals, 159 distinct on (strain, kind, value, unit) — so the paper
+really does report that many numbers. The strains were not.
+
+The cause is in the merge step, and its own comment asserted the opposite:
+
+> *"Spans are already in document coordinates here, so a record seen twice through the window
+> overlap serialises identically both times. That is what makes the overlap free: it costs a
+> duplicate, and the duplicate is exactly detectable."*
+
+The key was the whole serialised record. Real models do not repeat themselves verbatim: asked
+about an overlapping window they quote **whichever sentence is in front of them**, so the span
+differs, so the JSON differs, and the duplicate survives into the curation queue as a second task
+for the same strain. The existing test missed it because it returns the *same* quote in both
+windows, which any key catches.
+
+Fixed: a strain is identified by its name, which is already how promotion treats it
+(`YAA:STRAIN:<slug>`), so this only moves the collapse earlier — to where the human cost is. Every
+other kind keeps the whole-record key deliberately, because two measurements with the same value
+may be genuinely different measurements and the same paper showed only 8 whole-record duplicates
+in 167.
+
+**Effect across the four papers: 446 → 380 proposals, strains 186 → 120.** 66 curation tasks that
+were never real work, on four papers. Configs and measurements are untouched.
+
+---
+
 ## 4a. The benchmark set: S.5's headline number was unobtainable, not merely unmeasured
 
 `data/benchmarks/known_positives.yaml` is what PLAN.md S.5 calls *"the headline number for whether
