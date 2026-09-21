@@ -657,12 +657,25 @@ RECORD_KINDS: Final[tuple[str, ...]] = (
 )
 
 
-def payload_schema(vocabulary: PayloadVocabulary) -> JsonSchema:
+def payload_schema(
+    vocabulary: PayloadVocabulary, *, kinds: Sequence[str] | None = None
+) -> JsonSchema:
     """The whole-payload JSON Schema: seven arrays plus the model's self-report.
 
     Every array is ``required``, even though any of them may be empty. An omitted key is
     ambiguous between "this paper has none" and "I did not look", and those are different answers
     to a question the atlas asks later.
+
+    ``kinds`` narrows the schema to a subset of :data:`RECORD_KINDS`, for asking a model about one
+    record kind at a time. The whole schema is ~19,100 compact characters and the largest single
+    section is ~4,200, so a one-kind ask cuts the fixed per-call overhead by roughly three
+    quarters -- which matters because that overhead is repeated in **every window of every paper**
+    and, on a local model, is most of the context budget.
+
+    The ambiguity note above still holds *within* a call: the keys that are asked for stay
+    required. What changes is that a narrowed call makes no claim at all about the kinds it did
+    not ask about, so a caller that narrows must ask for every kind it intends to have looked at,
+    or it has silently reintroduced the "I did not look" gap this docstring warns about.
     """
     sections = payload_sections(vocabulary)
     if tuple(section.key for section in sections) != RECORD_KINDS:
@@ -670,6 +683,19 @@ def payload_schema(vocabulary: PayloadVocabulary) -> JsonSchema:
             f"section keys {tuple(s.key for s in sections)} do not match RECORD_KINDS "
             f"{RECORD_KINDS}; the two must stay in step"
         )
+    if kinds is not None:
+        wanted = tuple(kinds)
+        unknown = [k for k in wanted if k not in RECORD_KINDS]
+        if unknown:
+            raise SchemaBuildError(
+                f"unknown record kind(s) {unknown}; known kinds are {list(RECORD_KINDS)}"
+            )
+        if not wanted:
+            raise SchemaBuildError("kinds is empty; a payload with no sections asks nothing")
+        # Kept in RECORD_KINDS order rather than the caller's, so the schema — and therefore the
+        # prompt, and therefore the cache key — does not depend on argument order.
+        keep = frozenset(wanted)
+        sections = tuple(s for s in sections if s.key in keep)
     properties: JsonSchema = {section.key: section.array_schema() for section in sections}
     properties["self_confidence"] = {
         "type": "string",
@@ -682,7 +708,7 @@ def payload_schema(vocabulary: PayloadVocabulary) -> JsonSchema:
     }
     return {
         "type": "object",
-        "required": [*RECORD_KINDS, "self_confidence"],
+        "required": [*(s.key for s in sections), "self_confidence"],
         "properties": properties,
         "additionalProperties": False,
     }

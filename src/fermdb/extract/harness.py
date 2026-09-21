@@ -997,6 +997,7 @@ def extract_publication(
     now: datetime | None = None,
     max_excerpt_chars: int | None = None,
     window_overlap: int = 1500,
+    kinds: Sequence[str] | None = None,
 ) -> ExtractionOutcome:
     """Extract one publication into a proposed Zone I ``extraction`` row.
 
@@ -1013,6 +1014,12 @@ def extract_publication(
             play. Never falls back to "assume it resolves".
         write: False runs everything including validation and writes nothing — the dry run a
             curator uses to see what a prompt revision would produce.
+        kinds: Ask for a subset of ``RECORD_KINDS`` instead of all seven. The payload schema is
+            most of the fixed per-call cost, so narrowing it buys back context — but a narrowed
+            run makes **no claim about the kinds it did not ask for**, and the resulting
+            ``extraction`` row would otherwise be indistinguishable from one that looked and found
+            nothing. The kinds asked for are therefore recorded in the prompt version, so two runs
+            over different subsets cannot silently share a cache entry or be compared as equals.
 
     Returns:
         An :class:`ExtractionOutcome`. ``extraction_id`` is None when ``write`` is False.
@@ -1033,7 +1040,7 @@ def extract_publication(
     document = source_text
     excerpt = build_excerpt(document, split_sections(document), sections)
     vocabulary = load_vocabulary(settings, conn)
-    schema = payload_schema(vocabulary)
+    schema = payload_schema(vocabulary, kinds=kinds)
     units = load_units(settings)
     yields = load_theoretical_yields(settings)
     resolver = (
@@ -1041,6 +1048,12 @@ def extract_publication(
     )
 
     prompt_file = load_prompt("extraction", directory=prompt_directory)
+    # A narrowed run asked a different question, so it gets a different prompt version. Without
+    # this, two runs over different subsets would share a cache entry keyed on (prompt, model,
+    # options) -- and a stored `extraction` row would claim a coverage it never had.
+    prompt_version = prompt_file.version
+    if kinds is not None:
+        prompt_version += "+kinds:" + ",".join(k for k in RECORD_KINDS if k in frozenset(kinds))
     windows = (
         excerpt.split(max_excerpt_chars, overlap=window_overlap)
         if max_excerpt_chars is not None
@@ -1084,7 +1097,7 @@ def extract_publication(
             schema,
             provider=provider,
             model=config.model_for("extraction"),
-            prompt_version=prompt_file.version,
+            prompt_version=prompt_version,
             options=config.options,
             timeout_s=config.timeout_s,
             cache=cache,
@@ -1143,7 +1156,7 @@ def extract_publication(
         notes=tuple(notes),
         excerpt=excerpt,
         stats=stats,
-        prompt_version=prompt_file.version,
+        prompt_version=prompt_version,
         self_confidence=_least_confident(results),
         failed_attempts=tuple(attempt for result in results for attempt in result.failed_attempts),
     )

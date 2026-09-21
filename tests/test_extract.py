@@ -405,6 +405,49 @@ def test_the_payload_schema_requires_every_section(vocabulary: PayloadVocabulary
     assert check_json_schema(incomplete, schema)
 
 
+def test_a_narrowed_schema_asks_for_only_the_kinds_named(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    """One record kind at a time, so the schema stops being most of the prompt.
+
+    The whole schema is ~18,000 compact characters against a ~4,800-character prompt template, and
+    that overhead is repeated in every window of every paper. Narrowing cuts it by ~60%, which is
+    the difference between a local model having negative room for the excerpt at its default
+    context and having ~12,000 characters of it.
+    """
+    schema = payload_schema(vocabulary, kinds=["measurements"])
+    assert set(schema["properties"]) == {"measurements", "self_confidence"}
+    assert schema["required"] == ["measurements", "self_confidence"]
+    assert check_json_schema({"measurements": [], "self_confidence": "low"}, schema) == []
+
+
+def test_a_narrowed_schema_keeps_record_kinds_order_not_the_callers(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    """The prompt is part of the cache key, so it must not vary with argument order."""
+    forwards = payload_schema(vocabulary, kinds=["strains", "measurements"])
+    backwards = payload_schema(vocabulary, kinds=["measurements", "strains"])
+    assert forwards == backwards
+    assert list(forwards["properties"]) == ["strains", "measurements", "self_confidence"]
+
+
+def test_a_narrowed_schema_rejects_an_unknown_or_empty_kind(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    with pytest.raises(SchemaBuildError, match="unknown record kind"):
+        payload_schema(vocabulary, kinds=["measurments"])  # codespell:ignore
+    with pytest.raises(SchemaBuildError, match="asks nothing"):
+        payload_schema(vocabulary, kinds=[])
+
+
+def test_the_full_schema_is_unchanged_when_no_kinds_are_given(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    """The narrowing is opt-in: every existing caller must get byte-identical output."""
+    assert payload_schema(vocabulary) == payload_schema(vocabulary, kinds=None)
+    assert list(payload_schema(vocabulary)["properties"])[:-1] == list(RECORD_KINDS)
+
+
 def test_the_payload_schema_refuses_an_invented_product_id(
     vocabulary: PayloadVocabulary,
 ) -> None:

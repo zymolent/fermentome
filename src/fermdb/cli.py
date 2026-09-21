@@ -49,6 +49,7 @@ from .db import open_db
 from .db.cli import add_db_subcommand
 from .extract import (
     DEFAULT_EXTRACTION_SECTIONS,
+    RECORD_KINDS,
     ExtractionError,
     ExtractionOutcome,
     SchemaBuildError,
@@ -424,9 +425,19 @@ def cmd_extract_run(args: argparse.Namespace) -> int:
             if args.sections
             else DEFAULT_EXTRACTION_SECTIONS
         )
+        kinds = tuple(args.only_kinds) if args.only_kinds else None
+        if kinds is not None:
+            unknown = [k for k in kinds if k not in RECORD_KINDS]
+            if unknown:
+                print(
+                    f"unknown record kind(s) {unknown}; known kinds are {list(RECORD_KINDS)}",
+                    file=sys.stderr,
+                )
+                return 2
         print(
             f"{publication_id}: provider={config.provider} "
             f"model={config.model_for('extraction')} sections={','.join(sections)} "
+            f"kinds={','.join(kinds) if kinds else 'all'} "
             f"source={origin}",
             file=sys.stderr,
         )
@@ -443,6 +454,7 @@ def cmd_extract_run(args: argparse.Namespace) -> int:
             run_id=args.run_id,
             write=not args.dry_run,
             max_excerpt_chars=args.max_excerpt_chars,
+            kinds=kinds,
         )
         _print_extraction_outcome(outcome, dry_run=args.dry_run)
 
@@ -828,6 +840,15 @@ def build_parser() -> argparse.ArgumentParser:
         dest="no_enqueue",
         action="store_true",
         help="write the extraction but do not create curation tasks for it",
+    )
+    p_ex_run.add_argument(
+        "--only-kind",
+        dest="only_kinds",
+        action="append",
+        metavar="KIND",
+        help="ask for this record kind only; repeatable. Narrows the payload schema, which is "
+        "most of the fixed per-call cost. A narrowed run makes NO claim about the kinds it did "
+        f"not ask for, so its prompt version records the subset. Kinds: {', '.join(RECORD_KINDS)}",
     )
     p_ex_run.set_defaults(func=cmd_extract_run)
 
