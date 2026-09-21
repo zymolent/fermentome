@@ -1,0 +1,275 @@
+# Published recoding controls: the reference artifacts the recoder is judged against.
+#
+# WHY THIS FILE EXISTS. PLAN.md Q's phase-0 acceptance ends "the recoder round-trips a known
+# mitochondrial gene and reproduces the published recoded marker sequence for a control". Every
+# other phase-0 clause passed; this one had never run, because the control is ARG8m and the
+# warnings audit at docs/drafts/warnings/PLAN.yaml line 2387 established that no paper in the
+# stored corpus prints its nucleotide sequence -- only the fact of it ("ARG8m differs from nuclear
+# ARG8 in its sequence to accommodate for differences in the genetic code of yeast mitochondria",
+# doi:10.1091/mbc.e16-11-0775). That audit's own instruction was to fetch the sequence from
+# GenBank, and to add the fetch to the phase-0 task list because "an acceptance criterion whose
+# reference artefact has not been acquired cannot be met". This file is that fetch.
+#
+# WHAT IS HERE. Three published sequences, each carrying the accession that makes it evidence:
+# the cox3::ARG8m fusion CDS exactly as GenBank annotates it (U31093.1 614..1912, the record's own
+# /transl_table=3), the ARG8m ORF alone (U31093.1 641..1912), and the nuclear ARG8 CDS it was
+# recoded from (NM_001183394.1, YOL140W). The last two are both 1,272 nt, so the comparison below
+# is strictly positional -- no alignment, and therefore nothing to get wrong in the alignment.
+#
+# THE FINDING, recorded here because surfacing it is the entire point of the criterion:
+# THE RECODER DOES NOT REPRODUCE ARG8m CODON-FOR-CODON, and the disagreement is a difference of
+# policy, not an error.
+#   * The protein matches exactly. recode(ARG8, source_table=1, mode="to_table3") encodes the same
+#     423 residues plus stop that published ARG8m encodes under table 3 -- which is NP_014501.1,
+#     and also residues 10-432 of AAC53660.1.
+#   * The codons match at 218 of 424 positions (51.4%; 1,046 of 1,272 nt, 82.2%). All 206
+#     differences are synonymous under table 3, and at all 206 the PUBLISHED codon is itself
+#     inside the recoder's own accepted candidate set. There is no position at which the two
+#     disagree about meaning or legality -- only about preference.
+#   * The cause is `recode`'s deliberate "keep the original codon when it is already acceptable"
+#     rule (src/fermdb/recode.py): it performs a MINIMAL recode, changing 20 of 424 codons -- the
+#     12 CUN (Leu under table 1, Thr under table 3), the 6 ATA (Ile/Met) and the 2 CGA/CGC absent
+#     from native yeast mtDNA. Steele/Butler/Fox instead re-optimized the whole ORF to the
+#     mitochondrial codon bias, which is why their AT content is 69.3% against the recoder's
+#     61.2% and the nuclear gene's 59.7%.
+#   * So the two are not interchangeable, and a test asserting equality would be wrong. The test
+#     asserts the census below instead: change the recoder's ranking policy and these numbers
+#     move, and someone has to come and explain why. See tests/test_recode.py.
+#
+# A SECOND FINDING, about the published marker rather than the recoder: ARG8m IS NOT DUAL-SAFE.
+# It carries two internal TGA codons (tryptophan at ORF codons 168 and 258), which are stop codons
+# under table 1 -- so the published marker would truncate at residue 167 if it were ever
+# translated on cytosolic ribosomes. `recode(..., mode="dual_safe")` refuses exactly those two
+# codons and `check_compartment_safety` flags them. That is a real, checkable property of a real
+# published artifact, and it is the concrete case behind genetic_code.py's insistence that the
+# code follows the genome that carries the gene.
+#
+# PROVENANCE OF THE FIELDS. `sequence` is the record's ORIGIN block over the stated region,
+# uppercased, with the line wrapping removed. `protein` is the record's own /translation
+# qualifier VERBATIM (no terminator character), never this project's own translation of the
+# nucleotides -- otherwise the acceptance test would be checking `translate` against itself
+# instead of against NCBI's curators. `checksum_sha256` is sha256 over the uppercase whitespace-
+# free ASCII sequence, and `load_recoding_controls` verifies it on every read: a sequence edited
+# in place here fails loudly rather than silently changing what the acceptance test means.
+#
+# Curation conventions (docs/reference/CONVENTIONS.md "Curation"): every entry carries `evidence`
+# and `confidence` from the closed set. Zone R throughout -- exactly what NCBI Nucleotide
+# returned, never a curator's or a model's reading of it.
+
+version: 1
+zone: R
+retrieved_on: "2026-09-22"
+
+sequences:
+  - id: cox3_arg8m_fusion_cds
+    role: published_recoded_marker_cds
+    gene: "cox3::ARG8m"
+    accession: U31093.1
+    region: "614..1912"
+    length_nt: 1299
+    encoding_genome: mitochondrial
+    translation_table: 3
+    protein_accession: AAC53660.1
+    protein_length_aa: 432
+    checksum_sha256: 5faae496c696dfb62ad1ed3c567a157d5ab6f149c579f49cb693843679e0f906
+    source_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=U31093.1&rettype=gb&retmode=text
+    sequence: |
+      ATGACACATTTAGAAAGAAGTAGACAAATGTTCAAAAGATATTTATCATCAACATCATCA
+      AGAAGATTCACATCAATCTTAGAAGAAAAAGCTTTTCAAGTAACAACATATTCAAGACCT
+      GAAGATTTATGTATCACAAGAGGTAAAAATGCTAAATTATATGATGATGTAAATGGTAAA
+      GAATATATCGATTTCACAGCTGGTATTGCTGTAACAGCTTTAGGTCATGCTAATCCTAAA
+      GTAGCTGAAATCTTACATCATCAAGCTAATAAATTAGTACATTCATCAAATTTATATTTC
+      ACAAAAGAATGTTTAGATTTATCAGAAAAAATCGTAGAAAAAACAAAACAATTCGGTGGT
+      CAACATGATGCTTCAAGAGTATTCTTATGTAATTCAGGTACCGAAGCTAATGAAGCTGCA
+      TTAAAATTCGCTAAAAAACATGGTATCATGAAAAATCCTAGTAAACAAGGTATTGTAGCT
+      TTCGAAAATTCATTCCATGGTAGAACAATGGGTGCTTTATCAGTAACATGAAATTCAAAA
+      TATAGAACACCTTTCGGTGATTTAGTACCTCATGTATCATTCTTAAATTTAAATGATGAA
+      ATGACAAAATTACAATCATATATCGAAACAAAAAAAGATGAAATCGCTGGTTTAATCGTA
+      GAACCTATTCAAGGTGAAGGTGGTGTATTTCCTGTAGAAGTAGAAAAATTAACTGGTTTA
+      AAAAAAATCTGTCAAGATAATGATGTAATCGTAATTCATGATGAAATTCAATGTGGTTTA
+      GGTAGATCAGGTAAATTATGAGCTCATGCTTATTTACCTTCAGAAGCTCATCCTGATATT
+      TTCACATCAGCTAAAGCATTAGGTAATGGTTTCCCTATTGCTGCTACAATCGTAAATGAA
+      AAAGTAAATAATGCTTTAAGAGTAGGTGATCATGGTACAACATATGGTGGTAATCCTTTA
+      GCTTGTTCAGTATCAAATTATGTATTAGATACAATTGCTGATGAAGCATTCTTAAAACAA
+      GTATCAAAAAAATCAGATATCTTACAAAAAAGATTAAGAGAAATCCAAGCTAAATATCCT
+      AATCAAATCAAAACAATCAGAGGTAAAGGTTTAATGTTAGGTGCTGAATTTGTAGAACCT
+      CCAACAGAAGTAATCAAAAAAGCTAGAGAATTAGGTTTATTAATCATCACAGCTGGTAAA
+      TCAACAGTAAGATTCGTACCTGCTTTAACAATCGAAGATGAATTAATCGAAGAAGGTATG
+      GATGCTTTCGAAAAAGCTATCGAAGCTGTATATGCTTAA
+    protein: |
+      MTHLERSRQMFKRYLSSTSSRRFTSILEEKAFQVTTYSRPEDLCITRGKNAKLYDDVNGK
+      EYIDFTAGIAVTALGHANPKVAEILHHQANKLVHSSNLYFTKECLDLSEKIVEKTKQFGG
+      QHDASRVFLCNSGTEANEAALKFAKKHGIMKNPSKQGIVAFENSFHGRTMGALSVTWNSK
+      YRTPFGDLVPHVSFLNLNDEMTKLQSYIETKKDEIAGLIVEPIQGEGGVFPVEVEKLTGL
+      KKICQDNDVIVIHDEIQCGLGRSGKLWAHAYLPSEAHPDIFTSAKALGNGFPIAATIVNE
+      KVNNALRVGDHGTTYGGNPLACSVSNYVLDTIADEAFLKQVSKKSDILQKRLREIQAKYP
+      NQIKTIRGKGLMLGAEFVEPPTEVIKKARELGLLIITAGKSTVRFVPALTIEDELIEEGM
+      DAFEKAIEAVYA
+    note: >-
+      The CDS exactly as GenBank annotates it: the COX3 start codon and first eight codons fused
+      in frame to the recoded ARG8m ORF, carried on mtDNA and therefore declared /transl_table=3
+      by the submitter. This is the sequence the round-trip half of the phase-0 acceptance
+      criterion exercises: it must translate to AAC53660.1 under table 3 and must NOT translate to
+      it under table 1.
+    evidence: >-
+      NCBI Nucleotide efetch (db=nuccore, id=U31093.1, rettype=gb), fetched live 2026-09-22.
+      GenBank record 'Synthetic construct of S. cerevisiae acetylornithine aminotransferase
+      (cox3::ARG8m) gene, complete cds', 2,042 bp, submitted by Fox,T.D. (Cornell) 06-JUL-1995;
+      reference Steele,D.F., Butler,C.A. and Fox,T.D., Proc. Natl. Acad. Sci. U.S.A.
+      93(11):5253-5257 (1996), PMID 8643562. Region and /transl_table are the record's own CDS
+      feature qualifiers, not this atlas's reading.
+    confidence: high
+
+  - id: arg8m_orf
+    role: published_recoded_marker_orf
+    gene: ARG8m
+    accession: U31093.1
+    region: "641..1912"
+    length_nt: 1272
+    encoding_genome: mitochondrial
+    translation_table: 3
+    protein_accession: null  # sub-region of AAC53660.1; no protein record of its own
+    protein_length_aa: 423
+    checksum_sha256: e6503c6f71cf29ebc88ae0fc8fbfb41120ecfb5b37745bb080e13a0cb009245e
+    source_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=U31093.1&rettype=gb&retmode=text
+    sequence: |
+      ATGTTCAAAAGATATTTATCATCAACATCATCAAGAAGATTCACATCAATCTTAGAAGAA
+      AAAGCTTTTCAAGTAACAACATATTCAAGACCTGAAGATTTATGTATCACAAGAGGTAAA
+      AATGCTAAATTATATGATGATGTAAATGGTAAAGAATATATCGATTTCACAGCTGGTATT
+      GCTGTAACAGCTTTAGGTCATGCTAATCCTAAAGTAGCTGAAATCTTACATCATCAAGCT
+      AATAAATTAGTACATTCATCAAATTTATATTTCACAAAAGAATGTTTAGATTTATCAGAA
+      AAAATCGTAGAAAAAACAAAACAATTCGGTGGTCAACATGATGCTTCAAGAGTATTCTTA
+      TGTAATTCAGGTACCGAAGCTAATGAAGCTGCATTAAAATTCGCTAAAAAACATGGTATC
+      ATGAAAAATCCTAGTAAACAAGGTATTGTAGCTTTCGAAAATTCATTCCATGGTAGAACA
+      ATGGGTGCTTTATCAGTAACATGAAATTCAAAATATAGAACACCTTTCGGTGATTTAGTA
+      CCTCATGTATCATTCTTAAATTTAAATGATGAAATGACAAAATTACAATCATATATCGAA
+      ACAAAAAAAGATGAAATCGCTGGTTTAATCGTAGAACCTATTCAAGGTGAAGGTGGTGTA
+      TTTCCTGTAGAAGTAGAAAAATTAACTGGTTTAAAAAAAATCTGTCAAGATAATGATGTA
+      ATCGTAATTCATGATGAAATTCAATGTGGTTTAGGTAGATCAGGTAAATTATGAGCTCAT
+      GCTTATTTACCTTCAGAAGCTCATCCTGATATTTTCACATCAGCTAAAGCATTAGGTAAT
+      GGTTTCCCTATTGCTGCTACAATCGTAAATGAAAAAGTAAATAATGCTTTAAGAGTAGGT
+      GATCATGGTACAACATATGGTGGTAATCCTTTAGCTTGTTCAGTATCAAATTATGTATTA
+      GATACAATTGCTGATGAAGCATTCTTAAAACAAGTATCAAAAAAATCAGATATCTTACAA
+      AAAAGATTAAGAGAAATCCAAGCTAAATATCCTAATCAAATCAAAACAATCAGAGGTAAA
+      GGTTTAATGTTAGGTGCTGAATTTGTAGAACCTCCAACAGAAGTAATCAAAAAAGCTAGA
+      GAATTAGGTTTATTAATCATCACAGCTGGTAAATCAACAGTAAGATTCGTACCTGCTTTA
+      ACAATCGAAGATGAATTAATCGAAGAAGGTATGGATGCTTTCGAAAAAGCTATCGAAGCT
+      GTATATGCTTAA
+    protein: |
+      MFKRYLSSTSSRRFTSILEEKAFQVTTYSRPEDLCITRGKNAKLYDDVNGKEYIDFTAGI
+      AVTALGHANPKVAEILHHQANKLVHSSNLYFTKECLDLSEKIVEKTKQFGGQHDASRVFL
+      CNSGTEANEAALKFAKKHGIMKNPSKQGIVAFENSFHGRTMGALSVTWNSKYRTPFGDLV
+      PHVSFLNLNDEMTKLQSYIETKKDEIAGLIVEPIQGEGGVFPVEVEKLTGLKKICQDNDV
+      IVIHDEIQCGLGRSGKLWAHAYLPSEAHPDIFTSAKALGNGFPIAATIVNEKVNNALRVG
+      DHGTTYGGNPLACSVSNYVLDTIADEAFLKQVSKKSDILQKRLREIQAKYPNQIKTIRGK
+      GLMLGAEFVEPPTEVIKKARELGLLIITAGKSTVRFVPALTIEDELIEEGMDAFEKAIEA
+      VYA
+    note: >-
+      ARG8m proper, without the nine-codon COX3 leader: GenBank's own gene/misc_feature 'ARG8m'
+      begins at 641, and 641..1912 is the ATG-to-TAA ORF inside it. Exactly 1,272 nt, the same
+      length as the nuclear ARG8 CDS below, so the two align codon-for-codon with no gaps -- which
+      is what makes the reproduction half of the acceptance criterion a strict positional
+      comparison rather than an alignment.
+    evidence: >-
+      Same record and same fetch as cox3_arg8m_fusion_cds. The 641 boundary is the record's own
+      misc_feature /note: 'acetylornithine aminotransferase; this was originally a nuclear gene
+      whose resulting amino acid sequence has been recoded according to the yeast mitochondrial
+      genetic code'. The 1912 boundary is the CDS feature's own end.
+    confidence: high
+
+  - id: arg8_nuclear_cds
+    role: recoder_input
+    gene: ARG8
+    accession: NM_001183394.1
+    region: "1..1272"
+    length_nt: 1272
+    encoding_genome: nuclear
+    translation_table: 1
+    protein_accession: NP_014501.1
+    protein_length_aa: 423
+    checksum_sha256: 2d5e1dd2c55d9e23542ed575fe5fd626656e3a2840371b0477c6f86f876791cb
+    source_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NM_001183394.1&rettype=gb&retmode=text
+    sequence: |
+      ATGTTTAAAAGATATTTATCCAGTACGTCATCAAGAAGATTTACAAGCATTTTAGAGGAA
+      AAGGCCTTTCAAGTGACCACTTACTCTAGACCTGAAGATCTATGTATAACTAGAGGTAAA
+      AATGCAAAGCTGTATGATGACGTGAATGGTAAAGAATATATCGATTTCACCGCAGGTATT
+      GCGGTGACCGCATTAGGCCATGCAAATCCTAAAGTGGCAGAAATTCTGCACCATCAGGCT
+      AACAAACTGGTTCATTCCTCCAACCTTTACTTCACTAAGGAATGTTTGGATTTAAGTGAA
+      AAGATTGTTGAAAAGACCAAGCAATTCGGTGGTCAACACGACGCCTCAAGAGTATTTTTA
+      TGTAATTCTGGTACGGAAGCAAATGAAGCTGCTTTGAAGTTTGCAAAGAAACATGGTATA
+      ATGAAAAATCCTAGCAAGCAAGGCATTGTTGCATTTGAGAACTCTTTTCATGGCCGTACT
+      ATGGGCGCTTTATCTGTCACTTGGAATAGTAAATATAGAACTCCTTTTGGGGATTTGGTT
+      CCCCATGTCTCATTCTTAAATTTGAATGACGAAATGACCAAACTACAAAGTTATATCGAG
+      ACCAAAAAGGACGAGATTGCTGGTTTAATTGTCGAGCCCATACAAGGTGAAGGTGGGGTT
+      TTTCCCGTAGAAGTTGAAAAGCTAACCGGATTGAAGAAAATATGTCAAGATAATGATGTG
+      ATTGTCATTCATGATGAAATTCAATGCGGTTTGGGCCGTTCAGGTAAACTATGGGCTCAT
+      GCTTATTTACCAAGTGAGGCTCATCCGGATATTTTTACATCTGCCAAAGCATTGGGAAAT
+      GGCTTCCCCATCGCTGCCACCATCGTCAATGAAAAAGTTAATAATGCTTTGAGAGTTGGT
+      GACCACGGCACCACGTATGGTGGTAATCCGCTGGCCTGTTCTGTAAGCAACTATGTTTTG
+      GATACCATAGCAGACGAAGCTTTTTTGAAACAAGTCTCTAAGAAGAGTGATATCTTACAA
+      AAGCGCTTGCGCGAAATTCAAGCCAAATATCCAAATCAAATAAAGACTATCAGAGGAAAA
+      GGTTTGATGCTTGGTGCTGAGTTCGTCGAACCACCCACCGAGGTCATCAAAAAGGCCAGA
+      GAATTGGGACTTTTGATCATTACCGCTGGTAAGAGTACCGTTAGATTTGTTCCCGCATTA
+      ACGATTGAAGACGAACTAATCGAAGAAGGGATGGATGCTTTTGAAAAGGCTATTGAAGCG
+      GTTTACGCTTAA
+    protein: |
+      MFKRYLSSTSSRRFTSILEEKAFQVTTYSRPEDLCITRGKNAKLYDDVNGKEYIDFTAGI
+      AVTALGHANPKVAEILHHQANKLVHSSNLYFTKECLDLSEKIVEKTKQFGGQHDASRVFL
+      CNSGTEANEAALKFAKKHGIMKNPSKQGIVAFENSFHGRTMGALSVTWNSKYRTPFGDLV
+      PHVSFLNLNDEMTKLQSYIETKKDEIAGLIVEPIQGEGGVFPVEVEKLTGLKKICQDNDV
+      IVIHDEIQCGLGRSGKLWAHAYLPSEAHPDIFTSAKALGNGFPIAATIVNEKVNNALRVG
+      DHGTTYGGNPLACSVSNYVLDTIADEAFLKQVSKKSDILQKRLREIQAKYPNQIKTIRGK
+      GLMLGAEFVEPPTEVIKKARELGLLIITAGKSTVRFVPALTIEDELIEEGMDAFEKAIEA
+      VYA
+    note: >-
+      The nuclear gene ARG8m was recoded FROM -- the recoder's input for the reproduction half of
+      the criterion. S. cerevisiae S288C YOL140W, SGD:S000005500, curated by SGD from NC_001147
+      (chromosome XV). RefSeq calls it a 'partial mRNA' because the record carries the CDS only,
+      with no UTRs; the CDS itself is complete (ATG..TAA, 1,272 nt) and that is all the recoder
+      needs.
+    evidence: >-
+      NCBI Nucleotide efetch (db=nuccore, id=NM_001183394.1, rettype=gb), fetched live 2026-09-22.
+      Found via esearch db=nuccore, term 'ARG8[Gene Name] AND "Saccharomyces cerevisiae
+      S288C"[Organism] AND refseq[filter]' (2 hits: this and chromosome XV NC_001147.6). Its
+      /translation NP_014501.1 is byte-identical to residues 10-432 of AAC53660.1, which is the
+      independent confirmation that these two records really are the same protein.
+    confidence: high
+
+# The measured census of `recode(arg8_nuclear_cds, source_table=1, mode="to_table3")` against
+# `arg8m_orf`. Recorded so the acceptance test asserts a specific, explained disagreement rather
+# than a loose inequality -- and so a future change to the recoder's codon ranking has to come
+# past these numbers rather than around them.
+comparison:
+  input: arg8_nuclear_cds
+  expected: arg8m_orf
+  mode: to_table3
+  total_codons: 424
+  identical_codons: 218
+  differing_codons: 206
+  # Every difference is a synonym swap under table 3; not one changes the encoded residue.
+  synonymous_differences: 206
+  # ...and at every differing position the PUBLISHED codon is one the recoder would itself accept.
+  published_codon_acceptable_to_recoder: 206
+  identical_nucleotides: 1046
+  total_nucleotides: 1272
+  # Codons the recoder changes relative to its nuclear input: the 12 CUN, 6 ATA and 2 CGA/CGC.
+  codons_changed_from_input: 20
+  at_fraction_input: 0.5967
+  at_fraction_recoded: 0.6124
+  at_fraction_published: 0.6934
+  # Table-dependent codon counts, for running the compartment-safety gate on real sequences
+  # rather than on the synthetic "ATG + CTG*6 + TAA" the gate was originally written against.
+  nuclear_cun_codons: 12
+  nuclear_ata_codons: 6
+  nuclear_absent_in_mito_codons: 2
+  published_cun_codons: 0
+  published_internal_tga_codons: 2
+  published_internal_tga_positions: [168, 258]   # 1-based codon positions in arg8m_orf
+  published_absent_in_mito_codons: 0
+  reproduces_exactly: false
+  explanation: >-
+    The recoder performs a minimal, meaning-preserving recode; the published marker is a full
+    codon re-optimization to the mitochondrial bias. Same protein, same legality under table 3,
+    different codon preferences at 206 synonymous positions. The recoder is not wrong here, but
+    neither is it a reimplementation of Steele/Butler/Fox 1996, and this atlas should not claim
+    that it is.

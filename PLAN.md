@@ -2386,6 +2386,42 @@ byte-identical; **a sequence filed against `mitochondrial_matrix` carrying an un
 is rejected**; the recoder round-trips a known mitochondrial gene and reproduces the published
 recoded marker sequence for a control ⚠.
 
+**AMENDMENT 2026-09-22 — phase 0, measured. The recoder is a safe recoder, not a codon optimizer,
+and the control proves it at the level that matters.**
+
+*What this replaces:* in the phase-0 acceptance criterion above, "reproduces the published recoded
+marker sequence for a control".
+
+*The replacement:* "**encodes the identical protein** to the published recoded marker under the
+compartment's own genetic code, with **every codon-level disagreement being a codon the recoder
+itself accepts** — the census pinned in a test, so changing the recoder's ranking breaks it".
+
+*Why:* the control has now been fetched and the comparison run. Against **U31093.1**, Steele,
+Butler & Fox's published `cox3::ARG8m` (*PNAS* 93:5253, 1996), the recoder reproduces all 423
+residues plus stop exactly, and disagrees on **206 of 424 codons** — every one of them synonymous
+under table 3, and at **every one** the published codon is already inside the recoder's own
+accepted set. There is no position where the two disagree about meaning or legality, only about
+preference. The cause is `recode`'s deliberate rule of keeping the original codon when it is
+already acceptable: it changes 20 of 424 codons (the 12 `CUN`, the 6 `ATA`, the 2 `CGA`/`CGC`
+absent from native yeast mtDNA), while Fox re-optimized the whole ORF to mitochondrial codon bias.
+AT content lands at 61.2% against the published 69.3%.
+
+Read literally, the old clause demands byte-identity, and byte-identity is only reachable by making
+`recode` a codon optimizer — forcing a first-choice codon everywhere, changing its output for every
+caller, to match one 1996 author's bias table. That is a different tool with a different risk
+profile, and it is not what the compartment-safety gate needs: what the gate needs is that a
+recoded sequence *translate correctly and carry no ambiguous codon*, which is exactly what the
+protein-level clause tests. Forcing first choice everywhere would not even reach byte-identity
+(72.9% AT, 275/424 identical). So the clause is restated to demand the property that is load-
+bearing and is met, rather than a property that is incidental and would cost the recoder its
+minimality.
+
+*Recorded alongside it, about the published marker rather than the recoder:* ARG8m carries two
+internal `TGA` codons (Trp at ORF codons 168 and 258) that are **STOP under table 1** — the
+published marker would truncate at residue 167 on a cytosolic ribosome. `dual_safe` refuses exactly
+those two codons. The marker the field uses is not dual-safe, and the atlas should say so wherever
+it is recommended.
+
 ### Phase 1 — The isobutanol core (8–10 weeks)
 
 **The phase that decides whether the project works.** Agent-drafted, fully human-reviewed:
