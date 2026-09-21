@@ -1,0 +1,878 @@
+# ρ⁰/ρ⁻ physiology — what a cell loses when it loses its mitochondrial genome.
+#
+# MITOCHONDRIAL_PROGRAM.md §3 budgets this at ~10 papers and calls it "Chassis consequences".
+# Two live decisions turn on it: OPEN_QUESTIONS M3 (respiration is "the preferred requirement for
+# the final industrial production strain unless a respiration-deficient strain demonstrates a
+# compelling and scalable process advantage") and OPEN_QUESTIONS M2 (strategy E needs a ρ⁰
+# derivative of the owner's industrial polyploid, which "cannot be bought and must be made").
+#
+# ────────────────────────────────────────────────────────────────────── THE HEADLINE
+#
+# THE FE-S ANSWER IS YES, AND IT IS THE MOST CONSEQUENTIAL THING IN THIS FILE.
+# Loss of mtDNA compromises iron–sulfur cluster biogenesis. Six independent papers in this corpus
+# say so, and they agree on the mechanism: no mtDNA → no OXPHOS → the inner-membrane potential ΔΨ
+# collapses to a low, ATP-hydrolysis-driven residue → matrix protein import, which is ΔΨ-dependent,
+# is degraded → ISC assembly, a matrix process, is degraded with it. The cleanest statement in the
+# corpus is doi:10.1186/s12915-025-02409-2: "Since protein import into the mitochondrial matrix
+# depends on ∆Ψ, essential mitochondrial functions, like iron-sulfur cluster biosynthesis, are also
+# compromised". The decisive control is in doi:10.1093/femsre/fuv028: a ρ⁰ strain carrying
+# ATP1–111, which raises ΔΨ without restoring respiration, has no crisis — so the damage tracks ΔΨ,
+# NOT respiration. Three separate respiratory-chain deletions (CAT5, RIP1, COX4) that leave mtDNA
+# intact cause no comparable defect.
+#
+# WHY THAT LANDS ON ILV3. Ilv3 is the 4Fe-4S dihydroxyacid dehydratase of the valine branch and it
+# sits IN THE MATRIX, which is where its cluster is made. doi:10.1016/j.meteno.2016.01.002 states
+# both halves in one sentence: cluster biogenesis "occurs predominantly in the mitochondrial
+# matrix (), the location of the native yeast dihydroxyacid dehydratase Ilv3". So the ρ⁰ ISC defect
+# and the DHAD step are located in the same compartment, and the corpus independently records DHAD
+# as the rate-limiting step of engineered isobutanol strains whenever its cluster supply is short.
+#
+# BUT THE JOIN IS INFERRED, NOT MEASURED — SAY SO OUT LOUD. No paper in these 1,309 full texts
+# assays Ilv3 activity, DHAD flux, 2-ketoisovalerate, or branched-chain amino acid prototrophy in a
+# ρ⁰ strain. Every ρ⁰ ISC result in the corpus is scored on CYTOSOLIC/NUCLEAR Fe-S clients (DNA
+# polymerases, Rad3, Nar1, Mms19) because the assay used was nuclear genome instability. The matrix
+# clients — Ilv3, Aco1, Leu1, lipoate and biotin synthases — are not measured in a ρ⁰ background
+# anywhere here. Two readings are consistent with the evidence and the corpus does not separate
+# them: (a) matrix ISC assembly fails first, because import fails, and Ilv3 is hit hardest; or
+# (b) residual matrix ISC capacity keeps matrix clients loaded and only the export-dependent
+# cytosolic branch starves. This is a cheap experiment — DHAD assay or valine prototrophy in a ρ⁰
+# vs isogenic ρ⁺ pair — and it should be run before strategy E commits to a ρ⁰-derived chassis.
+#
+# WHAT THIS DOES TO THE M3 TRADE. §2.1 frames the cost of taking an mtDNA locus as the loss of the
+# displaced gene, and activator_map.yaml already softened even that (intergenic_upstream_COX2 costs
+# nothing). This file says the framing was too narrow in the other direction: for a ρ⁰ CHASSIS the
+# cost is not only respiration. Respiration alone is cheap for a fermenting cell — ρ⁰ cells ferment
+# glucose at near-wild-type rate and still make ethanol. The expensive part of ρ⁰ is the ΔΨ collapse, and the
+# ΔΨ collapse is what reaches Fe-S, which is what reaches Ilv3. An argument that the process is
+# anaerobic anyway, so respiration is free, is answering the wrong half.
+#
+# NOTE THE DIRECTION-OF-CAUSATION SURPRISE. The coupling runs both ways: Ilv5, the KARI of the same
+# valine branch, is an mtDNA NUCLEOID PACKAGING PROTEIN (doi:10.1093/femsre/fuv028), and perturbing
+# it destabilises mtDNA. doi:10.1016/j.synbio.2022.02.007 replaced matrix Ilv5 with a bacterial
+# KARI and got a 166-fold petite frequency and an abandoned strain. The isobutanol pathway can
+# CREATE petites, not only suffer from them.
+#
+# Every quote below was re-resolved in the stored full text through fermdb.extract.harness
+# .load_source_text + fermdb.llm.validate.verify_span at the offsets the text itself reports:
+# 57 quotes, 57 passes, 0 failures, each unique in its document. No quote is spliced; where two
+# passages are used they are listed separately.
+#
+# NO `confidence` FIELD IS WRITTEN ANYWHERE IN THIS FILE. A human sets those. This is a draft under
+# docs/drafts/ and nothing under data/ was touched.
+
+version: 1
+zone: R
+status: draft
+question: "What does a yeast cell lose when it loses its mitochondrial genome, and does that reach Ilv3?"
+answer_in_one_line: >-
+  It loses respiration, mitochondrial translation, a normal ΔΨ, and — through the ΔΨ — iron–sulfur
+  cluster biogenesis. Fermentation is nearly untouched. The Fe-S defect is documented on cytosolic
+  and nuclear clients only; no paper in this corpus measures Ilv3 or DHAD in a ρ⁰ strain, so the
+  pathway risk is mechanistically strong and empirically open.
+
+corpus_searched:
+  stored_full_texts: 1310
+  readable: 1309
+  search_terms_used:
+    - "rho0, rho-zero, rho minus, [rho0], [rho-]"
+    - "ρ0 (U+03C1), and the PDF private-use rendering U+F072 followed by 0"
+    - "petite, petite-positive, petite-negative, mtDNA-less, mtDNA depleted, lacking mtDNA"
+    - "cross-searched against: Fe-S / iron-sulfur / ISC / 4Fe-4S, Ilv3 / DHAD / dihydroxyacid,
+       aconitase / Leu1 / lipoic / biotin synthase, anaerobic, ethidium bromide, industrial /
+       wine / brewing / lager / polyploid / aneuploid, auxotroph / valine / isoleucine"
+  pua_glyph_note: >-
+    The U+F072 trap flagged in the brief is real but narrow here. A corpus-wide sweep for U+F072
+    returns exactly ONE document, doi:10.1016/bs.mie.2024.07.028, where the ρ of ρ⁰ is rendered as
+    U+F072 and the genotype therefore reads as that private-use glyph followed by a zero — the
+    line is "0) and bearing kar1-1 mutation in the nuclear KAR1 gene, which block the fusion of",
+    with the invisible glyph immediately before the 0 and a hard line break before it. That paper
+    is already curated in heterologous_orf_precedents.yaml, whose provenance note records the same
+    failure. No other ρ⁰ paper in this corpus is hidden behind the glyph, so the 35 stored papers
+    counted by keyword in OPEN_QUESTIONS M2 were not an undercount caused by encoding.
+
+# ═══════════════════════════════════════════════════════ 1. WHAT A ρ⁰ CELL LOSES, AND KEEPS
+
+losses_and_retentions:
+
+  - item: respiration and oxidative phosphorylation
+    status: lost_completely
+    publication: doi:10.1186/s12915-025-02409-2
+    evidence: >-
+      "ρ0 mitochondria are deficient for oxidative phosphorylation and unable to perform
+      respiration. Petite-positive species are able to survive as ρ0 as long as they are in the
+      presence of glucose, which provides ATP by way of fermentation, but are unable to survive in
+      respiration carbon sources such as glycerol or pyruvate [, ]. The dysfunction of the ETC
+      results in a large drop in mitochondrial inner membrane potential ∆Ψ []. Since protein import
+      into the mitochondrial matrix depends on ∆Ψ, essential mitochondrial functions, like
+      iron-sulfur cluster biosynthesis, are also compromised []."
+    note: >-
+      This single passage is the whole causal chain the file turns on, in one paper's own words:
+      no OXPHOS → ΔΨ collapse → import failure → ISC failure. Everything else below is confirmation
+      or quantification of it.
+
+  - item: mitochondrial protein synthesis (all eight mtDNA ORFs and the mitoribosome)
+    status: lost_completely
+    publication: doi:10.1093/femsre/fuv028
+    evidence: >-
+      "When considering mitochondrial dysfunction, it is important to differentiate between a
+      mutation in a single mitochondrial gene encoding a component of the respiratory chain, which
+      is necessary for proper mitochondrial function and rho− or rho0 mutations. All of these
+      mutations affect cellular energy production through oxidative phosphorylation, but the former
+      preserves the mitochondrial genome and the production of other mitochondrially encoded
+      proteins, whereas the latter disrupts the ability to synthesize those proteins"
+    why_it_matters: >-
+      A ρ⁰ chassis has no mitochondrial translation apparatus at all. For strategy E this is not a
+      side effect, it is the premise: the ρ⁰ recipient is a blank matrix into which a whole
+      synthetic genome is delivered by cytoduction, and the delivered genome must restore the
+      translation machinery along with the cargo.
+
+  - item: a normal inner-membrane potential ΔΨ
+    status: degraded_to_an_atypical_residue
+    publication: doi:10.1534/g3.113.010108
+    evidence: >-
+      "In rho0 cells or in cells under anaerobic conditions, glycolytic ATP is imported into
+      mitochondria and hydrolysis of ATP by the F1-ATPase activity is essential to generate a
+      mitochondrial membrane potential and to maintain viability (; ). This low and atypical
+      mitochondrial membrane potential distinguishes rho0 cells from other respiratory mutants with
+      an intact ATP synthase."
+    corroboration: >-
+      doi:10.1186/s12915-025-02409-2 names the machinery: "The study of petite-suppressing and
+      petite-enabling mutations has revealed that mitochondrial function can be supported by the
+      inverted action of the nuclear-encoded F1 subunit of the ATP synthase and the ATP/ADP
+      exchange machinery, which can rescue ΔΨ by hydrolysis of ATP produced by the fermentative
+      pathway []." And it names the genes a ρ⁰ chassis cannot afford to lose: "Petite-positivity in
+      S. cerevisiae is lost in mutants in the α and β subunits of F1-ATPase and in the PET9 ATP/ADP
+      translocase [, ]."
+    why_it_matters: >-
+      Two things for the programme. (1) A ρ⁰ cell PAYS glycolytic ATP continuously to hold a
+      residual ΔΨ — a direct, permanent yield tax on a fermentation, and one no isobutanol paper in
+      this corpus accounts for. (2) The quote also says the same low-ΔΨ state exists "in cells under
+      anaerobic conditions", which means part of the ρ⁰ penalty is already being paid by any
+      strictly anaerobic process, ρ⁺ or not. That cuts BOTH ways in the M3 argument and should not
+      be quoted selectively.
+
+  - item: mitochondrial matrix protein import
+    status: degraded_but_must_remain_partly_functional
+    publication: doi:10.1186/s12915-025-02409-2
+    evidence: >-
+      "Petite mutants are capable of foregoing oxidative phosphorylation in the presence of glucose
+      for fermentation but must retain some measure of mitochondrial protein import for survival
+      []."
+    why_it_matters: >-
+      This is the sentence that makes the Fe-S question a question and not a foregone conclusion.
+      Import is degraded, not abolished — so matrix ISC assembly is presumably degraded, not
+      abolished, and the quantitative question — by how much, and is it enough for Ilv3 — is exactly
+      what nobody in this corpus measured.
+
+  - item: the mitochondrial compartment itself
+    status: retained
+    publication: doi:10.3390/microorganisms12102077
+    evidence: >-
+      "There once was a question of whether mitochondria existed in the absence of respiratory
+      function. The answer is that they do exist under all conditions, but they are not so
+      morphologically distinct as when cells are growing through respiration."
+    corroboration: >-
+      doi:10.1534/g3.113.010108 calls what is left proto-mitochondria: "Cells lacking mtDNA
+      maintain "proto-mitochondria," with abnormal shape () and limited metabolism, but are still
+      essential for cell survival."
+    why_it_matters: >-
+      A ρ⁰ cell still has a matrix. Strategy E depends on that — it is the compartment the delivered
+      genome will be expressed in, and it is also the compartment Ilv2/Ilv5/Ilv3 occupy.
+
+  - item: glucose fermentation to ethanol
+    status: retained_nearly_intact
+    publication: doi:10.1371/journal.pone.0056388
+    evidence: >-
+      "As expected, ρ0 cells were capable of producing but not consuming glycerol (), which is
+      metabolized exclusively by oxidation. On the other hand, glucose consumption by ρ0 cells ()
+      was only slightly delayed relative to WT cells ()."
+    corroboration: >-
+      doi:10.3390/microorganisms11041040 states the general principle and draws the practical
+      conclusion: "yeast can grow via anaerobic fermentation without requiring any mitochondrial
+      function. This feature makes it possible to study mtDNA genotypes that are lethal in other
+      organisms []. Thus, yeast cultures under anaerobic fermentation conditions can avoid problems
+      with mtDNA copy number maintenance []."
+    why_it_matters: >-
+      This is the strongest single fact FOR tolerating a respiration-deficient production strain,
+      and it is the one the M3 escape clause would rest on. Glucose→ethanol is essentially
+      unimpaired. Note the limits of the evidence: this is a chronological-ageing study, the ethanol
+      and glycerol yield tables are not in the extracted text, and no paper in this corpus reports a
+      ρ⁰-vs-ρ⁺ ethanol yield or productivity comparison under industrial fermentation conditions.
+      That comparison is a corpus gap, not a settled result.
+
+  - item: growth on non-fermentable carbon (glycerol, ethanol, pyruvate)
+    status: lost_completely
+    publication: doi:10.1007/s00439-015-1578-x
+    evidence: >-
+      "Petite mutants of S. cerevisiae are unable to grow on non-fermentable carbon sources and form
+      only small anaerobic colonies in the presence of glucose. While this phenotype can result from
+      a point mutation in mtDNA or a mutation in a nuclear gene, most often it is caused by a
+      complete loss (rho0) or extensive deletions (rho−) of mtDNA. Petite colonies appear at a low
+      (1–5 %) rate spontaneously in cultures grown on fermentable carbon sources."
+    why_it_matters: >-
+      Also gives the baseline spontaneous petite rate (1–5%) against which any engineered strain's
+      petite frequency should be judged — see the 166-fold record below.
+
+# ═══════════════════════════════ 2. THE Fe-S / ILV3 QUESTION — THE HIGHEST-VALUE RECORD
+
+iron_sulfur_cluster_biogenesis:
+
+  headline: >-
+    Loss of mtDNA DOES impair Fe-S cluster biogenesis, and the mechanism is ΔΨ, not respiration.
+    Whether it reaches Ilv3 is NOT answered by this corpus and must be measured.
+
+  mechanism:
+    publication: doi:10.1093/femsre/fuv028
+    evidence:
+      - >-
+        "A series of conclusive experiments by Veatch et al. () has shown that the cellular crisis
+        observed in rho0 cells, manifesting as progressively slower growth, cell-cycle arrest and
+        nuclear genome instability, is linked to a defect in ISC biogenesis due to a reduction in
+        the mitochondrial membrane potential ΔΨ."
+      - >-
+        "Second, rho0 cells carrying the ATP1–111 allele, which encodes a hyperactive F1 ATP
+        synthase and generates a higher ΔΨ than in wild-type rho0 cells, did not present any
+        detectable cellular crisis or genome instability."
+      - >-
+        "Respiratory-deficient rho+ mutants do not exhibit as robust a nuclear mutator phenotype as
+        that of the rho0 strains (Veatch et al. ; Dirick et al. ). Therefore, a mere respiratory
+        deficiency is not sufficient for a marked genomic instability."
+    reading: >-
+      Three separate controls, all in one review, all pointing the same way. Deleting CAT5, RIP1 or
+      COX4 kills respiration while leaving mtDNA intact and produces NO comparable defect. Raising
+      ΔΨ in a ρ⁰ cell (ATP1–111) abolishes the defect while leaving it non-respiring. Knocking down
+      the purely cytosolic Fe-S maturation factor Nar1 reproduces the defect in a cell with intact
+      mitochondria. The variable is ΔΨ acting through ISC biogenesis — respiration itself is a
+      bystander. This is precisely the distinction MITOCHONDRIAL_PROGRAM.md and OPEN_QUESTIONS M3
+      do not currently draw, and the whole M3 trade should be restated in these terms.
+    independent_confirmation:
+      - publication: doi:10.1091/mbc.e18-06-0356
+        evidence: >-
+          "The nuclear genome instability observed in cells without mtDNA (referred to as rho0
+          cells) is a consequence of decreased mitochondrial membrane potential (∆Ψ), which in turn
+          results in defects in the formation of iron–sulfur clusters, cofactors that are essential
+          for the normal function of proteins including those that affect nuclear genome integrity
+          ()."
+      - publication: doi:10.26508/lsa.202302091
+        evidence: >-
+          "although the nuclear DNA instability in mtDNA-depleted cells is driven by defective Fe-S
+          cluster protein assembly, the cell cycle defect was found to be independent of Fe-S
+          metabolism ()."
+      - publication: doi:10.3390/ijms22126640
+        evidence: >-
+          "(2) rho0 have reduced mitochondrial membrane potential (MMP) leading to impairment of
+          iron-sulfur synthesis [], (3) inhibition of TCA cycle leads to interruption of dNTPs and
+          amino acid synthesis ()."
+      - publication: doi:10.1038/s41586-019-1549-9
+        evidence: >-
+          "Indeed, strains with higher deviations from 2n ploidy were over-represented among rho0
+          colonies that lack detectable mtDNA (. The extent to which connections between mtDNA loss
+          and aneuploidy reflect iron-sulphur-cluster formation defects and/or other mechanisms
+          remains to be explored."
+        note: >-
+          Genome-scale, and it is the one paper that links ρ⁰ status to PLOIDY DEVIATION — directly
+          relevant to a polyploid industrial chassis. Note the paper treats the Fe-S link as an
+          open hypothesis, not a demonstrated one.
+      - publication: doi:10.3389/fgene.2011.00102
+        evidence: >-
+          "The ATP1-111 mutation in rho0 cells partially restored the MMP and reduced mean RLS to
+          that of rho+ cells."
+        note: >-
+          Independent construction of the same ATP1-111 control, in a different lab and for a
+          different readout (replicative lifespan). It corroborates that ΔΨ in a ρ⁰ cell is
+          pharmacologically/genetically raisable — which is the shape of a MITIGATION if a ρ⁰
+          chassis is ever needed.
+
+  which_clients_were_measured:
+    finding: cytosolic_and_nuclear_only
+    publication: doi:10.1534/g3.113.010108
+    evidence:
+      - >-
+        "decreased levels of cytoplasmic ISCs, because of low mitochondrial membrane potential in
+        rho0 cells, impair the proper folding and maturation of a number of nuclear proteins
+        required to maintain genomic stability (such as DNA Pol d and Rad3)."
+      - >-
+        "a defect in iron–sulfur cluster (ISC) metabolism, which originates in mitochondria and is
+        partially exported to the cytoplasm (), might ultimately lead to nuclear DNA instability in
+        these cells."
+    reading: >-
+      Every ρ⁰ Fe-S phenotype in this corpus is scored on a CYTOSOLIC or NUCLEAR client — DNA
+      polymerases δ/ε/ζ/α, Pri2, Rad3, Ntg2, Dna2, Nar1, Mms19, Cia1, Dre2, Rli1. The reason is
+      methodological: the assay was chromosome instability, so only clients that touch DNA were
+      looked at. The MATRIX clients — Ilv3, Aco1, Leu1, Sdh2, lipoate synthase, biotin synthase —
+      appear in this corpus only in ρ⁺ contexts. ABSENCE IS A FINDING and this is one: the corpus
+      contains no measurement of any matrix Fe-S enzyme in a ρ⁰ background.
+
+  the_ilv3_bridge:
+    status: mechanistically_strong_empirically_untested
+    publication: doi:10.1016/j.meteno.2016.01.002
+    evidence: >-
+      "Prokaryotic and eukaryotic dihydroxyacid dehydratases contain iron–sulphur (4Fe–4S) clusters
+      and require iron–sulphur cluster biogenesis and assembly mechanisms for in vivo activity (, ,
+      , ). In S. cerevisiae, iron–sulphur cluster biogenesis and assembly into mature proteins
+      occurs predominantly in the mitochondrial matrix (), the location of the native yeast
+      dihydroxyacid dehydratase Ilv3. Iron–sulphur cluster assembly can also occur in the yeast
+      cytosol (, , ), but has a much lower capacity than the mitochondrial system (, )."
+    corroboration:
+      - publication: doi:10.1186/1754-6834-5-65
+        evidence: >-
+          "Ilv3 is a [Fe-S] cluster containing enzyme []. In yeast cells, iron-sulphur clusters are
+          normally synthesized within mitochdrondria by the ISC assembly machinery which is similar
+          to the bacterial ISC system []."
+        note: "The typo 'mitochdrondria' is the source's own and is reproduced verbatim."
+      - publication: doi:10.1016/j.synbio.2022.02.007
+        evidence:
+          - '"a 2Fe–2S cluster-requiring dihydroxyacid dehydratase (DHAD, encoded by ILV3)"'
+          - >-
+            "Functional genomic analyses suggested that the poor performances of the cytosolic
+            pathway strains were in part due to a shortage in cytosolic Fe–S clusters, which are
+            required cofactors for the dihydroxyacid dehydratase enzyme."
+        note: >-
+          CONFLICT WORTH RECORDING, NOT RESOLVING: doi:10.1016/j.meteno.2016.01.002 says DHAD
+          carries a [4Fe-4S] cluster; doi:10.1016/j.synbio.2022.02.007 says Ilv3 is "2Fe–2S".
+          ISOBUTANOL_PROGRAM.md §line 110 records [4Fe-4S]. Both are in this corpus and they
+          disagree. Curated as observed; a human should decide which the atlas carries.
+    the_inference_and_its_gap: >-
+      The syllogism is: (1) ρ⁰ → low ΔΨ → degraded matrix import → degraded matrix ISC assembly;
+      (2) Ilv3's cluster is made by matrix ISC assembly, in the matrix, where Ilv3 already sits;
+      (3) therefore a ρ⁰ background should compromise Ilv3. Premises (1) and (2) are each quoted
+      above from separate papers. The CONCLUSION is not stated by any paper in this corpus, and no
+      paper here measures it. What would settle it in one experiment: DHAD specific activity, or
+      2-ketoisovalerate titre, or simple valine/isoleucine prototrophy, in a ρ⁰ strain against its
+      isogenic ρ⁺ parent. That experiment does not appear in these 1,309 texts.
+    what_would_change_the_route_decision: >-
+      If Ilv3 IS compromised in ρ⁰, then respiration-deficiency stops being a growth-rate tax and
+      becomes a PATHWAY LESION at the exact step ISOBUTANOL_PROGRAM.md already names as the
+      bottleneck — and every route that sacrifices mtDNA or ΔΨ, including strategy E's ρ⁰ delivery
+      step, inherits it. If Ilv3 is NOT compromised, the M3 escape clause stays open and the cost
+      of a ρ⁰ chassis is growth and genome stability only. The corpus does not choose between these,
+      and this file does not either.
+
+  a_second_order_risk_worth_flagging:
+    publication: doi:10.3390/ijms22126640
+    evidence: >-
+      "(2) rho0 have reduced mitochondrial membrane potential (MMP) leading to impairment of
+      iron-sulfur synthesis [], (3) inhibition of TCA cycle leads to interruption of dNTPs and amino
+      acid synthesis ()."
+    note: >-
+      The only sentence in the corpus that puts "amino acid synthesis" and a ρ⁰-adjacent mitochondrial
+      defect in the same clause. Read it carefully: it attributes the amino-acid effect to TCA
+      inhibition, not to mtDNA loss, and it is a discussion sentence in a 3-bromopyruvate paper, not
+      a measurement. It is NOT evidence that ρ⁰ cells are amino-acid auxotrophs. Recorded because
+      the brief asked for any amino-acid-auxotrophy signal and this is the closest the corpus comes.
+
+# ═════════════════════════════════════════ 3. GROWTH, CELL CYCLE AND ADAPTATION CONSEQUENCES
+
+growth_and_cell_cycle:
+
+  - finding: "loss of mtDNA triggers an immediate, four-part penalty"
+    publication: doi:10.1091/mbc.e18-06-0356
+    evidence: >-
+      "The immediate response to loss of mtDNA in yeast is loss of respiratory activity, activation
+      of the mtDNA inheritance checkpoint, reduced growth rate, and a high rate of nuclear genome
+      instability (; ; )."
+
+  - finding: "but the cell ADAPTS, and the penalty partly reverses"
+    publication: doi:10.1091/mbc.e18-06-0356
+    evidence: >-
+      "During this adaptation, rho0 cells, which have no mtDNA, exhibit increased growth rates and
+      nuclear genome stabilization."
+    why_it_matters: >-
+      Directly relevant to process design and to how a ρ⁰ chassis would be benchmarked. A freshly
+      made ρ⁰ derivative is NOT the strain you will run; an adapted one is. Any fitness comparison
+      made in the first days after EtBr treatment will overstate the cost. It also means that any
+      claim about how slow a ρ⁰ strain is carries a time axis, and the corpus's own growth numbers
+      are not comparable unless adaptation state is matched.
+
+  - finding: "the G1/S arrest is a checkpoint, not damage, and is background-independent"
+    publication: doi:10.1083/jcb.201205193
+    evidence: >-
+      "Our finding that arrest of rho0 cells occurs in three genetic backgrounds (W303, D273-10B,
+      and BY4741) indicates that it is not a consequence of genetic background. Moreover, because
+      W303 rho0 cells exhibit robust growth (Fig. S1), the findings indicate that the arrest
+      observed is not a consequence of severe mitochondrial damage that compromises cell growth
+      rates."
+    why_it_matters: >-
+      Two useful things. (1) The arrest is Rad53-dependent signalling, so it is in principle
+      suppressible — another mitigation if a ρ⁰ chassis is forced. (2) D273-10B, the background of
+      the purchasable Fox ρ⁰ kar1-1 strains named in OPEN_QUESTIONS M2, is one of the three tested,
+      and W303 ρ⁰ "exhibit robust growth" — so ρ⁰ per se is not a crippling growth defect in a
+      laboratory background.
+
+  - finding: "natural petite isolates vary widely, and some grow normally"
+    publication: doi:10.1186/s12915-020-00786-4
+    evidence: >-
+      "Among natural petites, we can identify both isolates with high doubling time (DT, black solid
+      line) and isolates with recovered growth rate, comparable to petite with suppressor mutations
+      (black dashed line)."
+    why_it_matters: >-
+      Population-scale evidence that the growth cost of losing mtDNA is not fixed and can be
+      suppressed by nuclear genotype. Argues that a ρ⁰ derivative of the production strain should be
+      screened for fast-growing isolates rather than accepted as whatever comes off the plate.
+
+# ══════════════════════════════════════════════ 4. HOW ρ⁰ AND ρ⁻ STRAINS ARE ACTUALLY MADE
+
+generation_methods:
+
+  protocols:
+    - method: ethidium bromide, liquid culture to saturation
+      publication: doi:10.1007/s10522-025-10233-y
+      evidence: >-
+        "Generation of ρ0 cells was accomplished by the selective elimination of mtDNA by treatment
+        with ethidium bromide (Slonimski et al. ). Ten μL of yeast was added to 50 mL YPD along with
+        50 μL of a 10 mg/mL EtBr solution, and then grown to saturation."
+      verification_used: "inability to grow on glycerol"
+      note: "The most fully specified recipe in the corpus — concentrations, volumes and medium."
+
+    - method: ethidium bromide, plate kill-zone ring
+      publication: doi:10.1073/pnas.2101242118
+      evidence: >-
+        "For each diploid mater, a petite version was generated by exposure to ethidium bromide (EtBr)
+        (). Isolates were seeded at an approximate density of 300 individuals per plate. A 3-μL drop
+        of EtBr (10 mg/mL) was spotted onto the center of each plate. A ring around the spot formed
+        where all cells were killed due to the toxic effects of EtBr. Surrounding this kill zone, a
+        ring of petite colonies form."
+      applied_to: "DIPLOID strains, in a yeast-hybrid breeding programme"
+      note: >-
+        A dose-gradient trick that needs no liquid handling, and the paper applies it to diploids
+        rather than haploids — the closest thing in the corpus to a recipe for a non-haploid isolate.
+
+    - method: ethidium bromide, short pulse for acute mtDNA loss
+      publication: doi:10.1534/g3.113.010108
+      evidence: >-
+        "mtDNA loss was induced in wild-type (WT) cells using ethidium bromide treatment for 6 hr"
+      note: >-
+        Used deliberately to study NEWLY born ρ⁰ cells before adaptation. The same paper's distinction
+        between "newborn" and "long-established" ρ⁰ clones is the practical reason to record which of
+        these protocols a strain came from.
+
+    - method: ethidium bromide with triplicate independent isolates, and why
+      publication: doi:10.1126/sciadv.aav1869
+      evidence: >-
+        "ρ0 strains were generated by treating ρ+ parent strains with ethidium bromide ().
+        Respiratorily deficient strains were screened for by the absence of growth on glycerol, and
+        the complete removal of mtDNA was confirmed by 4′,6-diamidino-2-phenylindole staining ().
+        Because of the mutagenic nature of ethidium bromide, to control for the effect of any spurious
+        nuclear mutations, we generated ρ0 strains of each parent strain in triplicate."
+      why_it_matters: >-
+        THE PROTOCOL DETAIL THE PROGRAMME SHOULD COPY. EtBr is a nuclear mutagen as well as an mtDNA
+        one. Any ρ⁰ derivative of the production strain is also a randomly mutagenised derivative, and
+        the published answer is to make three independent ones and confirm they behave alike. For an
+        industrial strain whose value IS its nuclear genome, this is not optional. Note also the
+        two-step verification: glycerol failure screens, DAPI confirms absence of mtDNA.
+
+    - method: CRISPR-Cas9 targeted to the matrix
+      publication: doi:10.3390/microorganisms11041040
+      evidence: >-
+        "To efficiently construct cells lacking mtDNA (ρ °cells), Cas9 fused with MTS from COX4 at the
+        N-terminus (MTS-Cas9) was expressed on a centromeric plasmid with a strong constitutive TDH3
+        (GPD) promoter."
+      why_it_matters: >-
+        The only NON-MUTAGENIC route to ρ⁰ in this corpus, and it sidesteps the EtBr objection above
+        entirely. The paper reports the gRNA reaching the matrix through an intrinsic RNA-import
+        mechanism, with ATP8 as the target. It is described as an increased RATE of mtDNA-depleted
+        cells rather than a clean conversion, so it is a lead and not a validated protocol — but for
+        an industrial polyploid where nuclear mutagenesis is unacceptable, it is the lead worth
+        pulling. Note the corpus renders ρ⁰ here as "ρ °cells", with a stray space.
+
+    - method: spontaneous, then selected
+      publication: doi:10.3390/microorganisms13010099
+      evidence: >-
+        "In this study, we show that elevated tolerance to two or three out of four tested antifungals
+        is a generic feature of at least five petite-positive species of yeasts including C. glabrata
+        (higher tolerance of petites to clotrimazole and miconazole), S. bayanus (tolerance to
+        clotrimazole, fluconazole, and miconazole), S. cerevisiae (tolerance to clotrimazole and
+        fluconazole), S. paradoxus (tolerance to clotrimazole, fluconazole, and miconazole), and S.
+        pastorianus (tolerance to clotrimazole and fluconazole)."
+      note: >-
+        Included for two reasons. (1) Its strain table mixes "spontaneous rho mutant" and "rho mutant
+        induced with ethidium bromide" for the SAME parent, including for S. pastorianus, the
+        industrial allopolyploid lager species — so EtBr demonstrably works there. (2) It calls every
+        isolate "rho−" without distinguishing ρ⁰ from ρ⁻ anywhere in the text. AMBIGUOUS AS
+        PUBLISHED; not resolved here.
+
+  discrimination_of_rho0_from_rho_minus:
+    publication: doi:10.3390/genes12020300
+    evidence: >-
+      "crossing a number of petite cells with different mit− tester strains, harbouring a single
+      point mutation in a mitochondrial gene encoding for a respiratory complex subunit; if at least
+      one of the diploids obtained is respiratory proficient, it means that the tested cell retained
+      a mtDNA fragment encompassing the mit− mutation and then it was rho−; (ii) analysis by the
+      Southern Blot of the mtDNA extracted from petite colonies using an ori fragment as a probe;
+      (iii) staining of mtDNA with DAPI (4′,6-Diamidine-2′-phenylindole dihydrochloride), which, in
+      yeast, binds both the nuclear DNA and the mtDNA."
+    why_it_matters: >-
+      The programme will need to PROVE a constructed derivative is ρ⁰ and not ρ⁻, because a residual
+      ρ⁻ genome would recombine with the delivered synthetic genome. Three published methods, one of
+      which (mit⁻ tester crosses) is the same genetic trick the Fox workflow already uses. A worked
+      example of the same three-way test in practice is doi:10.1371/journal.pone.0056388, which
+      confirmed its ρ⁰ isolate "by mating them with S. cerevisiae mit- strains containing point
+      mutations in mitochondrial genes".
+
+  downstream_requirement_for_strategy_E:
+    publication: doi:10.1016/j.xpro.2022.101359
+    evidence: '"This acceptor strain must be rho0 and mating type A."'
+    why_it_matters: >-
+      From the Fox-lab cytoduction protocol already curated in this atlas. It states the M2
+      requirement as a hard constraint: the recipient of an engineered mtDNA must itself be ρ⁰, AND
+      of a compatible mating type. Both are problems in a polyploid industrial isolate — see §5.
+
+# ══════════════════════════════════ 5. INDUSTRIAL AND POLYPLOID BACKGROUNDS — THE M2 EVIDENCE
+
+industrial_and_polyploid:
+
+  headline: >-
+    OPEN_QUESTIONS M2 marks "in a polyploid industrial isolate it is not routine ⚠" as background
+    knowledge. The corpus now bears on it and SPLITS it in two. Making the ρ⁰ derivative is routine
+    and has been done in exactly this class of strain. What is NOT routine is everything downstream:
+    mating a polyploid at all, and living with its higher genome instability.
+
+  claims:
+    - claim: ρ⁰ derivatives of industrial allopolyploid lager strains have been made, by EtBr
+      publication: doi:10.1126/sciadv.aav1869
+      evidence: >-
+        "To produce strains with an industrial lager yeast nuclear background and S. cerevisiae mtDNA
+        (cybrids), karyogamy-deficient (kar1-1) ρ0 strains (–) were used to transfer mitochondria from
+        a donor S. cerevisiae strain to a ρ0 lager strain ()"
+      reading: >-
+        A ρ⁰ LAGER strain — S. cerevisiae × S. eubayanus allopolyploid, the most industrial genome in
+        common laboratory use — was made and used as a cytoduction recipient. This is the closest
+        published analogue to what strategy E needs, and it is the same kar1-1 cytoduction architecture
+        the Fox workflow uses. It partly ANSWERS M2's ⚠: the operation is not unprecedented.
+
+    - claim: the real polyploid obstacle is the mating type locus, not the mtDNA removal
+      publication: doi:10.1126/sciadv.aav1869
+      evidence: >-
+        "Because lager yeasts contain both MATa and MATα at their mating type locus, mating does not
+        usually occur. To mate polyploid lagers to the kar1-1 ρ+ strains for mitochondria transfer, the
+        MAT locus had to first be homozygosed or otherwise reduced to a single mating type."
+      why_it_matters: >-
+        THE MOST ACTIONABLE SENTENCE IN THIS FILE FOR M2. Cytoduction is a mating. A polyploid
+        industrial isolate that is MAT-heterozygous cannot mate, so the ρ⁰ derivative alone is not
+        enough — the MAT locus has to be engineered first, which touches the nuclear genome the owner
+        is paying to preserve. The paper's route was a HyPr plasmid to induce mating-type switching.
+        This is a second, distinct construction step that OPEN_QUESTIONS M2 does not currently cost,
+        and it stacks with the xpro protocol's "must be rho0 and mating type A" requirement above.
+
+    - claim: allopolyploid backgrounds carry extra genome instability, and it shows in the data
+      publication: doi:10.1126/sciadv.aav1869
+      evidence: >-
+        "While some of this variation may be a result of mutations induced by ethidium bromide, the
+        absence of a strong trend for any specific ρ0 strain in the resulting cybrids or synthetic
+        hybrids suggests that these differences more likely reflect experimental variation or the
+        additional genome instability of the allopolyploid lager strains."
+      reading: >-
+        Their ANOVA found significantly more inter-replicate variation among LAGER ρ⁰ replicates than
+        among the haploid/diploid S. cerevisiae and S. eubayanus ones. The authors read it as
+        allopolyploid genome instability rather than a specific EtBr lesion. Practical consequence:
+        triplicate ρ⁰ isolates are a minimum in a polyploid, not a luxury, and phenotyping should
+        expect a spread.
+
+    - claim: ploidy deviation and ρ⁰ status are statistically associated genome-wide
+      publication: doi:10.1038/s41586-019-1549-9
+      evidence: >-
+        "Indeed, strains with higher deviations from 2n ploidy were over-represented among rho0
+        colonies that lack detectable mtDNA (. The extent to which connections between mtDNA loss and
+        aneuploidy reflect iron-sulphur-cluster formation defects and/or other mechanisms remains to
+        be explored."
+      note: "Direction of causation is not established by this observation, and the paper says so."
+
+    - claim: mtDNA copy number scales linearly with ploidy
+      publication: doi:10.1186/s12915-020-00786-4
+      evidence: >-
+        "the mtDNA copy number scales up with ploidy in a linear way, with diploid strains having
+        around double number of mitochondrial genomes and triploid having three times the number,
+        compared to haploid cells"
+      why_it_matters: >-
+        A polyploid production strain holds proportionally MORE mtDNA copies to eliminate, and — on
+        the other side of the operation — proportionally more copies for a delivered synthetic genome
+        to reach homoplasmy against. Both directions argue the polyploid case is quantitatively
+        harder even where it is qualitatively the same. MITOCHONDRIAL_PROGRAM.md §1 estimates mtDNA
+        at roughly 50–200 copies per cell in nucleoids ⚠; this paper reports a median of 18
+        mitochondrial genomes per haploid nuclear genome in a population survey, which a human
+        should reconcile with §1.
+
+    - claim: petites arise spontaneously under industrial conditions and are a known brewing problem
+      publication: doi:10.1128/aem.01015-25
+      evidence: >-
+        "A well-known phenomenon in brewing is the occurrence of respiratory-deficient or “petite”
+        mutants that either lack mitochondrial DNA (ρ0 phenotype) or are impaired (ρ ─ phenotype).
+        These mutants arise spontaneously in response to various stress factors under industrial
+        conditions ()."
+      corroboration: >-
+        The same paper's evolved clones show the split concretely: "Of the three buckwheat-wort-adapted
+        clones, clone A1 lost the complete mitochondrial genome (ρ0), whereas clones A6 and A9 kept
+        only the ATP6 gene and reduced their genome from 82 to 5 kb. Their impaired respiratory-mediated
+        ATP production was observed, as they formed small (“petite”) colonies (approximately 30% of the
+        ancestor’s colony size) and were unable to grow on non-fermentable carbon source medium."
+      ambiguity_flagged: >-
+        RULE 5 IN ACTION. The same paper's figure legend calls the same clone the opposite thing:
+        "Clone A1, rho─, lacked mitochondrial DNA." A strain that lacks mitochondrial DNA is ρ⁰, not
+        ρ⁻. The body text says ρ0 and the legend says rho─. Recorded as the paper's own inconsistency;
+        not resolved here. It is a fair warning about how much of the 35-paper keyword count in
+        OPEN_QUESTIONS M2 will need this kind of reading.
+
+    - claim: respiratory deficiency is generally UNWANTED in industrial strains
+      publication: doi:10.17912/micropub.biology.000831
+      evidence: >-
+        "Given that respiratory defects are often undesirable for industrial applications , we
+        speculate that increasing the upper thermal limit of S. uvarum via experimental evolution in a
+        more useful way may require simultaneous selection against the petite phenotype."
+      corroboration: >-
+        doi:10.1111/1751-7915.70092, working on an industrial S. cerevisiae: "The clones were
+        categorised into two groups based on their respiratory competence or deficiency, the latter
+        associated with mtDNA loss, an event seemingly linked to FCNZ and heat tolerance."
+      note: >-
+        Independent support for the OWNER'S M3 default rather than the escape clause. Two separate
+        industrial-evolution papers treat petite emergence as a defect to be selected against, and one
+        of them recommends counter-selection on glycerol as standard practice.
+
+    - claim: petites alter fermentation FLAVOUR chemistry, including fusel alcohols
+      publication: doi:10.3389/fgene.2020.00002
+      evidence: >-
+        "mutations linked to the mitochondrial genome that result in petite phenotypes can result in
+        the production of off-flavors (related to synthesis of esters and fusel alcohols) in beer
+        fermentation ()."
+      why_it_matters: >-
+        ISOBUTANOL IS A FUSEL ALCOHOL. This is the only statement in the corpus connecting petite
+        status to branched-chain-alcohol output, and it is a brewing review citing a secondary source,
+        not a measurement — direction and magnitude are unstated. It could mean a ρ⁰ background RAISES
+        fusel alcohol output, which would be an argument FOR the M3 escape clause, or lowers it. It is
+        a lead worth chasing to its primary source, and it is not evidence on its own.
+
+    - claim: petites are more tolerant to azole antifungals, across five species including S. pastorianus
+      publication: doi:10.3390/microorganisms13010099
+      note: >-
+        Quoted in §4 above. Relevant here because it documents a POSITIVE selection pressure for
+        respiratory deficiency — a reason petites can take over a population under stress — and
+        because it includes the industrial lager species. Its rho⁻/ρ⁰ labelling is ambiguous throughout.
+
+# ═══════════════════════ 6. THE VALINE BRANCH AND mtDNA ARE COUPLED IN BOTH DIRECTIONS
+
+pathway_feedback_onto_mtdna:
+
+  headline: >-
+    Not asked for in the brief, and it may be the second most useful thing here. The isobutanol
+    pathway does not only depend on mitochondrial state — it PERTURBS it.
+
+  findings:
+    - finding: "Ilv5, the KARI of the valine branch, is an mtDNA nucleoid packaging protein"
+      publication: doi:10.1093/femsre/fuv028
+      evidence: >-
+        "Ilv5 is the acetohydroxy acid reductoisomerase that catalyzes one of the reactions in the
+        branched chain amino acid biosynthesis pathway. The Aco1 protein is a bifunctional
+        iron–sulfur cluster (ISC)-containing enzyme, which functions as both a mitochondrial aconitase
+        in the tricarboxylic cycle and a nucleoid protein for the maintenance of rho+ genomes (Chen et
+        al. ). These two functions are accomplished by two separate domains of the protein. Ilv5 binds
+        to dsDNA independently of Abf2, and a deficiency of this protein destabilizes rho+ mtDNA
+        (Macierzanka et al. )."
+      why_it_matters: >-
+        Both moonlighting nucleoid proteins named here are enzymes the isobutanol programme touches:
+        Ilv5 is IN the pathway, and Aco1 is an Fe-S TCA enzyme in the same compartment. Deleting,
+        truncating, relocalising or replacing Ilv5 is therefore an mtDNA-stability intervention as
+        well as a flux intervention — which is not how ISOBUTANOL_PROGRAM.md currently models it.
+
+    - finding: "replacing matrix Ilv5 with a bacterial KARI produced a 166-fold petite frequency"
+      publication: doi:10.1016/j.synbio.2022.02.007
+      evidence: >-
+        "When constructing the mIBAIlvC6E6 strain we uncovered an unexpected petite phenotype. The
+        frequency at which the petite colonies arose in the mIBAIlvC6E6 strain was 166-fold that of
+        the wild-type (WT) strain (). All other engineered strains had a low petite frequency
+        consistent with natural S. cerevisiae isolates [,]. The mIBAIlvC6E6 strain was not included in
+        further studies due to this irreversible fitness defect."
+      reading: >-
+        The strain that lost the phenotype is precisely the one where a MITOCHONDRIALLY TARGETED
+        bacterial KARI (ilvC6E6) replaced Ilv5 in the matrix. The cytosolic version of the same
+        swap did not do it. Against the 1–5% spontaneous baseline quoted in §1, 166-fold is
+        catastrophic, and the authors abandoned the strain. The paper does not connect this to Ilv5's
+        nucleoid role; this file does, and flags the join as an inference from two separate papers.
+      consequence_for_duet: >-
+        DUET puts a heterologous KDC and ADH into the matrix. Nothing here says a KDC or an ADH will
+        destabilise nucleoids. But this is a documented case of a matrix-targeted heterologous enzyme
+        in THIS pathway producing an irreversible petite phenotype that killed the strain, so PETITE
+        FREQUENCY should be a standard readout on every matrix-targeted construct the programme
+        builds — alongside the folding-kinetics criterion already recorded in
+        heterologous_orf_precedents.yaml. It is a cheap plate assay and it caught a fatal defect here.
+
+    - finding: "a second isobutanol group looked for the same effect and did not find it"
+      publication: doi:10.1186/1754-6834-5-65
+      evidence: >-
+        "For ilv5 mutants a petite phenotype is described as Ilv5 seems to be involved in the
+        maintenance of wild-type mitochondrial DNA []. However, we could not find any indications for
+        the occurrence of a petite phenotype in our ilv5 mutant strains."
+      note: >-
+        An explicit negative result on the same coupling, from an isobutanol paper. So the corpus
+        holds a 166-fold positive and a clean negative for related interventions. Both are recorded;
+        neither is resolved. The difference may be deletion versus matrix-targeted replacement, which
+        is a testable distinction and not one this corpus settles.
+
+    - finding: "a branched-chain amino acid can rescue growth of a ρ⁰ strain"
+      publication: doi:10.1128/mbio.00084-18
+      evidence: >-
+        "A parallel result was observed with the respiration-deficient ρ0 mmf1Δ cha1Δ mutant strain
+        where the addition of isoleucine increased the growth rate to the level of the ρ− wild-type
+        control (µ = 0.26) ()."
+      note: >-
+        THE CLOSEST THING IN THE CORPUS TO A BRANCHED-CHAIN AMINO ACID PHENOTYPE IN A ρ⁰ STRAIN, and
+        it is not a clean one: the ρ⁰ status is secondary to an mmf1Δ cha1Δ genotype whose defect is
+        2-aminoacrylate toxicity from Ilv1, and the isoleucine rescue is attributed to that, not to
+        mtDNA loss. Note also what the comparison implies — the rescued ρ⁰ strain reaches only the
+        ρ⁻ WT control's µ = 0.26, against µ ≈ 0.45–0.48 for the ρ⁺ WT reported in the same passage.
+        Recorded as suggestive and confounded. It is NOT evidence that ρ⁰ cells are isoleucine
+        auxotrophs.
+
+# ══════════════════════════════════════════════════════ 7. ρ⁰ vs ρ⁻ vs mit⁻ — KEEPING THEM APART
+
+nomenclature_discipline:
+
+  definitions:
+    - definition_source: doi:10.1093/femsre/fuv028
+      evidence: >-
+        "(3) Further, there are cytoplasmic petites that have lost the ability to respire due to a
+        point mutation or mutations in only one or two of the mitochondrial genes necessary for
+        respiration (mit− mutants). In addition to respiratory deficiencies, the rho− and rho0 mutants
+        display pleiotropic phenotypes associated with their inability to synthesize mitochondrial
+        proteins. In contrast, mit− mutants are proficient in mitochondrial gene expression, although
+        these yeasts are also unable to respire."
+      reading: >-
+        The cleanest three-way definition in the corpus, and it states the consequence that matters
+        for this programme: ρ⁻ and ρ⁰ lose mitochondrial PROTEIN SYNTHESIS; mit⁻ does not. A mit⁻
+        strain is respiration-deficient with an intact translation apparatus — which is a materially
+        different chassis from ρ⁰ and is never what strategy E means.
+
+    - observation: "mit− colonies are visibly larger than petites, which hints at the energetic gap"
+      publication: doi:10.3390/microorganisms12102077
+      evidence: >-
+        "In contrast to petites, mit- mutants were large in size and their respiratory deficiency was
+        due to a loss of just one mitochondrial function."
+      note: >-
+        A first-person historical account from the Linnane lab. Its own reading: "The larger colony
+        size of mit- mutants compared to petites may indicate that the mit- mutants have better energy
+        conservation." Consistent with the ΔΨ story in §2 — a mit⁻ cell keeps its ATP synthase and its
+        translation, so it keeps more of its ΔΨ.
+
+  papers_in_this_corpus_that_do_not_keep_them_apart:
+    - publication: doi:10.1128/aem.01015-25
+      problem: "body text says clone A1 is ρ0; figure legend calls the same clone rho─"
+    - publication: doi:10.3390/microorganisms13010099
+      problem: "labels all isolates rho− throughout with no ρ⁰/ρ⁻ discrimination reported"
+    - publication: doi:10.1038/s41598-018-31558-4
+      problem: >-
+        uses a strain designated "[rho−] LJ104" in a very-high-gravity ETHANOL fermentation study
+        without stating whether it is ρ⁰ or ρ⁻ — noted because it is the one paper in the corpus
+        that runs a respiration-deficient strain under conditions resembling the owner's process,
+        and its genotype ambiguity is what stops it being a usable data point.
+
+# ═══════════════════════════════════════════════════ 8. MAMMALIAN ρ⁰ — A CONTRAST, NOT A TRANSFER
+
+cross_species_contrast:
+  publication: doi:10.1038/s42255-026-01454-7
+  evidence:
+    - '"Cells depleted of mtDNA, known as ρ0 cells, are dependent on uridine and pyruvate for growth."'
+    - >-
+      "ScURA forms a homodimer in the cytosol that uses fumarate as an electron acceptor instead of
+      ubiquinone, enabling respiration-independent pyrimidine biosynthesis."
+  reading: >-
+    Worth one record because it is the clearest case of a ρ⁰ biosynthetic auxotrophy in the
+    literature — and yeast DOES NOT HAVE IT. Mammalian ρ⁰ cells become uridine auxotrophs because
+    their DHODH is a respiratory-chain-coupled inner-membrane enzyme. S. cerevisiae's Ura1 is a
+    soluble cytosolic fumarate-dependent enzyme, which is exactly why this paper transplants the
+    yeast gene INTO mammalian cells to cure the auxotrophy. So the single best-known ρ⁰
+    biosynthetic lesion does not transfer to yeast. This is a useful discipline check: do not import
+    mammalian ρ⁰ phenotypes into the yeast chassis model. It also sharpens the Ilv3 question by
+    contrast — pyrimidines are safe in yeast BECAUSE the enzyme left the mitochondrion, and Ilv3 has
+    not.
+
+# ═════════════════════════════════════════════════════════════════ 9. WHAT IS GENUINELY ABSENT
+
+absences:
+  - gap: "Ilv3 / DHAD activity in a ρ⁰ background"
+    status: never_measured_in_this_corpus
+    note: >-
+      The single highest-value missing datum. Searching all 1,309 readable texts for Ilv3, DHAD or
+      dihydroxyacid in any ρ⁰/ρ⁻/petite context returns only ρ⁺ results and the cytosolic-relocalisation
+      literature. No Ilv3 assay, no 2-KIV titre, no valine/isoleucine prototrophy test in a ρ⁰ strain.
+
+  - gap: "any matrix Fe-S client measured in a ρ⁰ background"
+    status: never_measured_in_this_corpus
+    note: >-
+      Aconitase, Leu1, Sdh2, lipoate synthase and biotin synthase appear in the corpus only in ρ⁺
+      contexts or as transcript-level retrograde-response targets (ACO1 is UP-regulated in ρ⁰ cells,
+      doi:10.1091/mbc.e09-10-0899, which says nothing about whether the protein is cluster-loaded).
+      Every ρ⁰ Fe-S measurement here is on a cytosolic or nuclear client.
+
+  - gap: "2-ketoisovalerate production in a ρ⁰ strain"
+    status: never_measured_in_this_corpus
+    note: >-
+      The brief asked specifically whether ρ⁰ cells can still make 2-KIV. Nothing in the corpus
+      addresses it directly. The indirect argument is that Ilv2 and Ilv5 are nuclear-encoded,
+      imported and cofactor-simple (TPP and NADPH), so they should still work; Ilv3 is the step at
+      risk. But that is inference, and DHIV would then accumulate in place of 2-KIV — a specific,
+      cheaply measurable prediction that would settle the Ilv3 question by metabolite ratio alone.
+
+  - gap: "ρ⁰-vs-ρ⁺ ethanol yield or productivity under industrial fermentation conditions"
+    status: not_found
+    note: >-
+      Glucose consumption is reported as near-normal and glycerol consumption as absent
+      (doi:10.1371/journal.pone.0056388), and a [rho−] strain appears in a very-high-gravity ethanol
+      study (doi:10.1038/s41598-018-31558-4) whose genotype is too ambiguous to use. No paper here
+      gives a side-by-side yield.
+
+  - gap: "amino-acid auxotrophy caused by mtDNA loss"
+    status: no_positive_evidence_found
+    note: >-
+      Searched directly. The corpus contains no report of ρ⁰ cells becoming auxotrophic for any
+      amino acid. The nearest items are recorded above and both are confounded: the 3-bromopyruvate
+      discussion sentence attributing amino-acid effects to TCA inhibition, and the mmf1Δ isoleucine
+      rescue driven by 2-aminoacrylate toxicity. ABSENCE IS A FINDING: as far as this corpus goes,
+      a ρ⁰ yeast cell is not reported to be an amino-acid auxotroph.
+
+  - gap: "a ρ⁰ derivative of a bioethanol / fuel-ethanol industrial polyploid specifically"
+    status: nearest_analogue_only
+    note: >-
+      The lager work (doi:10.1126/sciadv.aav1869) is the closest published case and it is a brewing
+      allopolyploid, not a fuel-ethanol isolate. The methods transfer; the strain does not.
+
+  - gap: "whether raising ΔΨ in a ρ⁰ chassis (ATP1-111 or equivalent) restores matrix Fe-S loading"
+    status: open_and_cheap
+    note: >-
+      Two corpus papers show ATP1-111 rescues the NUCLEAR consequences of ρ⁰. Nobody asked whether
+      it rescues the matrix ones. If it does, it is a ready-made mitigation for a ρ⁰ production
+      chassis and it is already a named, published allele.
+
+# ═══════════════════════════════════════════════════════════════════════════ PROVENANCE
+
+provenance:
+  method: >-
+    Every stored full text was decoded once through fermdb.extract.harness.load_source_text — the
+    same function verify_span reads — and searched with regex across all the ρ spellings listed
+    under corpus_searched. Every quote above was then re-resolved through
+    fermdb.llm.validate.verify_span against that text at the offsets the text itself reports.
+  quotes_written: 57
+  quotes_verified: 57
+  quotes_failed: 0
+  each_quote_unique_in_its_document: true
+  no_quote_is_spliced: true
+  publications_drawn_on: 26
+  confidence_fields: >-
+    Deliberately absent. CONVENTIONS.md reserves confidence to a human; this is a draft and nothing
+    in it has been graded.
+  data_directory_untouched: true
+  transcription_notes:
+    - >-
+      doi:10.1186/1754-6834-5-65 spells "mitochdrondria"; reproduced verbatim.
+    - >-
+      doi:10.3390/microorganisms11041040 renders ρ⁰ as "ρ °cells" with a stray space; reproduced
+      verbatim.
+    - >-
+      doi:10.1038/s41586-019-1549-9 has an unclosed "(" where a figure citation was stripped;
+      reproduced verbatim.
+    - >-
+      doi:10.1128/aem.01015-25 uses curly quotes around “petite” and a right single quote in
+      "ancestor’s"; reproduced verbatim.
+    - >-
+      doi:10.1128/mbio.00084-18 uses MICRO SIGN U+00B5 in "µ = 0.26", not GREEK SMALL LETTER MU;
+      reproduced verbatim.
+    - >-
+      doi:10.1186/s12915-025-02409-2 and doi:10.1091/mbc.e18-06-0356 use U+2206 INCREMENT for ∆Ψ
+      while doi:10.1093/femsre/fuv028 uses U+0394 GREEK CAPITAL DELTA; both reproduced as published.

@@ -1,0 +1,582 @@
+# Verification draft for docs/design/ISOBUTANOL_PROGRAM.md
+# Every warning-marked line checked against the local full-text corpus (1,309 papers).
+# Quotes are verbatim from the named corpus file. No confidence values are set here;
+# nothing in this file is marked verified. A human curator decides that.
+# Generated 2026-09-21. Source doc not modified.
+
+- line: 6
+  claim: >-
+    The WARN symbol marks a claim carried from background knowledge rather than read from a source in this session, and each must be verified before it enters the database.
+  verdict: confirmed
+  what_to_change: >-
+    Drop the mark. This sentence states the document's own convention; it asserts no biology, and nothing in a literature corpus could confirm or refute it. Keep the sentence, remove the mark from it, so the marked-line count reflects only verifiable claims.
+  consequence_if_wrong: >-
+    none, documentation only
+  searches_run:
+    - "(none - meta-statement; no biological claim to test)"
+
+- line: 26
+  claim: >-
+    Diagram node: ILV3 [Fe-S, O2-labile]. Ilv3 carries an iron-sulfur cluster and is oxygen-labile.
+  verdict: incomplete
+  publication: "doi:10.1002/chem.202203140"
+  corpus_file: "00007.txt"
+  also_in:
+    - "00603.txt doi:10.1186/1754-6834-5-65"
+    - "00141.txt doi:10.1016/j.synbio.2022.02.007"
+  evidence:
+    - |-
+        The enzymatic properties of several members of the ilvD/EDD family have been reported. They all contain Fe−S clusters in their active sites of the type [2Fe−2S][, , ] or [4Fe−4S],[, , ] with the latter being more sensitive to oxygen than the former.
+    - |-
+        Ilv3 is a [Fe-S] cluster containing enzyme [].
+    - |-
+        We hypothesized that the mitochondrial-localized Ilv3p is not a rate-limiting step in the mIBAILV5 strain because the required cofactor for the enzyme, a 2Fe–2S cluster, is more accessible in the mitochondria where its biogenesis begins.
+  what_to_change: >-
+    Change the node to `ILV3   [Fe-S, cluster type disputed; O2-lability follows from type]` and open a knowledge_gap of kind `mechanism_unknown` for the Ilv3 cluster stoichiometry. The Fe-S half is solid. The O2-labile half is not an independent fact: within the ilvD/EDD family the corpus states that [4Fe-4S] is the oxygen-sensitive form and [2Fe-2S] is not, and the corpus disagrees with itself about which Ilv3 carries (see line 110). Do not carry O2-lability as a property of Ilv3 until the cluster type is settled. No direct measurement of Ilv3 oxygen lability appears anywhere in this corpus.
+  consequence_if_wrong: >-
+    A ranker that treats Ilv3 as intrinsically O2-labile downweights micro-aerobic and anaerobic strategy-B routes on a premise the corpus does not support, and a bench team imposes anaerobic handling (glovebox extraction, O2-scrubbed assay buffers) on an enzyme that may not need it - or, in the opposite error, omits O2 control that is genuinely required. The same uncertainty selects which Fe-S maturation machinery you overexpress to rescue cytosolic Ilv3.
+  searches_run:
+    - "Ilv3[^.]{0,200}(Fe.?S|cluster)|dihydroxy.?acid dehydratase[^.]{0,160}(4Fe|2Fe|iron.sulfur|iron.sulphur)"
+    - "(DHAD|IlvD|Ilv3|dihydroxyacid dehydratase)[^.]{0,160}(oxygen.?(sensitiv|labil)|O2.?(sensitiv|labil))"
+    - "oxygen --require 'dihydroxy.?acid dehydratase|DHAD|Ilv3'"
+    - "crystal structure[^.]{0,200}(2Fe|dehydratase)"
+
+- line: 31
+  claim: >-
+    Diagram: the carrier that moves 2-ketoisovalerate out of the mitochondrial matrix is UNKNOWN; the 2-KIV competing set is BAT1, ECM31, LEU4/LEU9.
+  verdict: confirmed
+  publication: "doi:10.1016/j.btre.2026.e00959"
+  corpus_file: "00080.txt"
+  also_in:
+    - "00767.txt doi:10.1186/s13068-019-1560-2"
+    - "00126.txt doi:10.1016/j.meteno.2016.01.002"
+  evidence:
+    - |-
+        KIV, the key intermediate, follows the isobutanol production route by being transported into the cytosol using the unidentified mitochondrial KIV carrier (KIVC), where it is further converted to isobutanol by KDCs and ADHs, respectively. This isobutanol production route, which requires the transport of KIV via KIVC, was designated the KIVC-dependent pathway.
+    - |-
+        This is consistent with the high activity of the mitochondrial α-KIV carrier, which transports α-KIV produced in mitochondria to the cytosol, where it can be decarboxylated by endogenous cytosolic ketoacid decarboxylases to isobutyraldehyde [].
+  what_to_change: >-
+    Drop the mark on the carrier: a 2026 paper in this corpus names it in so many words as "the unidentified mitochondrial KIV carrier (KIVC)". But record two facts the diagram hides. (1) The gap is identity, not existence - transport is demonstrated and at least one study describes the carrier as high-activity, so a strategy-A route must not be costed as if 2-KIV cannot leave. (2) The competing set at this node is incomplete: the corpus documents extracellular accumulation of KIV (and of acetolactate and DHIV) through unidentified plasma-membrane export, a fourth drain at or near this node, plus Ald6 oxidation of isobutyraldehyde to isobutyrate downstream. Add `kiv_extracellular_export` to the competing set or to section 5 as its own gap.
+  consequence_if_wrong: >-
+    If the atlas encodes 'carrier unknown' as 'transport may not occur', strategy A is downweighted to zero and every native-split route disappears from the ranking - the corpus says the opposite, that carrier activity is high. Conversely, a competing-reaction set that misses extracellular KIV loss under-counts the leak at the exact node the route is built around, which is the failure mode the ECM31 amendment was written to fix.
+  searches_run:
+    - "(ketoisovalerate|keto-isovalerate|KIV|2-ketoacid)[^.]{0,120}(transport|carrier|export|efflux|shuttl|cross|traffic)"
+    - "mtDNA|mitochondrial genome|mitochondrial DNA --require isobutanol"
+
+- line: 35
+  claim: >-
+    Diagram: pantothenate (drawn from 2-KIV via Ecm31) feeds CoA.
+  verdict: confirmed
+  publication: "doi:10.1186/s12934-015-0240-6"
+  corpus_file: "00662.txt"
+  also_in:
+    - "00765.txt doi:10.1186/s13068-019-1486-8"
+    - "00728.txt doi:10.1186/s13068-016-0456-7"
+  evidence:
+    - |-
+        A primary intermediate in isobutanol biosynthesis, 2-ketoisovalerate, also functions as an initial substrate in pantothenic acid biosynthesis []. 3-Methyl-2-oxobutanoate hydroxymethyltransferase, encoded by ECM31, catalyzes the first step in pantothenic acid biosynthesis. Consequently, deletion of ECM31 could prevent the diversion of 2-ketoisovalerate into the pantothenate pathway (Figure ).
+    - |-
+        Furthermore, besides valine synthesis and the Ehrlich pathway, KIV is also a substrate for biosyntheses of pantothenate and leucine. In the first step of pantothenate biosynthesis, KIV is converted to 2-dehydropantoate by 3-methyl-2-oxobutanoate hydroxymethyltransferase Ecm31.
+    - |-
+        CoA biosynthesis starts from pantothenate. In yeast, pantothenate can be produced via an endogenous pathway starting from 2-ketoisovalerate, derived from the valine metabolic pathway, and spermine, derived from l-ornithine and methionine []. Besides, it can be taken up from the medium by the transporter Fen2 [].
+  what_to_change: >-
+    Drop the mark. The biochemistry - 2-KIV is a substrate of pantothenate biosynthesis, the first step is Ecm31 (3-methyl-2-oxobutanoate / ketopantoate hydroxymethyltransferase), and pantothenate is the entry point to CoA - is stated explicitly and independently in at least three isobutanol papers in this corpus. Promote the section-1 amendment's ECM31 biochemistry from `(unverified)` to cited. Record alongside it that yeast can also take pantothenate up from the medium via the Fen2 transporter, which is why the de novo pathway is dispensable (see line 272).
+  consequence_if_wrong: >-
+    none, documentation only - the chemistry is right. The consequence lives at line 272, where the document draws the wrong conclusion from it.
+  searches_run:
+    - "ECM31|Ecm31|ketopantoate hydroxymethyltransferase"
+    - "pantothenate --require 'ketoisovalerate|KIV|ketopantoate'"
+
+- line: 45
+  claim: >-
+    Ilv5 takes NADPH; the alcohol dehydrogenase step typically takes NADH.
+  verdict: overstated
+  publication: "doi:10.1186/1475-2859-12-119"
+  corpus_file: "00569.txt"
+  also_in:
+    - "00341.txt doi:10.1093/femsyr/foaf014"
+    - "00028.txt doi:10.1007/s00253-009-2085-6"
+  evidence:
+    - |-
+        The metabolic pathway shown in Figure also indicates that isobutanol biosynthesis requires NADPH as a cofactor for the reaction catalyzed by Ilv5p and Adh6p. For synthesis of one molecule of isobutanol from two molecules of pyruvate, reducing power has to be supplied by two molecules of NADPH. Because ethanol synthesis from pyruvate essentially uses NADH as a cofactor, the activation of isobutanol biosynthesis should cause NADPH shortage and NADH abundance.
+    - |-
+        Among them, the Kari is NADPH-dependent and the Adh is NADH-dependent.
+    - |-
+        As predicted by sequence analysis, AdhA from L. lactis did not show any detectable enzymatic activity when tested with NADPH as a cofactor (Table ). AdhA showed relatively small substrate preference towards acetaldehyde, but it exhibited the highest activity for isobutyraldehyde among the three enzymes tested. The glycolysis pathway produces two NADH per glucose but does not produce NADPH. Therefore, NADH-dependent enzymes should be preferred for isobutanol production. These results suggest that AdhA is most suitable for isobutanol production in an engineered pathway
+  what_to_change: >-
+    Replace "the alcohol dehydrogenase step typically takes NADH" with: "the alcohol dehydrogenase step takes NADH or NADPH depending on which ADH is used - Adh1/Adh2 and L. lactis AdhA are NADH-dependent, Adh6, Adh7 and E. coli YqhD are NADPH-dependent - so the cofactor mismatch at this step is a part choice, not a property of the route." Note that the highest-titer yeast builds in this corpus pair kivd with ADH6, i.e. the published yeast route is NADPH at both steps and consumes two NADPH per isobutanol, not one NADPH and one NADH.
+  consequence_if_wrong: >-
+    A redox-balance error of two reducing equivalents in the configuration most published yeast strains actually use. The `Balance / redox per compartment` line of a route card computed on 'NADPH in, NADH out' will stamp a route balanced that is not, and will propose a transhydrogenase-like shunt (Pyc2/Mdh2/Mae1) for a route that does not need one, or omit it for one that does. At the bench it drives the wrong ADH part choice: swapping Adh6 for AdhA to 'fix' the mismatch would break a strain whose engineered asset is NADPH supply.
+  searches_run:
+    - "(Adh6|Adh7|ADH6|ADH7|YqhD|yqhD)[^.]{0,140}NADPH|NADPH.{0,120}(Adh6|Adh7|YqhD)"
+    - "adhA --require 'NADH|NADPH'"
+
+- line: 48
+  claim: >-
+    How 2-ketoisovalerate leaves the matrix in the cytosolic-Ehrlich configuration is not settled.
+  verdict: confirmed
+  publication: "doi:10.1016/j.btre.2026.e00959"
+  corpus_file: "00080.txt"
+  also_in:
+    - "00603.txt doi:10.1186/1754-6834-5-65"
+  evidence:
+    - |-
+        KIV, the key intermediate, follows the isobutanol production route by being transported into the cytosol using the unidentified mitochondrial KIV carrier (KIVC)
+    - |-
+        As transport of KIV across the mitochondrial membrane is known [] this indicates that DIV can be efficiently exported out of mitochondria.
+  what_to_change: >-
+    Drop the mark and cite doi:10.1016/j.btre.2026.e00959 (2026), which still calls it the unidentified KIV carrier. Sharpen "not settled" to "the carrier protein is unidentified; the transport itself is demonstrated" - the corpus reports transport of KIV across the mitochondrial membrane as known and export of DIV as efficient. File as a `transport_carrier_unknown` gap, status `open`, with no candidate genes proposed anywhere in the corpus.
+  consequence_if_wrong: >-
+    none if read as written, but the wording matters for ranking: 'not settled' invites a reader to treat strategy A as unbuildable. The corpus supports the narrower statement that the gene is unknown while the flux exists, so strategy A should be costed as 'cannot be engineered at this step', not 'does not work'.
+  searches_run:
+    - "(ketoisovalerate|KIV)[^.]{0,120}(transport|carrier|export|efflux|shuttl|cross)"
+
+- line: 91
+  claim: >-
+    Strategy B: truncate the Ilv targeting presequences so Ilv2/Ilv5/Ilv3 stay cytosolic; Fe-S maturation of Ilv3 in the cytosol is a known difficulty.
+  verdict: confirmed
+  publication: "doi:10.1186/1754-6834-5-65"
+  corpus_file: "00603.txt"
+  also_in:
+    - "00223.txt doi:10.1038/s41598-019-40631-5"
+    - "00126.txt doi:10.1016/j.meteno.2016.01.002"
+    - "00141.txt doi:10.1016/j.synbio.2022.02.007"
+  evidence:
+    - |-
+        To prevent the import of the three enzymes into yeast mitochondria, N-terminally shortened Ilv2, Ilv5 and Ilv3 versions were constructed lacking their mitochondrial targeting sequences. SDS-PAGE and immunofluorescence analyses confirmed expression and re-localization of the truncated enzymes.
+    - |-
+        To overcome this compartmentalization problem, we relocated llv2, Ilv5, and Ilv3 to the cytosol by deleting the N-terminal mitochondrial targeting sequence as reported previously. ILV2ΔN54, ILV5ΔN48, and ILV3ΔN19 were expressed under the control of a strong constitutive promoter, PTDH3, on CEN-based plasmids
+    - |-
+        In S. cerevisiae, iron–sulphur cluster biogenesis and assembly into mature proteins occurs predominantly in the mitochondrial matrix (), the location of the native yeast dihydroxyacid dehydratase Ilv3. Iron–sulphur cluster assembly can also occur in the yeast cytosol (, , ), but has a much lower capacity than the mitochondrial system (, ).
+  what_to_change: >-
+    Drop both marks and add the specifics a builder needs. The demonstrated truncations are Ilv2dN54, Ilv5dN48 and Ilv3dN19, used by at least three independent groups in this corpus; file them as parts with `verification_method` = microscopy / subcellular fractionation (SDS-PAGE plus immunofluorescence in doi:10.1186/1754-6834-5-65). For the Fe-S half, state the mechanism rather than the adjective: cytosolic Fe-S assembly (CIA) exists but has a much lower capacity than the mitochondrial ISC system, and the demonstrated mitigations in this corpus are iron supplementation, AFT1 overexpression and NFS1 overexpression. Record the negative result too: the same paper reports that Ilv3 versions truncated more deeply than dN19 failed to complement and had probably lost activity.
+  consequence_if_wrong: >-
+    A build that guesses the Ilv3 truncation length rather than using dN19 can produce a catalytically dead enzyme - this has already happened and is reported in the corpus. That is a lost build cycle plus a strain that looks like a targeting failure but is an activity failure, exactly the confusion `verification_method` exists to prevent.
+  searches_run:
+    - "(mitochondrial targeting (sequence|signal)|presequence) --require 'isobutanol|kivd|Aro10'"
+    - "peroxisom --require 'compartmentali|targeting|alcohol'"
+
+- line: 92
+  claim: >-
+    Strategy C: add presequences to a ketoacid decarboxylase and an ADH so they act in the matrix; reported to improve isobutanol substantially.
+  verdict: confirmed
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  evidence:
+    - |-
+        Compartmentalization of the 
+        Ehrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in 
+        the cytoplasm only improved yields by 10%,
+  what_to_change: >-
+    Drop both marks and replace "reported to improve isobutanol substantially" with the numbers, since the atlas is meant to turn this table into a comparison: compartmentalising the Ehrlich pathway into mitochondria increased isobutanol production by 260%, where cytoplasmic overexpression of the same pathway gave 10%. The same paper reports roughly fivefold from overexpressing the native ILV products in mitochondria and almost 18-fold with the downstream enzymes also targeted, in high-cell-density fermentation. Cite doi:10.1038/nbt.2509.
+  consequence_if_wrong: >-
+    none, documentation only - but the vague wording costs the table its purpose. 260% versus 10% for the same enzymes is the strongest quantitative argument in the four-row comparison and it is currently invisible to the ranker.
+  searches_run:
+    - "fold (increase|improvement|higher)[^.]{0,160}isobutanol --require mitochondri"
+
+- line: 93
+  claim: >-
+    Strategy D: peroxisomal or other-organelle assembly of the isobutanol pathway.
+  verdict: not_in_corpus
+  what_to_change: >-
+    Keep the row but relabel it. Across 366 readable isobutanol papers there is no peroxisomal (or vacuolar, or synthetic-compartment) isobutanol or branched-chain-alcohol build in this corpus. Peroxisomal targeting of other pathways in yeast is well attested, so the technique is real; the application is not. Change "Peroxisomal or other-organelle assembly" to "Peroxisomal or other-organelle assembly - technique demonstrated for other pathways, no isobutanol precedent found" and set the row's evidence level to Zone I (untested) rather than leaving it to read as a fourth published family alongside A, B and C.
+  consequence_if_wrong: >-
+    Section 2's own framing is 'Published work clusters into four families.' If strategy D is ranked as a published family, a team can commit to peroxisomal assembly believing there is prior art to copy - import capacity, cofactor supply and 2-KIV entry into the peroxisome would all have to be solved from scratch. That is a year-scale misallocation of the same kind section 4.4 warns about for mtDNA.
+  searches_run:
+    - "peroxisom[^.]{0,200}(isobutanol|branched-chain alcohol|butanol)|isobutanol[^.]{0,150}peroxisom"
+    - "peroxisom --require 'compartmentali|organelle engineering|targeting|alcohol'"
+
+- line: 106
+  claim: >-
+    Table header: the `common parts` column lists the parts commonly used for each of the five step roles.
+  verdict: incomplete
+  publication: "doi:10.1186/s13068-015-0374-0"
+  corpus_file: "00725.txt"
+  also_in:
+    - "00603.txt doi:10.1186/1754-6834-5-65"
+    - "00198.txt doi:10.1038/s41467-021-27852-x"
+  evidence:
+    - |-
+        In S. cerevisiae five endogenous enzymes encoded by PDC1PDC5PDC6ARO10 and THI3 have been postulated to be involved in the decarboxylation of KIV to isobutyraldehyde [,].
+    - |-
+        To eliminate interference by native decarboxylases, each 2-oxo acid decarboxylase was overexpressed in a ‘decarboxylase-negative’ (pdc1Δ pdc5Δ pdc6Δ aro10Δ) S. cerevisiae background. Kinetic analyses in cell extracts revealed a superior Vmax/Km ratio of KdcA for α-ketoisovalerate and a wide range of linear and branched-chain 2-oxo acids.
+  what_to_change: >-
+    Drop the mark on the header but fix the column contents, which omit parts the corpus treats as first-choice. Add: THI3 (Kid1) as the fifth native yeast KDC; L. lactis KdcA as a distinct KDC part with the best Vmax/Km for alpha-ketoisovalerate measured in a decarboxylase-negative yeast background; L. lactis IlvD as an alternative DHAD used in yeast; Sfa1 and the engineered L. lactis AdhA-RE1 as ADH parts. See lines 111 and 112 for the per-row detail.
+  consequence_if_wrong: >-
+    Route enumeration can only propose parts the catalog holds. KdcA is the highest-Vmax/Km KIV decarboxylase measured in this corpus and Ll-IlvD is the DHAD used in the corpus's cytosolic-pathway biosensor work; a catalog missing both will systematically rank the second-best part first, and the omission is invisible because the route card still reports '5 parts'.
+  searches_run:
+    - "(Aro10|ARO10)[^.]{0,180}(decarboxylase|broad|substrate) --require 'Pdc1|Pdc5|KIV'"
+
+- line: 108
+  claim: >-
+    AlsS is catabolic and not feedback-inhibited by valine, which is why it is preferred in heterologous builds.
+  verdict: incomplete
+  publication: "doi:10.1002/elsc.201900151"
+  corpus_file: "00012.txt"
+  also_in:
+    - "00474.txt doi:10.1128/aem.00976-22"
+    - "00029.txt doi:10.1007/s00253-010-2522-6"
+  evidence:
+    - |-
+        The first step in this route is the conversion of two pyruvate molecules to 2‐acetolactate catalyzed by the acetolactate synthase (AlsS), which is usually feedback inhibited by the branched‐chain amino acids l‐valine, l‐leucine, and l‐isoleucine. However, AlsS from Bacillus subtilis has been shown to be feedback‐resistant and therefore has been applied for isobutanol production in several studies , .
+    - |-
+        Alternatively, AlsS from B. subtilis generates 2-acetolactate but not 2-aceto-2-hydroxybutyrate (), which could reduce the accumulation of l-isoleucine as a by-product (). AlsS could not be affected by the feedback inhibition of branched-chain amino acids (). Although AlsS has 2-ketoisovalerate decarboxylase activity, we minimized this activity and maintained the overall acetolactate synthase activity through molecular modification and RBS optimization, respectively.
+  what_to_change: >-
+    The feedback half is confirmed, with one correction of scope: the corpus says AlsS is resistant to feedback inhibition by the branched-chain amino acids generally (valine, leucine and isoleucine), not by valine alone. The word "catabolic" is not supported anywhere in this corpus - either cite it from a B. subtilis acetoin-pathway source or drop it. Add two properties the corpus does report and the design-variable column omits: AlsS makes 2-acetolactate but not 2-aceto-2-hydroxybutyrate, so it leaks less to isoleucine than the native AHAS; and AlsS itself carries a 2-ketoisovalerate decarboxylase side activity.
+  consequence_if_wrong: >-
+    The AlsS 2-KIV decarboxylase side activity is the one that bites: in a design that deliberately accumulates 2-KIV, or that measures KIV to locate a bottleneck, AlsS consumes the intermediate it is supposed to supply and the flux analysis blames the wrong enzyme. One corpus group had to engineer that side activity down to hold a 2-KIV titer.
+  searches_run:
+    - "alsS|AlsS --require 'feedback|catabolic|not inhibited|insensitiv'"
+    - "catabolic (acetolactate|ALS)|acetolactate synthase[^.]{0,80}catabolic"
+    - "catabolic --require 'alsS|acetolactate synthase'"
+
+- line: 109
+  claim: >-
+    KARI parts: S. cerevisiae Ilv5; E. coli IlvC and its NADH-preferring engineered variants.
+  verdict: confirmed
+  publication: "doi:10.1038/s41467-021-27852-x"
+  corpus_file: "00198.txt"
+  also_in:
+    - "00141.txt doi:10.1016/j.synbio.2022.02.007"
+    - "00341.txt doi:10.1093/femsyr/foaf014"
+  evidence:
+    - |-
+        Ec_ilvCP2D1-A1, encoding an engineered NADH-dependent KARI from E. coli
+    - |-
+        a mitochondrial-localized isobutanol pathway with a NADH-dependent IlvC6E6p KARI, mIBAIlvC6E6; a cytosolic-localized isobutanol pathway with a NADPH-dependent Ilv5p KARI, cIBAILV5; and a cytosolic-localized isobutanol pathway with a NADH-dependent IlvC6E6p KARI, cIBAIlvC6E6
+  what_to_change: >-
+    Drop the mark and name the variants instead of gesturing at them, since this is the row the document itself calls the single highest-leverage part choice. The two NADH-preferring IlvC variants used in yeast in this corpus are IlvC6E6 and IlvC-P2D1-A1. Add the L. brevis LbIlvC cofactor swap as a further part row, and keep 'engineered to NADH' and 'naturally NADH-dependent' as distinct part attributes - the corpus treats them as different options.
+  consequence_if_wrong: >-
+    none, documentation only - the claim is right. Naming the variants matters only because a route card that says 'NADH-KARI' with no part id cannot be built from.
+  searches_run:
+    - "(IlvC|KARI)[^.]{0,200}(NADH.?(dependent|preferring|utilizing)|switch.{0,40}cofactor)"
+
+- line: 110
+  claim: >-
+    DHAD design variable: "[4Fe-4S] cluster: oxygen lability, and cytosolic Fe-S maturation if relocalized".
+  verdict: wrong
+  publication: "doi:10.1002/chem.202203140"
+  corpus_file: "00007.txt"
+  also_in:
+    - "00141.txt doi:10.1016/j.synbio.2022.02.007"
+    - "00126.txt doi:10.1016/j.meteno.2016.01.002"
+  evidence:
+    - |-
+        They all contain Fe−S clusters in their active sites of the type [2Fe−2S][, , ] or [4Fe−4S],[, , ] with the latter being more sensitive to oxygen than the former. A divalent metal ion (generally a Mg2+) is also essential for the catalytic activity of these enzymes.[, , ] Only a few crystal structures of ilvD/EDD dehydratases have been reported, all with a [2Fe−2S] cluster.
+    - |-
+        the required cofactor for the enzyme, a 2Fe–2S cluster, is more accessible in the mitochondria where its biogenesis begins. This is not the case for the cIBAIlvC6E6 and cIBAILV5 strains since the synthesis and delivery of the required 2Fe–2S cluster into the cytosolic-localized Ilv3p requires Fe–S cluster biogenesis machinery that spans multiple compartments (both the mitochondria and cytosol).
+    - |-
+        Prokaryotic and eukaryotic dihydroxyacid dehydratases contain iron–sulphur (4Fe–4S) clusters and require iron–sulphur cluster biogenesis and assembly mechanisms for in vivo activity (, , , ).
+  what_to_change: >-
+    Replace the asserted stoichiometry with the dispute. Proposed wording: "Fe-S cluster - stoichiometry disputed in the literature. One isobutanol paper writes (4Fe-4S) for the family; another writes 2Fe-2S for Ilv3p specifically; a structural study reports that the ilvD/EDD family contains either [2Fe-2S] or [4Fe-4S], that [4Fe-4S] is the more oxygen-sensitive of the two, and that every solved crystal structure in the family is [2Fe-2S]. Oxygen lability and the choice of cytosolic maturation machinery both follow from the type, so neither can be stated until it is settled." Open a `mechanism_unknown` knowledge_gap and mirror it at line 26.
+  consequence_if_wrong: >-
+    Highest in this document after line 272. The cluster type selects which maturation machinery you overexpress to rescue relocalized Ilv3 ([2Fe-2S] and [4Fe-4S] loading are different CIA client pathways), selects whether an anaerobic or micro-aerobic process is protective or irrelevant, and is exactly the kind of cofactor fact a curator files once and never revisits. Filing a disputed stoichiometry as a fact propagates into the DHAD part record, the strategy-B cost column and any structural modelling done off it - and the disagreement is between two papers the project already holds.
+  searches_run:
+    - "Ilv3[^.]{0,200}(Fe.?S|cluster)|dihydroxy.?acid dehydratase[^.]{0,160}(4Fe|2Fe|iron.sulfur)"
+    - "crystal structure[^.]{0,200}(2Fe|dehydratase)"
+    - "oxygen --require 'DHAD|Ilv3|dihydroxy.?acid dehydratase'"
+
+- line: 111
+  claim: >-
+    KDC parts: L. lactis KivD; S. cerevisiae Aro10, Pdc1/5/6.
+  verdict: incomplete
+  publication: "doi:10.1186/1754-6834-5-65"
+  corpus_file: "00603.txt"
+  also_in:
+    - "00725.txt doi:10.1186/s13068-015-0374-0"
+    - "00669.txt doi:10.1186/s12934-016-0449-z"
+  evidence:
+    - |-
+        In S. cerevisiae five endogenous enzymes encoded by PDC1PDC5PDC6ARO10 and THI3 have been postulated to be involved in the decarboxylation of KIV to isobutyraldehyde [,]. The three Pdc enzymes are also involved in pyruvate decarboxylation in the ethanol fermentation pathway of yeast.
+    - |-
+        To eliminate interference by native decarboxylases, each 2-oxo acid decarboxylase was overexpressed in a ‘decarboxylase-negative’ (pdc1Δ pdc5Δ pdc6Δ aro10Δ) S. cerevisiae background. Kinetic analyses in cell extracts revealed a superior Vmax/Km ratio of KdcA for α-ketoisovalerate and a wide range of linear and branched-chain 2-oxo acids. However, KdcA also showed the highest activity with pyruvate which, in engineered strains, can contribute to formation of ethanol as a by-product.
+    - |-
+        the individual decarboxylase genes were expressed in a host S. cerevisiae strain that lacked all the 2-keto acid decarboxylase genes involved in the decarboxylation step of the Ehrlich pathway (CEN.PK711-7C pdc1∆ pdc5∆ pdc6∆ aro10∆ thi3∆). Absence of the pyruvate decarboxylase genes (PDC1, PDC5, PDC6) has been previously shown to inhibit growth on glucose [].
+  what_to_change: >-
+    Add THI3 (Kid1) as the fifth native KDC - the corpus states that five endogenous enzymes, PDC1, PDC5, PDC6, ARO10 and THI3, have been postulated to decarboxylate KIV to isobutyraldehyde, and the corpus's decarboxylase-null background is pdc1D pdc5D pdc6D aro10D thi3D. Add L. lactis KdcA as a separate part with its two measured properties: the best Vmax/Km for alpha-ketoisovalerate of the three compared, and the highest pyruvate activity of the three, which regenerates ethanol as a by-product. State explicitly in the schema that Pdc1/5/6 appear both here as KDC parts and in the section-1 diagram as competing reactions, and that these are the same enzymes.
+  consequence_if_wrong: >-
+    A wrong-experiment risk. The diagram labels PDC1/5/6 `[competing]` while this table lists them as KDC parts; a deletion proposal generated from the diagram alone (pdc1D pdc5D pdc6D, to kill the ethanol sink) also removes most of the cell's KIV decarboxylase capacity, and the corpus's own decarboxylase-negative control strain is built from exactly those deletions plus aro10D. A team could delete the ethanol sink and lose the product step in one construct. The KdcA caveat is the mirror image: swapping in the kinetically best KDC reintroduces ethanol.
+  searches_run:
+    - "(Aro10|ARO10)[^.]{0,180}(decarboxylase|broad|substrate) --require 'Pdc1|Pdc5|KIV|ketoisovalerate'"
+
+- line: 112
+  claim: >-
+    ADH parts: L. lactis AdhA; S. cerevisiae Adh1-7, Adh6; E. coli YqhD.
+  verdict: incomplete
+  publication: "doi:10.3389/fmicb.2012.00196"
+  corpus_file: "01015.txt"
+  also_in:
+    - "00028.txt doi:10.1007/s00253-009-2085-6"
+    - "00190.txt doi:10.1038/nbt.2509"
+  evidence:
+    - |-
+        In addition, six ADH genes from S. cerevisiae, encoding for Adh1, Adh2, Adh5, Adh6, Adh7, and Sfa1, were overexpressed in plasmids under control of the PGK1 promoter. Different KDC–ADH combinations were used to measure isobutanol levels under additive additions of 8 g/L 2KIV, the precursor to isobutanol. A kivd-ADH6 combination gave the highest isobutanol level at 488 mg/L
+  what_to_change: >-
+    Drop the redundancy - Adh6 is inside Adh1-7 - and add the parts the corpus actually used: Sfa1 (screened alongside Adh1, Adh2, Adh5, Adh6 and Adh7), the engineered L. lactis AdhA-RE1 with improved affinity for isobutyraldehyde, and E. coli FucO. Carry the cofactor as a field on each part rather than as prose in the design-variable column: Adh1/Adh2/AdhA NADH, Adh6/Adh7/YqhD NADPH. Record that the best KDC-ADH pairing in the screen was kivd + ADH6 at 488 mg/L.
+  consequence_if_wrong: >-
+    Missing AdhA-RE1 means the atlas cannot reproduce the E. coli anaerobic result at all (see line 122), since that strain needed the engineered ADH as well as the engineered KARI. Missing per-part cofactor fields is what lets the line-45 error through into the redox balance.
+  searches_run:
+    - "adhA --require 'NADH|NADPH'"
+    - "(Adh6|Adh7|YqhD)[^.]{0,140}NADPH"
+
+- line: 122
+  claim: >-
+    Swapping in an NADH-preferring KARI is what made near-theoretical anaerobic isobutanol possible in E. coli.
+  verdict: incomplete
+  publication: "doi:10.3389/fmicb.2012.00196"
+  corpus_file: "01015.txt"
+  also_in:
+    - "00054.txt doi:10.1007/s10295-020-02319-y"
+  evidence:
+    - |-
+        Directed evolution approaches () were applied to IlvC and AdhA to switch cofactor dependence from NADPH to NADH. In an anaerobic, fully NADH-dependent strain containing AdhARE1 and IlvC6E6-his6, 13.4 g/L isobutanol at 100% theoretical maximum yield was produced in M9 media supplemented with glucose, yeast extract, and trace met als
+    - |-
+        E. coli has a native alcohol dehydrogenase yqhD, but overexpression of adhA from L. lactis is advantageous due to utilization of NADH rather than NADPH as a cofactor []. A mutant of adhA was shown to have higher affinity towards isobutyraldehyde. In a mutated form of ilvC, the cofactor was exchanged from NADPH to NADH. These mutations enabled anaerobic isobutanol production at 100% of the theoretical yield [].
+  what_to_change: >-
+    It took two swaps, not one. Rewrite as: "making the route fully NADH-dependent - an engineered NADH-preferring KARI (IlvC6E6) together with an engineered NADH-dependent ADH (AdhA-RE1) - is what produced 13.4 g/L isobutanol at 100% of theoretical yield anaerobically in E. coli." Record the corpus's own control alongside it: overexpressing the transhydrogenase pntAB with wild-type ilvC and yqhD addressed the same imbalance but gave a lower titer and yield than the two-swap strain, so the transhydrogenase route is a real but inferior alternative, not an equivalent.
+  consequence_if_wrong: >-
+    A route-card correctness bug. A route that swaps only the KARI and keeps an NADPH-dependent ADH (Adh6 or YqhD - the two most used in yeast) does not close the anaerobic redox balance, but a ranker holding this claim as written stamps it redox-balanced. That is precisely the configuration the corpus reports failing in yeast, so the atlas would recommend an experiment the literature has already run and lost.
+  searches_run:
+    - "(IlvC|KARI)[^.]{0,200}(NADH.?(dependent|preferring))"
+    - "theoretical (maximum )?yield[^.]{0,120}anaerobic[^.]{0,120}isobutanol"
+
+- line: 141
+  claim: >-
+    Compartment targeting is routine, high-throughput, and what essentially all published mitochondrial isobutanol work actually is.
+  verdict: incomplete
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  evidence:
+    - |-
+        Efforts to improve the production of a compound of interest in Saccharomyces cerevisiae have mainly involved engineering or 
+        overexpression of cytoplasmic enzymes. We show that targeting metabolic pathways to mitochondria can increase production 
+        compared with overexpression of the enzymes involved in the same pathways in the cytoplasm. Compartmentalization of the 
+        Ehrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in 
+        the cytoplasm only improved yields by 10%,
+  what_to_change: >-
+    The substantive half holds: every mitochondrial isobutanol build in this corpus is nuclear-encoded targeting via an N-terminal presequence, and a search for mtDNA-encoded isobutanol pathway genes across 366 readable isobutanol papers returns nothing. Keep that, and cite it as the negative result of a corpus search rather than as a positive finding. Drop or evidence the adjectives "routine, high-throughput": nothing in this corpus characterises mitochondrial targeting as high-throughput, and the corpus reports targeting outcome varying by enzyme - which is what `verification_method` in the same section exists to capture.
+  consequence_if_wrong: >-
+    `feasibility_rating = routine` is a computed field that feeds the ranking. Setting it from an unevidenced adjective rather than from per-part expression_records means a route with three never-before-targeted enzymes ranks the same as one reusing constructs that are already published with localisation evidence.
+  searches_run:
+    - "mtDNA|mitochondrial genome|mitochondrial DNA --require isobutanol"
+    - "(mitochondrial targeting sequence|presequence) --require 'isobutanol|kivd|Aro10'"
+
+- line: 158
+  claim: >-
+    The S. cerevisiae mitochondrial chromosome is ~86 kb.
+  verdict: incomplete
+  publication: "doi:10.1093/nar/gkx443"
+  corpus_file: "00413.txt"
+  also_in:
+    - "00291.txt doi:10.1080/23802359.2017.1407699"
+    - "00287.txt doi:10.1080/15476286.2021.1943929"
+  evidence:
+    - |-
+        The mtDNA monomer in S. cerevisiae (strain S288C) is ∼85.8 kb that, like human mtDNA, encodes protein components of the OXPHOS system [() and references therein].
+    - |-
+        The mtDNAs of strains I-30, I-329 and I-566 are 87,571, 80,204 and 80,886 bp long, respectively.
+  what_to_change: >-
+    Replace the single number with the reference value and the observed range: "~85.8 kb in the S288C reference; 80.2-87.6 kb across sequenced S. cerevisiae strains, and often quoted as 75-85 kb." The size varies because intron content and noncoding regions vary between strains, not because the gene set does. Add that yeast mtDNA exists predominantly as head-to-tail linear multimers rather than a single closed circle - the word "chromosome" implies a topology the corpus contradicts.
+  consequence_if_wrong: >-
+    Low for ranking, real for a build. A biolistic insertion plan drawn against an assumed 86 kb reference map will have the wrong intergenic coordinates in an industrial background whose mtDNA is 80 kb, and homology arms are what then fail.
+  searches_run:
+    - "(8[0-9]([.,][0-9]+)?\\s?(kb|kilobase|kbp|bp)) --require 'mitochondrial genome|mtDNA'"
+
+- line: 160
+  claim: >-
+    Yeast mtDNA encodes Cox1, Cox2, Cox3, Cob, Atp6, Atp8, Atp9, Var1, the two rRNAs, the tRNAs and the RNase P RNA - and essentially nothing the isobutanol route needs.
+  verdict: incomplete
+  publication: "doi:10.1080/23802359.2017.1407699"
+  corpus_file: "00291.txt"
+  also_in:
+    - "00364.txt doi:10.1093/gbe/evu203"
+    - "00287.txt doi:10.1080/15476286.2021.1943929"
+  evidence:
+    - |-
+        Like in other S. cerevisiae (Foury et al. ), all three mtDNAs contain a common set of protein-coding genes that includes ATPase subunits (atp6, atp8, atp9), three subunits of cytochrome C oxidase (cox1, cox2, cox3), apocytochrome b (cob) and ribosome-associated protein (VAR1/rps3). The order of these genes in all three mtDNAs is identical. In addition, 6, 4 and 3 open reading frames coding for LAGLIDADG endonucleases (pfam00961 domain) were predicted in mtDNAs of strains I-30, I-329 and I-566, respectively. All three genomes contain genes for large and small subunits of rRNA, 24 tRNA genes and the rnpB gene.
+    - |-
+        Other genes, in particular those encoding the subunits of NADH dehydrogenase, VAR1 and the RNA subunit of the mitochondrial RNAse P (RPM1) () are not present in all mt genomes.
+  what_to_change: >-
+    The list is right as far as it goes - all eleven named elements including the RNase P RNA (rnpB / RPM1) are confirmed, and the tRNA count is 24. Add the one category it omits: intron-encoded ORFs, chiefly LAGLIDADG endonucleases, of which the corpus finds 6, 4 and 3 in three sequenced S. cerevisiae strains. Note also that one corpus source counts nine protein-coding genes in S. cerevisiae mtDNA against the eight named here. The closing clause, that none of this is what the isobutanol route needs, is sound and should stay.
+  consequence_if_wrong: >-
+    Specific to section 4.2. The intron-encoded ORFs are the mtDNA loci that differ between strains and are the realistic insertion and marker sites for a biolistic programme. A gene-content model missing them leaves both the table-3 recoding validator and any insertion-site planner blind to several kilobases of real, strain-variable coding sequence.
+  searches_run:
+    - "VAR1|Var1 --require 'COX1|ATP6|COB|rRNA'"
+    - "RNase P|RPM1|rnpB"
+
+- line: 163
+  claim: >-
+    Table header: the four listed mtDNA-engineering techniques and their states are the available techniques, honestly stated.
+  verdict: incomplete
+  publication: "doi:10.3390/microorganisms11041040"
+  corpus_file: "01210.txt"
+  evidence:
+    - |-
+        MTS-fused modular DNA-binding proteins such as transcription activator-like effector nuclease (TALEN) and nucleic acid deaminase enzymes, which do not require gRNA and donor DNA for genome editing, respectively, have been fused as base-editing enzymes and transported into the mitochondria for genome editing [,,].
+  what_to_change: >-
+    The four rows are the right four and three of them are fair; the CRISPR row is not (line 170) and the base-editor row needs an organism qualifier (line 169). Add a column or a note recording which organism each state refers to - the corpus's comparison of mtDNA-editing technologies is explicitly a table of results in mammalian cells, and the yeast situation differs on the one row that matters most here. Add TALED (TALE-linked deaminase, A-to-G) alongside DdCBE, since the corpus lists it as a distinct editor class.
+  consequence_if_wrong: >-
+    Section 4.4 promises the user an honest cost for the mtDNA route and this table is that cost. A table that silently imports mammalian-cell states into a yeast programme mis-prices the frontier route in both directions; see lines 169 and 170 for the two specific errors.
+  searches_run:
+    - "mitoTALEN|mitoZFN|DdCBE|TALE-DdCBE|base editor"
+    - "biolistic"
+
+- line: 169
+  claim: >-
+    DdCBE-class base editors: demonstrated for mitochondrial base editing.
+  verdict: incomplete
+  publication: "doi:10.3390/microorganisms11041040"
+  corpus_file: "01210.txt"
+  evidence:
+    - |-
+        A comparison of the latest targeted mitochondrial DNA-editing technologies in mammalian cells.
+
+        Editing Enzymes | DNA Targeting Elements | Types of Mutations | Editing Efficiency | Off-Target EditingFrequency of mtDNA | Refs
+
+        DdCBEs | TALE repeats | 5′-TC-3′ to 5′-TT-3′ | 5–50% | 0.024–0.049% | []
+
+        TALEDs | TALE repeats | A to G | 49% | 0.008–0.013% | []
+
+        HiFi-DdCBEs | TALE repeats | 5′-TC-3′ to 5′-TT-3′ | 53–61% | 0.001–0.0175% | []
+  what_to_change: >-
+    Add the organism. The corpus's demonstration table is headed "A comparison of the latest targeted mitochondrial DNA-editing technologies in mammalian cells"; DdCBE is listed there at 5-50% editing, HiFi-DdCBE at 53-61% and TALED (A-to-G) at 49%. No DdCBE demonstration in S. cerevisiae appears in this corpus. Rewrite the state cell as "Demonstrated for mitochondrial base editing in mammalian cells; not demonstrated in S. cerevisiae in this corpus" and set the corresponding `feasibility_rating` to `not_demonstrated_in_organism` rather than `specialist` or `frontier`.
+  consequence_if_wrong: >-
+    Direct and computable. `feasibility_rating` is one of the fields section 4.2 defines and section 7 ranks on. Rating DdCBE as demonstrated makes an mtDNA point-edit route look one tier cheaper in S. cerevisiae than the evidence supports - the exact silent discount section 4.4 says the atlas exists to prevent.
+  searches_run:
+    - "mitoTALEN|mitoZFN|DdCBE|base editor"
+
+- line: 170
+  claim: >-
+    CRISPR-Cas in the matrix is not established, and guide RNA import into mitochondria is the unsolved step.
+  verdict: wrong
+  publication: "doi:10.3390/microorganisms11041040"
+  corpus_file: "01210.txt"
+  evidence:
+    - |-
+        A recent study demonstrated the potential of the CRISPR-Cas9 system to target mtDNA in yeast cells []. To efficiently construct cells lacking mtDNA (ρ °cells), Cas9 fused with MTS from COX4 at the N-terminus (MTS-Cas9) was expressed on a centromeric plasmid with a strong constitutive TDH3 (GPD) promoter. When gRNA targeting ATP8 encoded by mtDNA was expressed on a multi-copy plasmid with the SNR52 promoter, the formation rate of mitochondria-depleted cells that lost viability in non-fermentative glycerol medium was significantly increased in comparison to that of control cells without gRNA expression [].
+    - |-
+        This result suggests that a certain portion of the expressed gRNA could enter the mitochondrial matrix in yeast cells through an intrinsic mechanism (a). Therefore, yeast cells have the potential to perform mtDNA genome editing using the CRISPR-Cas9 system by simply expressing gRNA with a certain sequence [].
+    - |-
+        Conversely, there are no physiological mechanisms for the mitochondrial transportation of DNA molecules that were introduced into the cytosol for genome editing. However, yeast mitochondria possess a system of HR activated by DSBs []; thus, the easy method for the introduction of donor DNA molecules into the mitochondria facilitates more flexible editing of mtDNA []. To achieve physical transportation, membrane-permeable nanocarriers to transport donor DNA [,] and the particle gun method [] for genome editing of mtDNA have been employed. Although promising methods have been shown, these techniques require additional alternative carrier materials with donor DNA, and a simpler method of donor DNA delivery is required.
+  what_to_change: >-
+    The first half stands - mitochondrial CRISPR-Cas9 is not established. The second half is a mammalian statement applied to yeast, and it is wrong for this organism. In S. cerevisiae, expressing MTS-Cas9 together with an ordinary SNR52-driven gRNA against mtDNA ATP8 significantly increased rho-zero formation, which the corpus reads as a portion of the gRNA reaching the matrix through an intrinsic mechanism; yeast is also known to import nuclear-encoded tRNAs. Rewrite the note as: "Not established. In mammalian cells the unsolved step is gRNA import. In S. cerevisiae gRNA appears to reach the matrix through a native RNA-import mechanism; the unsolved steps there are donor-DNA delivery into the matrix (no physiological DNA-import route exists) and editing efficiency."
+  consequence_if_wrong: >-
+    The most serious error in section 4. Section 4.4 says the atlas's most useful service for an mtDNA programme is to make the cost explicit, and this line is what such a programme would be aimed at. As written it sends a team to engineer RNA-import tags (tRNA-derived shuttle structures on the gRNA) to solve a problem the corpus says yeast may not have, and away from the step the corpus identifies as actually blocking: getting donor DNA into the matrix, for which the corpus names two candidate approaches (biolistic delivery, and a donor-DNA/gRNA hybrid duplex). That is a mis-aimed research programme, not a documentation defect.
+  searches_run:
+    - "mitoTALEN|mitoZFN|DdCBE|base editor"
+    - "gRNA import|guide RNA[^.]{0,80}mitochondri"
+    - "biolistic"
+
+- line: 178
+  claim: >-
+    S. cerevisiae mitochondria translate by NCBI table 3, not the standard code, with UGA=Trp, AUA=Met, CUN=Thr and CGA/CGC absent.
+  verdict: incomplete
+  publication: "doi:10.3389/fmicb.2023.1268944"
+  corpus_file: "01060.txt"
+  also_in:
+    - "00969.txt doi:10.26508/lsa.202301965"
+    - "00154.txt doi:10.1016/j.xpro.2022.101359"
+    - "01149.txt doi:10.3390/ijms22094524"
+  evidence:
+    - |-
+        Yeast mitochondrial translation tables fall into either the Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code (NCBI table 4, hereafter referred to as the fungal code), which is consistent with other fungi, or the yeast mitochondrial code (NCBI table 3, originally based on S. cerevisiae, hereafter referred to as the Saccharomyces code) based on additional reassignments of AUA and CUN codons, which typically define the order Saccharomycetales.
+    - |-
+        The sequence of the nuclear COX6 in this construct was modified to express a protein with Leu73 (CTC to TTG) and Leu143 (CTA to TTA) as in yeast mitochondria, the CUN codon family codes for threonine (; ).
+    - |-
+        In order to be functionally expressed, the reporter gene needs to be recoded to fit the mitochondrial codon usage and cloned into pPT24. The final plasmid is then delivered into the mitochondria via biolistic transformation where it can finally be recombined with a mutant mtDNA that carries a deletion in the COX2 gene (B).
+  what_to_change: >-
+    Drop the mark on the framing and on the CUN row, which are the load-bearing parts and are well supported: the yeast mitochondrial code is NCBI table 3, defined by reassignment of AUA and the CUN family relative to the fungal code, and the corpus contains a worked recoding (COX6 Leu73 CTC-to-TTG, Leu143 CTA-to-TTA) done for exactly the reason section 4.3 gives. Keep a mark on the CGA/CGC row: nothing in this corpus states that CGA and CGC are absent or unassigned in S. cerevisiae mtDNA, and one source describes a yeast mitochondrial tRNA-Arg(ACG) as binding the canonical CGN codons, which sits awkwardly with it. Add the caution that table 3 is a Saccharomycetales property, not a general yeast one - the corpus reports that in many Saccharomycetales the AUA reassignment is unsupported and the modified tRNA required for it is absent, and that C. albicans uses table 4.
+  consequence_if_wrong: >-
+    The CUN rule is what the phase-0 validator enforces and it is correct, so the acceptance criterion is safe. The risk is scope creep: if the validator is later extended to reject CGA/CGC on the strength of an unsupported row it will reject valid recoded sequences, and if `genetic_code_table` is defaulted to table 3 for any yeast compartment rather than for S. cerevisiae specifically, sequences for non-Saccharomyces hosts will be validated against the wrong code.
+  searches_run:
+    - "NCBI table 3|yeast mitochondrial code"
+    - "CUN codon family|CUN codons?[^.]{0,80}threonine|codes for threonine"
+    - "CGA|CGC --require 'arginine|codon'"
+    - "(UGA|TGA)[^.]{0,120}(tryptophan|Trp) --require mitochond"
+    - "ARG8m|recoded --require mitochondri"
+
+- line: 230
+  claim: >-
+    The five seeded knowledge gaps: the mitochondrial 2-KIV carrier; isobutanol/isobutyraldehyde export across the plasma membrane; cytosolic Fe-S maturation capacity for relocalized Ilv3; matrix NADPH supply under production conditions; whether an NADH-preferring KARI confers in yeast the benefit it confers in E. coli.
+  verdict: wrong
+  publication: "doi:10.3389/fbioe.2022.1080024"
+  corpus_file: "00989.txt"
+  also_in:
+    - "00118.txt doi:10.1016/j.jbc.2026.113228"
+    - "00126.txt doi:10.1016/j.meteno.2016.01.002"
+    - "00341.txt doi:10.1093/femsyr/foaf014"
+    - "00141.txt doi:10.1016/j.synbio.2022.02.007"
+  evidence:
+    - |-
+        In an effort to improve redox-balance, we mutated the KARI enzyme in the best cassette to change the cofactor usage from NADPH to NADH-preferring. Unfortunately, the resulting pathway could neither enable anaerobic growth nor improve isobutanol titers under micro-aerobic conditions (sealed serum vials).
+    - |-
+        Therefore, Gambacorta et al. () then worked on converting the cofactor preference of Kari from NADPH to NADH, but this approach failed to improve isobutanol production under aerobic conditions.
+    - |-
+        Because small aliphatic alcohols like isobutanol easily cross the plasma membrane via passive diffusion, their intracellular concentrations rapidly equilibrate with the extracellular environment ().
+    - |-
+        The extracellular accumulation of acetolactate, DHIV and KIV indicate the presence of export mechanisms for these pathway intermediates in the yeast plasma membrane. Consistent with the multi-genic nature of the transport of other carboxylic acids in S. cerevisiae (), screening of single deletion mutants failed to identify a unique acetolactate transporter ().
+  what_to_change: >-
+    Gaps 1, 3 and 4 are sound and should be seeded as written. Fix the other two. (a) Gap 5 is not open - it has been attempted in yeast and failed. One corpus group mutated the KARI in their best cassette to NADH-preferring and the resulting pathway neither enabled anaerobic growth nor improved titers under micro-aerobic conditions; a second corpus study built all four mitochondrial/cytosolic x Ilv5/IlvC6E6 combinations and located the limitation elsewhere (iron); a 2025 review states the approach failed to improve isobutanol production aerobically. Seed it with status `candidate_proposed` or `resolved`, carrying the negative result, not `open`. (b) Gap 2 is aimed at the wrong molecule. Isobutanol crosses the plasma membrane by passive diffusion and its intracellular concentration equilibrates with the extracellular one, so there is no alcohol export carrier to find. The unsolved export problem in this corpus is the charged intermediates: extracellular accumulation of acetolactate, DHIV and KIV implies plasma-membrane export mechanisms, screening single-deletion mutants failed to identify even a unique acetolactate transporter, and carboxylic-acid export in S. cerevisiae is described as poorly understood and multi-genic. Replace gap 2 with `pathway_intermediate_export_unidentified (acetolactate / DHIV / KIV)`.
+  consequence_if_wrong: >-
+    The highest-leverage error in the document, because section 5 says the ranked gap list is the atlas's most useful output and is computable rather than editorial - so a wrong gap is not caught by a reader, it is ranked. Seeding a resolved-negative question as open sends a team to rerun an experiment the literature has already lost twice. Seeding a passive-diffusion process as a carrier hunt sends a transporter-screening campaign after a carrier that does not exist, while the genuine leak - intermediates walking out of the cell at the node the route is built around - stays unmodelled and uncounted in the carbon balance.
+  searches_run:
+    - "(isobutanol|higher alcohol|fusel alcohol)[^.]{0,120}(efflux|export|transporter|plasma membrane|secretion)"
+    - "(IlvC|KARI)[^.]{0,200}NADH.?(dependent|preferring)"
+    - "theoretical (maximum )?yield[^.]{0,120}anaerobic[^.]{0,120}isobutanol"
+
+- line: 250
+  claim: >-
+    Chassis property: Pdc status intact / attenuated / minus, with a C2 requirement and evolved glucose tolerance; the single largest determinant of pyruvate availability.
+  verdict: incomplete
+  publication: "doi:10.1186/s12934-015-0305-6"
+  corpus_file: "00664.txt"
+  also_in:
+    - "00564.txt doi:10.1186/1475-2859-11-131"
+    - "00765.txt doi:10.1186/s13068-019-1486-8"
+    - "00341.txt doi:10.1093/femsyr/foaf014"
+  evidence:
+    - |-
+        However, it cannot grow on glucose as the sole carbon source, and requires supplementation of C2 compounds to the medium in order to meet the requirement for cytosolic acetyl-CoA for biosynthesis of fatty acids and ergosterol.
+    - |-
+        Plate growth experiments indicated that both the Pdc-MTH1-ΔT strain and a Pdc- strain overexpressing the wild-type MTH1 gene grew on 20 g l-1 glucose without addition of ethanol as external C2 source (Figure ). Although pure agarose was used in the plate experiments, a contamination with C2 compounds could not be entirely excluded and a further analysis was performed in aerobic, pH-controlled bioreactors on 7.5 g l-1 glucose without ethanol. This experiment confirmed that introduction of the MTH1-ΔT mutation was sufficient to enable growth in batch cultures on glucose as sole carbon source (Figure ).
+    - |-
+        An explanation for this unexpected low glucose consumption and isobutanol production might be an arising C2 auxotrophy in pdc− cells, as Pdcs provide C2 compounds for synthesis of cytosolic acetyl-coenzyme A [, , ]. To investigate if C2 auxotrophy was the limiting factor in Pdc-deficient cells, fermentation experiments were repeated with a supplementation of 1% (v/v) ethanol as C2 compound source to the fermentation media to compensate the lack of C2 sources.
+
+        Results showed that supplementation of ethanol increased isobutanol titer only slightly to 0.03 g/L (1.62 mg/g glucose) in JWY13 (Fig. a, b).
+  what_to_change: >-
+    Split the parenthesis into two independent fields, because they are two defects with two different fixes. `c2_requirement` - Pdc-negative strains cannot grow on glucose as sole carbon source and need C2 supplementation to meet the cytosolic acetyl-CoA demand for fatty acid and ergosterol biosynthesis. `glucose_growth_fix` in {none, evolved (ALE), MTH1-dT} - glucose growth has been restored both by adaptive laboratory evolution and, separately, by an engineered internal deletion in MTH1, with MTH1-dT alone sufficing in bioreactor batch culture. "Evolved glucose tolerance" names only one of the two. Also qualify "the single largest determinant of pyruvate availability": in this corpus's own isobutanol experiments a pdc1D pdc5D background severely depressed both glucose consumption and isobutanol titer even with Mth1dT present, and ethanol supplementation barely recovered it - consistent with the section-7 amendment that DUET runs Pdc-positive by design.
+  consequence_if_wrong: >-
+    This field selects a chassis. If the atlas treats Pdc-minus as monotonically better for pyruvate availability it will propose the Pdc-null chassis for isobutanol - which in the corpus's own isobutanol experiments made isobutanol worse, not better, and which also removes the KIV decarboxylase capacity discussed at line 111. And a chassis_profile recording 'C2 requirement' without recording whether MTH1-dT is present cannot answer the question a builder actually asks, which is whether this particular strain grows on glucose.
+  searches_run:
+    - "C2 compound|acetate.{0,40}(auxotroph|requirement)|two.carbon (source|compound) --require 'pdc|pyruvate decarboxylase'"
+    - "(Pdc|PDC).?(negative|minus)[^.]{0,200}(C2|acetyl-CoA|glucose)"
+
+- line: 272
+  claim: >-
+    Sample route output, deletions line: BAT1, LEU4, ECM31 (attenuate) - ECM31 is not a like-for-like deletion candidate because pantothenate feeds CoA and the pathway is plausibly essential, so an ecm31-delta proposal must carry an essentiality check and fall back to attenuation.
+  verdict: wrong
+  publication: "doi:10.1186/s13068-019-1486-8"
+  corpus_file: "00765.txt"
+  also_in:
+    - "00662.txt doi:10.1186/s12934-015-0240-6"
+    - "00126.txt doi:10.1016/j.meteno.2016.01.002"
+    - "00728.txt doi:10.1186/s13068-016-0456-7"
+    - "00080.txt doi:10.1016/j.btre.2026.e00959"
+  evidence:
+    - |-
+        Then, we successively deleted essential genes of competing pathways for synthesis of 2,3-butanediol (BDH1 and BDH2), leucine (LEU4 and LEU9), pantothenate (ECM31) and isoleucine (ILV1) resulting in an optimized metabolic flux toward isobutanol and titers of up to 0.56 g/L (13.54 mg/g glucose).
+    - |-
+        A primary intermediate in isobutanol biosynthesis, 2-ketoisovalerate, also functions as an initial substrate in pantothenic acid biosynthesis []. 3-Methyl-2-oxobutanoate hydroxymethyltransferase, encoded by ECM31, catalyzes the first step in pantothenic acid biosynthesis. Consequently, deletion of ECM31 could prevent the diversion of 2-ketoisovalerate into the pantothenate pathway (Figure ).
+    - |-
+        For example, overexpression of the native S. cerevisiae valine biosynthesis and degradation pathways led to isobutanol yields of only 0.0059 mol/mol glucose (), while additional elimination of competing enzymes such as Bat1, Leu2, Ald6, Ecm31, Pdc1 and Lpd1 resulted in significant but moderate increases of isobutanol yields (, , , ).
+    - |-
+        CoA biosynthesis starts from pantothenate. In yeast, pantothenate can be produced via an endogenous pathway starting from 2-ketoisovalerate, derived from the valine metabolic pathway, and spermine, derived from l-ornithine and methionine []. Besides, it can be taken up from the medium by the transporter Fen2 [].
+  what_to_change: >-
+    Change the line to `Deletions  BAT1/BAT2, LEU4/LEU9, ECM31` and delete the attenuation caveat, together with the section-1 amendment sentence that "the pathway is plausibly essential (unverified), so an ecm31-delta proposal must carry an essentiality check and fall back to attenuation if it fails." ecm31-delta is viable and is an ordinary, repeatedly published deletion in isobutanol strains: at least two independent groups in this corpus carry it, one in a strain reaching 2.09 g/L isobutanol (CEN.PK113-7D dilv2 dbdh1 dbdh2 dleu4 dleu9 decm31 dilv1 dadh1 dgpd1 dgpd2 dald6), and a review lists Ecm31 among competing enzymes whose elimination raised yields. The mechanism is that yeast does not depend on de novo pantothenate - it can also take pantothenate up from the medium via Fen2. Separately, fix the paralogs on the same line: the corpus deletes LEU4 and LEU9 together, and BAT2 is the cytosolic paralog of BAT1; a deletion set naming only LEU4 and only BAT1 leaves the paralog carrying the flux.
+  consequence_if_wrong: >-
+    The most serious item in this audit. As written, the atlas gates every ecm31-delta proposal behind an essentiality check and defaults to attenuation - so a team is told to build a promoter-swap or degron construct for a gene that published strains simply delete. That is an unnecessary construct, an unnecessary control, and a strain that leaks 2-KIV to pantothenate for a whole build cycle, all to guard against a hazard the literature has already shown does not exist. The paralog error compounds it: a leu4-delta single deletion leaves Leu9 draining 2-KIV to leucine, so the deletion set as written would under-perform and the failure would be blamed on the route rather than on the missing paralog.
+  searches_run:
+    - "ECM31|Ecm31|ketopantoate hydroxymethyltransferase"
+    - "pantothenate --require 'ketoisovalerate|KIV|ketopantoate'"
+    - "Then, we successively deleted essential genes of competing pathways"
+

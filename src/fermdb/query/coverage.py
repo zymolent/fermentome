@@ -114,18 +114,33 @@ class EntityCoverage:
     label: str
     count: int
     pending: int
+    #: Proposals a curator has resolved that still cannot become rows, because no promoter exists
+    #: for their record kind. A third kind of empty, and the one that sends you to write code
+    #: rather than to review anything.
+    accepted_unpromotable: int = 0
     exists: bool = True
 
     @property
     def state(self) -> str:
-        """``missing_table`` | ``populated`` | ``awaiting_curation`` | ``never_populated``.
+        """``missing_table`` | ``populated`` | ``awaiting_curation`` | ``awaiting_promoter`` |
+        ``never_populated``.
 
-        The last two are both "zero rows" and are the distinction the whole module is for.
+        The last three are all "zero rows" and telling them apart is what this module is for.
+        Each names a different gate: acquisition, a curator, or a developer.
+
+        ``awaiting_promoter`` exists because bulk-accepting a queue made the page lie. Proposals
+        that are accepted but have no promoter vanished from the pending count and fell through
+        to ``never_populated`` -- "nothing has been proposed, never looked" -- about records that
+        had been proposed, read and agreed to. Ordered before ``awaiting_curation`` deliberately:
+        a kind with both wants the promoter written first, since reviewing more of it changes
+        nothing until something can write the rows.
         """
         if not self.exists:
             return "missing_table"
         if self.count > 0:
             return "populated"
+        if self.accepted_unpromotable > 0:
+            return "awaiting_promoter"
         return "awaiting_curation" if self.pending > 0 else "never_populated"
 
     @property
@@ -136,6 +151,10 @@ class EntityCoverage:
             "awaiting_curation": (
                 f"empty, but {self.pending} proposal(s) are queued for review; "
                 "the gate is curation, not acquisition"
+            ),
+            "awaiting_promoter": (
+                f"empty, but {self.accepted_unpromotable} proposal(s) are accepted and cannot be "
+                "written: no promoter for this record kind; the gate is code, not curation"
             ),
             "never_populated": "empty, and nothing has been proposed -- never looked",
         }[self.state]
@@ -151,6 +170,7 @@ class EntityCoverage:
             "label": self.label,
             "count": self.count,
             "pending_curation": self.pending,
+            "accepted_unpromotable": self.accepted_unpromotable,
             "state": self.state,
             "note": self.note,
             "is_actionable": self.is_actionable,
@@ -213,6 +233,7 @@ class Coverage:
             "pages": [page.as_json() for page in self.pages],
             "summary": {
                 "populated": len(self.by_state("populated")),
+                "awaiting_promoter": len(self.by_state("awaiting_promoter")),
                 "awaiting_curation": len(self.by_state("awaiting_curation")),
                 "never_populated": len(self.by_state("never_populated")),
                 "missing_table": len(self.by_state("missing_table")),
@@ -249,6 +270,33 @@ def _pending_by_kind(conn: sqlite3.Connection) -> dict[str, int]:
     return counts
 
 
+def _accepted_unpromotable_by_kind(conn: sqlite3.Connection) -> dict[str, int]:
+    """Resolved proposals that no promoter can write, per record kind.
+
+    Counts `accepted` and `edited` rather than `pending`: these have been through review and are
+    waiting on code. Restricted to kinds outside `PROMOTABLE_KINDS`, so a task blocked on a
+    missing field -- which a curator can still fix -- is not reported as a code problem.
+
+    Imported inside the function: `curate.promote` is the authority on which kinds can be written
+    and duplicating that tuple here is how the two would drift apart.
+    """
+    from ..curate.promote import PROMOTABLE_KINDS
+
+    counts = dict.fromkeys(RECORD_KINDS, 0)
+    rows = (
+        Select("curation_task")
+        .columns("record_kind", "COUNT(*) AS n")
+        .where("status IN ('accepted', 'edited')")
+        .group_by("record_kind")
+        .page(conn)
+    )
+    for row in rows:
+        kind = str(row["record_kind"])
+        if kind not in PROMOTABLE_KINDS:
+            counts[kind] = int(row["n"])
+    return counts
+
+
 def _pending_by_table(pending_by_kind: Mapping[str, int]) -> dict[str, int]:
     totals: dict[str, int] = {}
     for kind, count in pending_by_kind.items():
@@ -269,6 +317,7 @@ def read_coverage(
     present = _existing_tables(conn)
     pending_by_kind = _pending_by_kind(conn)
     pending_by_table = _pending_by_table(pending_by_kind)
+    stuck_by_table = _pending_by_table(_accepted_unpromotable_by_kind(conn))
 
     rows: list[EntityCoverage] = []
     for table, label in entities:
@@ -282,6 +331,7 @@ def read_coverage(
                 label=label,
                 count=total,
                 pending=pending_by_table.get(table, 0),
+                accepted_unpromotable=stuck_by_table.get(table, 0),
             )
         )
 

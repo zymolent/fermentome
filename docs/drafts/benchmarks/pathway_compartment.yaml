@@ -1,0 +1,412 @@
+# Benchmark evidence draft - category: pathway_compartment
+# Source claims: data/benchmarks/known_positives.yaml (11 entries, BM-PATH-001..011)
+# Corpus: 1,309 stored full texts (session cache).
+#
+# Every `quote` and every `secondary_quotes[].quote` is a byte-exact slice of the cached plain
+# text, including PDF-extraction line breaks, soft hyphens and en-dashes. Do not reflow them.
+# Prose fields (`quote_supports`, `note`, `why`) are mine and are wrapped for reading.
+#
+# NOTHING HERE IS VERIFIED. No confidence value is asserted; that is a curator's act.
+# Tally: supported 7 / partially_supported 3 / contradicted 1 / not_in_corpus 0
+# Curator's attention is most needed on BM-PATH-007 (contradicted), BM-PATH-003 (cluster type
+# disputed inside the corpus) and BM-PATH-006 (statement is malformed as written).
+
+- id: BM-PATH-001
+  verdict: supported
+  publication: "doi:10.1016/j.btre.2026.e00959"
+  corpus_file: "00080.txt"
+  quote: |-
+    In the natural process, pyruvates are subsequent to transport into the mitochondria, two pyruvate molecules are condensed into one molecule of acetolactate by acetohydroxyacid synthase [AHAS (Ilv2/Ilv6), with the catalytic subunit Ilv2 (encoded by the ILV2 gene) and the regulatory subunit Ilv6 (encoded by the ILV6 gene)].
+  quote_supports: >-
+    Establishes the reaction (two pyruvate condensed into one acetolactate), the enzyme composition
+    - Ilv2 the catalytic subunit of ILV2 and Ilv6 the regulatory subunit of ILV6, so Ilv6 is a
+    subunit and not a second catalytic step - and that the reaction follows transport of pyruvate
+    into the mitochondria. It does NOT say 'mitochondrial matrix': it says 'the mitochondria', so
+    the sub-organellar resolution the claim asserts rests on the secondary quote below, not on this
+    one.
+  searches_run:
+    - "Ilv2|acetolactate synthase   --require mitochondri"
+    - "ILV6.{0,200}regulatory"
+    - "mitochondrial matrix   --require (Ilv2|ILV2)"
+  note: >-
+    All three clauses are covered once the secondary quote is included. Not covered by the corpus at
+    all: the systematic names YMR108W and YCL009C appear nowhere, so the source_hint's systematic
+    names remain unconfirmed here; and no GO cellular-component annotation or evidence code appears
+    anywhere in the corpus, which is expected - that is an SGD lookup, not a full-text lookup. A
+    curator wanting the L2 evidence code will have to go outside this corpus.
+  secondary_quotes:
+    - publication: "doi:10.1038/s41598-019-40631-5"
+      corpus_file: "00223.txt"
+      quote: |-
+        and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
+      why: >-
+        Gives the matrix-level compartment for Ilv2, Ilv5 and Ilv3 together; used by BM-PATH-001, -002
+        and -003.
+
+- id: BM-PATH-002
+  verdict: supported
+  publication: "doi:10.1016/j.meteno.2016.01.002"
+  corpus_file: "00126.txt"
+  quote: |-
+    the set of native S. cerevisiae reactions that forms the basis for previous academic studies is not in itself redox balanced due to the use of an NADPH-dependent acetohydroxyacid reductoisomerase (AHAR, encoded by ILV5) to catalyse the conversion of acetolactate to 2,3-dihydroxyisovalerate.
+  quote_supports: >-
+    Establishes the reaction (acetolactate to 2,3-dihydroxyisovalerate), the gene (ILV5), the enzyme
+    class (acetohydroxyacid reductoisomerase / KARI) and the explicit NADPH cofactor term that BM-
+    COF-001 wants. It says nothing about compartment; the matrix clause rests on the first secondary
+    quote.
+  searches_run:
+    - "Ilv5|ILV5   --require 2,3-dihydroxyisovalerate"
+    - "Ilv5|ILV5   --require (nucleoid|mtDNA|mitochondrial DNA)"
+  note: >-
+    Both clauses of the statement are covered. The source_hint's moonlighting caveat is worth
+    recording as its own assertion and is independently attested here: the second secondary quote
+    gives the mtDNA-maintenance role AND, in the same breath, Brat et al. failing to see the petite
+    phenotype in their own ilv5 mutants. 00331.txt (doi:10.1093/femsre/fuv028) separately describes
+    Ilv5 as a mitochondrial nucleoid protein that can replace the Abf2 mtDNA-packaging function when
+    BCAAs are limiting. The upshot for the atlas: an ilv5 deletion phenotype is not a clean readout
+    of the KARI step.
+  secondary_quotes:
+    - publication: "doi:10.1038/s41598-019-40631-5"
+      corpus_file: "00223.txt"
+      quote: |-
+        and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
+      why: >-
+        Gives the matrix-level compartment for Ilv2, Ilv5 and Ilv3 together; used by BM-PATH-001, -002
+        and -003.
+    - publication: "doi:10.1186/1754-6834-5-65"
+      corpus_file: "00603.txt"
+      quote: |-
+        For ilv5 mutants a petite phenotype is described as Ilv5 seems to be involved in the maintenance of wild-type mitochondrial DNA []. However, we could not find any indications for the occurrence of a petite phenotype in our ilv5 mutant strains.
+      why: >-
+        The Ilv5 mtDNA-maintenance moonlighting role, AND the same paper failing to reproduce the petite
+        phenotype.
+
+- id: BM-PATH-003
+  verdict: partially_supported
+  publication: "doi:10.1016/j.meteno.2016.01.002"
+  corpus_file: "00126.txt"
+  quote: |-
+    Prokaryotic and eukaryotic dihydroxyacid dehydratases contain iron–sulphur (4Fe–4S) clusters and require iron–sulphur cluster biogenesis and assembly mechanisms for in vivo activity (, , , ). In S. cerevisiae, iron–sulphur cluster biogenesis and assembly into mature proteins occurs predominantly in the mitochondrial matrix (), the location of the native yeast dihydroxyacid dehydratase Ilv3.
+  quote_supports: >-
+    Establishes the [4Fe-4S] requirement for dihydroxyacid dehydratases as a class, the dependence
+    on Fe-S cluster biogenesis for in vivo activity, AND that the native yeast Ilv3 sits in the
+    mitochondrial matrix. It does NOT state the reaction Ilv3 catalyses, and it attributes 4Fe-4S to
+    the enzyme family rather than to yeast Ilv3 as measured.
+  searches_run:
+    - "(4Fe.?4S|2Fe.?2S|\\[4Fe|\\[2Fe|iron.sulfur|iron.sulphur|Fe.S cluster)   --require (Ilv3|dihydroxy.?acid dehydratase|DHAD)"
+  note: >-
+    THE CLUSTER TYPE IS DISPUTED WITHIN THE CORPUS and a curator must resolve it before [4Fe-4S] is
+    carried forward. 00141.txt assigns 2Fe-2S to yeast ILV3 specifically (second secondary quote)
+    and repeats 'the supply of the 2Fe-2S cluster cofactor for the DHAD enzyme' in its conclusions;
+    00126.txt (the primary quote) assigns 4Fe-4S to the family. 00007.txt (third secondary quote)
+    explains the split: the ilvD/EDD family spans both types and every solved crystal structure so
+    far is [2Fe-2S]. 00603.txt (Brat et al.) hedges to 'Ilv3 is a [Fe-S] cluster containing enzyme
+    []' with no type at all. RECOMMENDATION: record the cluster requirement WITHOUT a stoichiometry,
+    or record the type as disputed with both citations attached. The reaction clause (DHIV to KIV)
+    is supported by the fourth secondary quote. The oxygen-lability sub-claim the source_hint flags
+    as recalled is NOT asserted for yeast Ilv3 anywhere in the corpus - 00007.txt asserts it only as
+    a general contrast between the two cluster types.
+  secondary_quotes:
+    - publication: "doi:10.1038/s41598-019-40631-5"
+      corpus_file: "00223.txt"
+      quote: |-
+        and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
+      why: >-
+        Gives the matrix-level compartment for Ilv2, Ilv5 and Ilv3 together; used by BM-PATH-001, -002
+        and -003.
+    - publication: "doi:10.1016/j.synbio.2022.02.007"
+      corpus_file: "00141.txt"
+      quote: |-
+        The first half of the pathway converts pyruvate to α-ketoisovalerate (KIV) by mitochondria-localized ILV enzymes: acetolactate synthase (ALS, encoded by ILV2), a NADPH-dependent ketol-acid reductoisomerase (KARI, encoded by ILV5), and a 2Fe–2S cluster-requiring dihydroxyacid dehydratase (DHAD, encoded by ILV3).
+      why: >-
+        Assigns a 2Fe-2S cluster to yeast ILV3 specifically - directly at odds with the [4Fe-4S] clause
+        of BM-PATH-003.
+    - publication: "doi:10.1002/chem.202203140"
+      corpus_file: "00007.txt"
+      quote: |-
+        They all contain Fe−S clusters in their active sites of the type [2Fe−2S][, , ] or [4Fe−4S],[, , ] with the latter being more sensitive to oxygen than the former. A divalent metal ion (generally a Mg2+) is also essential for the catalytic activity of these enzymes.[, , ] Only a few crystal structures of ilvD/EDD dehydratases have been reported, all with a [2Fe−2S] cluster.
+      why: >-
+        Explains why both stoichiometries circulate: the ilvD/EDD family spans both types, and every
+        solved structure is 2Fe-2S. Also the only corpus statement bearing on oxygen lability, and it is
+        about the family, not yeast Ilv3.
+    - publication: "doi:10.1080/21655979.2021.1978189"
+      corpus_file: "00289.txt"
+      quote: |-
+        2,3-dihydroxyisovalerate is then dehydrated to form 2 ketoisovalerate which is catalyzed by dihydroxyacid dehydratase.
+      why: >-
+        The Ilv3 reaction clause of BM-PATH-003, which the primary quote does not state.
+
+- id: BM-PATH-004
+  verdict: supported
+  publication: "doi:10.1016/j.btre.2026.e00959"
+  corpus_file: "00080.txt"
+  quote: |-
+    KIV, the key intermediate, is either transformed into valine in mitochondria by branched-chain amino acid aminotransferase (BCAT): Bat1 (encoded by the BAT1 gene) or translocated into the cytosol. KIV is also synthesized in cytosol by the Ehrlich degradation of the amino acid valine (Val), commencing with a transamination conversion of Val to KIV mediated by cytosolic BCAT: Bat2, which is encoded by the BAT2 gene. KIV undergoes further decarboxylation to form isobutyraldehyde via α-keto acid decarboxylases (KDCs).
+  quote_supports: >-
+    Establishes KIV as the point where two fates diverge - transamination to valine inside
+    mitochondria by Bat1, or translocation to the cytosol and decarboxylation to isobutyraldehyde by
+    KDCs. That covers both halves of the claim (last shared intermediate of valine biosynthesis;
+    entry point of the Ehrlich pathway) in one run of text. It does not mention the leucine branch.
+  searches_run:
+    - "(branch.?point|last common|branching point|last shared)   --require (ketoisovalerate|KIV)"
+    - "(valine|leucine)   --require (KIV|ketoisovalerate).{0,300}(leucine|isopropylmalate|LEU4)"
+  note: >-
+    The third consuming reaction the expected_outcome asks for - the leucine branch via alpha-
+    isopropylmalate synthase - is in the secondary quote, which also places that branch in EITHER
+    compartment, something a compartment-aware schema has to represent. Worth knowing: no corpus
+    paper uses the phrase 'branch point' for KIV. The claim is a fair paraphrase of what several
+    papers describe, not a sentence anyone wrote, so a literal-string recovery test would fail on
+    it. KEGG map00290 and the MetaCyc pathway identifier named in the source_hint do not appear in
+    the corpus and cannot be confirmed from it.
+  secondary_quotes:
+    - publication: "doi:10.1038/s41467-021-27852-x"
+      corpus_file: "00198.txt"
+      quote: |-
+        Next, α-KIV is acetylated in either mitochondria or the cytosol by α-isopropylmalate (α-IPM) synthases (encoded by LEU4 and LEU9) to produce α-IPM.
+      why: >-
+        The third KIV-consuming reaction BM-PATH-004's expected_outcome asks for, plus the fact that it
+        can run in either compartment.
+
+- id: BM-PATH-005
+  verdict: supported
+  publication: "doi:10.1080/21655979.2021.1978189"
+  corpus_file: "00289.txt"
+  quote: |-
+    The proceeding reaction of Ehrlich pathway for isobutanol occurs in cytosol. BAT 2 present in cytosol by its transaminase activity convert valine to 2 ketoisovalerate (KIV). 2-ketoisovalerate in cytosol gets converted to isobutyraldehyde by pyruvate decarboxylase. Genes responsible for this conversion include PDC1, PDC5, PDC6, ARO10, THI3.
+  quote_supports: >-
+    Establishes that the Ehrlich decarboxylation runs in the cytosol, that KIV is the substrate and
+    isobutyraldehyde the product, and names PDC1, PDC5, PDC6 and ARO10 as the genes responsible.
+    Every clause of the benchmark statement is covered by this one passage.
+  searches_run:
+    - "(Aro10|ARO10)   --require (cytosol|cytoplasm)"
+    - "isobutyraldehyde   --require (alcohol dehydrogenase|ADH)"
+  note: >-
+    Corroborated by 00141.txt (doi:10.1016/j.synbio.2022.02.007), quoted as the primary for BM-
+    PATH-006, which gives the same roster as 'promiscuous cytosolic-localized decarboxylase enzymes
+    Pdc1/5/6p or Aro10p'. This source adds THI3 as a fifth candidate the benchmark statement omits -
+    worth adding to the gene group. Hazelwood et al. 2008, the review the source_hint points at, is
+    NOT in the corpus, so this is a secondary statement in a review rather than the primary. If a
+    curator wants an L1 source for which decarboxylase actually carries flux, 00725.txt
+    (doi:10.1186/s13068-015-0374-0) is a dedicated comparative kinetic assessment of the native and
+    heterologous 2-oxo acid decarboxylases for exactly this application.
+
+- id: BM-PATH-006
+  verdict: partially_supported
+  publication: "doi:10.1016/j.synbio.2022.02.007"
+  corpus_file: "00141.txt"
+  quote: |-
+    The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5) (a).
+  quote_supports: >-
+    Establishes the cytosolic compartment for the final reduction and that more than one ADH is a
+    candidate. It does NOT support the roster as written: the corpus says ADH1-5, not 'Adh1-Adh7',
+    and does not list Adh6 among them. It also pins the cofactor to NADH, where the benchmark
+    statement leaves cofactor open.
+  searches_run:
+    - "(Adh1|ADH1|Adh6|ADH6|alcohol dehydrogenase)   --require cytosol"
+    - "isobutyraldehyde   --require (alcohol dehydrogenase|ADH)"
+  note: >-
+    THE STATEMENT IS BADLY WORDED AND SHOULD BE REWRITTEN BEFORE IT IS USED AS A QUERY TARGET: 'with
+    Adh1-Adh7 and Adh6 among the candidates' names Adh6 twice, because Adh6 falls inside the range
+    Adh1-Adh7. The underlying idea is sound - Adh6 is attested as a cytosolic Ehrlich-pathway
+    candidate in the first secondary quote, and Adh7 is the ADH Avalos et al. used - but the
+    enumeration is not. THE COFACTOR IS DISPUTED IN THE CORPUS: 00141 says NADH-dependent for
+    ADH1-5, the second secondary quote says NADPH, and 00190.txt notes 'the reported NADPH
+    dependence of Sc-adh7'. That spread is exactly why the expected_outcome's demand for a per-
+    candidate cofactor annotation, rather than one merged ADH row, is the right schema call - but it
+    also means no single source will satisfy this entry.
+  secondary_quotes:
+    - publication: "doi:10.1186/1475-2859-12-119"
+      corpus_file: "00569.txt"
+      quote: |-
+        have been developed following a bacterial strategy by construction of the Ehrlich pathway in the cytosol through expression of the kivd gene from Lactococcus lactis and ADH6 gene from S. cerevisiae[].
+    - publication: "doi:10.1080/21655979.2021.1978189"
+      corpus_file: "00289.txt"
+      quote: |-
+        Formed isobutyraldehyde is reduced to isobutanol by alcohol dehydrogenase enzyme which require NADPH as cofactor [].
+      why: >-
+        Contradicts 00141's NADH assignment for the same step - the cofactor is not settled in the
+        corpus.
+
+- id: BM-PATH-007
+  verdict: contradicted
+  publication: "doi:10.1038/s41598-019-40631-5"
+  corpus_file: "00223.txt"
+  quote: |-
+    In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex, and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix. The mitochondrial 2-KIV is then exported to the cytosol, and finally converted to isobutanol through Ehrlich pathway, involving endogenous KDCs and ADHs.
+  quote_supports: >-
+    This is the corpus's own end-to-end description of the native compartment split, and it names
+    TWO inner-membrane transport events, not one: cytosolic pyruvate imported via the MPC complex,
+    and 2-KIV exported from the matrix to the cytosol. It does support the transition the statement
+    points at (the KIV step, matrix to cytosol); it contradicts the words 'exactly once'.
+  searches_run:
+    - "mitochondrial pyruvate carrier|Mpc1|MPC1"
+    - "(Aro10|ARO10)   --require (cytosol|cytoplasm)"
+  note: >-
+    WHAT THE CORPUS SAYS INSTEAD: the native route crosses the inner membrane twice - pyruvate in
+    via Mpc, KIV out. This is not a strained reading. BM-PATH-011 of this same benchmark set asserts
+    the pyruvate import step explicitly, so the benchmark set contradicts itself between PATH-007
+    and PATH-011. The statement is true only if 'the isobutanol route' is defined to begin at matrix
+    pyruvate, and no corpus source draws the boundary there - the secondary quote starts the route
+    at glycolysis. RECOMMENDATION: restate as 'exactly two transitions, pyruvate in and
+    2-ketoisovalerate out', or make the route's start compartment explicit in the query shape. As
+    written, the expected_outcome ('Exactly one compartment transition') would score a CORRECT atlas
+    as a failure, which is the opposite of what PLAN.md S.5 wants this benchmark to measure.
+  secondary_quotes:
+    - publication: "doi:10.1080/21655979.2021.1978189"
+      corpus_file: "00289.txt"
+      quote: |-
+        Pyruvate produced through glycolysis are transferred into the mitochondria through the mitochondrial pyruvate complex [].
+
+- id: BM-PATH-008
+  verdict: supported
+  publication: "doi:10.1016/j.synbio.2024.12.010"
+  corpus_file: "00145.txt"
+  quote: |-
+    However, mitochondrial transport proteins involving α-KIV and valine remain unidentified [,], significantly limiting the use of compartmentalization strategies in constructing efficient cell factories [].
+  quote_supports: >-
+    Directly establishes that the mitochondrial transport protein for alpha-KIV is unidentified, and
+    frames it as an open limitation on compartmentalization strategy rather than a settled negative
+    - which is the knowledge_gap framing the statement asks for. It does not distinguish inner from
+    outer membrane, and it bundles valine transport into the same sentence.
+  searches_run:
+    - "(transporter|carrier|transport protein)   --require (KIV|ketoisovalerate).{0,200}(unidentified|unknown|not been identified|remain unidentified)"
+    - "KIV carrier|KIVC"
+  note: >-
+    Independently corroborated, in stronger form, by the first secondary quote: 00080.txt gives the
+    missing entity a placeholder name (KIVC) and builds a whole pathway designation on it, which is
+    good evidence for a knowledge_gap row that names the routes depending on it. CAUTION FOR THE
+    EXTRACTOR: the second secondary quote, from Brat et al., says transport of KIV across the
+    mitochondrial membrane 'is known'. That means the transport is known to OCCUR, not that a
+    carrier gene is known. It is the most likely false positive for BM-NEG-004 in this corpus. Not
+    checkable here: no mitochondrial carrier family (MCF) substrate-assignment review is in the
+    corpus, so the 'confirm no MCF member is assigned to KIV' half of the source_hint cannot be
+    discharged from these 1,309 texts.
+  secondary_quotes:
+    - publication: "doi:10.1016/j.btre.2026.e00959"
+      corpus_file: "00080.txt"
+      quote: |-
+        KIV, the key intermediate, follows the isobutanol production route by being transported into the cytosol using the unidentified mitochondrial KIV carrier (KIVC), where it is further converted to isobutanol by KDCs and ADHs, respectively. This isobutanol production route, which requires the transport of KIV via KIVC, was designated the KIVC-dependent pathway.
+    - publication: "doi:10.1186/1754-6834-5-65"
+      corpus_file: "00603.txt"
+      quote: |-
+        As transport of KIV across the mitochondrial membrane is known [] this indicates that DIV can be efficiently exported out of mitochondria.
+      why: >-
+        LIKELY FALSE POSITIVE for BM-NEG-004: 'transport is known' means known to occur, not a named
+        carrier gene.
+
+- id: BM-PATH-009
+  verdict: supported
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  quote: |-
+    Compartmentalization of the 
+    Ehrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in 
+    the cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps 
+    of the biosynthetic pathway. Subcellular fractionation of engineered strains revealed that targeting the enzymes of the Ehrlich 
+    pathway to the mitochondria achieves greater local enzyme concentrations.
+  quote_supports: >-
+    Establishes the strategy (compartmentalizing the Ehrlich pathway into mitochondria), the
+    quantitative comparison against the matched cytoplasmic arrangement in the same study - +260%
+    versus +10% over the same upstream-only control - and that the localization claim was checked by
+    subcellular fractionation. This quote alone does not state that N-terminal presequences were the
+    targeting mechanism.
+  searches_run:
+    - "Compartmentalization of metabolic pathways in yeast mitochondria"
+    - "(cytoplasmic|cytoplasm).{0,120}(fold|higher|increase)"
+  note: >-
+    Author, year and journal from the source_hint all confirm: Avalos, Fink & Stephanopoulos, Nature
+    Biotechnology 2013, doi:10.1038/nbt.2509. The presequence mechanism and the verification_method
+    are in the same paper (secondary quote): the signal is the N-terminal CoxIV mitochondrial
+    localization signal, so verification_method should be recorded as subcellular fractionation plus
+    western blot, NOT none_reported. The paper also reports up to fourfold higher local enzyme
+    concentration when targeted. Two fair-comparison details worth carrying into the configuration
+    row: the control is a strain overexpressing only the upstream ILV genes, and the mitochondrial
+    and cytoplasmic arms were built from identical constructs differing only in targeting. Note the
+    quote's percentages are increases over that control, not a mitochondrial-versus-cytosolic ratio
+    - do not record 260% as a fold-change between arms.
+  secondary_quotes:
+    - publication: "doi:10.1038/nbt.2509"
+      corpus_file: "00190.txt"
+      quote: |-
+        We 
+        detected all enzymes fused to the CoxIV mitochondrial localization 
+        signal in the mitochondrial fractions, whereas we detected enzymes 
+        lacking the CoxIV signal only in cytoplasmic fractions ( Fig. 5).
+
+- id: BM-PATH-010
+  verdict: supported
+  publication: "doi:10.1186/1754-6834-5-65"
+  corpus_file: "00603.txt"
+  quote: |-
+    Isobutanol production could be improved by re-locating the valine biosynthesis enzymes Ilv2, Ilv5 and Ilv3 from the mitochondrial matrix into the cytosol. To prevent the import of the three enzymes into yeast mitochondria, N-terminally shortened Ilv2, Ilv5 and Ilv3 versions were constructed lacking their mitochondrial targeting sequences.
+  quote_supports: >-
+    Establishes the cytosolic-relocalization strategy exactly as the statement describes it -
+    N-terminally shortened Ilv2, Ilv5 and Ilv3 lacking their mitochondrial targeting sequences - and
+    that it improved isobutanol production. This quote says nothing about Fe-S maturation.
+  searches_run:
+    - "Cytosolic re-localization and optimization of valine synthesis"
+    - "(4Fe.?4S|2Fe.?2S|iron.sulfur|iron.sulphur|Fe.S cluster)   --require (Ilv3|dihydroxy.?acid dehydratase|DHAD)"
+  note: >-
+    Authors and year from the source_hint confirm: Brat, Boles and colleagues, Biotechnol Biofuels
+    2012, doi:10.1186/1754-6834-5-65. The second clause - cytosolic Fe-S maturation for Ilv3 as a
+    recognized difficulty - is supported by the first two secondary quotes and belongs on the DHAD
+    step as a bottleneck row rather than as narrative text. IMPORTANT NUANCE, third secondary quote:
+    Brat et al. report the opposite outcome in their own hands - the CIA machinery did load their
+    cytosolic Ilv3. So the bottleneck is real and published but not universal; record it as a
+    contested bottleneck carrying both sides, not as a settled fact. 00126.txt adds a third,
+    quantitative framing (cytosolic ISC assembly has much lower capacity than the mitochondrial
+    system). No dedicated review of the CIA machinery is in the corpus, so the maturation half of
+    the source_hint is only covered incidentally, by papers whose subject is isobutanol rather than
+    Fe-S biology.
+  secondary_quotes:
+    - publication: "doi:10.1016/j.synbio.2022.02.007"
+      corpus_file: "00141.txt"
+      quote: |-
+        Functional genomic analyses suggested that the poor performances of the cytosolic pathway strains were in part due to a shortage in cytosolic Fe–S clusters, which are required cofactors for the dihydroxyacid dehydratase enzyme.
+    - publication: "doi:10.1016/j.meteno.2016.01.002"
+      corpus_file: "00126.txt"
+      quote: |-
+        Iron–sulphur cluster assembly can also occur in the yeast cytosol (, , ), but has a much lower capacity than the mitochondrial system (, ).
+    - publication: "doi:10.1186/1754-6834-5-65"
+      corpus_file: "00603.txt"
+      quote: |-
+        It seems that for the cytosolic Ilv3 version the loading with iron-sulphur can also be accomplished by the cytosolic assembly machinery CIA.
+      why: >-
+        Brat et al. report the CIA machinery DID load their cytosolic Ilv3 - the bottleneck is published
+        but not universal.
+
+- id: BM-PATH-011
+  verdict: partially_supported
+  publication: "doi:10.1038/s41598-019-40631-5"
+  corpus_file: "00223.txt"
+  quote: |-
+    In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex,
+  quote_supports: >-
+    Establishes that cytosolic pyruvate reaches the mitochondria via the mitochondrial pyruvate
+    carrier (MPC) complex. It does NOT say 'mitochondrial inner membrane' - a targeted search
+    returned zero corpus texts pairing MPC with 'inner membrane' - and it names the complex
+    generically rather than giving the MPC1/MPC2/MPC3 subunits the expected_outcome asks for.
+  searches_run:
+    - "mitochondrial pyruvate carrier|Mpc1|MPC1"
+    - "(inner membrane|inner mitochondrial membrane)   --require (pyruvate carrier|MPC)"
+  note: >-
+    The subunit names and the 'itself engineerable' clause are both in the secondary quotes:
+    00289.txt gives MPC1/MPC2/MPC3 and a 22-fold isobutanol improvement from overexpressing mpc1 and
+    mpc3, and 00960.txt confirms the three-gene composition with MPC1 essential for function.
+    00145.txt adds the aerobic/anaerobic subunit split. Still unevidenced from this corpus: the
+    specific membrane (inner vs outer). Also note for evidence levelling - Herzig et al. and Bricker
+    et al., Science 2012, are NOT in the corpus as full texts; they appear only as citations inside
+    00350.txt and 00603.txt, so within this corpus the identification is attested by citation, and
+    the expected_evidence_level of L2 is not reachable from the corpus alone. The contrast with BM-
+    PATH-008 that the entry says is the point DOES hold: 00145.txt names MPC and calls the alpha-KIV
+    carrier unidentified in adjacent sentences, which makes it the single cleanest passage for
+    testing that the atlas returns a name for one and a gap for the other.
+  secondary_quotes:
+    - publication: "doi:10.1080/21655979.2021.1978189"
+      corpus_file: "00289.txt"
+      quote: |-
+        Mitochondrial pyruvate carriers (MPC) which include mpc1, mpc2, and mpc3 were overexpressed in various combinations. Overexpression of mpc1 and mpc 3 improved isobutanol production.
+    - publication: "doi:10.18632/oncotarget.7174"
+      corpus_file: "00960.txt"
+      quote: |-
+        There are three genes in yeast taking part in encoding the mitochondrial pyruvate carrier, i.e., MPC1, MPC2 and MPC3, with the first one being crucial for its function.

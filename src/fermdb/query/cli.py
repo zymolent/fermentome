@@ -56,6 +56,14 @@ def cmd_query_coverage(args: argparse.Namespace) -> int:
         for entity in actionable:
             print(f"  {entity.label:<24}{entity.pending:>4} proposal(s)")
 
+    stuck = report.by_state("awaiting_promoter")
+    if stuck:
+        print()
+        print("Empty, but proposals are accepted and unwritable -- these wait on a")
+        print("promoter, not a curator:")
+        for entity in stuck:
+            print(f"  {entity.label:<24}{entity.accepted_unpromotable:>4} proposal(s)")
+
     never = report.by_state("never_populated")
     if never:
         print()

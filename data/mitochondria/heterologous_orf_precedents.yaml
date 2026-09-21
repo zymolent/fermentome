@@ -1,0 +1,379 @@
+# Precedents for heterologous or recoded ORFs expressed from yeast mtDNA.
+#
+# MITOCHONDRIAL_PROGRAM.md §3 budgets this as ~10–25 papers, and §2.3 states the expectation the
+# table was built to test: "The encouraging precedent is Arg8ᵐ ... It is one precedent, for one
+# enzyme", with the programme's own risk framing — "the size of the gap is the size of the risk".
+# PLAN.md phase 1b requires "the precedents table for soluble heterologous enzymes from mtDNA is
+# complete, however thin it turns out to be".
+#
+# THE HEADLINE. It is not thin. §2.3 undercounted the precedent base by writing it from memory,
+# and this file corrects it in four ways, each from a paper already sitting in this corpus:
+#
+#   1. A genuinely HETEROLOGOUS soluble protein has been made from yeast mtDNA — not a recoded
+#      yeast gene. Superfolder GFP, nanoluciferase and GFPβ1-10 are jellyfish/shrimp-derived or
+#      wholly engineered sequences with no evolutionary history in a mitochondrion.
+#   2. One of them is an ENZYME, assayed catalytically: nanoluciferase, at ~2,000× background.
+#      §2.3's central question — "Has any soluble heterologous enzyme of this class been made from
+#      mtDNA?" — has a yes, for a class of one.
+#   3. An insert need NOT displace a gene. §2.1's "inserting a gene costs you the gene whose UTR
+#      you borrowed" is true of the ARG8ᵐ-style replacement but not of the pPT24 route, which adds
+#      the ORF as a ninth gene in a silent region and leaves respiration intact. See
+#      `activator_map.yaml`, locus `intergenic_upstream_COX2`.
+#   4. There is a documented FOLDING FAILURE, with a mechanism attached — and the mechanism is
+#      about the matrix, so it transfers to DUET's enzymes. That is the real content of the risk,
+#      and it is more useful than a bare absence of precedent would have been.
+#
+# WHAT IS STILL MISSING. CORRECTED 2026-09-21, the same day this file was written: the original
+# text claimed "every precedent below is a monomeric, cofactor-free protein", and that was wrong
+# because two precedents were missing from it. Rip1, a [2Fe-2S] Rieske protein, has been made from
+# mtDNA — so a metal-centre cofactor can be acquired by an mtDNA-encoded product, and Ilv3 (DHAD)
+# is an Fe-S enzyme. What remains genuinely unprecedented is narrower: a THIAMINE-dependent
+# catalyst and an obligate oligomer. Not one precedent below requires TPP to be loaded or a
+# homotetramer to be assembled in the matrix. Searching this corpus for TPP or thiamine in a
+# mitochondrial-matrix context returns nothing bearing on an mtDNA-encoded protein.
+#
+# So the gap has moved TWICE in one day, and both moves were narrowings:
+#   §2.3 asked   "can the matrix make a soluble protein at all"   — answered, yes, repeatedly
+#   this file said "can it load a cofactor and oligomerise one"      — half-answered by Rip1's
+#                                                                      [2Fe-2S] cluster
+#   what is left  "can it load THIAMINE, and build a homotetramer"
+# DUET's ADH is Zn-dependent, which sits between the two: a metal, but not an Fe-S cluster, and
+# no precedent either way. The KDC is the genuinely unprecedented case and should be treated as
+# the pacing risk of strategy E.
+#
+# EVERY QUOTE IN THIS FILE was re-resolved in the stored full text at its recorded offsets before
+# being written (fermdb.llm.validate.verify_span, exact, no normalization): 29 on first writing,
+# 6 more for the Cox6/Rip1 rows added the same day, 35 of 35 passing. One draft quote failed and
+# was corrected rather than loosened — see the note at the foot.
+#
+# A LESSON WORTH KEEPING, since this file got its own headline wrong. Cox6 and Rip1 were missed
+# because their paper is titled "ALLOTOPIC expression of COX6" — and allotopic normally means the
+# opposite direction, nuclear expression of a mitochondrial gene. A search for strategy-E
+# precedents skips it on the title, reasonably, and the abstract's first line is what corrects
+# that: "Relocation of COX6 from nuclear to the mitochondrial genome". Title-level filtering is
+# how this corpus hides things.
+
+version: 2
+zone: R
+question: "Has any soluble heterologous enzyme been made from yeast mtDNA?"
+answer_in_one_line: >-
+  Yes — nanoluciferase, catalytically assayed, respiration intact. Plus two fluorescent proteins,
+  the Arg8ᵐ marker, and (added later the same day) Cox6 and the [2Fe-2S] Rieske protein Rip1, both
+  partial. So even a metal cofactor is precedented. Nothing TPP-dependent and nothing obligately
+  oligomeric — which is what DUET's KDC still is.
+
+corpus_searched:
+  stored_full_texts: 1310
+  readable: 1309
+  unreadable: 1
+  unreadable_note: >-
+    doi:10.2323/jgam.2022.05.001 is an AES-encrypted PDF; pypdf refuses it without
+    cryptography>=3.1. One document out of 1,310, and it is a Journal of General and Applied
+    Microbiology paper with no mitochondrial-genetics signal in its metadata — but the coverage
+    claim below is 1,309, not 1,310, and this is why.
+
+precedents:
+
+  - name: nanoluciferase (mtnLuc)
+    origin: "engineered from Oplophorus gracilirostris luciferase — no natural mitochondrial history"
+    protein_class: enzyme
+    soluble: true
+    heterologous: true
+    locus: intergenic_upstream_COX2
+    utr_source: COX2
+    displaced_gene: null
+    respiration_retained: true
+    recoded_for_table_3: true
+    functional_readout: catalytic activity
+    publication: doi:10.1016/j.xpro.2022.101359
+    evidence: >-
+      "The power of this technique is exemplified by a mitochondrially encoded nanoluciferase,
+      which allows to monitor levels of mitochondrial translation under a variety of growth
+      conditions." The construction and its cost to the cell: "Following the protocol as detailed
+      above, we integrated a recoded version of nanoluciferase (mtnLuc) into mtDNA. Expression of
+      mtnLuc does not perturb mitochondrial function, as evidenced by robust growth on respiratory
+      media containing glycerol". The enzyme WORKS, and the number is the point — "With a readout
+      at around 2 × 105 of relative luminescent units (RLU) in the strain expressing mtnLuc and
+      around 102 of RLU in the wild type strain, we confirmed that the measured signal can be
+      easily read and distinguished from the background". That is a ~2,000-fold catalytic signal
+      from an enzyme folded in the matrix from a message its own ribosomes translated.
+    why_it_matters: >-
+      This is the closest precedent the corpus holds to DUET's actual ask, and it is closer than
+      §2.3 credited. Note one limit that keeps it from settling the question: "Moreover, it
+      operates in an ATP-independent manner" — nanoluciferase is a small, monomeric, cofactor-free
+      catalyst. It demonstrates catalysis in the matrix; it does not demonstrate cofactor loading.
+    confidence: medium
+
+  - name: superfolder GFP (sfGFPm)
+    origin: "Aequorea victoria GFP, engineered variant"
+    protein_class: fluorescent reporter
+    soluble: true
+    heterologous: true
+    locus: intergenic_upstream_COX2
+    utr_source: COX2
+    displaced_gene: null
+    respiration_retained: true
+    recoded_for_table_3: true
+    functional_readout: fluorescence (microscopy and flow cytometry), Western blot
+    publication: doi:10.15698/mic2018.03.621
+    evidence: >-
+      "Employing biolistic transformation we have integrated a gene encoding superfolder GFP into
+      the mitochondrial genome. This reporter is compatible with mitochondrial respiratory
+      function and enables the direct detection of mitochondrial translation in vivo as GFP
+      fluorescence." The design choice that makes it free: "To avoid the respiratory deficiency
+      associated with inactivation of mitochondrial genes, we engineered a new mitochondrial
+      genome that coded for sfGFP as an additional ninth open reading frame." Respiration was then
+      measured rather than assumed — "We therefore conclude that expression of sfGFPm does not
+      alter the assembly of respiratory complexes or the general respiratory competence of the
+      cells."
+    why_it_matters: >-
+      The ninth-ORF construction is the single most useful design fact in this file. It says the
+      activator/locus constraint of §2.1 does not have to be paid in a displaced gene.
+    confidence: medium
+
+  - name: GFPβ1-10 (BiG Mito-Split-GFP)
+    origin: "Aequorea victoria GFP, first ten β-strands, synthetic gene"
+    protein_class: fluorescent reporter (split, self-assembling)
+    soluble: true
+    heterologous: true
+    locus: ATP6
+    utr_source: ATP6
+    displaced_gene: ATP6
+    respiration_retained: true
+    rescue_strategy: second_locus
+    recoded_for_table_3: true
+    functional_readout: GFP reconstitution with a nuclear-encoded β11 strand
+    publication: doi:10.1016/bs.mie.2024.07.028
+    evidence: >-
+      "This split -GFP is bi -genomic because the first ten ß-strands of GFP (GFPß1-10) are
+      encoded by the mitochondrial genome and translated by mitoribosomes", ending "with GFPß1-10
+      gene sequence integrated in the locus of ATP6 under the regulatory sequences of ATP6 gene"
+      (strain RKY176; the underlying construction is Bader et al. 2020).
+    why_it_matters: >-
+      A worked example of `rescue_strategy: second_locus`, which the schema has a field for and
+      the atlas had no instance of. "The aim of the study was to construct respiring strain
+      bearing the GFPß1-10 gene in the fully functional  mtDNA." — and they got it by moving ATP6
+      to the COX2 locus (5'UTR_COX2–ATP6–3'UTR_COX2) FIRST, then putting the heterologous ORF into
+      the vacated ATP6 locus under ATP6's own leader. So a locus can be taken and its gene
+      re-provided elsewhere in the same genome. It also folds: reconstituting a β-barrel with a
+      strand made in another compartment is a stiff folding test to pass by accident.
+    confidence: medium
+
+  - name: ARG8ᵐ
+    origin: "S. cerevisiae nuclear ARG8, recoded to translation table 3"
+    protein_class: "enzyme (acetylornithine aminotransferase) — soluble matrix metabolic enzyme"
+    soluble: true
+    heterologous: false
+    locus: "COX1 | COX2 | COX3 | COB | ATP6 | ATP8 | VAR1 — inserted at each in the corpus"
+    utr_source: "the displaced gene's own leader"
+    displaced_gene: "whichever locus is used"
+    respiration_retained: false
+    recoded_for_table_3: true
+    functional_readout: growth on medium lacking arginine
+    publication: "doi:10.1093/nar/gkac1229, doi:10.1091/mbc.e16-11-0775, doi:10.1093/nar/gkaa424"
+    evidence: >-
+      The marker §2.3 already knew about, but the corpus shows it used at more loci than §2.3
+      implies and, importantly, used as an instrument rather than a curiosity: "When the ORFs of
+      representative mitochondrial protein-coding genes (COB, COX1, COX2 and VAR1) were replaced
+      with the ARG8m sequence" — doi:10.1093/nar/gkac1229. At ATP8: section heading "Aep3p is
+      required for expression of ARG8m at the ATP8 locus of mtDNA" — doi:10.1091/mbc.e16-11-0775.
+      Under the VAR1 leader: "to encode for a mitochondrial protein required for the expression of
+      the mitochondrial reporter gene ARG8m placed under the control of VAR1 5′-UTR" —
+      doi:10.1093/nar/gkaa424.
+    why_it_matters: >-
+      Not as a precedent — §2.3 had it — but because the four-locus comparison in
+      doi:10.1093/nar/gkac1229 is the only experiment in this corpus that varies the LEADER while
+      holding the soluble cargo constant. See `leader_choice_matters` below. That is a result
+      about DUET's exact problem and nobody was looking for it.
+    confidence: medium
+
+  - name: ATP6–mNeonGreen and ATP6–mKate2 fusions
+    origin: "engineered fluorescent proteins fused to a resident mtDNA gene"
+    protein_class: fluorescent reporter, membrane-anchored fusion
+    soluble: false
+    heterologous: true
+    locus: ATP6
+    utr_source: ATP6
+    displaced_gene: null
+    respiration_retained: unknown
+    recoded_for_table_3: true
+    functional_readout: fluorescence
+    publication: doi:10.1126/sciadv.abi8886
+    evidence: >-
+      Sequences recoded "compatible with the mitochondrial genetic code (Twist Bioscience, San
+      Francisco)"
+      "were fused to the C terminus of the coding region of ATP6, which was amplified from genomic
+      DNA", delivered via pPT24 into "the kar1-1 strain αDFS160 ρ0 by biolistic transformation".
+    why_it_matters: >-
+      Listed for completeness and for the recoding vendor route, not as a soluble-folding
+      precedent: an ATP6 fusion is membrane-anchored, which is the easy case §2.3 correctly
+      identified as the norm. Its value here is that commercial synthesis of table-3-recoded ORFs
+      is routine enough to be a catalogue purchase.
+      (CORRECTED 2026-09-21: this row first read 'recoded "for the mitochondrial genetic code"'.
+      The source says "compatible with". A paraphrase inside quotation marks is the precise error
+      this file exists to prevent, and it was written here by the same session that wrote the
+      rule. It survived the first pass because only the longer neighbouring span was submitted to
+      verify_span; the short fragment was never checked. Verify every fragment, not every record.)
+    confidence: medium
+
+  - name: Cox6 (COX6-Cᵐ)
+    origin: "S. cerevisiae NUCLEAR COX6, recoded and relocated INTO mtDNA"
+    protein_class: "cytochrome oxidase subunit 6 — a nuclear-encoded OXPHOS subunit"
+    soluble: false
+    heterologous: false
+    locus: "not recorded here"
+    respiration_retained: partial
+    recoded_for_table_3: true
+    functional_readout: "partial complementation of a COX6 deletion; ³⁵S pulse-labelling"
+    publication: doi:10.26508/lsa.202301965
+    evidence: >-
+      ADDED 2026-09-21, and it was MISSED when this file was first written. The paper's title
+      says "Allotopic expression of COX6", and a search for strategy-E precedents reasonably skips
+      a paper that announces itself as allotopic — but the direction is the opposite of what the
+      word usually means here: "Relocation of COX6 from nuclear to the mitochondrial genome helps
+      unveil the role of Atco (Atp9–Cox6 complex) in coupling the biogenesis of cytochrome oxidase
+      and ATP synthase in yeast mitochondria." Nuclear → mtDNA is the strategy-E direction, so this
+      belongs here and not in the allotopic table. Built by the standard route: "we used the method
+      of mitochondrial transformation developed by Fox and colleagues".
+    why_it_matters: >-
+      Two cautions, both of which this file previously lacked. First, expression was POOR: "The
+      observed poor expression in these two studies indicates a topologic dependence in the
+      process of sorting nuclear-encoded components into the oxphos complexes." Second, and
+      directly relevant to the stability question, the construct destabilised the genome carrying
+      it — the authors grew cells on ethanol/glycerol specifically to "minimize the tendency of the
+      strain with COX6-C m to convert to ρ−/0 mutants when grown on fermentable sugars such as
+      glucose or galactose". A production process runs on fermentable sugar.
+    confidence: medium
+
+  - name: Rip1 (RIPᵐ) — the Rieske Fe-S protein
+    origin: "S. cerevisiae NUCLEAR RIP1, recoded and transferred into mtDNA"
+    protein_class: "Rieske iron-sulfur protein — an essential catalytic subunit of the bc1 complex"
+    soluble: false
+    heterologous: false
+    locus: "not recorded in the reporting paper"
+    respiration_retained: partial
+    recoded_for_table_3: true
+    functional_readout: "partial restoration of respiration in a rip1 null"
+    publication: doi:10.26508/lsa.202301965
+    evidence: >-
+      Reported second-hand, and flagged as such: "A recoded version of the nuclear RIP1 gene for
+      the Rieske FeS protein, an essential catalytic subunit of the bc1 complex, was previously
+      successfully transferred to mtDNA". The primary paper is NOT held in this corpus, so this
+      row is a pointer to acquire rather than a record read here. Its outcome is stated: "The
+      partial complementation by the COX6-C m allele is similar to the partial restoration of
+      respiration of a rip1 null mutant with a mitochondrial-relocated RIPm allele".
+    why_it_matters: >-
+      THIS ROW CORRECTS THIS FILE'S OWN HEADLINE GAP. The note below said every precedent here is
+      "monomeric, cofactor-free" and concluded that the sharp edge of the risk had moved to
+      "can the matrix load a cofactor into a protein its own ribosomes just made". Rip1 carries a
+      **[2Fe-2S] cluster**, and it was made from mtDNA and partially functional — so a metal-centre
+      cofactor CAN be acquired by an mtDNA-encoded product. That matters for DUET beyond the
+      general point: Ilv3 (DHAD) is itself an Fe-S enzyme, so this is the nearest precedent the
+      corpus holds for the pathway's one metalloenzyme. It does NOT answer the TPP question for a
+      ketoacid decarboxylase, and "partial" is doing real work in both records — but the gap is
+      narrower than this file first claimed, and narrower in the direction that helps.
+    confidence: medium
+
+# ----------------------------------------------------------------------- the negative result
+
+failures:
+
+  - name: fluorescence-enhanced GFP at the COX3 locus
+    outcome: "expressed, but poorly folded and respiration-deficient"
+    publication: doi:10.15698/mic2018.03.621
+    evidence: >-
+      "In a pioneering previous study, a gene encoding fluorescence-enhanced GFP was inserted into
+      the mitochondrial genome to replace the open reading frame of COX3 . The resulting strain
+      was respiration deficient and expressed only weak fluorescence, which limited its usefulness
+      in fluorescence microscopic and flow cytometric experiments." The proposed cause is the
+      sentence this whole file turns on: "This limitation could be explained by poor folding of
+      GFP expressed in the context of the mitochondrial translation system , which is specialized
+      on the production of membrane proteins."
+    why_it_matters: >-
+      This is §2.3's fear, observed. The matrix DID fail to fold a soluble heterologous protein
+      properly, and the stated reason — a translation system specialised for membrane proteins —
+      applies to a ketoacid decarboxylase exactly as much as to GFP. It is also the one precedent
+      that says what to DO about it: "To circumvent the folding problem, we employed superfolder
+      GFP (sfGFP), which folds with enhanced kinetics resulting in a more stable protein". The
+      fix was a fast-folding variant of the same protein. For DUET that argues for screening KDC
+      and ADH orthologues on folding kinetics and intrinsic stability, not only on kcat — which is
+      a selection criterion the programme does not currently have.
+    confidence: medium
+
+# ------------------------------------------------------------- the leader is not a free choice
+
+leader_choice_matters:
+  publication: doi:10.1093/nar/gkac1229
+  finding: >-
+    The same soluble cargo (Arg8ᵐ) behaves differently behind different mitochondrial leaders, and
+    the split is between OXPHOS leaders and the VAR1 leader. "However, the loss of Dpc29 strongly
+    decreased cell growth on media lacking arginine (Figure ) and reduced ARG8m reporter protein
+    steady-state levels for all the mitochondrial-encoded genes assayed except VAR1". The
+    mechanism offered: "One explanation for this discrepancy is that the OXPHOS 5′ and 3′
+    sequences (COB, COX1 and COX2) target the ARG8m mRNA to locations where hydrophobic
+    respiratory chain proteins that normally emerge from mitoribosomes are directed toward the
+    mitochondrial inner membrane to facilitate complex assembly. We propose that synthesis of the
+    soluble mitochondrial matrix protein Arg8 toward the inner membrane at these locations may
+    result in steric hindrance, and Dpc29 becomes necessary for optimal translation during these
+    experimental conditions." And the exception, with its reason: "Consistent with this idea, Var1
+    reporter expression is Dpc29 independent because Var1-expressing mitoribosomes are thought to
+    translate at distinct mitoribosome assembly sites that direct their products to the matrix".
+  consequence_for_duet: >-
+    A borrowed leader does not only license translation (§2.1) — it also decides WHERE in the
+    mitochondrion the nascent chain emerges. A soluble enzyme behind COX1/COX2/COB is synthesised
+    into a membrane-insertion context it does not belong in. VAR1 is the only yeast mtDNA gene
+    whose own product is soluble and whose ribosomes are matrix-directed, which makes the VAR1
+    leader the mechanistically indicated choice for a soluble heterologous enzyme. This is a
+    testable design preference, and it exists only because VAR1 was added to `activator_map.yaml`
+    this session. It is NOT yet tested for a heterologous enzyme; treat it as the best-supported
+    hypothesis, not a settled answer.
+  confidence: medium
+
+# ----------------------------------------------------------------- what remains genuinely open
+
+# `kind` and `status` are the two columns the `knowledge_gap` table keeps apart, and this file
+# used to conflate them: it wrote `status: never_attempted`, which is a KIND ("nobody has tried
+# this"), into the field the schema uses for progress ("open / candidate_proposed / resolved").
+# A loader reading it literally would have written an illegal status. Split 2026-09-21.
+open_gaps:
+  - gap: "cofactor loading in the matrix: TPP and Zn specifically"
+    kind: never_attempted
+    status: open
+    note: >-
+      NARROWED 2026-09-21. This gap originally read "cofactor loading" without qualification and
+      was too broad: Rip1 above carries a [2Fe-2S] cluster and was made from mtDNA, so metal-centre
+      acquisition is precedented, which also speaks to Ilv3. What is NOT precedented is a
+      thiamine-dependent catalyst or a Zn-dependent alcohol dehydrogenase. Searching the 1,309
+      readable full texts for thiamine/TPP in a mitochondrial-matrix context still returns nothing
+      bearing on an mtDNA-encoded protein. DUET's KDC is the unprecedented case.
+  - gap: oligomeric assembly in the matrix for an mtDNA-encoded protein
+    kind: never_attempted
+    status: open
+    note: >-
+      Every precedent above is monomeric (nanoluciferase, sfGFP) or assembles with a partner
+      supplied from the cytosol (GFPβ1-10 + β11). A homotetrameric KDC has no precedent here.
+  - gap: insert stability over generations under non-selective conditions
+    # never_attempted rather than mechanism_unknown: the 2026-09-21 stability pass established
+    # that NO paper has followed a heterologous mtDNA ORF over generations, under selection or
+    # without. That is an untried experiment, not an unexplained mechanism.
+    kind: never_attempted
+    status: open
+    note: >-
+      MITOCHONDRIAL_PROGRAM.md §2.4 asks for it and this search did not pursue it; it is a
+      separate line of the §3 corpus table. Note that both neutral-site precedents carry a
+      built-in selection (respiration restored via COX2), so they say nothing about a construct
+      held without selection — which production conditions usually are.
+
+# ---------------------------------------------------------------------------------- provenance
+#
+# Method: every stored full text was decoded once through `fermdb.extract.harness.load_source_text`
+# — the same function `verify_span` reads — and searched with regex. Every quote above was then
+# re-resolved through `verify_span` against that text at the offsets the text itself reports.
+#
+# One draft quote FAILED that check and is worth recording, because it is the failure mode the
+# check exists for. A sentence copied from doi:10.1016/bs.mie.2024.07.028 about the ρ⁰ kar1-1
+# recipient did not resolve: the PDF's text layer renders ρ as U+F072, a private-use-area glyph,
+# and the line wrap was one space where the draft had two. The quote was corrected to what the
+# source actually says rather than the check loosened to accept it. A corpus-wide sweep found PUA
+# glyphs in 8 of 1,309 documents — small, but in this paper it hits ρ specifically, which is the
+# one symbol this programme cannot afford to mis-search.

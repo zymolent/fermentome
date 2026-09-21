@@ -1,0 +1,797 @@
+# Marked-claim verification for docs/design/MITOCHONDRIAL_PROGRAM.md and docs/design/DUET_TARGET.md.
+#
+# MITOCHONDRIAL_PROGRAM.md's own header carries the instruction this file executes: "This document
+# has a higher [warning] density than the rest of the plan and a lower tolerance for being wrong,
+# because it will inform construct design." Twenty-two lines are marked in that file and three in
+# DUET_TARGET.md. One record below per marked line.
+#
+# WHAT A MARK MEANS: the claim was written from an AI's background knowledge, not from a source
+# anyone read. This file says, for each one, what 1,309 stored full texts do and do not support.
+#
+# METHOD. Every quote in `evidence` was sliced out of the cached source text by regex-anchored
+# offset, never retyped, and each slice was checked to occur exactly once in its document before
+# being written here. Quotes are double-quoted YAML scalars rather than folded ones because several
+# come from PDF text layers where the line wraps and the soft hyphens are part of the string and
+# folding would silently destroy them. No quote splices two passages; where two passages are needed
+# there are two strings. Each evidence entry is preceded by a comment naming its DOI and its cached
+# file, so any quote can be re-resolved.
+#
+# NO `confidence` FIELD IS WRITTEN ANYWHERE IN THIS FILE, and nothing here is marked verified.
+# CONVENTIONS.md reserves that for a human curator; this is a draft under docs/drafts/. Nothing
+# under data/ and neither design document was touched.
+#
+# VERDICTS USED
+#   confirmed            the corpus supports the claim as stated
+#   incomplete           true as far as it goes; something load-bearing is missing
+#   overstated           directionally right, quantitatively or categorically too strong
+#   wrong                the corpus contradicts it
+#   not_in_corpus        the corpus cannot answer, or the line is not a factual claim
+#   already_checked_today  a phase-1b curation file already settled it; `covered_by` names which
+#
+# TALLY
+#   already_checked_today  9   (lines 53, 59, 61, 73, 105, 112, 128, 147, 158 of MITOCHONDRIAL_PROGRAM,
+#                               across 5 curated files; not re-derived here)
+#   confirmed              7   (6 in MITOCHONDRIAL_PROGRAM, 1 in DUET_TARGET)
+#   overstated             3
+#   incomplete             2
+#   wrong                  1
+#   not_in_corpus          3   (all three are legend/header lines carrying no claim)
+#
+# THE THREE THINGS A READER SHOULD TAKE FROM THIS FILE
+#
+#   1. THE COPY NUMBER IS THE MARK THAT MATTERS MOST, AND IT IS OVERSTATED. "50-200 copies per cell"
+#      is the top of a review range that no primary measurement in this corpus reaches. Every direct
+#      measurement here lies between 14 and 32 per cell, and the one population-scale survey reports
+#      a MEDIAN OF 18 mitochondrial genomes per haploid nuclear genome. The same survey supplies the
+#      rescue the document never makes: copy number scales close to linearly with ploidy, so DUET's
+#      industrial polyploid carries proportionally more. Defensible number: ~18 per haploid genome,
+#      measured range 14-32, tail above 80, ~60-80 in a tetraploid.
+#
+#   2. DUET's POS5 SINGLE-POINT-OF-FAILURE ARGUMENT DOES NOT HOLD. The corpus names a second route
+#      from matrix NADH to matrix NADPH -- the PYC2/MDH2/MAE1 transhydrogenase-like shunt, run "in
+#      its native mitochondrial location" -- and a third option that removes the NADPH requirement,
+#      an NADH-preferring KARI. The architecture is more robust than claimed; the priority ordering
+#      it drives is wrong.
+#
+#   3. THE ENZYME PROPERTIES THE WHOLE STRATEGY-E RISK RESTS ON ARE BOTH CORRECT. The KDC is
+#      TPP-dependent and tetrameric (crystal structure plus gel filtration); ADHs are commonly
+#      zinc-dependent and oligomeric (yeast Adh1 among the "tetrameric ADHs"). So the never_attempted
+#      gap is correctly placed -- and it is specifically the KDC, because a non-zinc ADH orthologue
+#      is an available hedge and there is no equivalent hedge for thiamine.
+
+version: 1
+zone: R
+status: draft
+
+MITOCHONDRIAL_PROGRAM:
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 7
+  claim: >-
+    Header/legend line. The warning glyph on this line is the CONVENTION being defined (the
+    legend sentence defining what a warning mark means), not a claim about biology.
+  verdict: not_in_corpus
+  what_to_change: >-
+    Drop the mark. These lines are the legend, not marked claims; the extractor matched the
+    glyph that defines the convention. If the mark list is regenerated, exclude lines 7-9 of
+    this file.
+  consequence_if_wrong: >-
+    none, documentation only.
+  searches_run: ["(manual reading of docs/design/MITOCHONDRIAL_PROGRAM.md lines 7-10)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 8
+  claim: >-
+    Header/legend line. The warning glyph on this line is the CONVENTION being defined (the
+    document asserts it has a higher warning density and a lower tolerance for being wrong),
+    not a claim about biology.
+  verdict: not_in_corpus
+  what_to_change: >-
+    Drop the mark. These lines are the legend, not marked claims; the extractor matched the
+    glyph that defines the convention. If the mark list is regenerated, exclude lines 7-9 of
+    this file.
+  consequence_if_wrong: >-
+    none, documentation only.
+  searches_run: ["(manual reading of docs/design/MITOCHONDRIAL_PROGRAM.md lines 7-10)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 9
+  claim: >-
+    "Verify every warning mark in section 3 against primary literature before building
+    anything." The document directs its own verification effort at section 3.
+  verdict: wrong
+  what_to_change: >-
+    Change "section 3" to "sections 1 and 2". Section 3 contains exactly ONE marked line (158),
+    and it is a corpus-SIZE estimate ('~30-60 papers', '~10-25'), which cannot inform construct
+    design at all. Every mark that does inform construct design - the activator table, the
+    recoding rules, the enzyme properties, the transformation route, the copy number - is in
+    section 1 or section 2. A reader who followed this instruction literally would verify the
+    budget table and build on the unverified biology.
+  consequence_if_wrong: >-
+    A bench scientist following the document's own instruction verifies the wrong section and
+    proceeds to construct design with sections 1-2 unchecked. That is precisely the failure the
+    instruction was written to prevent, so the mis-pointer is worth fixing even though it is
+    documentation only.
+  searches_run: ["(manual audit: which sections contain the 22 marked lines)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 19
+  claim: >-
+    The valine branch (Ilv2/Ilv6 -> Ilv5 -> Ilv3) already runs in the mitochondrial matrix, so
+    2-ketoisovalerate is produced there; finishing the route in the matrix avoids the
+    unidentified 2-KIV export step entirely.
+  verdict: incomplete
+  publication: "doi:10.1038/s41598-019-40631-5"
+  corpus_file: "00223.txt"
+  evidence:
+    # doi:10.1038/s41598-019-40631-5  [00223.txt]
+    - "In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex, and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix. The mitochondrial 2-KIV is then exported to the cytosol, and finally converted to isobutanol through Ehrlich pathway, involving endogenous KDCs and ADHs."
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt]
+    - "The first half of the pathway converts pyruvate to α-ketoisovalerate (KIV) by mitochondria-localized ILV enzymes: acetolactate synthase (ALS, encoded by ILV2), a NADPH-dependent ketol-acid reductoisomerase (KARI, encoded by ILV5), and a 2Fe–2S cluster-requiring dihydroxyacid dehydratase (DHAD, encoded by ILV3). The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5)"
+  notes: >-
+    The compartment claim is right and well attested. What the sentence leaves out is the OTHER
+    membrane crossing. The corpus states the native route as two crossings, not one: pyruvate
+    IN through the mitochondrial pyruvate carrier, 2-KIV OUT by an unnamed route. Strategy E
+    removes the export leg only; the MPC import leg stays, and it is a carrier whose capacity
+    has itself been an engineering target (MPC1/MPC2/MPC3 are overexpressed to raise isobutanol
+    in doi:10.1093/femsyr/foae006).
+  what_to_change: >-
+    Keep the claim, add the second crossing: 'The valine branch already runs in the matrix, so
+    2-KIV is produced there - reached by pyruvate imported through the MPC. Finishing the route
+    in the matrix removes the unidentified 2-KIV export step, but not the MPC import step,
+    which becomes the remaining membrane-transport ceiling for strategy E.'
+  consequence_if_wrong: >-
+    Moderate. If the route is sold as 'no membrane crossings' the ranker will under-cost
+    strategy E and the lab may attribute a flux ceiling to enzyme folding when it is pyruvate
+    import. MPC capacity should be a measured covariate in any strategy-C or -E experiment, not
+    an assumption.
+  searches_run: ["(2-ketoisovalerate|alpha-ketoisovalerate|KIV).{0,120}(mitochondri|matrix|export|transport)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 28
+  claim: >-
+    mtDNA is present at roughly 50-200 copies per cell in nucleoids, which is a gene dosage a
+    single nuclear integration cannot match.
+  verdict: overstated
+  publication: "doi:10.1186/s12915-020-00786-4"
+  corpus_file: "00651.txt"
+  evidence:
+    # doi:10.1186/s12915-020-00786-4  [00651.txt]
+    - "The number of mitochondrial genomes is generally constant across clades (Additional file : Figure S11), with no significant differences between domesticated and wild lineages, with a median of 18 mitochondrial genomes for each haploid nuclear genome. The variation is however particularly high across the population, reaching over 80 copies. As previously reported [], the mtDNA copy number scales up with ploidy in a linear way, with diploid strains having around double number of mitochondrial genomes and triploid having three times the number, compared to haploid cells"
+    # doi:10.1093/nar/gkad849  [00391.txt]
+    - "This analysis revealed a consistent ∼1.6-fold increase of mtDNA CN in Δcim1 cells compared to WT cells when grown on YPD containing a fermentable carbon source (29 versus 18 mtDNA copies per cell in Δcim1 and WT, respectively) (Figure"
+    # doi:10.3390/biom13030501  [01097.txt]
+    - "On average, the MALs that maintained the mtDNA had 14 mitochondrial genomes per haploid nuclear genome."
+    # doi:10.1038/s44318-024-00183-5  [00256.txt]
+    - "The length of this array represents the previously determined average of 32 mtDNA copies per diploid cell"
+    # doi:10.3390/jof9030329  [01191.txt]
+    - "Usually, S. cerevisiae has between 40 and 60 nucleoids, each containing 1 or 2 copies of mtDNA"
+    # doi:10.1007/s00439-015-1578-x  [00047.txt]
+    - "This could be explained by the lower copy number of mtDNA molecules per cell in yeast (about 20–30 copies per cell, 50–100 fold less than in typical vertebrate cells)"
+    # doi:10.1534/g3.112.003152  [00928.txt]
+    - "In S. cerevisiae, the mtDNA genome is present normally at 20−100 copies per cell comprising 10–20% of the total cellular DNA"
+    # doi:10.1534/genetics.114.166637  [00939.txt]
+    - "Its copy number per cell ranges from 50 to 200 () and contrary to the mammalian mtDNA it is biparentally inherited after mating, allowing for recombination, although this heteroplasmic state is transient for only ∼20 generations."
+  notes: >-
+    Two claims in one sentence. The NUCLEOID packaging is confirmed (40-60 nucleoids of 1-2
+    copies each in doi:10.3390/jof9030329, and the Abf2/Cim1 literature throughout). The NUMBER
+    is the problem. The corpus splits cleanly: every direct measurement sits between 14 and 32
+    per cell (qPCR of WT on YPD: 18; mutation-accumulation lines: 14; a modelling paper's cited
+    average: 32 per DIPLOID; the population survey: median 18 per haploid nuclear genome,
+    'reaching over 80 copies' at the tail), while every 50-200-style figure is a review
+    sentence citing something else. The population survey also supplies the correction DUET
+    actually needs: copy number scales close to linearly with ploidy, so an industrial
+    polyploid carries proportionally more - which is the one argument that partially rescues
+    the dosage case, and the document does not make it.
+  what_to_change: >-
+    Replace '50-200 copies per cell' with a measured range and its conditions. Defensible
+    wording: 'mtDNA is present in nucleoids at roughly 15-40 copies per haploid genome in
+    laboratory strains on glucose (population median 18, individual strains exceeding 80), and
+    copy number scales close to linearly with ploidy - so an industrial tetraploid would carry
+    on the order of 60-80 copies.' Report the direct qPCR and sequencing measurements (18, 14,
+    22, 32-per-diploid) and the review ranges (20-30, 20-100, 50-200) separately; 50-200 is the
+    top of a secondary range and no primary measurement in this corpus reaches it.
+  consequence_if_wrong: >-
+    HIGH - this is the number strategy E is partly sold on. At 50-200 the dosage argument
+    carries the case on its own; at a median of 18 per haploid genome it does not, and the
+    honest comparison against a nuclear route becomes '~18-80 mtDNA copies vs 1-n nuclear
+    integrations', a range a multi-copy nuclear integration or a 2-micron vector can meet. A
+    route ranker fed 50-200 will rank E above C on dosage alone. Two second-order points the
+    document should carry with the number: copy number is not expression (nothing here measures
+    protein per mtDNA copy), and the same papers that measure it also show it moving 1.6-3 fold
+    with single nuclear mutations and with carbon source, so it is a regulated variable, not a
+    constant of the chassis.
+  searches_run: ["(copies|copy number|genomes) (of mtDNA |of mitochondrial DNA )?per (haploid )?(cell|diploid|nuclear genome)", "mitochondrial genomes per haploid|median of \\d+ mitochondrial|mtDNA copy number.{0,80}median", "per diploid cell|copies per diploid|nucleoids?,? (each )?(containing|with|harbou?r)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 36
+  claim: >-
+    Strategy C has published precedent for this exact pathway, while strategy E has none.
+  verdict: confirmed
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  evidence:
+    # doi:10.1038/nbt.2509  [00190.txt]
+    - "Compartmentalization of the \nEhrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in \nthe cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps \nof the biosynthetic pathway."
+    # doi:10.1038/nbt.2509  [00190.txt]
+    - "We \ndetected all enzymes fused to the CoxIV mitochondrial localization \nsignal in the mitochondrial fractions, whereas we detected enzymes \nlacking the CoxIV signal only in cytoplasmic fractions ( Fig. 5)."
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt]
+    - "However, the role that localization plays in isobutanol production is obscured by conflicting reports in the literature as both pathway localizations have achieved similar isobutanol titers and yields"
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt]
+    - "On the other hand, it has been proposed that cytosolic localization would be preferable in the context of industrially relevant conditions such as high glucose concentrations or anaerobic growth. This is in part because the mitochondria are known to enter a minimal energy-requirement mode under those conditions"
+  notes: >-
+    Precedent: confirmed and specific - Avalos 2013 built exactly strategy C (Ehrlich pathway
+    targeted to the matrix with the CoxIV presequence) for exactly isobutanol, with subcellular
+    fractionation to verify the targeting. What the mark should NOT be dropped without carrying
+    is that the BENEFIT is contested in this same corpus: a 2022 functional-genomics paper says
+    the role of localization is 'obscured by conflicting reports' with both localizations
+    reaching similar titers, and that cytosolic localization has been argued preferable under
+    exactly DUET's conditions - high glucose and anaerobic growth.
+  what_to_change: >-
+    Drop the mark on 'published precedent' (it is real). Add one sentence: 'The precedent
+    exists; the benefit does not replicate uniformly - cytosolic and mitochondrial
+    localizations have reached similar titers in several studies, and cytosolic localization
+    has been argued preferable at high glucose and under anaerobiosis, which are DUET's
+    conditions.'
+  consequence_if_wrong: >-
+    HIGH for programme sequencing, and it cuts toward the document's own recommendation.
+    MITOCHONDRIAL_PROGRAM section 5 question 1 is 'is matrix co-localization beneficial at
+    all?' - this corpus answers 'sometimes, and disputed under industrial conditions'. If C's
+    advantage does not hold anaerobically at high glucose, then E inherits that doubt before
+    its own risks are counted, and DUET's architectural claim 3 ('mitochondrial, not
+    cytosolic') needs its own evidence row rather than a citation to Avalos.
+  searches_run: ["(localization|localized|targeted).{0,200}(mitochondri).{0,200}(confirm|verif|microscop|fluorescen|fraction)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 53
+  claim: >-
+    Section heading: 'Translational activators - the binding constraint'.
+  verdict: already_checked_today
+  covered_by: "data/mitochondria/activator_map.yaml"
+  what_to_change: >-
+    See activator_map.yaml. In short: the activator principle is confirmed; the table is
+    incomplete (Mam33 at COX1, Cbp1 at COB, Atp25 at ATP9, and two whole loci missing -
+    Aep3/ATP8 and Sov1/VAR1); and line 73's 'inserting a gene costs you the gene whose UTR you
+    borrowed' is CORRECTED - the pPT24 route puts a recoded ORF into a silent region upstream
+    of COX2 as a ninth gene, borrowing COX2's leader and Pet111 without touching COX2, with
+    respiration measured intact.
+  consequence_if_wrong: >-
+    HIGH and already acted on. Construct design: an insert need not cost a locus, so the
+    respiration gate on strategy E should be re-read; and VAR1's leader is the mechanistically
+    indicated choice for a SOLUBLE enzyme because VAR1-expressing mitoribosomes are
+    matrix-directed while OXPHOS leaders aim the nascent chain at the inner membrane.
+  searches_run: ["(covered by data/mitochondria/activator_map.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 59
+  claim: >-
+    Yeast mitochondrial mRNAs are not translated generically: each requires specific,
+    nuclear-encoded translational activator proteins that recognize its own 5' untranslated
+    leader.
+  verdict: already_checked_today
+  covered_by: "data/mitochondria/activator_map.yaml"
+  what_to_change: >-
+    See activator_map.yaml. In short: the activator principle is confirmed; the table is
+    incomplete (Mam33 at COX1, Cbp1 at COB, Atp25 at ATP9, and two whole loci missing -
+    Aep3/ATP8 and Sov1/VAR1); and line 73's 'inserting a gene costs you the gene whose UTR you
+    borrowed' is CORRECTED - the pPT24 route puts a recoded ORF into a silent region upstream
+    of COX2 as a ninth gene, borrowing COX2's leader and Pet111 without touching COX2, with
+    respiration measured intact.
+  consequence_if_wrong: >-
+    HIGH and already acted on. Construct design: an insert need not cost a locus, so the
+    respiration gate on strategy E should be re-read; and VAR1's leader is the mechanistically
+    indicated choice for a SOLUBLE enzyme because VAR1-expressing mitoribosomes are
+    matrix-directed while OXPHOS leaders aim the nascent chain at the inner membrane.
+  searches_run: ["(covered by data/mitochondria/activator_map.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 61
+  claim: >-
+    The activator table: COX1 -> Pet309/Mss51; COX2 -> Pet111; COX3 -> Pet494/Pet54/Pet122; COB
+    -> Cbs1/Cbs2; ATP6 -> Atp22; ATP9 -> Aep1/Aep2.
+  verdict: already_checked_today
+  covered_by: "data/mitochondria/activator_map.yaml"
+  what_to_change: >-
+    See activator_map.yaml. In short: the activator principle is confirmed; the table is
+    incomplete (Mam33 at COX1, Cbp1 at COB, Atp25 at ATP9, and two whole loci missing -
+    Aep3/ATP8 and Sov1/VAR1); and line 73's 'inserting a gene costs you the gene whose UTR you
+    borrowed' is CORRECTED - the pPT24 route puts a recoded ORF into a silent region upstream
+    of COX2 as a ninth gene, borrowing COX2's leader and Pet111 without touching COX2, with
+    respiration measured intact.
+  consequence_if_wrong: >-
+    HIGH and already acted on. Construct design: an insert need not cost a locus, so the
+    respiration gate on strategy E should be re-read; and VAR1's leader is the mechanistically
+    indicated choice for a SOLUBLE enzyme because VAR1-expressing mitoribosomes are
+    matrix-directed while OXPHOS leaders aim the nascent chain at the inner membrane.
+  searches_run: ["(covered by data/mitochondria/activator_map.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 73
+  claim: >-
+    A heterologous ORF must be placed behind an existing gene's 5' UTR at that gene's locus, as
+    the recoded ARG8m marker is at COX3 or COX2; inserting a gene costs you the gene whose UTR
+    you borrowed.
+  verdict: already_checked_today
+  covered_by: "data/mitochondria/activator_map.yaml"
+  what_to_change: >-
+    See activator_map.yaml. In short: the activator principle is confirmed; the table is
+    incomplete (Mam33 at COX1, Cbp1 at COB, Atp25 at ATP9, and two whole loci missing -
+    Aep3/ATP8 and Sov1/VAR1); and line 73's 'inserting a gene costs you the gene whose UTR you
+    borrowed' is CORRECTED - the pPT24 route puts a recoded ORF into a silent region upstream
+    of COX2 as a ninth gene, borrowing COX2's leader and Pet111 without touching COX2, with
+    respiration measured intact.
+  consequence_if_wrong: >-
+    HIGH and already acted on. Construct design: an insert need not cost a locus, so the
+    respiration gate on strategy E should be re-read; and VAR1's leader is the mechanistically
+    indicated choice for a SOLUBLE enzyme because VAR1-expressing mitoribosomes are
+    matrix-directed while OXPHOS leaders aim the nascent chain at the inner membrane.
+  searches_run: ["(covered by data/mitochondria/activator_map.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 92
+  claim: >-
+    Translation table 3: UGA = Trp, AUA = Met, CUN = Thr not Leu, CGA/CGC absent.
+  verdict: incomplete
+  publication: "doi:10.3390/ijms22094524"
+  corpus_file: "01149.txt"
+  evidence:
+    # doi:10.3389/fmicb.2023.1268944  [01060.txt]
+    - "Yeast mitochondrial translation tables fall into either the Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code (NCBI table 4, hereafter referred to as the fungal code), which is consistent with other fungi, or the yeast mitochondrial code (NCBI table 3, originally based on S. cerevisiae, hereafter referred to as the Saccharomyces code) based on additional reassignments of AUA and CUN codons, which typically define the order Saccharomycetales."
+    # doi:10.1093/gbe/evz165  [00367.txt]
+    - "Protein-coding genes in the assembled mitogenomes were annotated using MFannot based on genetic code 4 (the only difference between genetic code 4 and the standard code is UGA being a tryptophan codon, not a stop codon)"
+    # doi:10.7717/peerj.8362  [01307.txt]
+    - "In addition, six tryptophan codons (TGG) at positions W18, W464, W659, W883, W1074 and W1126 of the 1366 aa Cas9 protein were changed to TGA, which codes for tryptophan in mitochondria but for a translational stop in the cytoplasm to avoid any Cas9 expression outside of mitochondria."
+    # doi:10.3390/ijms22094524  [01149.txt]
+    - "on the contrary, Msr1 charges both the mt-tRNA(UCU), which in yeast mitochondria binds AGR codons (where R indicates a purine) that in humans mitochondria are stop codons, and the mt-tRNA(ACG), which binds the canonical CGN codons. LARS2, charges both the mt-tRNA(UAG), which binds canonical CUN codons, and the mt-tRNA(UAA), which binds canonical UUR codons. On the contrary, yeast Nam2, charges only the mt-tRNA(UAA), which binds canonical UUR codons, since CUN codons encode for threonine."
+    # doi:10.1093/nar/gkq1345  [00401.txt]
+    - "The presence of tRNATrp with an UCA anticodon, and the absence of an S. cerevisiae homolog of the abnormal tRNAThr1 with 8-nt in the anticodon loop (decoding CUN as threonine), indicate that UGA and CUN codons are recognized as tryptophan and leucine, respectively. The codon assignment was verified by multiple alignments of protein sequences, which led us to the conclusion that UGA(Trp) is the only deviation from the standard genetic code."
+    # doi:10.3390/ijms21145083  [01148.txt]
+    - "The absence of the arginine CGA codon is likely due to the fact that it is never used in yeast mitochondria, whereas the two others (CAA and GCA) are used quite frequently"
+  notes: >-
+    Taken codon by codon against this corpus: (a) UGA = Trp - supported, in two independent
+    ways. Table 3 is defined here as table 4 plus reassignments of AUA and CUN, and table 4's
+    sole departure from the standard code is stated to be UGA-as-tryptophan; and it is
+    demonstrated functionally in S. cerevisiae, where six TGG codons of Cas9 were changed to
+    TGA specifically so the protein could only be made inside mitochondria. (b) CUN = Thr -
+    supported directly and twice. 'since CUN codons encode for threonine' is said of yeast
+    outright, and the comparative-genomics paper identifies the mechanism, an abnormal S.
+    cerevisiae tRNAThr1 with an 8-nt anticodon loop that decodes CUN as threonine, whose
+    ABSENCE in other yeasts is what makes CUN leucine there. (c) AUA = Met - NOT supported. The
+    corpus attests that AUA is reassigned in table 3 but never states what it is reassigned TO.
+    This one is table-3 knowledge the corpus does not independently carry. (d) CGA/CGC absent -
+    half supported, and the word 'absent' is doing two jobs. CGA is stated to be 'never used in
+    yeast mitochondria', which is a usage statement. CGC is not addressed anywhere. And
+    absent-from-usage is not the same as untranslatable: the same corpus says yeast
+    mitochondria charge an mt-tRNA(ACG) that 'binds the canonical CGN codons'.
+    src/fermdb/genetic_code.py already encodes this correctly - ABSENT_IN_YEAST_MITO is a soft
+    avoid-list, not an illegal set - so the code is more careful than the prose.
+  what_to_change: >-
+    Split the sentence by evidence class. Proposed: 'UGA = Trp (inherited from table 4, and
+    used deliberately as a mitochondria-only expression device), CUN = Thr not Leu (decoded by
+    a yeast-specific tRNAThr1 with an 8-nt anticodon loop), AUA reassigned relative to table 4
+    (identity taken from NCBI table 3, not from a source in this corpus), and CGA unused in
+    native yeast mtDNA (CGC not attested here). Note that unused is not untranslatable - a
+    CGN-reading tRNA-Arg exists - so the recoder should treat CGA/CGC as codons to avoid, not
+    as errors.'
+  consequence_if_wrong: >-
+    Moderate, and mostly documentation because the code is already right. The live risk is the
+    opposite of the one the section warns about: a recoder that treats CGA/CGC as ILLEGAL
+    rather than rare would reject valid synthetic ORFs and force needless redesign, and a
+    vendor quote built on a hard constraint costs money. The CUN = Thr rule is the dangerous
+    one and it is solid, so the leucine-rich warning stands.
+  searches_run: ["UGA.{0,60}(tryptophan|Trp)|(tryptophan|Trp).{0,40}UGA|TGA.{0,40}(tryptophan|Trp)", "AUA.{0,80}(methionine|Met)|CGA.{0,60}(absent|unused|not used|missing)", "translation table 3|genetic code table 3|yeast mitochondrial (genetic )?code", "CGN|CG[AC] codon|tRNA.?Arg|arginine codon"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 96
+  claim: >-
+    Yeast mtDNA is strongly AT-rich (~80%+).
+  verdict: confirmed
+  publication: "doi:10.7717/peerj.8362"
+  corpus_file: "01307.txt"
+  evidence:
+    # doi:10.7717/peerj.8362  [01307.txt]
+    - "For example, some mitochondrial genomes are low in GC content (17% in yeast mitochondria; ) and pH milieu is different from the other part of cells (pH 7.5 in yeast mitochondria whereas pH 7.2 in the cytoplasm;"
+  notes: >-
+    17% GC is 83% AT, so '~80%+' is right and if anything conservative. Corroborated
+    qualitatively throughout the corpus - 'extremely AT-rich low complexity intergenic regions
+    of S. cerevisiae mtDNA' (doi:10.1080/15476286.2021.1943929), and a qPCR methods section
+    that had to restrict itself to 8 amplifiable regions 'due to the low GC content of mtDNA'
+    (doi:10.1093/nar/gkad849). One nuance the flat number hides: the AT-richness is not uniform
+    - GC clusters are a dominant feature of otherwise AT-rich sequence
+    (doi:10.1093/femsre/fuv028), and ori elements carry GC-rich boxes, so a genome-average AT
+    figure is the wrong statistic for choosing an insertion site.
+  what_to_change: >-
+    Drop the mark; optionally sharpen to '~83% AT (17% GC), unevenly distributed - GC clusters
+    punctuate the AT-rich background and mark ori elements, so codon-usage targeting should use
+    the coding-sequence composition, not the genome average.'
+  consequence_if_wrong: >-
+    Low. Affects recoder output quality (rare-codon profile), not construct viability. The
+    uneven distribution matters more for choosing WHERE to insert than for HOW to recode.
+  searches_run: ["(AT-rich|AT content|A\\+T|GC content).{0,200}(mitochondrial genome|mtDNA)", "8[0-9](\\.\\d)?% (A\\+T|AT)|GC content.{0,30}1[0-9](\\.\\d)?%"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 105
+  claim: >-
+    Section heading: 'Soluble matrix proteins from mtDNA - precedent exists, but it is thin'.
+  verdict: already_checked_today
+  covered_by: "data/mitochondria/heterologous_orf_precedents.yaml"
+  what_to_change: >-
+    See heterologous_orf_precedents.yaml, which contradicts the heading: the precedent base is
+    not thin. Nanoluciferase (an enzyme, assayed catalytically at ~2,000x background),
+    superfolder GFP and a split-GFP fragment have all been made from yeast mtDNA, two of them
+    without displacing a gene. Rewrite the heading as 'precedent exists, and it is thicker than
+    expected - but not for these cofactors'.
+  consequence_if_wrong: >-
+    HIGH, and it moves the risk rather than removing it. The residual gap is now specific: no
+    mtDNA-encoded protein in this corpus has had THIAMINE loaded into it or been assembled as a
+    homotetramer. That makes the KDC, not the ADH and not 'soluble folding in general', the
+    pacing risk of strategy E.
+  searches_run: ["(covered by data/mitochondria/heterologous_orf_precedents.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 108
+  claim: >-
+    Mitochondrial translation is largely membrane-associated: most mtDNA-encoded products are
+    hydrophobic inner-membrane subunits, inserted co-translationally via Oxa1.
+  verdict: confirmed
+  publication: "doi:10.1091/mbc.e15-12-0811"
+  corpus_file: "00318.txt"
+  evidence:
+    # doi:10.1091/mbc.e15-12-0811  [00318.txt]
+    - "These proteins are translated on membrane-associated ribosomes on the matrix side of the inner membrane and have to be inserted into the lipid phase by the mitochondrial protein export machinery. Oxa1 represents the core subunit of this mitochondrial export machinery. The channel-forming Oxa1 protein facilitates the membrane insertion of mitochondria-encoded proteins in a cotranslational manner"
+  notes: >-
+    Both halves hold. Seven of the eight protein-coding loci of yeast mtDNA are OXPHOS membrane
+    subunits and the eighth, VAR1, is the soluble exception (see activator_map.yaml, which
+    records all eight). Co-translational insertion via Oxa1 is stated directly, with Mba1
+    positioning the ribosome at the exit tunnel. The consequence for DUET is sharper than the
+    sentence admits and is already recorded in heterologous_orf_precedents.yaml: a soluble
+    cargo behind an OXPHOS leader is synthesised INTO that membrane-insertion context, which is
+    the proposed mechanism both for the COX3-locus GFP folding failure and for the VAR1-leader
+    exception.
+  what_to_change: >-
+    Drop the mark. Optionally add the design consequence: 'and because insertion is
+    co-translational and leader-directed, a soluble enzyme placed behind an OXPHOS leader is
+    made at the membrane whether or not it belongs there - which is why the VAR1 leader is the
+    indicated choice for a soluble cargo.'
+  consequence_if_wrong: >-
+    Moderate and constructive. This is the mechanistic basis of the leader-choice preference;
+    if it were wrong, the argument for the VAR1 leader over the cheap intergenic COX2 site
+    would collapse and the construct could be built at the easier site without penalty.
+  searches_run: ["Oxa1.{0,200}(co-?translation|insert)|co-?translational.{0,120}Oxa1"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 112
+  claim: >-
+    Arg8m - acetylornithine aminotransferase, a soluble matrix metabolic enzyme - is expressed
+    functionally from mtDNA and used routinely as a marker.
+  verdict: already_checked_today
+  covered_by: "data/mitochondria/heterologous_orf_precedents.yaml"
+  what_to_change: >-
+    See the ARG8m row of heterologous_orf_precedents.yaml and the marker_systems draft.
+    Confirmed, and used at more loci than the document implies (COB, COX1, COX2, COX3, ATP8,
+    VAR1). The document should cite it not as the single precedent but as the one experiment
+    that varies the LEADER while holding a soluble cargo constant.
+  consequence_if_wrong: >-
+    Low on its own; high as the evidence for leader choice.
+  searches_run: ["(covered by data/mitochondria/heterologous_orf_precedents.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 117
+  claim: >-
+    A ketoacid decarboxylase is TPP-dependent and typically homotetrameric; an alcohol
+    dehydrogenase is often Zn-dependent and oligomeric.
+  verdict: confirmed
+  publication: "doi:10.1186/s13068-025-02687-6"
+  corpus_file: "00815.txt"
+  evidence:
+    # doi:10.1186/s13068-025-02687-6  [00815.txt]
+    - "X-ray crystal structure of KivdS286T reveals a tetrameric assembly composed of four polypeptide chains (Fig. a). The tetrameric structure is consistent with the results obtained from gel filtration chromatography, confirming that the crystal structure of KivdS286T represents the biologically active form of the protein."
+    # doi:10.3389/fbioe.2021.657253  [00985.txt]
+    - "Both key enzymes, ketoisovalerate decarboxylase and ketoisovalerate ferredoxin oxidoreductase, belong to the group of pyruvate decarboxylases/pyruvate oxidoreductases and are dependent on thiamine pyrophosphate (; ). The active forms are homo- or heterotetramers, respectively."
+    # doi:10.1021/acs.biochem.7b00446  [00156.txt]
+    - "The mechanism might involve a pentacoordinated zinc or a double-displacement reaction with participation by a nearby glutamate residue, as suggested by studies of human ADH3, yeast ADH1, and some other tetrameric ADHs."
+    # doi:10.3390/molecules25102404  [01233.txt]
+    - "Generally, several medium-chain alcohol dehydrogenases have been revealed to exist in bacteria as dimers or tetramers, while using NAD(H) or NADP(H) as a cofactor and one catalytic zinc ion at the active site."
+    # doi:10.3389/fbioe.2022.837813  [00991.txt]
+    - "In budding yeast Saccharomyces cerevisiae, zinc is the cofactor of several alcohol dehydrogenases (ADHs) and also acts as a structural component for various zinc finger proteins, some of which are critical for stress responses"
+    # doi:10.3389/fbioe.2026.1879695  [00995.txt]
+    - "Note, KIVD, ADH, and FDH are dimers but shown in monomer form for ease of visualization."
+    # doi:10.3389/fmicb.2019.02533  [01040.txt]
+    - "Z. mobilis encodes two alcohol dehydrogenases, the Zn-containing ADH I and the Fe-containing ADH II."
+  notes: >-
+    KDC: confirmed with structural evidence. The KivD crystal structure is a tetramer and gel
+    filtration agrees that the tetramer is the biologically active form; independently,
+    ketoisovalerate decarboxylase is stated to be TPP-dependent with homotetrameric active
+    forms. ADH: confirmed. Zinc is the cofactor of several S. cerevisiae ADHs; yeast Adh1 is
+    named among 'tetrameric ADHs'; medium-chain ADHs generally exist as dimers or tetramers
+    with one catalytic zinc at the active site. TWO qualifications the document should carry.
+    (i) One 2026 paper's figure legend calls KIVD and ADH dimers - a minority statement against
+    a crystal structure, recorded so the contradiction is not rediscovered. (ii) 'often
+    Zn-dependent' is exactly the right hedge, and it is the escape route: iron-containing ADHs
+    exist alongside zinc ones in the same organism, so a non-Zn ADH orthologue is a real option
+    if matrix zinc loading turns out to be the blocker.
+  what_to_change: >-
+    Drop both marks - they are right. Then add the design consequence they imply, which the
+    section stops short of: 'Both properties are confirmed, and both are unprecedented in
+    mtDNA-encoded protein: no mtDNA-encoded product in the stored literature has had TPP loaded
+    or been assembled as a homotetramer. Since ADHs are only OFTEN zinc-dependent, an
+    Fe-containing or otherwise non-Zn ADH orthologue is an available hedge; there is no
+    equivalent hedge for TPP, which makes the KDC the pacing risk.'
+  consequence_if_wrong: >-
+    HIGHEST in the document, jointly with the copy number. These two properties are what the
+    whole strategy-E risk assessment rests on. If the KDC were monomeric and cofactor-free
+    (like the nanoluciferase precedent) strategy E would be a near-precedented build; because
+    it is a TPP-loaded homotetramer it is genuinely unattempted, and the atlas's knowledge_gap
+    of kind never_attempted is correctly placed. At the bench this decides the screening
+    criterion: orthologues should be selected on folding kinetics, oligomerisation and cofactor
+    affinity, not on kcat alone.
+  searches_run: ["(KivD|KDC|keto.?acid decarboxylase|pyruvate decarboxylase).{0,120}(tetramer|homotetramer|dimer|oligomer|quaternary)", "alcohol dehydrogenase.{0,150}(zinc|Zn|tetramer|dimer|oligomer)", "Aro10.{0,120}(tetramer|dimer|oligomer|structure|thiamine|TPP)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 128
+  claim: >-
+    The established transformation route: construct -> biolistic bombardment of a rho-zero
+    recipient -> synthetic rho-minus clone -> mate to a rho-plus kar1-1 strain -> homologous
+    recombination -> select and screen for homoplasmy by mitotic segregation.
+  verdict: already_checked_today
+  covered_by: "docs/drafts/mitochondria/transformation_methods.yaml"
+  what_to_change: >-
+    See transformation_methods.yaml. The five-step route is confirmed almost step for step by
+    thirteen of fifteen records. Two corrections to carry into the schema: 'marker' is two
+    fields, not one (a nuclear marker on a co-bombarded plasmid SELECTS the shot; the
+    mitochondrial event is SCREENED by respiratory rescue of a mit-minus tester); and
+    homoplasmy is the cheap step, arriving in roughly a dozen to forty divisions without
+    selection, not a step to design around.
+  consequence_if_wrong: >-
+    Moderate and favourable. The expensive step is upstream (one reported figure: 0.1% of
+    screened colonies), so throughput planning should budget colony screening, not homoplasmy
+    chasing.
+  searches_run: ["(covered by docs/drafts/mitochondria/transformation_methods.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 147
+  claim: >-
+    Selection markers: complementation of a mit-minus lesion restoring growth on a
+    non-fermentable carbon source (the classical COX2/COX3 approach), or ARG8m complementing a
+    nuclear arg8-delta.
+  verdict: already_checked_today
+  covered_by: "docs/drafts/mitochondria/marker_systems.yaml"
+  what_to_change: >-
+    See marker_systems.yaml. Both markers exist, but the section files them as if they cost the
+    same: ARG8m consumes a locus and a leader, whereas the COX2 route consumes NOTHING - it
+    repairs a cox2 lesion in cis and leaves an unmarked COX2-positive genome. The 'tension with
+    2.1' the section names is real for ARG8m and false for the COX2 route.
+  consequence_if_wrong: >-
+    Moderate for construct design and strongly favourable: the cheapest selection is also the
+    one that leaves no scar, which pairs with the intergenic insertion site.
+  searches_run: ["(covered by docs/drafts/mitochondria/marker_systems.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 158
+  claim: >-
+    The section-3 corpus table's 'rough size' column: ~30-60 transformation-method papers,
+    ~10-25 heterologous/recoded ORF precedents, ~10 marker systems, ~10 stability records, ~20
+    allotopic, ~10 rho-zero physiology, ~10 activator loci.
+  verdict: already_checked_today
+  covered_by: "docs/drafts/mitochondria/transformation_methods.yaml"
+  what_to_change: >-
+    Replace the estimates with the counts the phase-1b files measured. The transformation row
+    is the one that is wrong by a large factor: fifteen papers in this corpus report a yeast
+    mitochondrial transformation the authors performed, not 30-60 - the earlier 43-document
+    keyword hit was counting the word 'biolistic', mostly in plant and algal chloroplast work.
+    The activator row (~10 loci) is right: there are 8 protein-coding loci plus a usable
+    intergenic site. The precedents row (~10-25) over-counted papers and under-counted
+    precedent.
+  consequence_if_wrong: >-
+    Low for the bench, real for planning and for 'who to ask'. The finding behind the number is
+    the useful part: the technique is practised by a handful of groups working largely from one
+    rho-zero kar1-1 strain out of one laboratory, which is a collaboration list, not a
+    literature.
+  searches_run: ["(covered by docs/drafts/mitochondria/transformation_methods.yaml - not re-derived)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 193
+  claim: >-
+    Comparison table, row 'precedent for isobutanol': strategy C = yes, strategy E = none.
+  verdict: confirmed
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  evidence:
+    # doi:10.1038/nbt.2509  [00190.txt]
+    - "Compartmentalization of the \nEhrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in \nthe cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps \nof the biosynthetic pathway."
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt]
+    - "However, the role that localization plays in isobutanol production is obscured by conflicting reports in the literature as both pathway localizations have achieved similar isobutanol titers and yields"
+  notes: >-
+    Same evidence as line 36. 'Yes' for C is correct and specific. 'None' for E is correct for
+    ISOBUTANOL, and it should not be quietly widened by heterologous_orf_precedents.yaml: there
+    is precedent for a heterologous soluble ENZYME from yeast mtDNA (nanoluciferase), but none
+    for this pathway, these enzyme classes, or these cofactors.
+  what_to_change: >-
+    Drop the mark on the C cell. Consider splitting the row in two, because the table currently
+    hides the most useful distinction the atlas now holds: 'precedent for isobutanol' (C: yes /
+    E: none) and 'precedent for the delivery mechanism' (C: routine / E: yes, for a soluble
+    heterologous enzyme, but never with TPP or an obligate oligomer).
+  consequence_if_wrong: >-
+    Moderate. Two rows instead of one stop the ranker from scoring E as wholly unprecedented,
+    which would be too harsh, or as precedented, which would be too kind.
+  searches_run: ["(localization|localized|targeted).{0,200}(mitochondri).{0,200}(confirm|verif|microscop|fluorescen|fraction)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 197
+  claim: >-
+    Comparison table, row 'gene dosage': strategy C = 1-n integrations, strategy E = ~50-200
+    copies.
+  verdict: overstated
+  publication: "doi:10.1186/s12915-020-00786-4"
+  corpus_file: "00651.txt"
+  evidence:
+    # doi:10.1186/s12915-020-00786-4  [00651.txt]
+    - "The number of mitochondrial genomes is generally constant across clades (Additional file : Figure S11), with no significant differences between domesticated and wild lineages, with a median of 18 mitochondrial genomes for each haploid nuclear genome. The variation is however particularly high across the population, reaching over 80 copies. As previously reported [], the mtDNA copy number scales up with ploidy in a linear way, with diploid strains having around double number of mitochondrial genomes and triploid having three times the number, compared to haploid cells"
+    # doi:10.1093/nar/gkad849  [00391.txt]
+    - "This analysis revealed a consistent ∼1.6-fold increase of mtDNA CN in Δcim1 cells compared to WT cells when grown on YPD containing a fermentable carbon source (29 versus 18 mtDNA copies per cell in Δcim1 and WT, respectively) (Figure"
+    # doi:10.3390/biom13030501  [01097.txt]
+    - "On average, the MALs that maintained the mtDNA had 14 mitochondrial genomes per haploid nuclear genome."
+    # doi:10.1038/s44318-024-00183-5  [00256.txt]
+    - "The length of this array represents the previously determined average of 32 mtDNA copies per diploid cell"
+    # doi:10.3390/jof9030329  [01191.txt]
+    - "Usually, S. cerevisiae has between 40 and 60 nucleoids, each containing 1 or 2 copies of mtDNA"
+    # doi:10.1007/s00439-015-1578-x  [00047.txt]
+    - "This could be explained by the lower copy number of mtDNA molecules per cell in yeast (about 20–30 copies per cell, 50–100 fold less than in typical vertebrate cells)"
+    # doi:10.1534/g3.112.003152  [00928.txt]
+    - "In S. cerevisiae, the mtDNA genome is present normally at 20−100 copies per cell comprising 10–20% of the total cellular DNA"
+    # doi:10.1534/genetics.114.166637  [00939.txt]
+    - "Its copy number per cell ranges from 50 to 200 () and contrary to the mammalian mtDNA it is biparentally inherited after mating, allowing for recombination, although this heteroplasmic state is transient for only ∼20 generations."
+  notes: >-
+    Same evidence as line 28, and this is where the number does its damage, because a table
+    cell is what a ranker reads. The honest cell is a range with a ploidy rider and a caveat
+    that copy number is not expression.
+  what_to_change: >-
+    Replace '~50-200 copies' with '~18 copies per haploid genome (median; 14-32 measured, >80
+    in outlier strains), scaling near-linearly with ploidy - so ~60-80 in a tetraploid. Copy
+    number is not expression: no measurement here relates mtDNA copies to protein output.'
+  consequence_if_wrong: >-
+    HIGH - this is the number strategy E is partly sold on. At 50-200 the dosage argument
+    carries the case on its own; at a median of 18 per haploid genome it does not, and the
+    honest comparison against a nuclear route becomes '~18-80 mtDNA copies vs 1-n nuclear
+    integrations', a range a multi-copy nuclear integration or a 2-micron vector can meet. A
+    route ranker fed 50-200 will rank E above C on dosage alone. Two second-order points the
+    document should carry with the number: copy number is not expression (nothing here measures
+    protein per mtDNA copy), and the same papers that measure it also show it moving 1.6-3 fold
+    with single nuclear mutations and with carbon source, so it is a regulated variable, not a
+    constant of the chassis.
+  searches_run: ["(copies|copy number|genomes) (of mtDNA |of mitochondrial DNA )?per (haploid )?(cell|diploid|nuclear genome)", "mitochondrial genomes per haploid|median of \\d+ mitochondrial|mtDNA copy number.{0,80}median", "per diploid cell|copies per diploid|nucleoids?,? (each )?(containing|with|harbou?r)"]
+
+- document: MITOCHONDRIAL_PROGRAM
+  line: 200
+  claim: >-
+    Comparison table, row 'folding/assembly in matrix': strategy C = demonstrated, strategy E =
+    unknown for these enzymes.
+  verdict: confirmed
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  evidence:
+    # doi:10.1038/nbt.2509  [00190.txt]
+    - "We \ndetected all enzymes fused to the CoxIV mitochondrial localization \nsignal in the mitochondrial fractions, whereas we detected enzymes \nlacking the CoxIV signal only in cytoplasmic fractions ( Fig. 5)."
+    # doi:10.1038/nbt.2509  [00190.txt]
+    - "Compartmentalization of the \nEhrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in \nthe cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps \nof the biosynthetic pathway."
+  notes: >-
+    For C the cell is fair: a heterologous KDC (Ll-kivd) and an ADH (Sc-Adh7) were
+    presequence-targeted to the matrix, their arrival there was checked by subcellular
+    fractionation rather than assumed, and the strain made 260% more isobutanol - which is
+    functional evidence that the imported enzymes folded and worked. One honest qualifier:
+    folding and oligomeric assembly were INFERRED from titer, not assayed; no in-organello
+    activity or oligomer measurement is reported. For E the cell is also fair - unknown for
+    these enzyme classes, per heterologous_orf_precedents.yaml.
+  what_to_change: >-
+    Drop the mark, and soften 'demonstrated' to 'demonstrated functionally (titer and
+    fractionation; folding and oligomerisation not assayed directly)'.
+  consequence_if_wrong: >-
+    Moderate, and it cuts in a direction the programme should like. Because C demonstrates only
+    that IMPORTED enzymes work in the matrix, it does not answer whether matrix-SYNTHESISED
+    ones would - so a successful C is not evidence that E's folding risk is small. The two
+    cells are less comparable than the table's alignment suggests, and section 5's question 4
+    stays open regardless of how C goes.
+  searches_run: ["(localization|localized|targeted).{0,200}(mitochondri).{0,200}(confirm|verif|microscop|fluorescen|fraction)"]
+
+DUET_TARGET:
+
+- document: DUET_TARGET
+  line: 8
+  claim: >-
+    Header line: gene symbols are taken verbatim from the concept note and the biology
+    attributed to them is marked where it is the author's reading rather than the owner's
+    statement.
+  verdict: not_in_corpus
+  what_to_change: >-
+    Drop the mark. This is the provenance legend, not a claim; it defines what the marks in
+    this file mean.
+  consequence_if_wrong: >-
+    none, documentation only.
+  searches_run: ["(manual reading of docs/design/DUET_TARGET.md lines 7-9)"]
+
+- document: DUET_TARGET
+  line: 109
+  claim: >-
+    ECM31, ketopantoate hydroxymethyltransferase, pulls 2-ketoisovalerate into pantothenate
+    biosynthesis, so it belongs in the competing-reaction set.
+  verdict: confirmed
+  publication: "doi:10.1186/s12934-015-0240-6"
+  corpus_file: "00662.txt"
+  evidence:
+    # doi:10.1186/s12934-015-0240-6  [00662.txt]
+    - "A primary intermediate in isobutanol biosynthesis, 2-ketoisovalerate, also functions as an initial substrate in pantothenic acid biosynthesis []. 3-Methyl-2-oxobutanoate hydroxymethyltransferase, encoded by ECM31, catalyzes the first step in pantothenic acid biosynthesis. Consequently, deletion of ECM31 could prevent the diversion of 2-ketoisovalerate into the pantothenate pathway"
+    # doi:10.1186/s13068-019-1486-8  [00765.txt]
+    - "In the first step of pantothenate biosynthesis, KIV is converted to 2-dehydropantoate by 3-methyl-2-oxobutanoate hydroxymethyltransferase Ecm31."
+  notes: >-
+    Confirmed, by two independent groups, with one naming nuance: the corpus calls the enzyme
+    3-methyl-2-oxobutanoate hydroxymethyltransferase (a synonym of ketopantoate
+    hydroxymethyltransferase), and names the product 2-dehydropantoate. The competing-set
+    membership is not a deduction here - ECM31 is actually deleted as a competing pathway in
+    published isobutanol strains, appearing in the deletion genotype of the 2.09 g/L CEN.PK
+    strain (Wess et al.) alongside BDH1/BDH2, LEU4/LEU9 and ILV1, and in the Ida et al.
+    single-knockout series with ALD6 and ILV1.
+  what_to_change: >-
+    Drop the mark. Optionally record the synonym so a search does not miss it: 'ECM31
+    (3-methyl-2-oxobutanoate hydroxymethyltransferase, ketopantoate hydroxymethyltransferase)
+    converts 2-KIV to 2-dehydropantoate, the first step of pantothenate biosynthesis; it is a
+    standard deletion in published isobutanol strains.'
+  consequence_if_wrong: >-
+    Low-to-moderate, and it confirms rather than changes the plan. Note the one real caution
+    for DUET: pantothenate is the precursor of coenzyme A, so an ecm31 deletion is not free in
+    a strain that must also run an industrial fermentation - the published uses delete it in
+    defined media, and DUET's molasses/2G context is not that. Cost the deletion, do not assume
+    it.
+  searches_run: ["Ecm31|ECM31", "ketopantoate|pantothenate"]
+
+- document: DUET_TARGET
+  line: 126
+  claim: >-
+    POS5 is the only named route from matrix NADH to matrix NADPH, which makes POS5 a single
+    point of failure: if matrix NADH-kinase flux is insufficient the pathway stalls at Ilv5.
+  verdict: overstated
+  publication: "doi:10.1093/femsyr/foae006"
+  corpus_file: "00336.txt"
+  evidence:
+    # doi:10.1016/j.mec.2024.e00245  [00124.txt]
+    - "For this purpose, the kinase Pos5 – naturally a mitochondrial enzyme – is regarded as particularly suitable, as it strongly prefers NADH over NAD+"
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt]
+    - "The first half of the pathway converts pyruvate to α-ketoisovalerate (KIV) by mitochondria-localized ILV enzymes: acetolactate synthase (ALS, encoded by ILV2), a NADPH-dependent ketol-acid reductoisomerase (KARI, encoded by ILV5), and a 2Fe–2S cluster-requiring dihydroxyacid dehydratase (DHAD, encoded by ILV3). The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5)"
+    # doi:10.1093/femsyr/foae006  [00336.txt]
+    - "Therefore, redox cofactors have been balanced for isobutanol production by overexpressing pyruvate carboxylase (PYC2), malate dehydrogenase (MDH2), and malic enzyme (MAE1) in the cytosol (in a decompartmentalized pathway) or in its native mitochondrial location to produce NADPH"
+    # doi:10.1093/femsyr/foae006  [00336.txt]
+    - "Regeneration of NADPH in the mitochondria or cytosol in lpd1Δ background, with the mitochondrial and cytosolic BCAA biosynthetic pathway upregulated, results in a strain that produces 221 ± 27 mg/L of isobutanol, a near 5-fold increase in titers in comparison to sole upregulation of BCAA biosynthesis"
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt]
+    - "One strategy to resolve this imbalance is to use a heterologous NADH-dependent KARI, such as the E. coli KARI variant, ilvC6E6, that was previously engineered with improved specificity towards NADH [,]. Another strategy is to increase the supply of NADPH by introducing a transhydrogenase-like shunt (NADH + NADP+ → NAD+ + NADPH) into S. cerevisiae []. Both strategies have been successful in improving isobutanol titers, demonstrating the importance of having a redox cofactor-balanced pathway"
+  notes: >-
+    The parts are right and the exclusivity is not. Confirmed: Pos5 is the mitochondrial NADH
+    kinase, it strongly prefers NADH over NAD+, and Ilv5/KARI is NADPH-dependent while the
+    Ehrlich ADH step is NADH-dependent - so the imbalance the architecture is built to close is
+    real. NOT confirmed: that Pos5 is the ONLY named route. This corpus names a second and
+    reports it being run in the mitochondrion - the transhydrogenase-like PYC2/MDH2/MAE1 shunt,
+    whose net effect is NADH + NADP+ -> NAD+ + NADPH, overexpressed either in the cytosol or
+    'in its native mitochondrial location to produce NADPH', and combined with an upregulated
+    mitochondrial BCAA pathway it gave 221 +/- 27 mg/L isobutanol, a near-5-fold increase. The
+    corpus also names the alternative DUET section 7 already wants - a heterologous
+    NADH-dependent KARI (E. coli ilvC6E6) - and reports that both strategies improved titers.
+    So there are at least two named routes to matrix NADPH from NADH, plus one route that
+    removes the requirement altogether.
+  what_to_change: >-
+    Replace 'POS5 is the only named route from matrix NADH to matrix NADPH' with 'POS5 is the
+    direct route from matrix NADH to matrix NADPH, and the cyclic PYC2/MDH2/MAE1
+    transhydrogenase-like shunt is a second, which has been run in its native mitochondrial
+    location with an upregulated mitochondrial BCAA pathway.' Then soften 'single point of
+    failure' to 'the primary and simplest route, with two documented alternatives - a
+    mitochondrial transhydrogenase-like shunt, and an NADH-preferring KARI that removes the
+    NADPH requirement.'
+  consequence_if_wrong: >-
+    HIGH, and it is the most consequential correction in the DUET file. As written, POS5 is
+    named the atlas's highest-priority bottleneck hypothesis and a single point of failure; on
+    this evidence it is neither unique nor unavoidable, and a programme that treats it as a
+    single point of failure will over-invest in measuring NADH-kinase capacity while
+    under-investing in the two alternatives - one of which (the mitochondrial shunt) has a
+    published titer attached and is not currently in DUET's gene set at all. The knowledge_gap
+    rows DUET section 7 asks to seed should therefore be THREE, not two: POS5 capacity,
+    NADH-preferring KARI, and the mitochondrially-localised transhydrogenase-like shunt. The
+    direction of the error is favourable - the architecture is more robust than claimed - but
+    the priority ordering it drives is wrong.
+  searches_run: ["Pos5|POS5|NADH kinase", "(mitochondrial|matrix).{0,120}NADPH (supply|source|generat|regenerat|pool)|Idp1|transhydrogenase", "Ilv5.{0,100}NADPH|NADPH.{0,80}(Ilv5|KARI)"]

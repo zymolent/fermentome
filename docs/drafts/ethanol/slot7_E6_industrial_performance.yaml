@@ -1,0 +1,687 @@
+# Slot 7 — Genetic basis of industrial performance (criterion E6)
+#
+# THREE CANDIDATES. THE OWNER PICKS ONE. This file does not choose and records no confidence.
+#
+# The question ETHANOL_REFERENCE_SLOTS.md sets for this slot is "what makes Ethanol Red
+# hyper-producing and ethanol-tolerant compared with lab strains?", and the same document sets
+# three expectations that shaped this shortlist rather than being flattered by it:
+#
+#   1. The advantage is expected to be POLYGENIC, with aneuploidy and copy-number variation
+#      carrying real weight. A candidate promising a single-gene explanation is to be treated
+#      with suspicion. All three candidates below report polygenic architectures in their own
+#      words; the one paper in the pool that does offer a single-gene account of an aneuploidy
+#      (TUP1 / chromosome III) is deliberately NOT shortlisted, and the reason is written out
+#      under not_shortlisted_but_notable so the owner can overrule it knowingly.
+#   2. Part of this slot is COMPUTABLE, not literary — the Ethanol Red / CEN.PK113-7D / S288C
+#      comparison produces the variant list on its own, capped at L3, and the literature slot
+#      exists to say which of those differences anyone has actually TESTED. So papers that test
+#      causality (reciprocal hemizygosity, allele swaps, reconstruction into a naive background)
+#      were ranked above papers that only catalogue variants. Candidates A and C test causality;
+#      candidate B does not, and is shortlisted for a different reason stated in its entry.
+#   3. At N50 189 kb the proxy assembly is blind to structural variants and subtelomeres. Every
+#      candidate here that leans on SV or repeat-family claims inherits that blindness, and the
+#      inheritance is named in each `what_it_lacks`.
+#
+# THE CHOICE THE OWNER IS ACTUALLY MAKING. The three are deliberately different kinds of answer:
+#
+#   A (doi:10.1101/gr.131698.111) — STANDING VARIATION IN AN INDUSTRIAL STRAIN. What alleles does
+#     a real bioethanol strain already carry that a lab strain does not, validated one gene at a
+#     time by reciprocal hemizygosity? Answers "which of the computable differences are causal",
+#     but for a Brazilian strain, not for Ethanol Red.
+#   B (doi:10.1186/s12864-015-1737-4) — ETHANOL RED ITSELF. The only publication in this pool
+#     that sequences Ethanol Red and deposits the reads and an assembly. Answers "what is in this
+#     genome", with zero causal validation and with the phenotype under study being heat plus
+#     hydrolysate rather than ethanol.
+#   C (doi:10.1371/journal.pgen.1005635) — WHAT SELECTION REACHES FOR. Two years of ethanol
+#     selection, >30 populations, aneuploidy and ploidy dynamics, and nine SNPs rebuilt in a
+#     naive ancestor with fitness effects measured. Answers "what is the architecture of ethanol
+#     tolerance and how big are individual effects", in a lab background, aerobically.
+#
+# A is the closest to the slot's stated purpose; B is the closest to the slot's stated subject;
+# C is the closest to the slot's stated expectation about architecture. None is all three.
+#
+# TWO FINDINGS THE OWNER SHOULD READ BEFORE THE CANDIDATES. Both are recorded in full further
+# down, in `ethanol_red_coverage` and `pool_assessment`:
+#   * This corpus says very little about Ethanol Red SPECIFICALLY, and nothing at all about why
+#     its ethanol performance is high. It appears as a chassis to be engineered, as a benchmark
+#     to be beaten, as a haploid segregant used as a QTL parent — and, in one paper, as the
+#     INFERIOR parent, because its acetic acid tolerance is low. Ethanol Red being an excellent
+#     ethanol producer is asserted in the corpus and never dissected in it.
+#   * The 25-publication budget is very unlikely to be fillable with causality-testing papers.
+#     The counts are below. This is a finding about the literature, not slack to consume.
+#
+# NO `confidence` FIELD APPEARS ANYWHERE IN THIS FILE, and nothing here is marked accepted or
+# verified. Quotes are verbatim literal blocks taken by offset from the stored full texts; none
+# is spliced, and where two passages are needed they are listed as separate quotes.
+
+version: 1
+slot: 7
+criterion: E6
+status: draft
+zone: R
+budget: 25
+question: "What makes Ethanol Red hyper-producing and ethanol-tolerant compared with lab strains?"
+selection_procedure: >-
+  Per ETHANOL_REFERENCE_SLOTS.md, decided 2026-09-20 by the project owner: the literature agent
+  proposes three candidates per slot and the owner picks one. The agent does not choose; it
+  shortlists. This file is the shortlist for slot 7 and contains no pick.
+
+pool:
+  file: scratchpad/ethanol/E6.json
+  readable_candidates: 143
+  corpus_documents_searched: 1311
+  restriction: >-
+    Candidates were drawn only from the 143 E6-tagged readable candidates. Full texts of the
+    twelve leading candidates were read; the three below were read end to end.
+  search_terms_used:
+    - "Ethanol Red, EthanolRed, Lesaffre, Fermentis, Thermosacc"
+    - "PE-2, JAY270, JAY291, CAT-1, BG-1"
+    - "reciprocal hemizygosity, hemizygote, allele swap / replacement / exchange, QTL"
+    - "aneuploidy, chromosome III, copy number variation, heterozygosity, subtelomeric"
+    - "cross-ranked by density of causality-method terms against density of ethanol-trait terms"
+
+# ═══════════════════════════════════════════════════════════ CANDIDATE A — QTL AND CAUSALITY
+
+candidates:
+
+  - candidate: A
+    kind: QTL mapping with gene-level causal validation
+    pmid: "22399573"
+    doi: 10.1101/gr.131698.111
+    title: >-
+      Identification of novel causative genes determining the complex trait of high ethanol
+      tolerance in yeast using pooled-segregant whole-genome sequence analysis
+    year: 2012
+    journal: Genome research
+    corpus_file: 00430.txt
+    strains:
+      - "VR1 — diploid Brazilian bioethanol production strain, isolated as a wild yeast from a plant fermentor"
+      - "VR1-5B — highly ethanol-tolerant haploid segregant of VR1, the superior parent"
+      - "BY4741 — haploid laboratory strain (S288C background, ura3 delta and other auxotrophies), the inferior parent"
+      - "5974 segregants of the VR1-5B x BY4741 cross; pools of 136 (>=16% ethanol) and 31 (>=17% ethanol)"
+      - "nine reciprocal-hemizygosity diploid pairs in the VR1-5B/BY4741 hybrid background"
+    conditions: >-
+      Ethanol tolerance scored as growth of spotted dilution series on solid YP plates with
+      ethanol as the SOLE carbon source, 10-19% (v/v), read after 6-14 days at 30C. This is a
+      survival-and-growth assay on a non-fermentable carbon source, not a fermentation.
+    what_data_it_actually_contains:
+      raw_deposited: >-
+        Yes — Illumina HiSeq 2000 paired-end reads for both parents and both segregant pools,
+        40x or greater coverage, deposited at the NCBI SRA.
+      processed: >-
+        SNP nucleotide-frequency curves per chromosome with simultaneous confidence bands; a
+        fine-mapped 16 kb interval on chromosome XIV with all 115 polymorphisms Sanger-resolved
+        and annotated per ORF; per-marker association percentages and binomial p-values; an
+        eight-way QTL-combination table across 85 tolerant segregants.
+      figures_only: >-
+        The reciprocal-hemizygosity and deletion phenotypes are spot-dilution photographs. There
+        is no quantitative effect size for any allele — no growth rate, no fitness coefficient,
+        no titre. The QTL-combination table is marked in the stored text as
+        "[table not machine-readable: published as an image]".
+    accessions:
+      - "SRA049724 (NCBI SRA) — parents and both segregant pools"
+    open_access: >-
+      Genome Research, 2012. Free full text via PMC; the stored corpus copy is the complete
+      article including Methods and Data access. Not a CC-BY licence.
+    why_this_slot: >-
+      This is the paper the slot's second expectation is asking for: it takes an industrial
+      bioethanol strain, maps the loci that separate it from a lab strain for the exact trait in
+      question, and then validates individual genes by reciprocal hemizygosity in an otherwise
+      identical hybrid background. That is causality by construction, not association. It also
+      delivers the polygenic answer the slots document predicts — three major loci plus minor
+      loci that appear only under the more stringent 17% selection — and it delivers a named,
+      SNP-level, non-subtelomeric gene set (MKT1, APJ1, and the negative SWS2) that can be looked
+      up directly in the Ethanol Red proxy genome without needing SV calls. It is the single best
+      answer in this pool to "which of the computable differences has anyone actually tested".
+    what_it_lacks:
+      - >-
+        NOT ETHANOL RED. The industrial parent is VR1, a Brazilian strain. Whether Ethanol Red
+        carries the VR1 alleles of MKT1 or APJ1 is unknown from this paper and would have to be
+        checked in the proxy genome — which is exactly the L3-capped comparative work the slot
+        already plans, so this paper supplies the hypothesis list, not the answer.
+      - >-
+        THE ASSAY IS NOT A FERMENTATION. Tolerance is growth on ethanol as sole carbon source on
+        plates. It says nothing about ethanol YIELD, productivity, titre, or performance under
+        VHG, and therefore nothing about the "hyper-producing" half of the slot question.
+      - >-
+        NO EFFECT SIZES. Every allele effect is reported as a spot-dilution image. Nothing in
+        this paper can populate a measurement row with a number.
+      - >-
+        ONE LOCUS OF THREE WAS DISSECTED. QTL2 and the minor loci were never resolved to genes,
+        so the reported gene list is knowingly incomplete even for this cross.
+      - >-
+        A CONTROL-STRAIN ARTEFACT SITS INSIDE THE RESULT. The causative gene of QTL1 turned out
+        to be URA3 — an auxotrophy of the BY4741 reference, not industrial biology. Any
+        downstream use must discard QTL1, and this raises the general question of how much of a
+        lab-versus-industrial comparison is lab-strain damage rather than industrial gain.
+      - >-
+        SNP/INDEL ONLY. No CNV, no aneuploidy, no ploidy analysis, and the superior parent is a
+        haploid segregant — so the aneuploidy and copy-number contribution the slots document
+        expects to matter is structurally invisible here.
+      - >-
+        2012 SHORT READS. Subtelomeric and repeat-rich regions are not addressed, the same blind
+        spot the proxy assembly has.
+    evidence:
+      - quote: |-
+            We crossed a highly ethanol-tolerant segregant of a Brazilian bioethanol production strain with a laboratory strain with moderate ethanol tolerance. Out of 5974 segregants, we pooled 136 segregants tolerant to at least 16% ethanol and 31 segregants tolerant to at least 17%. Scoring of SNPs using whole-genome sequence analysis of DNA from the two pools and parents revealed three major loci and additional minor loci.
+      - quote: |-
+            In the locus with the strongest linkage, we identified three closely located genes affecting ethanol tolerance: MKT1, SWS2, and APJ1, with SWS2 being a negative allele located in between two positive alleles.
+      - quote: |-
+            Comparing the ethanol tolerance of each pair of heterozygous strains revealed a difference in the phenotypic contribution between the parental alleles from MKT1, SWS2, and APJ1 (). The presence of the VR1-5B allele from the MKT1 and APJ1 gene resulted in higher ethanol tolerance compared to the BY4741 allele. Surprisingly, for SWS2 the opposite was true, as the BY4741 allele was advantageous over the VR1-5B allele.
+      - quote: |-
+            Ethanol tolerance was, thereby, defined as growth on solid YP plates with ethanol as the sole carbon source.
+      - quote: |-
+            The VR1 parent strain could grow in medium containing up to 16% ethanol, while the VR1-5B segregant showed growth in medium containing up to 18% ethanol ().
+      - quote: |-
+            Further analysis of QTL1 identified the URA3 gene as the sole causative gene in that locus. The BY4741 strain used as a control strain for low ethanol tolerance is ura3Δ and has several other auxotrophic mutations.
+        note: >-
+          Recorded as a limitation, not a finding. QTL1 is an artefact of the reference parent's
+          auxotrophy and should not be carried forward.
+      - quote: |-
+            All sequence data have been submitted to the NCBI Sequence Read Archive (SRA) (http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi) under accession number SRA049724.
+
+# ═══════════════════════════════════════════ CANDIDATE B — ETHANOL RED'S OWN COMPARATIVE GENOME
+
+  - candidate: B
+    kind: comparative genomics of Ethanol Red and an evolved derivative
+    pmid: "26156140"
+    doi: 10.1186/s12864-015-1737-4
+    title: >-
+      Cell periphery-related proteins as major genomic targets behind the adaptive evolution of
+      an industrial Saccharomyces cerevisiae strain to combined heat and hydrolysate stress
+    year: 2015
+    journal: BMC genomics
+    corpus_file: 00632.txt
+    strains:
+      - "Ethanol Red (ER) — the diploid Lesaffre/Fermentis commercial bioethanol strain itself, named as such"
+      - "ISO12 — an ER derivative from around 300 generations of adaptive evolution under heat plus spruce hydrolysate"
+      - "S288C (R64-1-1 / sacCer3) as the mapping reference"
+    conditions: >-
+      Genomics from single colonies on YPD. Physiology from AEROBIC glucose-limited chemostats
+      (defined mineral medium, 10 g/L glucose, D = 0.1/h, 30C, pH 5.5, 1 vvm air) sampled at six
+      independent steady states, plus shake-flask growth in 50% and undiluted spruce hydrolysate
+      at 39C, plus growth on glycerol and 3% ethanol as sole carbon sources, plus a lyticase cell
+      wall lysis assay and LC-QTOF/MS lipidomics of 119 lipid species.
+    what_data_it_actually_contains:
+      raw_deposited: >-
+        Yes, and this is the point of the candidate — Illumina MiSeq 2x250 bp reads for Ethanol
+        Red are at SRA, and a de novo Ethanol Red ASSEMBLY is at DDBJ/EMBL/GenBank. That is a
+        second, independent Ethanol Red genome alongside the proxy GCA_029255905.1, from a
+        different laboratory, different sequencing chemistry and different assembler.
+      processed: >-
+        Full variant call of ER against S288C (78,901 variants) and of ISO12 against S288C
+        (78,133), with the strain-unique subsets partitioned into intergenic, coding, synonymous
+        and non-synonymous; per-ORF non-synonymous variant lists for both strains as supplementary
+        files; Ka/Ks values per ORF; read-depth CNV calls for both reference and non-reference
+        regions; unmapped-contig BLAST assignments; the 119-lipid differential table.
+      figures_only: >-
+        The GO enrichment bar chart, the variant density plot and the colony-morphology and
+        biofilm observations are figures; the higher biofilm-forming capacity of ISO12 is reported
+        as "data not shown".
+    accessions:
+      - "SRR2002842 (NCBI SRA) — Ethanol Red reads"
+      - "SRR2002960 (NCBI SRA) — ISO12 reads"
+      - "JWJK00000000 / JWJK01000000 (DDBJ/EMBL/GenBank) — Ethanol Red assembly"
+      - "LBNP00000000 / LBNP01000000 (DDBJ/EMBL/GenBank) — ISO12 assembly"
+    open_access: >-
+      BMC Genomics, 2015. Fully open access, CC-BY, with nine supplementary data files including
+      the complete per-ORF variant tables and the CNV and Ka/Ks results.
+    why_this_slot: >-
+      It is the only publication among the 143 E6 candidates that sequences Ethanol Red and
+      publishes the data. For a slot whose subject is a specific commercial strain with an
+      unpublished breeding history, a second independent genome and a published, downloadable
+      per-ORF variant list against S288C is directly useful: it gives the comparative layer a
+      cross-check on GCA_029255905.1 and a ready-made catalogue of Ethanol Red's coding variants
+      to intersect with the tested-allele lists from candidates A and C. It also states, in the
+      authors' own words, that the improvement is polygenic, which is the expectation the slots
+      document asks to be honoured rather than contradicted.
+    what_it_lacks:
+      - >-
+        NO CAUSALITY AT ALL. Not one variant is tested. There is no reciprocal hemizygosity, no
+        allele swap, no reconstruction. The eleven "positively selected" genes are a Ka/Ks
+        ranking, and the one hypothesis the authors did test experimentally — that the MTL1
+        changes altered cell wall integrity — FAILED: the lyticase assay found no difference.
+        Under the slot's own rule this paper is a catalogue, and catalogues are capped at L3.
+      - >-
+        THE WRONG PHENOTYPE. The trait under study is combined heat and lignocellulosic-inhibitor
+        tolerance, not ethanol tolerance and not ethanol yield. Nothing in this paper measures why
+        Ethanol Red is good at making ethanol.
+      - >-
+        ETHANOL RED IS THE BASELINE, NOT THE SUBJECT. The analysis is built to explain what
+        changed in ISO12. Ethanol Red's 2,240 strain-unique variants are reported and tabulated
+        but never interpreted as the cause of anything; there is no Ethanol Red versus CEN.PK or
+        versus another industrial strain comparison anywhere in the paper.
+      - >-
+        SV AND SUBTELOMERE BLINDNESS, SAME AS THE PROXY. Short-read MiSeq with a mapping-based
+        CNV caller. The FLO gene family and Ty element claims — which are among the paper's most
+        prominent — sit precisely in the repeat-rich regions this method cannot resolve, and the
+        authors themselves report that remapping ISO12 against the ER de novo assembly produced
+        around 9000 variants they judged largely false positives. A candidate resting on these
+        claims inherits the proxy's blindness rather than relieving it.
+      - >-
+        Ka/Ks BETWEEN TWO STRAINS ~300 GENERATIONS APART is being asked to do work the statistic
+        was not designed for; the authors flag the length-change caveat but not this one.
+      - >-
+        NO ANAEROBIC DATA. The chemostats are aerobic, so the physiology cannot be read against an
+        anaerobic industrial fermentation without a further assumption.
+    evidence:
+      - quote: |-
+            The industrial Saccharomyces cerevisiae strain Ethanol Red [Fermentis, S.I. Lesaffre] (ER) and the derived evolved strain ISO12 [] were used for the experiments.
+      - quote: |-
+            Number of variants detected versus S288c | 78,901 | 78,133
+
+            Number of variants unique to strain | 2240/78,901 | 1472/78,133
+
+            Statistics of the strain-unique variants
+
+            Intergenic variants | 1293/2240 | 969/1472
+
+            Coding region variants | 947/2240 | 503/1472
+
+            Predicted effects of the coding region variantsa
+
+            Synonymous effects | 536 | 222
+
+            Non-synonymous effects | 454 | 306
+        note: >-
+          Verbatim table rows as the stored text renders them. 78,901 variants separate Ethanol
+          Red from S288C, of which only 2,240 are unique to ER relative to ISO12 — the scale of
+          the comparative problem the slot anticipates, in the numbers of a paper that ran it.
+      - quote: |-
+            The sequencing of ER and ISO12 was performed by Genewiz Inc. (South Plainfield, NJ, USA) using Illumina MiSeq 2x250bp (Illumina Inc., San Diego, CA, USA).
+      - quote: |-
+            11 genes were found to be under positive selection (Ka/Ks >1).
+      - quote: |-
+            From the results presented in the current study, the improved tolerance to combined stresses in ISO12 is shown to reside in multiple mechanisms requiring more than just a few mutations.
+      - quote: |-
+            The sequence reads from this project have been deposited at the NCBI Sequence Read Archive under the accessions SRR2002842 (ER) and SRR2002960 (ISO12). The assembly data set supporting the results of this article has been deposited at DDBJ/EMBL/GenBank under the accessions JWJK00000000 (ER) and LBNP00000000 (ISO12). The versions described in this paper are version JWJK01000000 and LBNP01000000.
+
+# ══════════════════════════════════ CANDIDATE C — ARCHITECTURE OF ETHANOL TOLERANCE, RECONSTRUCTED
+
+  - candidate: C
+    kind: long-term experimental evolution with population genomics and mutation reconstruction
+    pmid: "26545090"
+    doi: 10.1371/journal.pgen.1005635
+    title: Adaptation to High Ethanol Reveals Complex Evolutionary Pathways
+    year: 2015
+    journal: PLoS genetics
+    corpus_file: 00863.txt
+    strains:
+      - "Isogenic haploid, diploid and tetraploid derivatives of the prototrophic S288C strain FY5, with FLO1, FLO10 and FLO11 deleted"
+      - "More than 30 evolved populations and over 100 adapted clones sequenced across two years / about 200 generations"
+      - "Nine individual SNPs reconstructed singly in the non-evolved ancestor"
+    conditions: >-
+      Turbidostats (Sixfors), 400 mL, YP with 4% glucose, 30C, pH 5.0, AEROBIC, 250 rpm,
+      chloramphenicol, population size around 1e10. Ethanol raised in steps every 25 generations
+      from 6% (v/v) to 12% (v/v) at 200 generations. Fitness of reconstructed mutants measured by
+      flow-cytometry competition against a fluorescently labelled ancestor in YP 2% glucose with
+      9% (v/v) ethanol.
+    what_data_it_actually_contains:
+      raw_deposited: >-
+        Yes — all population and clone whole-genome sequencing at NCBI SRA under one BioProject.
+      processed: >-
+        Per-clone mutation tables with gene, mutation type and codon change; genome-wide CNV and
+        ploidy calls across clones and time points; mutator-lineage identification; PheNetic
+        sub-network output; and per-mutation selection coefficients (s_mut, mean and SEM over
+        three replicates) for the reconstructed SNPs across a range of ethanol concentrations.
+      figures_only: >-
+        The CNV genome views and the fitness panels are figures; the underlying selection
+        coefficients are tabulated in supplementary material rather than in the body text.
+    accessions:
+      - "PRJNA292495 (NCBI SRA BioProject)"
+    open_access: >-
+      PLoS Genetics, 2015. Fully open access, CC-BY, with supplementary mutation and fitness
+      tables and a stated data-availability policy.
+    why_this_slot: >-
+      This is the architecture answer, and it is the only paper in the pool that both observes
+      aneuploidy under ethanol selection AND rebuilds individual mutations in a naive background
+      to measure what each one is worth. It therefore satisfies the slot's demand for causality by
+      reconstruction while refusing the single-gene framing the slot warns against: the explicit
+      finding is a complex interplay of point mutations, copy number variation, ploidy change,
+      mutators and clonal interference, with different lineages reaching tolerance by different
+      routes. It supplies the chromosome III aneuploidy observation the whole later literature
+      rests on, and it supplies a direct industrial bridge: the VPS70 mutation it selected in the
+      lab alters the same amino acid as a determinant of ethanol tolerance found independently in
+      a Brazilian bioethanol strain — convergence between what selection reaches for and what an
+      industrial strain already carries, which is the transfer argument this slot needs.
+    what_it_lacks:
+      - >-
+        IT IS NOT AN INDUSTRIAL STRAIN. The whole experiment starts from an S288C-derived
+        laboratory background. It tells the programme what ethanol selection produces, not what
+        Ethanol Red contains. Every use is an analogy, and the slot caps analogies at L3.
+      - >-
+        THE ANEUPLOIDIES ARE OBSERVED, NOT VALIDATED. The paper says so itself: the adaptive role
+        of the extra chromosome III is a hypothesis awaiting further experiments. Only the nine
+        SNPs were reconstructed, and aneuploidy — the mechanism the slots document expects to
+        matter most — is precisely what was not tested here.
+      - >-
+        AEROBIC, AND NOT A FERMENTATION. Turbidostats under air, fitness scored by competition.
+        No ethanol yield, no titre, no anaerobic physiology, so again nothing about
+        "hyper-producing".
+      - >-
+        MUTATOR CONFOUNDING. Two reactors acquired mutator phenotypes and had to be excluded from
+        parts of the analysis; mutation counts elsewhere are inflated relative to a clean lineage.
+      - >-
+        SELECTION COEFFICIENTS ARE CONDITION-SPECIFIC AND MODEST. They are measured at one ethanol
+        concentration in one medium against one ancestor, and several reconstructed mutants are
+        LESS fit than wild type without ethanol — a trade-off that would have to be re-measured
+        before any of it is transferred to a chassis.
+      - >-
+        SHORT-READ CNV. Copy-number and ploidy calls come from read depth; subtelomeric and
+        repeat-region changes are not resolved, the same limitation as the proxy assembly.
+    evidence:
+      - quote: |-
+            Whole-genome sequencing of more than 30 evolved populations and over 100 adapted clones isolated throughout this two-year evolution experiment revealed how a complex interplay of de novo single nucleotide mutations, copy number variation, ploidy changes, mutator phenotypes, and clonal interference led to a significant increase in ethanol tolerance.
+      - quote: |-
+            Starting strains for the evolution experiment are all derived from the haploid prototrophic S288c strain FY5 [].
+      - quote: |-
+            Populations were founded in 400 mL ethanol containing media. Media contained 10 g/L yeast extract, 20g/L bactopeptone, 4% (w/v) glucose, 0.001% (v/v) Rhodorsil, Antifoam Silicone 46R, chloramphenicol (50 μg/mL) and increasing concentrations of ethanol. Populations were maintained at an average population size of 1010 cells. After 25 generations, the level of EtOH in the media was increased each time (starting at 6% (v/v) and reaching 12% at 200 generations).
+      - quote: |-
+            Turbidostat cultures were maintained using Sixfors reactors (Infors) at 30°C, pH was kept constant at 5.0 with continuous mixing at 250 rpm in aerobic conditions.
+      - quote: |-
+            Interestingly, acquisition of an extra copy of chromosome III appeared to be a common feature for most of our evolved clones (). Some (parts of) other chromosomes, including chromosome XII and chromosome IV, are also duplicated in several of our evolved clones. These frequent occurrences indicate that these specific aneuploidies could be adaptive under ethanol conditions, although the exact mechanistic basis remains to be elucidated and further experiments are needed to validate the (potential) adaptive role of these observed aneuploidies.
+        note: >-
+          Both halves matter: chromosome III duplication is recurrent, AND the authors state
+          plainly that its adaptive role is not yet validated.
+      - quote: |-
+            A mutation in VPS70 has been recently identified by members of our team as a determinant of ethanol tolerance in a Brazilian bioethanol strain [].
+      - quote: |-
+            All sequencing data are available from the NCBI Sequence Read Archive: Bioproject, accession number PRJNA292495.
+
+# ═════════════════════════════════════════════════════════════ NOT SHORTLISTED, BUT NOTABLE
+
+not_shortlisted_but_notable:
+
+  - doi: 10.1111/1751-7915.70244
+    pmid: "41074565"
+    title: >-
+      Chromosome III Aneuploidy Enhances Ethanol Tolerance in Industrial Saccharomyces cerevisiae
+      by Increasing the TUP1 Copy Number
+    year: 2025
+    corpus_file: 00448.txt
+    accessions: ["PRJNA1153811 (RNA-seq)"]
+    open_access: "Microbial Biotechnology, fully open access"
+    what_it_offers: >-
+      The only paper in the pool that proposes a MECHANISM for the chromosome III aneuploidy and
+      tests it: RNA-seq of a 3xChrIII strain against its 2xChrIII derivative at 0, 6 and 10%
+      ethanol, TUP1 identified as the sole enriched chromosome III transcription factor, and one
+      of the three TUP1 copies then deleted, which lowered tolerance towards the 2xChrIII level.
+    why_not_shortlisted:
+      - >-
+        THE TITLE'S "INDUSTRIAL" IS NOT SUPPORTED BY THE STRAINS. 2-200-2 is a laboratory strain:
+        an FY5 (S288C) derivative from the candidate C evolution experiment, carrying a
+        hypermutator MSH2 insertion plus indels in ASG1 and PET123. No industrial strain is used
+        anywhere in the paper. A reader who admitted this on its title would be admitting a claim
+        the data do not make.
+      - >-
+        IT IS A SINGLE-GENE EXPLANATION OF A POLYGENIC PHENOMENON, which the slots document says
+        to treat with suspicion rather than enthusiasm. The test is also one-directional —
+        removing a TUP1 copy lowers tolerance; nothing shows that ADDING TUP1 to a euploid strain
+        raises it, which is the claim the title implies.
+      - >-
+        THE EFFECT IS SMALL AND THE BACKGROUND IS NOISY. MIC moves from 11.44 to 10.23 and NIC
+        from 8.81 to 5.54, measured in a hypermutator carrying other mutations, across seven
+        mutants.
+      - >-
+        It is downstream of candidate C and uses C's strains, so shortlisting both would have put
+        two papers from one lineage into a three-way choice.
+    evidence:
+      - quote: |-
+            S. cerevisiae strain 2‐200‐2 (MATα/α) was originally obtained from Voordeckers et al. (), and used in this study. This strain was derived from FY5 (MATα), a background in which the FLO1, FLO10 and FLO11 genes had been deleted. Following these deletions, the strain underwent 200 generations of adaptive evolution under ethanol stress. The evolved strain, 2‐200‐2, exhibits a hypermutator phenotype resulting from an insertion in MSH2, and carries additional genetic alterations, including aneuploidy of chromosome III and indels in ASG1 and PET123.
+      - quote: |-
+            NIC | 8.81 ± 0.13 (a) | 5.54 ± 0.62 (b) | 6.39 ± 0.68 (b)
+
+            MIC | 11.44 ± 0.14 (a) | 10.23 ± 0.33 (b) | 10.72 ± 0.17 (b)
+      - quote: |-
+            The information about the sequences area available in BioProject ID PRJNA1153811.
+    recommendation_if_the_owner_disagrees: >-
+      If the owner wants the aneuploidy/CNV mechanism represented rather than the architecture,
+      this is the paper to swap in for candidate C — but the swap should be recorded together with
+      the strain-provenance objection above, because the slot's own suspicion clause applies.
+
+  - doi: 10.3389/fgene.2019.00782
+    pmid: "31572430"
+    title: "Controlled Reduction of Genomic Heterozygosity in an Industrial Yeast Strain Reveals Wide Cryptic Phenotypic Variation"
+    year: 2019
+    corpus_file: 01009.txt
+    what_it_offers: >-
+      The strongest treatment in the pool of a genuine industrial hyper-producer's genome
+      ARCHITECTURE: PE-2/JAY270, the sugarcane distillery strain, with heterozygosity manipulated
+      by inbreeding and targeted uniparental disomy and the phenotypic consequences measured.
+      Directly relevant to whether Ethanol Red's advantage lives in its heterozygous configuration
+      rather than in any individual allele.
+    why_not_shortlisted: >-
+      The traits measured are heat stress tolerance and competitive growth, not ethanol tolerance
+      or ethanol yield, and the QTLs are broad genomic regions with no gene-level validation. It
+      would answer an architecture question the owner has not yet asked in this slot.
+    evidence:
+      - quote: |-
+            One such case is the PE-2/JAY270 strain, a natural hybrid widely adopted by sugarcane bioethanol distilleries for its ability to thrive under harsh biotic and abiotic stresses during industrial scale fermentation, however, it is not known whether or how the heterozygous configuration of the JAY270 genome contributes to its many desirable traits.
+
+  - doi: 10.1186/s12864-019-5959-8
+    pmid: "31462217"
+    title: >-
+      Natural allelic variations of Saccharomyces cerevisiae impact stuck fermentation due to the
+      combined effect of ethanol and temperature; a QTL-mapping study
+    year: 2019
+    corpus_file: 00636.txt
+    what_it_offers: >-
+      QTL mapping plus reciprocal hemizygosity validation of two causative genes (VHS1 and OYE2,
+      both stop-codon insertions) for fermentation completion under high gravity (over 240 g/L
+      sugar) at over 28C — causality tested on an actual FERMENTATION endpoint, which candidates
+      A and C both lack.
+    why_not_shortlisted: >-
+      Winemaking strains and winemaking conditions; the phenotype is stuck fermentation rather
+      than high ethanol tolerance as such, and the transfer to a first-generation bioethanol
+      chassis is an extra inferential step. A strong reserve if the owner weights fermentation
+      endpoints above strain provenance.
+
+  - doi: 10.1371/journal.pone.0103233
+    pmid: "25116161"
+    title: >-
+      The genetic basis of variation in clean lineages of Saccharomyces cerevisiae in response to
+      stresses encountered during bioethanol fermentations
+    year: 2014
+    corpus_file: 00897.txt
+    what_it_offers: >-
+      Six F1 crosses among four divergent lineages, linkage analysis, and reciprocal hemizygosity
+      validation of COX20 (weak acid) and RCK2 (osmotic stress).
+    why_not_shortlisted: >-
+      Despite the title, the validated genes are for weak acid and osmotic stress, not ethanol.
+      Ethanol tolerance produced no gene-level result here.
+
+  - doi: 10.1534/g3.116.029389
+    pmid: "27172212"
+    title: "Genome Sequence and Analysis of a Stress-Tolerant, Wild-Derived Strain of Saccharomyces cerevisiae Used in Biofuels Research"
+    year: 2016
+    corpus_file: 00934.txt
+    what_it_offers: >-
+      A near-complete PacBio plus Illumina assembly of a biofuels strain (GLBRCY22-3) with contig
+      N50 693 kb, chromosome-level for most chromosomes plus mtDNA and the 2-micron plasmid, and
+      92 predicted genes absent from S288C. It is the methodological argument for what long reads
+      buy in exactly the subtelomeric regions the Ethanol Red proxy cannot see at N50 189 kb.
+    why_not_shortlisted: >-
+      A different strain, no causal tests, and the phenotypes are hydrolysate stress rather than
+      ethanol. Cited here because it states the field-wide gap this slot is trying to close.
+    evidence:
+      - quote: |-
+            industrial S. cerevisiae strains have been selected for their robust tolerance phenotypes and further developed for lignocellulosic ethanol production, including the strains PE-2 () and Ethanol Red (). The genome sequences of several bioethanol production strains, including the PE-2-derivative JAY291 (), have been published, but the identities of the genes and variants that confer stress tolerance and other industrially desirable properties have generally remained unclear (; ; ; ; ).
+
+  - doi: 10.1186/1471-2164-13-479
+    pmid: "22978491"
+    title: "Genome sequencing and genetic breeding of a bioethanol Saccharomyces cerevisiae strain YJS329"
+    year: 2012
+    corpus_file: 00545.txt
+    what_it_offers: >-
+      Whole-genome sequence, array-CGH karyotype and RNA-seq of a bioethanol strain against an
+      S288C-derived comparator — the same comparison shape the slot's computable layer will run,
+      including an explicit count of SNPs, indels and unique genes.
+    why_not_shortlisted: >-
+      Correlative throughout; differentially expressed genes are described as the main
+      contributors without allele-level validation, and the strain is neither Ethanol Red nor a
+      strain the programme otherwise uses.
+
+  - doi: 10.1186/s13068-022-02109-x
+    pmid: "35418148"
+    title: >-
+      Screening novel genes by a comprehensive strategy to construct multiple stress-tolerant
+      industrial Saccharomyces cerevisiae with prominent bioethanol production
+    year: 2022
+    corpus_file: 00795.txt
+    what_it_offers: >-
+      Comparative transcriptomics between a multi-stress-tolerant industrial strain and its parent
+      across five stresses, followed by construction of overexpression strains and fermentation
+      testing — the rare pool paper that carries a candidate gene all the way to ethanol titre.
+    why_not_shortlisted: >-
+      Gain-of-function engineering in a chosen background, not a test of which natural difference
+      between an industrial and a lab strain is causal. It answers "can this gene help", not
+      "is this why the industrial strain is better".
+
+# ══════════════════════════════════════════════════════════════════ ETHANOL RED COVERAGE
+
+ethanol_red_coverage:
+  headline: >-
+    VERY LITTLE, AND ESSENTIALLY NOTHING ON WHY ITS ETHANOL PERFORMANCE IS HIGH. This is a finding
+    about the literature and it should be recorded as a knowledge gap, not left as silence, since
+    the slot is built on Ethanol Red as the proxy genome.
+  counts:
+    corpus_documents_naming_ethanol_red_lesaffre_or_fermentis: 57
+    of_those_inside_the_E6_candidate_pool: 9
+    that_sequence_ethanol_red_and_deposit_the_data: 1
+    that_test_why_ethanol_red_is_ethanol_tolerant_or_high_yielding: 0
+  how_it_actually_appears:
+    - role: "as a chassis to be engineered"
+      note: >-
+        Xylose- and arabinose-fermenting derivatives (GS1.11-26, GSE16-T18, HDY.GUF12), CRISPR
+        engineering for carboxylic acids from lignosulfonate, amylolytic derivatives. Ethanol Red
+        is the starting material; nothing about it is being measured.
+    - role: "as a benchmark to be beaten"
+      note: >-
+        Included as the industrial comparator in cellulolytic-strain work without any analysis of
+        why it performs as it does.
+      evidence:
+        - corpus_file: 00046.txt
+          doi: 10.1007/s00253-026-13830-0
+          in_e6_pool: false
+          note: "Cited only as evidence of how Ethanol Red is used, not as a candidate."
+          quote: |-
+              The industrial strain Ethanol Red® (ER) was included as a benchmark due to its widespread application in established bioethanol production processes.
+    - role: "as a genetic background supplying haploid segregants for QTL analysis"
+      note: >-
+        ER18, ER18A and ER7A appear as parents in the Thevelein-group polygenic-analysis series
+        (corpus files 00727, 00494, 00495, 00473). The traits analysed there are acetic acid
+        tolerance, thermotolerance and isoamyl acetate flavour formation — never ethanol
+        tolerance and never ethanol yield.
+    - role: "as the INFERIOR parent"
+      note: >-
+        The single most useful corrective in the corpus. Ethanol Red is not uniformly superior;
+        for acetic acid it is the sensitive parent, which is a direct caution against reading the
+        proxy genome as a general-purpose robustness reference.
+      evidence:
+        - corpus_file: 00727.txt
+          quote: |-
+              To determine the polygenic basis of high acetic acid tolerance, we have used Ethanol Red as the inferior parent strain displaying lower acetic acid tolerance.
+  the_one_quantitative_claim_about_its_performance:
+    evidence:
+      - corpus_file: 00727.txt
+        note: >-
+          An 18% ethanol titre, asserted in passing in the introduction of a paper about acetic
+          acid tolerance, with no conditions, no medium and no reference to a measurement. This is
+          the corpus's entire quantitative statement about why Ethanol Red is worth using as the
+          proxy.
+        quote: |-
+            It is able to produce ethanol titers of up to 18 %.
+  consequences_to_record_as_knowledge_gaps:
+    - >-
+      No publication in this corpus reports a breeding history, pedigree, ploidy determination or
+      karyotype for Ethanol Red. The slots document anticipated this; the corpus confirms it.
+    - >-
+      No publication compares Ethanol Red directly with CEN.PK113-7D or S288C for ethanol
+      tolerance or ethanol yield under matched conditions. The comparison the slot wants does not
+      exist in the literature and will have to be computed or measured.
+    - >-
+      Candidate B's assembly (JWJK00000000) is an independent second Ethanol Red genome. If the
+      owner picks B, the first cheap action it enables is a concordance check against
+      GCA_029255905.1 — agreement raises confidence in the SNP layer; disagreement in repeat-rich
+      regions quantifies the proxy's blind spot instead of leaving it asserted. Both assemblies
+      are short-read, so neither relieves the structural-variant blindness.
+    - >-
+      Ethanol Red's advantage over lab strains is treated as common knowledge by every paper that
+      uses it and demonstrated by none of them.
+
+# ═════════════════════════════════════════════════════════════════════ POOL ASSESSMENT
+
+pool_assessment:
+  question: "Is a 25-publication budget fillable with papers that actually test causality?"
+  answer: >-
+    NO — not with causality-testing papers on this slot's trait. The honest projection is roughly
+    6 to 10 admissible publications, of which about 4 to 6 test causality at gene level and only
+    2 or 3 test it for ethanol rather than for a neighbouring stress. The remainder of the budget
+    should be reported unspent rather than filled with variant catalogues, which the slot itself
+    caps at L3 and which the comparative layer can generate without a paper.
+  pool_composition:
+    total_readable_candidates: 143
+    not_substantially_about_S_cerevisiae: 47
+    note_on_those_47: >-
+      The E6 tag is noisy. It has pulled in Pichia/Komagataella protein-expression papers,
+      Yarrowia and Rhodotorula lipid work, and several plant-genomics papers with no yeast content
+      at all (BES1 in hemp, ZmICE1 in maize, WD40 in Spartina, a sugarcane mitochondrial CMS
+      paper). These are not near misses; they are off-criterion.
+    S_cerevisiae_with_substantial_ethanol_content: 34
+    S_cerevisiae_without_substantial_ethanol_content: 62
+  causality_audit:
+    method: >-
+      Every pool full text was scanned for causality-method terms (reciprocal hemizygosity,
+      hemizygote, allele swap / replacement / exchange, QTL) and cross-ranked against the density
+      of ethanol-trait terms. The ranking was then read by hand, because term density alone
+      mislabels reviews.
+    papers_validating_genes_by_reciprocal_hemizygosity_or_allele_exchange: 8
+    of_those_where_the_validated_trait_is_ethanol_tolerance: 1
+    identification: "doi:10.1101/gr.131698.111 — candidate A"
+    of_those_where_the_validated_trait_is_a_fermentation_endpoint_under_ethanol_and_heat: 1
+    identification_2: "doi:10.1186/s12864-019-5959-8 — VHS1 and OYE2, listed as notable"
+    papers_validating_by_reconstruction_into_a_naive_background: 2
+    identification_3: >-
+      doi:10.1371/journal.pgen.1005635 (nine SNPs, fitness measured — candidate C) and
+      doi:10.1111/1751-7915.70244 (one TUP1 copy deleted — listed as notable)
+    the_rest: >-
+      The remaining causality-competent papers in the pool validate genes for acetic acid
+      tolerance, carbon dioxide inhibition of flavour ester production, near-freezing temperature,
+      ionic liquid tolerance, hydrolysate toxin tolerance and high-temperature fermentation. All
+      are real causal work on the wrong trait, and admitting them would fill the budget with
+      E6-adjacent rather than E6 evidence.
+  what_this_means_for_the_slot:
+    - >-
+      The bottleneck is not discovery and not the cap. It is that the specific question — why a
+      commercial bioethanol strain out-performs a lab strain at making and surviving ethanol — has
+      barely been asked in a form that admits a causal answer, and never for Ethanol Red.
+    - >-
+      The slot should therefore be filled deliberately shallow: the picked candidate, the two or
+      three genuinely causal ethanol papers, and then the unspent share reported as the slots
+      document requires.
+    - >-
+      Everything else this slot wants is computable from the genome set at L3, and the single
+      action that would change the picture is the one the slots document already names —
+      sequencing the owner's own strain, ideally with long reads, since the SV and subtelomeric
+      blindness is shared by the proxy assembly AND by candidate B's short-read assembly.
+
+# ══════════════════════════════════════════════════════════════════════════ PROVENANCE
+
+provenance:
+  produced: 2026-09-21
+  produced_by: literature agent, slot 7 shortlist task
+  read_in_full: >-
+    Corpus files 00430, 00632 and 00863 end to end; 00448, 01009, 00897, 00636, 00545, 00934,
+    00992, 00795 and 00363 read in substantial part; abstracts, strain tables and data-availability
+    sections read for the remainder of the leading set.
+  quote_discipline: >-
+    Every string under an `evidence` key was taken by exact-offset slice from the stored full text
+    and emitted as a YAML literal block, so the characters are the document's own and internal
+    whitespace is preserved. No quote is spliced and no ellipsis joins two passages; where two
+    passages are needed they appear as two separate quote entries. Empty bracketed citations "()"
+    and "[]" are artefacts of the stored text's citation stripping and are preserved rather than
+    cleaned.
+  not_written: >-
+    No `confidence` value appears in this file. Nothing is marked accepted or verified. Nothing
+    under data/ was read for writing or modified. The owner picks one candidate; this file does
+    not pick.

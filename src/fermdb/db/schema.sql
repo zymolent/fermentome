@@ -1065,6 +1065,41 @@ CREATE TABLE modification_mtdna_edit (
     FOREIGN KEY (modification_id, type) REFERENCES modification(id, type) ON DELETE CASCADE
 );
 
+-- The catalogue of sites an mtDNA insert may target, with what each one costs. Distinct from
+-- `mtdna_insertion` below, which records a proposed or performed EDIT: this is the menu, that is
+-- the order. Loaded from data/mitochondria/activator_map.yaml.
+--
+-- Benchmark BM-MIT-004 asks "for a proposed insertion locus, return utr_source,
+-- activator_required and displaced_gene", and until this table existed the atlas could not
+-- answer it even though the map had been curated — the knowledge was in the repo and unreachable
+-- from a query.
+--
+-- One row is not a gene: `intergenic_upstream_COX2` is a silent region carried by the Fox lab's
+-- pPT24 plasmid, and an insert there borrows COX2's leader while displacing nothing. That row is
+-- why `displaced_if_used` is nullable and why the comment below, which says inserting always
+-- costs you a gene, is true only of the replacement route.
+CREATE TABLE mtdna_locus (
+    id                   TEXT PRIMARY KEY,
+    locus                TEXT NOT NULL UNIQUE,
+    encodes              TEXT,
+    -- JSON array. NULL means "not recorded", never "none required": an insert designed against a
+    -- locus with NULL here is exactly the failure BM-MIT-004 exists to catch, so absence and
+    -- emptiness must not be spelled the same way.
+    activators           TEXT,
+    utr_source           TEXT,
+    displaced_if_used    TEXT,
+    respiration_retained_if_used INTEGER
+                         CHECK (respiration_retained_if_used IN (0, 1)),
+    rescue_available     TEXT CHECK (rescue_available IN ('none', 'nuclear_allotopic_copy',
+                                                          'second_locus', 'other', 'unknown')),
+    zone                 TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence             TEXT NOT NULL,
+    confidence           TEXT NOT NULL
+                         CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
+);
+
+CREATE INDEX mtdna_locus_by_displacement ON mtdna_locus(displaced_if_used);
+
 -- Yeast mitochondrial mRNAs are not translated generically: each needs nuclear-encoded
 -- translational activators that recognize its own 5' leader, so an insert must sit behind an
 -- existing gene's UTR at that gene's locus — and inserting therefore costs you the gene whose UTR

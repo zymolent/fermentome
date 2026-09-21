@@ -58,6 +58,16 @@ from .extract import (
 )
 from .genetic_code import AMBIGUOUS_CODONS, TABLE_1, TABLE_3
 from .literature.discovery import FamilyRunResult, run_family
+from .literature.ethanol import (
+    CRITERION_BUDGET,
+    PLAN_ACCEPTANCE_DISAGREES,
+    PUBLICATION_CAP,
+    SLOTS,
+    admit,
+    budget_status,
+    readable_candidates,
+    unspent_report,
+)
 from .literature.eutils import EutilsClient, EutilsError
 from .literature.manual_queue import IngestReport, export_queue, ingest_directory
 from .literature.queries import (
@@ -218,6 +228,77 @@ def cmd_literature_status(args: argparse.Namespace) -> int:
             f"{status.excluded:>6}"
         )
     return 0
+
+
+def cmd_literature_ethanol_status(_args: argparse.Namespace) -> int:
+    """The ethanol layer's seven slots, their budgets, and what is spent against each."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    try:
+        lines = budget_status(conn)
+        readable = {c: len(readable_candidates(conn, c)) for c in CRITERION_BUDGET}
+        unspent = unspent_report(conn)
+    finally:
+        conn.close()
+
+    print(f"{'slot':<5}{'name':<42}{'crit':<6}{'budget':>7}{'admitted':>9}{'readable':>10}")
+    for slot in SLOTS:
+        line = next(entry for entry in lines if entry.criterion == slot.criterion)
+        print(
+            f"{slot.number:<5}{slot.name:<42}{slot.criterion:<6}{line.budget:>7}"
+            f"{line.admitted:>9}{readable[slot.criterion]:>10}"
+        )
+    total_budget = sum(CRITERION_BUDGET.values())
+    total_admitted = sum(entry.admitted for entry in lines)
+    print()
+    print(
+        f"layer: {total_admitted}/{PUBLICATION_CAP} publications admitted "
+        f"({total_budget} allocated across criteria)"
+    )
+
+    # A criterion whose readable pool is smaller than its budget cannot fill it from what is
+    # held, and that is a finding about acquisition, not a reason to quietly reallocate.
+    short = [c for c, n in readable.items() if n < CRITERION_BUDGET[c]]
+    if short:
+        print()
+        for criterion in sorted(short, key=lambda c: CRITERION_BUDGET[c] - readable[c]):
+            print(
+                f"  SHORT  {criterion}: {readable[criterion]} readable against a budget of "
+                f"{CRITERION_BUDGET[criterion]} -- the rest need acquiring, not reallocating"
+            )
+    if unspent:
+        print()
+        print("unspent (reported, never reallocated automatically):")
+        for line_text in unspent:
+            print(f"  {line_text}")
+    print()
+    print(f"NOTE: {PLAN_ACCEPTANCE_DISAGREES}")
+    return 0
+
+
+def cmd_literature_ethanol_admit(args: argparse.Namespace) -> int:
+    """Admit one publication under one criterion, or say exactly why it cannot be."""
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        problems = admit(
+            conn,
+            settings,
+            publication_id=args.publication_id,
+            criterion=args.criterion,
+            slot=args.slot,
+        )
+    finally:
+        conn.close()
+
+    if not problems:
+        print(f"admitted {args.publication_id} under {args.criterion}")
+        return 0
+    print(f"NOT admitted: {args.publication_id} under {args.criterion}", file=sys.stderr)
+    for problem in problems:
+        print(f"  {problem.code}: {problem.detail}", file=sys.stderr)
+    return 1
 
 
 def cmd_literature_manual_queue_export(args: argparse.Namespace) -> int:
@@ -614,6 +695,20 @@ def build_parser() -> argparse.ArgumentParser:
         "status", help="corpus counts per family against query_families.yaml's expected_count"
     )
     p_lit_status.set_defaults(func=cmd_literature_status)
+
+    p_lit_ethanol = lit_sub.add_parser(
+        "ethanol", help="the capped ethanol reference layer: slots, budgets and admission"
+    )
+    eth_sub = p_lit_ethanol.add_subparsers(dest="ethanol_command", required=True)
+
+    p_eth_status = eth_sub.add_parser("status", help="slots, budgets, and what is spent")
+    p_eth_status.set_defaults(func=cmd_literature_ethanol_status)
+
+    p_eth_admit = eth_sub.add_parser("admit", help="admit one publication under one criterion")
+    p_eth_admit.add_argument("--publication-id", required=True)
+    p_eth_admit.add_argument("--criterion", required=True, choices=sorted(CRITERION_BUDGET))
+    p_eth_admit.add_argument("--slot", type=int, default=None, help="cross-check the slot")
+    p_eth_admit.set_defaults(func=cmd_literature_ethanol_admit)
 
     p_lit_manual_queue = lit_sub.add_parser(
         "manual-queue", help="the manual full-text download queue (export / ingest)"

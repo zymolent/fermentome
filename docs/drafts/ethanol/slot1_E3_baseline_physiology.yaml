@@ -1,0 +1,770 @@
+# Slot 1 — Anaerobic vs aerobic reference physiology (criterion E3)
+#
+# Three candidates. The owner picks one; this file does not choose.
+#
+# THE HEADLINE THE OWNER SHOULD READ FIRST. The E3 pool of 91 readable full texts contains
+# EXACTLY ONE chemostat physiology study (doi:10.1093/femsyr/fow006) and it is aerobic only,
+# on ETHANOL as the carbon source, not glucose. No paper in the pool measures one strain under
+# both oxygen regimes at chemostat standard on defined medium. The slot's actual question —
+# aerobic versus anaerobic baseline for the same strain, at a stated dilution rate — is not
+# answered by any single paper in this pool. The shortlist below is therefore a choice between
+# three PARTIAL rulers, and the honest framing is: one rigorous aerobic chemostat (wrong carbon
+# source), one complete aerobic batch yield set on defined medium (industrial background, oxygen
+# regime stated inconsistently), one anaerobic batch yield set with a closed carbon balance
+# (engineered background, glucose measured in the presence of xylose).
+#
+# SEE `pool_assessment` AT THE FOOT OF THIS FILE BEFORE PICKING. Anaerobic, glucose-limited
+# chemostat studies of a CEN.PK reference strain — including one with a dilution-rate SERIES at
+# 0.05, 0.1 and 0.25 h-1 plus transcriptome data — DO exist in the project corpus. They are not
+# tagged E3, so they were outside the pool I was allowed to shortlist from. That is a tagging
+# finding, not a literature finding, and it is probably worth more to the slot than any of the
+# three candidates below.
+#
+# Rule 4 of the brief is applied throughout: every number carries its dilution rate (or specific
+# growth rate) and its oxygen regime. Numbers that cannot carry both are listed under
+# `flagged_not_usable_as_baseline` rather than recorded as baselines.
+#
+# Quotes are verbatim from the stored full texts, whitespace as the stored text renders it
+# (table rows appear as pipe-delimited lines because that is how the stored text renders tables).
+# No quote is spliced; where two passages are needed they are listed as separate quotes.
+#
+# NO `confidence` FIELD IS WRITTEN ANYWHERE IN THIS FILE, and nothing here is marked accepted or
+# verified. This is a draft shortlist for the owner's decision.
+
+version: 1
+slot:
+  number: 1
+  name: Anaerobic vs aerobic reference physiology
+  criterion: E3
+  budget: 20
+  question: "What does baseline yeast physiology look like, quantitatively?"
+  stated_preference: "chemostat, defined medium, CEN.PK preferred"
+  what_the_atlas_needs: >-
+    biomass yield, ethanol yield, glycerol yield, specific growth rate or dilution rate, oxygen
+    regime, medium composition, and ideally the same strain measured under both aerobic and
+    anaerobic conditions in one study.
+  pool: "91 readable full texts tagged E3 (scratchpad ethanol/E3.json)"
+  status: draft
+
+candidates:
+
+  - candidate: A
+    handle: "Delft chemostat, CEN.PK113-7D, aerobic, ethanol-limited"
+    pmid: "26818854"
+    doi: "10.1093/femsyr/fow006"
+    title: >-
+      Replacement of the initial steps of ethanol metabolism in Saccharomyces cerevisiae by
+      ATP-independent acetylating acetaldehyde dehydrogenase.
+    year: 2016
+    journal: "FEMS yeast research"
+    strains:
+      reference: "CEN.PK113-7D (Ald+ Acs+), the reference strain of the chemostat comparison"
+      others: >-
+        evolved A-ALD-dependent Ald- strains IMS456, IMS457, IMS458, IMS459, IMS460 and their
+        engineered progenitors, all in the CEN.PK background
+    conditions:
+      dilution_rate: "0.05 h-1 set; 0.048 +/- 0.001 h-1 measured at steady state"
+      oxygen_regime: "aerobic; 2-L bioreactor sparged with 500 mL min-1 air, stirred at 800 rpm"
+      medium: "synthetic medium after Verduyn et al., 6 g L-1 ethanol in the feed; pH 5.0; 30 C"
+      limitation: "ethanol-limited (carbon-limited) chemostat, 1 L working volume"
+      carbon_source: "ETHANOL, not glucose — this is the single most important caveat for the slot"
+      replication: "three independent replicate cultures per strain; steady state at 12-15 volume changes"
+    what_data_it_actually_contains: >-
+      A complete steady-state physiology table for the reference strain: dilution rate, biomass
+      yield on ethanol, qethanol, qO2, qCO2, respiratory quotient, qglycerol, qacetate, qsuccinate,
+      qacetaldehyde, residual ethanol and a closed carbon recovery. Plus steady-state INTRACELLULAR
+      metabolite concentrations (40 metabolites by GC-MS and LC-MS/MS, including acetyl-CoA, NADH,
+      NAD+, NADPH) measured by cold-methanol quenching in the same chemostat cultures. Also a
+      published stoichiometric derivation of the wild-type biomass yield on ethanol. Tables are in
+      the paper; no processed omics matrices are deposited.
+    accessions:
+      - "PRJNA286073 — whole-genome sequence reads of the evolved strains and plasmids (not the reference physiology)"
+    why_this_slot: >-
+      It is the only true chemostat physiology study in the E3 pool, and it is the only place in
+      the pool where a CEN.PK113-7D reference strain's rates are reported with a stated dilution
+      rate, an oxygen regime, a defined medium and a carbon balance that closes at 100 +/- 4%.
+      If the slot is meant to be a RULER, this is the only candidate built like one.
+    what_it_lacks:
+      - "NO ANAEROBIC CONDITION AT ALL. It cannot answer the slot's comparative question by itself."
+      - >-
+        The carbon source is ethanol, not glucose. The biomass yield 0.57 g g-1 is a yield ON
+        ETHANOL and cannot be compared with any glucose yield without restating the basis.
+      - "No ethanol yield and no glycerol yield on sugar — ethanol is the substrate, not a product."
+      - >-
+        Single dilution rate (0.05 h-1). No rate series, so nothing here constrains how the
+        baseline moves with growth rate — the very dependence the project's IMU032 finding warns about.
+      - >-
+        The reference strain appears as the CONTROL in an engineering study. Its numbers are
+        trustworthy but incidental to the paper's purpose, and were measured at a dilution rate
+        chosen to suit the evolved strains ("Based on the lowest maximum specific growth rate of
+        the evolved strains, the dilution rate for these experiments was set at 0.05 h-1").
+      - "No deposited transcriptome or metabolome matrices; the metabolite data are in tables and supporting files."
+    open_access: >-
+      In PubMed Central and stored in the project corpus as full text. Journal licence terms were
+      not stated in the stored text and are not asserted here.
+    evidence:
+      - context: chemostat setup and oxygen regime
+        quote: >-
+          "Ethanol-limited chemostat cultivation was carried out at 30°C in aerobic 2-L laboratory
+          bioreactors (Applikon, Schiedam, the Netherlands) with a working volume of 1 L. The
+          ingoing synthetic medium (Verduyn et al. ) contained 6 g L−1 ethanol. Culture pH was
+          maintained at 5.0 by automatic addition of 2 M KOH."
+      - context: aeration and the dilution rate
+        quote: >-
+          "Bioreactors were sparged with 500 mL min−1 air and stirred at 800 rpm to ensure aerobic
+          conditions. Chemostat cultivation was preceded by a batch phase under the same conditions.
+          When a rapid decrease in CO2 production indicated ethanol depletion in the batch cultures,
+          continuous cultivation at a dilution rate of 0.05 h−1 was initiated."
+      - context: strain background
+        quote: >-
+          "The S. cerevisiae strains used in this study (Table ) share the CEN.PK genetic background
+          (Entian and Kotter ; Nijkamp et al. )."
+      - context: table caption fixing conditions for every number below
+        quote: >-
+          "Physiology of S. cerevisiae strain CEN.PK113-7D and evolved strain IMS456 in aerobic
+          ethanol-limited chemostat cultures, grown at a dilution rate of 0.05 h−1 and at pH 5.
+          Averages and standard deviations were obtained from three independent replicate cultures
+          for each strain. The detection limit for ethanol was 0.02 g L−1."
+      - context: measured dilution rate (table row, CEN.PK113-7D first, IMS456 second)
+        quote: "Dilution rate | h−1 | 0.048 ± 0.001 | 0.048 ± 0.001"
+      - context: biomass yield (table row)
+        quote: "Biomass yield | g biomass g ethanol−1 | 0.57 ± 0.01 | 0.60 ± 0.00"
+      - context: ethanol consumption rate (table row)
+        quote: "qethanol | mmol g biomass−1 h−1 | −1.81 ± 0.04 | −1.72 ± 0.03"
+      - context: oxygen uptake rate (table row)
+        quote: "qO2 | mmol g biomass−1 h−1 | −3.38 ± 0.14 | −2.77 ± 0.12"
+      - context: carbon dioxide production rate (table row)
+        quote: "qCO2 | mmol g biomass−1 h−1 | 1.62 ± 0.06 | 1.15 ± 0.01"
+      - context: respiratory quotient (table row)
+        quote: "Respiratory quotient | molCO2 molO2−1 | 0.48 ± 0.00 | 0.42 ± 0.02"
+      - context: glycerol production rate (table row)
+        quote: "qglycerol | mmol g biomass−1 h−1 | 0.029 ± 0.001 | 0.046 ± 0.007"
+      - context: carbon recovery (table row) — the reason this candidate is usable as a ruler
+        quote: "Carbon recovery | % | 100 ± 4 | 96 ± 1"
+      - context: the wild-type yield as the authors themselves state it
+        quote: >-
+          "In summary, this theoretical stoichiometric analysis predicts a potential 30%–40% higher
+          biomass yield on ethanol (0.74–0.80 g biomass g ethanol−1) in engineered A-ALD-dependent
+          S. cerevisiae than the 0.57 g biomass g ethanol−1 of wild-type Ald+ Acs+ strains."
+      - context: why the dilution rate was 0.05 h-1 — it was set by the evolved strains, not chosen as a reference point
+        quote: >-
+          "Based on the lowest maximum specific growth rate of the evolved strains, the dilution
+          rate for these experiments was set at 0.05 h−1."
+      - context: deposited sequence data
+        quote: >-
+          "plasmids pUDE356, pUDE357, pUDE358, pUDE359 and pUDE360 have been deposited as sequence
+          read archives under bioproject PRJNA286073ID (Table )."
+
+  - candidate: B
+    handle: "industrial DSM wild type, defined Verduyn medium, aerobic batch on glucose"
+    pmid: "30159031"
+    doi: "10.1186/s13068-018-1231-8"
+    title: >-
+      l-Arabinose triggers its own uptake via induction of the arabinose-specific Gal2p transporter
+      in an industrial Saccharomyces cerevisiae strain.
+    year: 2018
+    journal: "Biotechnology for biofuels"
+    strains:
+      reference: "DS58227 — the industrial WILD-TYPE parent (DSM, Delft)"
+      others: >-
+        DS61143 (araABD from Lactobacillus plantarum plus non-oxidative PPP overexpression) and
+        DS61180 (DS61143 after adaptive evolution on l-arabinose)
+    conditions:
+      specific_growth_rate: >-
+        wild type DS58227 mu = 0.30 +/- 0.007 h-1 in the first exponential phase; 0.07 +/- 0.007 h-1
+        in the second (post-diauxic) phase. Batch, so there is no dilution rate.
+      oxygen_regime: >-
+        stated as aerobic for the glucose cultivations ("The cultivations on d-glucose were
+        performed under aerobic cultivation conditions"); the Methods describe the cultivation
+        system as microaerobic shake flasks with glass water locks. SEE `what_it_lacks` — this is
+        the candidate's main weakness.
+      medium: "minimal medium based on Verduyn; 20 g L-1 d-glucose as sole carbon and energy source; pH 4.2; 30 C"
+      limitation: "none — batch, glucose-excess (Crabtree) conditions, diauxic growth observed"
+      replication: "duplicates"
+    what_data_it_actually_contains: >-
+      A complete specific-rate and yield set for three strains of one lineage on glucose: mu for
+      both exponential phases, Ybiomass/glucose, and MOLAR yields of ethanol, acetate and glycerol
+      on glucose, plus rglucose, rethanol, racetate and rglycerol. Separately, microaerobic
+      cultivations on l-arabinose and d-galactose, and qPCR plus RNA-Seq comparisons of GAL-gene
+      expression across substrates. Figures and tables only; no deposited accession is stated
+      anywhere in the stored full text.
+    accessions:
+      - "None stated in the stored full text, although RNA-Seq was performed."
+    why_this_slot: >-
+      It is the pool's cleanest set of glucose yields on a DEFINED medium reported in mol/mol —
+      the same basis as the project's IMU032 finding — for a non-CEN.PK, industrially derived
+      wild type. Its aerobic glucose-excess ethanol yield of 1.25 mol/mol sits directly against
+      the 1.56 mol/mol anaerobic chemostat number the project already holds, which makes the
+      aerobic/anaerobic gap visible in a single comparable unit. It also brings a second strain
+      background for comparability, as the differentiation brief asks.
+    what_it_lacks:
+      - >-
+        THE OXYGEN REGIME IS STATED INCONSISTENTLY. The Methods say cultivations were performed
+        under microaerobic conditions in water-locked flasks; the Results and the Table 1 caption
+        say the glucose cultivations were aerobic. The flask configuration used for the aerobic
+        glucose runs specifically is never described. For a slot whose whole purpose is the oxygen
+        axis, this is a serious defect and the owner should weigh it heavily.
+      - "Batch, not chemostat. No dilution rate; the growth rate is an uncontrolled mu_max."
+      - "No anaerobic condition anywhere in the study."
+      - >-
+        No carbon balance or carbon recovery is reported, so the yields are not closed the way
+        candidate A's and candidate C's are.
+      - >-
+        Ybiomass/glucose is reported in gCDW per mmol glucose (0.015), not g g-1, so it must be
+        converted before it can be compared with other papers — and the conversion is not in the paper.
+      - >-
+        THE STRAIN CANNOT BE OBTAINED. "Strain access is restricted and availability can only be
+        made via DSM." A baseline nobody can re-measure is a weak ruler.
+      - >-
+        The wild type is the least-characterised of the three strains here; the paper's interest is
+        the evolved arabinose-utilising derivative, and the aerobic glucose run exists to show the
+        engineering caused no metabolic burden.
+    open_access: "BMC / Biotechnology for Biofuels — open access; full text stored in the project corpus."
+    evidence:
+      - context: medium, pH, temperature and substrate concentrations
+        quote: >-
+          "All cultivations were performed at pH 4.2 and 30 °C with minimal medium based on Verduyn
+          []. For cultures grown under microaerobic conditions, ergosterol and tween 80 were added
+          to final concentrations of 8 mg/L. d-Glucose, d-galactose, and l-arabinose were used as
+          substrates in a concentration of 20 g/L each for single sugar cultivations and about 10
+          g/L d-glucose with 10 g/L l-arabinose for mixed sugar cultivations."
+      - context: the cultivation system as the Methods describe it — microaerobic, water-locked
+        quote: >-
+          "Cultivations were performed under microaerobic conditions using 500-mL unbaffled shake
+          flasks containing 100 mL medium. The shake flasks were equipped with glass water locks and
+          a syringe port for sampling. All cultivations were performed in duplicates."
+      - context: the oxygen regime as the Results state it for the glucose cultivations — the contradiction
+        quote: >-
+          "The cultivations on d-glucose were performed under aerobic cultivation conditions to
+          minimize physiological bias and metabolic limitations in order to achieve unbiased results."
+      - context: table caption fixing conditions for every number below
+        quote: >-
+          "Product yields and rates for substrate uptake, growth and product formation during
+          exponential growth of S. cerevisiae DS58227, DS61143, and DS61180 in shake flasks under
+          aerobic growth conditions in minimal medium with d-glucose as sole carbon and energy source"
+      - context: column order for the table rows below
+        quote: "Strain | DS58227 | DS61143 | DS61180"
+      - context: specific growth rate, first exponential phase (table row)
+        quote: "µ (h−1) (1st exp. phase) | 0.30 (± 0.007) | 0.36 (± 0.002) | 0.33 (± 0.014)"
+      - context: specific growth rate, second exponential phase (table row)
+        quote: "µ (h−1) (2nd exp. phase) | 0.07 (± 0.007) | 0.11 (± 0.002) | 0.11 (± 0.0002)"
+      - context: biomass yield (table row) — note the unit is gCDW per mmol glucose
+        quote: "Ybiomass/glucose (gCDW/mmol) | 0.015 (± 0.001) | 0.015 (± 0.001) | 0.013 (± 0.001)"
+      - context: ethanol yield in mol/mol (table row) — the 2 mol/mol ceiling applies
+        quote: "Yethanol/glucose (mol/mol) | 1.25 (± 0.22) | 1.22 (± 0.14) | 1.21 (± 0.06)"
+      - context: glycerol yield (table row)
+        quote: "Yglycerol/glucose (mol/mol) | 0.02 (± 0.08) | 0.04 (± 0.008) | 0.07 (± 0.01)"
+      - context: acetate yield (table row)
+        quote: "Yacetate/glucose (mol/mol) | 0.01 (± 0.02) | 0.02 (± 0.004) | 0.02 (± 0.01)"
+      - context: glucose uptake rate (table row)
+        quote: "rglucose [mmol/(gCDW h−1)] | − 20.61 (± 1.01) | − 24.66 (± 2.16) | − 24.96 (± 0.51)"
+      - context: ethanol production rate (table row)
+        quote: "rethanol [mmol/(gCDW h−1)] | 25.74 (± 3.20) | 29.94 (± 0.84) | 30.16 (± 2.09)"
+      - context: glycerol production rate (table row)
+        quote: "rglycerol [mmol/(gCDW h−1)] | 0.46 (± 0.15) | 0.94 (± 0.29) | 1.78 (± 0.40)"
+      - context: strain availability
+        quote: >-
+          "The industrial S. cerevisiae strains DS58227, DS61143, and DS61180 have been developed
+          and provided by DSM (Delft, NL). Strain access is restricted and availability can only be
+          made via DSM."
+      - context: diauxic behaviour, which is itself evidence that the glucose cultures were respiring after the glucose phase
+        quote: >-
+          "All three strains exhibited a comparable growth profile on d-glucose with a characteristic
+          diauxic growth behavior. After a short lag-phase, cells started to grow exponentially for
+          about 10 h."
+
+  - candidate: C
+    handle: "anaerobic N2-sparged bioreactor, CEN.PK-derived, closed carbon balance"
+    pmid: "20219100"
+    doi: "10.1186/1475-2859-9-16"
+    title: >-
+      Fermentation of mixed glucose-xylose substrates by engineered strains of Saccharomyces
+      cerevisiae: role of the coenzyme specificity of xylose reductase, and effect of glucose on
+      xylose utilization.
+    year: 2010
+    journal: "Microbial cell factories"
+    strains:
+      reference: >-
+        BP000 (Candida tenuis xylose reductase in wild-type NADPH-preferring form) and BP10001
+        (K274R-N276D NADH-preferring variant). Both carry XDH and an extra xylulokinase copy at URA3.
+      background_note: >-
+        The stored corpus disagrees with itself about the parent. The companion paper
+        doi:10.1186/1475-2859-7-9 says the pair was "derived from the laboratory strain S.
+        cerevisiae CEN.PK 113-7D"; doi:10.1186/1754-6834-7-49 says BP10001 "was previously
+        constructed from S. cerevisiae CEN.PK 113-5D". CEN.PK background either way, exact parent
+        unresolved from these texts.
+    conditions:
+      specific_growth_rate: >-
+        mu_max of BP10001 fermenting glucose reported as 0.29 h-1 (stated in the fed-batch feed
+        derivation). Batch, so there is no dilution rate.
+      oxygen_regime: >-
+        anaerobic — Braun Biostat CT bioreactor sparged with nitrogen at 0.65 L min-1, with
+        ergosterol and Tween-80 supplied as anaerobic growth factors
+      medium: >-
+        mineral medium after Jeppsson et al. without extra riboflavin and folic acid, plus 10 mg L-1
+        ergosterol, 0.42 g L-1 Tween-80, antifoam; pH 5.0; 30 C
+      limitation: >-
+        none in the batch (10 g L-1 glucose plus 10 g L-1 xylose, initial CDW ~0.2 g L-1); the
+        fed-batch experiments instead hold glucose below 0.3 g L-1 at a controlled feed
+      carbon_source_caveat: >-
+        the glucose-phase numbers were measured with 10 g L-1 XYLOSE present in the same broth
+    what_data_it_actually_contains: >-
+      Yield coefficients and specific rates for the glucose phase and the xylose phase of anaerobic
+      mixed-substrate batches, each with a reported carbon recovery; a xylose-only batch; a
+      glucose-limited fed-batch and a glucose/xylose fed-batch with their own yields and rates; and
+      constrained genome-scale flux balance analysis (model iLL672, modified) producing central
+      carbon flux maps for several conditions. Off-gas CO2 and ethanol were measured. Tables,
+      figures and additional files only; no deposited omics.
+    accessions:
+      - "None stated in the stored full text."
+    why_this_slot: >-
+      It is the best-conditioned ANAEROBIC number in the pool: defined mineral medium with proper
+      anaerobic growth factors, nitrogen-sparged bioreactor, ethanol and glycerol yields reported
+      together, and a carbon recovery of 101% for the glucose phase. It is the only candidate that
+      supplies the anaerobic half of the slot's question at all, and its glucose-phase yields
+      (0.36 g g-1 ethanol, 0.12 g g-1 glycerol) are the numbers the atlas would otherwise be
+      missing entirely. It also brings something the other two lack: a controlled-feed series in
+      which glucose is held sub-0.3 g L-1, plus published flux maps.
+    what_it_lacks:
+      - "Batch, not chemostat. No dilution rate anywhere, and mu is not reported for the mixed-substrate batch itself."
+      - >-
+        The strains are ENGINEERED (XR/XDH/XK integrated at URA3), not wild type. The authors state
+        the glucose-phase behaviour was identical between the two variants, which argues the
+        cassette does not distort glucose metabolism, but neither strain IS the CEN.PK parent and
+        the parent was not run alongside.
+      - >-
+        The glucose phase was measured with 10 g L-1 xylose present. This is not a clean
+        single-substrate glucose baseline.
+      - >-
+        NO MEASURED BIOMASS YIELD FOR THE GLUCOSE PHASE. The only YXS in the paper (0.10 g g-1) is
+        an ASSUMPTION read off a figure for the fed-batch feed control, not a measurement —
+        recorded below as flagged, not as a baseline.
+      - "No aerobic condition, so it cannot answer the comparative question by itself either."
+      - "Oldest candidate (2010); no deposited data; no qO2/qCO2 (there is no oxygen to measure)."
+      - "The paper's subject is xylose, not baseline physiology; the glucose phase is a by-product of its design."
+    open_access: "BMC / Microbial Cell Factories — open access; full text stored in the project corpus."
+    evidence:
+      - context: anaerobic growth factors and the medium
+        quote: >-
+          "Mineral media for shake flask precultures and bioreactor experiments were as described by
+          Jeppsson et. al. [] except that no extra riboflavin and folic acid were supplied. Ten mg/L
+          of ergosterol, 0.42 g/L of Tween-80 and 250 μl/L of Antifoam 204 (Sigma-Aldrich, St.
+          Louis, MO, USA) were added to media used in anaerobic reactions."
+      - context: how anaerobiosis was maintained, plus pH and temperature
+        quote: >-
+          "The pH was kept constant at 5.0 by automatic addition of 1 M NaOH. The reactor was
+          sparged with nitrogen at a constant flow rate of 0.65 L/min and the temperature was kept
+          constant at 30°C."
+      - context: batch composition and inoculum
+        quote: >-
+          "Anaerobic batch conversion of mixed sugar substrates contained 10 g/L of xylose and 10
+          g/L glucose. An initial CDW of ~0.2 g/L was used."
+      - context: table caption fixing conditions for every number below
+        quote: >-
+          "Physiological parameters for BP000 and BP10001 obtained from batch fermentations of a
+          mixed glucose-xylose substrate (10 g/L each)"
+      - context: column order for the table rows below
+        quote: "BP000 | BP10001 | BP000 | BP10001"
+      - context: specific substrate uptake rate, glucose phase then xylose phase (table row)
+        quote: "q[g/g CDW/h]a | 3.0 | 2.9 | 0.05 | 0.05"
+      - context: ethanol yield, glucose phase then xylose phase (table row)
+        quote: "Yethanol[g/g] | 0.36 | 0.36 | 0.23 | 0.30"
+      - context: glycerol yield, glucose phase then xylose phase (table row)
+        quote: "Yglycerol[g/g] | 0.12 | 0.11 | 0.072 | 0.023"
+      - context: acetate yield (table row)
+        quote: "Yacetate[g/g] | 0.009 | 0.010 | 0.028 | 0.044"
+      - context: carbon recovery (table row) — the reason these yields are usable
+        quote: "C-recovery [%] | 101 | 97 | 108 | 107"
+      - context: the authors' own statement that the glucose phase is not strain-dependent here
+        quote: >-
+          "With the exception that a tiny amount of xylitol was produced by BP000 during the
+          "glucose phase", the performance of the two yeast strains in glucose fermentation was
+          identical within limits of experimental error."
+      - context: mu_max on glucose, and the fact that the biomass yield is an assumption
+        quote: >-
+          "Note: μ maxof BP10001 fermenting glucose was determined as 0.29 (1/h), and YXSfrom
+          glucose was assumed to be identical under batch and fed-batch fermentation conditions []."
+      - context: how the carbon balance was computed
+        quote: >-
+          "The carbon balance was calculated by taking all measured compounds (external metabolites,
+          biomass, CO2and ethanol in off-gas) into account. A value of 26.4 g/C-mol biomass [] was
+          used to calculate the amount of carbon transformed into biomass."
+      - context: strain lineage as stated in the companion paper doi:10.1186/1475-2859-7-9 (also in the E3 pool)
+        quote: >-
+          "Two isogenic yeast strains were derived from the laboratory strain S. cerevisiaeCEN.PK
+          113-7D."
+      - context: strain lineage as stated in doi:10.1186/1754-6834-7-49 (also in the E3 pool) — it disagrees
+        quote: >-
+          "Strain BP10001 was previously constructed from S. cerevisiae CEN.PK 113-5D through
+          genomic integration of genes encoding a doubly mutated (Lys274-to-Arg; Asn276-to-Asp)
+          variant of XR from C. tenuis and the wild-type XDH from Galactocandida mastotermitis."
+
+how_i_narrowed:
+
+  step_1_mechanical_triage:
+    what: >-
+      Scored all 91 pool full texts mechanically before reading any of them, counting occurrences
+      of chemostat / dilution rate / continuous culture / steady state / CEN.PK / Verduyn or mineral
+      or defined medium / C-mol / carbon balance / biomass yield / glycerol yield / qO2 / deposited
+      accession patterns. Titles alone were not trusted, because the pool is dominated by
+      lignocellulose engineering papers whose titles hide whatever reference physiology they contain.
+    result: >-
+      The distribution was stark. "chemostat" appears in only 6 of 91 texts, and more than once in
+      only two of them (18 hits in doi:10.1093/femsyr/fow006, 6 in doi:10.1186/s13068-015-0233-z).
+      "dilution rate" appears in 5. That single count decided the shape of the shortlist before any
+      reading: there is no field of chemostat candidates to choose among.
+
+  step_2_second_pass_on_physiology_vocabulary:
+    what: >-
+      Re-scored on the vocabulary a baseline actually needs — glucose/sugar/carbon/nitrogen-limited,
+      "dilution rate of 0.0x", "aerobic and anaerobic", explicit ethanol/glycerol/biomass yields,
+      C-mol, respiratory quotient and oxygen uptake, and deposited-data accession patterns.
+    result: >-
+      Surfaced the second tier that titles concealed: the DSM industrial lineage paper
+      (doi:10.1186/s13068-018-1231-8), the Zurich 13C respiration study
+      (doi:10.1186/1752-0509-4-12), the anaerobic mixed-substrate bioreactor pair
+      (doi:10.1186/1475-2859-9-16 and doi:10.1186/1475-2859-7-9), and the BY4741 aerobic/anaerobic
+      comparison (doi:10.3390/microorganisms10061173).
+
+  step_3_full_text_reads:
+    read_in_full_or_in_relevant_depth:
+      - "doi:10.1093/femsyr/fow006 — shortlisted (A)"
+      - "doi:10.1186/s13068-018-1231-8 — shortlisted (B)"
+      - "doi:10.1186/1475-2859-9-16 — shortlisted (C)"
+      - "doi:10.1186/1752-0509-4-12 — read, not shortlisted (see runners_up)"
+      - "doi:10.3390/microorganisms10061173 — read, not shortlisted (see runners_up)"
+      - "doi:10.1128/aem.02330-23 — read, not shortlisted (see runners_up)"
+      - "doi:10.1186/s13068-015-0233-z — read, rejected: chemostat used only as an evolution vessel, no steady-state physiology and no reference strain"
+      - "doi:10.1186/1475-2859-7-9 — read, used as corroboration for candidate C's strain lineage; its own conversions are oxygen-limited resting cells with no biomass formation"
+      - "doi:10.1186/1754-6834-7-49 — read, rejected: anaerobic and on defined M-medium, but the reported yields are from wheat straw hydrolysate, not a defined-medium baseline"
+      - "doi:10.1186/s12934-016-0526-3 — read, rejected: four backgrounds including Ethanol Red side by side, but synthetic COMPLETE medium, shake flasks, growth rates only, no yields"
+      - "doi:10.1186/1754-6834-9-10 — rejected on conditions: anaerobic but complex medium (tryptone/yeast extract), screw-capped bottles, no defined-medium yields"
+    how_the_three_were_chosen: >-
+      Once it was clear no paper covers both oxygen regimes at chemostat standard, I stopped looking
+      for the ideal and picked three papers that fail in DIFFERENT directions, so the owner is
+      choosing between kinds of ruler rather than between grades of the same one: A is rigorous and
+      narrow (chemostat, but aerobic and on ethanol); B is broad and comparable (full mol/mol yield
+      set on defined medium, different background, but batch and with an ambiguous oxygen regime);
+      C supplies the missing anaerobic half with a closed carbon balance (but batch, engineered, and
+      with xylose in the broth).
+
+  runners_up_and_why_not:
+    - doi: "10.1186/1752-0509-4-12"
+      pmid: "20167065"
+      title: "Transcriptional regulation of respiration in yeast metabolizing differently repressive carbon substrates."
+      strain: "FY4 (prototrophic S288C background) — a background PLAN.md B.3.3 names"
+      conditions: "aerobic microscale batch (96-deep-well plates), minimal medium, 10 g L-1 of glucose, mannose, galactose or pyruvate"
+      why_it_was_attractive: >-
+        It is the pool's only 13C metabolic flux dataset for a WILD-TYPE strain, and it quantifies
+        the respiratory-fermentative axis directly, giving biomass yield, uptake rate, growth rate
+        and a "degree of respiration" for four substrates — a respiration SERIES, in a background
+        different from both A and C.
+      why_not_shortlisted: >-
+        Microtitre-plate batch cultures; aerobic only; the axis it varies is carbon source, not
+        oxygen; no ethanol or glycerol yields in the physiology table (they are inside the flux
+        additional files); no deposited omics. Against the slot's stated preference it is two steps
+        away (not chemostat, not the oxygen axis) where candidates A and C are each one step away.
+      numbers_worth_keeping_anyway: "recorded in baseline_numbers_found below"
+    - doi: "10.3390/microorganisms10061173"
+      pmid: "35744691"
+      title: "Estimation of Carbon Metabolism in Saccharomyces cerevisiae Acclimatized to Glycerol Assimilation with Quantitative PCR."
+      strain: "BY4741 wild type and a glycerol-acclimatized isolate (no.7)"
+      why_it_was_attractive: >-
+        It is the ONLY paper in the 91 that measures the same strain under both aerobic and
+        anaerobic conditions in one study on a synthetic defined medium — literally the slot's
+        question.
+      why_not_shortlisted: >-
+        The rigour does not survive contact with the requirement. Anaerobiosis is "a test-tube
+        equipped with a silico plug and a tightly held lid"; cultures are test-tube batch with no
+        dilution rate and no mu reported; yields are reported as a "percent yield" against a
+        theoretical titre with no carbon balance; BY4741 is auxotrophic. A number produced this way
+        cannot serve as the atlas's ruler, and admitting it would set the standard the rest of the
+        layer is read against far too low. Recorded below under flagged_not_usable_as_baseline.
+    - doi: "10.1128/aem.02330-23"
+      pmid: "38587374"
+      title: >-
+        Saccharomyces cerevisiae strains performing similarly during fermentation of lignocellulosic
+        hydrolysates show pronounced differences in transcriptional stress responses.
+      strains: "CEN.PK113-7D, Ethanol Red, KE6-12, LBCM31, LBCM109"
+      why_it_was_attractive: >-
+        The differentiation brief asks for one candidate offering deposited omics; this is the
+        pool's best omics offer, with RNA-seq of five backgrounds including both CEN.PK113-7D and
+        Ethanol Red grown anaerobically side by side, which would also serve slots 5 and 7.
+      why_not_shortlisted: >-
+        The only condition is 70% wheat straw hydrolysate. There is no defined-medium reference
+        condition anywhere in the study, so its physiology is a STRESS phenotype, not a baseline —
+        it belongs to E4 or to the industrial-strain slot, not to the slot everything else is read
+        against. It also reports mu_max and final titres but no yields and no carbon balance.
+
+baseline_numbers_found:
+
+  note: >-
+    The best-conditioned values found anywhere in the 91-paper pool, including papers not
+    shortlisted. Per rule 4, each carries its oxygen regime and its dilution rate or specific
+    growth rate. Values that cannot carry both are in flagged_not_usable_as_baseline below, not here.
+
+  aerobic:
+
+    - basis: "aerobic, ethanol-limited CHEMOSTAT — the best-conditioned aerobic values in the pool"
+      strain: "CEN.PK113-7D"
+      publication: "doi:10.1093/femsyr/fow006"
+      dilution_rate: "0.048 +/- 0.001 h-1 measured (0.05 h-1 set)"
+      oxygen_regime: "aerobic, air-sparged 500 mL min-1, 800 rpm"
+      medium: "synthetic medium after Verduyn et al., 6 g L-1 ethanol in feed, pH 5.0, 30 C"
+      limitation: "ethanol-limited"
+      values:
+        biomass_yield: "0.57 +/- 0.01 g biomass (g ethanol)-1"
+        q_ethanol: "-1.81 +/- 0.04 mmol (g biomass)-1 h-1"
+        q_O2: "-3.38 +/- 0.14 mmol (g biomass)-1 h-1"
+        q_CO2: "1.62 +/- 0.06 mmol (g biomass)-1 h-1"
+        respiratory_quotient: "0.48 +/- 0.00 mol CO2 (mol O2)-1"
+        q_glycerol: "0.029 +/- 0.001 mmol (g biomass)-1 h-1"
+        carbon_recovery: "100 +/- 4 %"
+      caveat: >-
+        Carbon source is ETHANOL. These are the atlas's best aerobic numbers, but they are not a
+        glucose baseline and must never be compared with a glucose yield without restating the basis.
+      evidence:
+        - quote: "Biomass yield | g biomass g ethanol−1 | 0.57 ± 0.01 | 0.60 ± 0.00"
+        - quote: "Respiratory quotient | molCO2 molO2−1 | 0.48 ± 0.00 | 0.42 ± 0.02"
+        - quote: "Carbon recovery | % | 100 ± 4 | 96 ± 1"
+
+    - basis: "aerobic, glucose-excess BATCH on defined medium — best aerobic GLUCOSE yields in the pool"
+      strain: "DS58227 (industrial wild type, DSM)"
+      publication: "doi:10.1186/s13068-018-1231-8"
+      specific_growth_rate: "0.30 +/- 0.007 h-1 (first exponential phase); no dilution rate — batch"
+      oxygen_regime: >-
+        stated aerobic in Results and table caption; Methods describe the cultivation system as
+        microaerobic water-locked shake flasks — FLAGGED as internally inconsistent
+      medium: "minimal medium based on Verduyn, 20 g L-1 d-glucose, pH 4.2, 30 C"
+      limitation: "none — glucose excess"
+      values:
+        ethanol_yield: "1.25 +/- 0.22 mol (mol glucose)-1 — i.e. 62 or 63 % of the 2 mol/mol ceiling (percentage computed here, not stated in the paper)"
+        glycerol_yield: "0.02 +/- 0.08 mol (mol glucose)-1"
+        acetate_yield: "0.01 +/- 0.02 mol (mol glucose)-1"
+        biomass_yield: "0.015 +/- 0.001 gCDW (mmol glucose)-1 (paper's unit; not converted to g g-1 here)"
+        q_glucose: "-20.61 +/- 1.01 mmol (gCDW h)-1"
+        q_ethanol: "25.74 +/- 3.20 mmol (gCDW h)-1"
+      why_it_matters_to_the_project: >-
+        This is the aerobic counterpart to the project's existing anaerobic chemostat finding, in
+        the SAME unit: 1.25 mol/mol aerobic glucose-excess batch against 1.56 mol/mol anaerobic
+        sugar-limited chemostat at D = 0.05 h-1 for IMU032. The gap between those two numbers is
+        the slot's substance, and it is carried by oxygen regime AND by growth rate together — a
+        further reason a yield quoted without both is not interpretable.
+      evidence:
+        - quote: "Yethanol/glucose (mol/mol) | 1.25 (± 0.22) | 1.22 (± 0.14) | 1.21 (± 0.06)"
+        - quote: "µ (h−1) (1st exp. phase) | 0.30 (± 0.007) | 0.36 (± 0.002) | 0.33 (± 0.014)"
+
+    - basis: "aerobic BATCH on minimal medium, 13C-constrained — a wild-type Crabtree reference in the S288C background"
+      strain: "FY4 (prototrophic S288C)"
+      publication: "doi:10.1186/1752-0509-4-12"
+      specific_growth_rate: "0.33 +/- 0.01 h-1 on glucose; no dilution rate — batch"
+      oxygen_regime: "aerobic microscale batch cultures (96-deep-well plates)"
+      medium: "minimal medium, 10 g L-1 glucose (or mannose, galactose, pyruvate)"
+      limitation: "none — substrate excess"
+      values:
+        glucose_uptake_rate: "-16.3 +/- 1.1 mmol (g h)-1"
+        biomass_yield: "0.11 +/- 0.01 g(cdw) (g glucose)-1"
+        degree_of_respiration_on_glucose: "0.00 +/- 0.00 AU"
+        contrast_pyruvate: "0.45 +/- 0.04 g(cdw) g-1, mu 0.10 +/- 0.01 h-1, degree of respiration 13.30 +/- 2.66 AU, aerobic"
+      why_it_matters: >-
+        It quantifies the fully-fermentative end of the aerobic axis (degree of respiration 0.00 on
+        glucose at mu 0.33 h-1) and the fully-respiratory end (pyruvate) in one strain and one
+        medium, which is the nearest thing in the pool to an internal calibration of the Crabtree
+        effect. The four-fold spread in biomass yield (0.11 to 0.45 g g-1) across substrates at
+        constant oxygen regime is a useful warning that "aerobic" alone does not fix a yield.
+      evidence:
+        - quote: "c-source | uptake rate [mmol/g/h] | biomass yield[g(cdw)/g(c - source)] | growth rate [1/h] | degree of respiration [AU]"
+        - quote: "glucose | -16.3 ± 1.1 | 0.11 ± 0.01 | 0.33 ± 0.01 | 0.00 ± 0.00"
+        - quote: "pyruvate | -2.5 ± 0.4 | 0.45 ± 0.04 | 0.10 ± 0.01 | 13.30 ± 2.66"
+
+  anaerobic:
+
+    - basis: "anaerobic, N2-sparged bioreactor BATCH on defined mineral medium — best anaerobic values in the pool"
+      strain: "BP000 and BP10001 (CEN.PK background, XR/XDH/XK integrated)"
+      publication: "doi:10.1186/1475-2859-9-16"
+      specific_growth_rate: "mu_max on glucose reported as 0.29 h-1 for BP10001; no dilution rate — batch"
+      oxygen_regime: "anaerobic, nitrogen sparged at 0.65 L min-1, ergosterol and Tween-80 supplied"
+      medium: "mineral medium after Jeppsson et al. plus anaerobic growth factors, pH 5.0, 30 C"
+      limitation: "none — 10 g L-1 glucose plus 10 g L-1 xylose batch"
+      values:
+        ethanol_yield_glucose_phase: "0.36 g (g glucose)-1 for both strains"
+        glycerol_yield_glucose_phase: "0.12 g g-1 (BP000); 0.11 g g-1 (BP10001)"
+        acetate_yield_glucose_phase: "0.009 g g-1 (BP000); 0.010 g g-1 (BP10001)"
+        q_glucose: "3.0 g (g CDW h)-1 (BP000); 2.9 (BP10001)"
+        carbon_recovery: "101 % (BP000); 97 % (BP10001)"
+      caveats:
+        - "Xylose was present in the broth throughout the glucose phase."
+        - "Strains are engineered; the CEN.PK parent was not run alongside."
+        - "No measured biomass yield for this phase — see flagged_not_usable_as_baseline."
+        - >-
+          The g/g ethanol yield converts to roughly 1.4 mol/mol on a molar basis, but the paper does
+          not state a molar yield and the conversion is not recorded as a paper-derived number here.
+      evidence:
+        - quote: "q[g/g CDW/h]a | 3.0 | 2.9 | 0.05 | 0.05"
+        - quote: "Yethanol[g/g] | 0.36 | 0.36 | 0.23 | 0.30"
+        - quote: "Yglycerol[g/g] | 0.12 | 0.11 | 0.072 | 0.023"
+        - quote: "C-recovery [%] | 101 | 97 | 108 | 107"
+
+    - basis: "anaerobic batch, multiple backgrounds — growth rates only, hydrolysate medium"
+      strains: "CEN.PK113-7D, KE6-12, Ethanol Red, LBCM31, LBCM109"
+      publication: "doi:10.1128/aem.02330-23"
+      specific_growth_rate: "0.16 +/- 0.1 h-1 (CEN.PK113-7D); 0.17 +/- 0.0 h-1 (Ethanol Red); no dilution rate — batch"
+      oxygen_regime: "anaerobic shake flasks"
+      medium: "minimal medium containing 70% (wt/wt) wheat straw hydrolysate — NOT a clean defined medium"
+      values:
+        dcw: "2.7 +/- 0.5 g L-1 (CEN.PK113-7D); 3.2 +/- 0.1 g L-1 (Ethanol Red)"
+        final_ethanol_titre: "32.8 +/- 0.9 g L-1 (CEN.PK113-7D); 32.2 +/- 0.8 g L-1 (Ethanol Red)"
+      caveat: >-
+        Titres, not yields, and in an inhibitory medium. Usable as a cross-background growth-rate
+        anchor under stress; NOT usable as the baseline the rest of the layer is read against.
+      evidence:
+        - quote: "CEN.PK113-7D | 2.7 ± 0.5 | 0.16 ± 0.1 | 0.7 ± 0.1 | 19.6 ± 0.3 | 0.6 ± 0.0 | 7.0 ± 0.0 | 32.8 ± 0.9"
+        - quote: "Ethanol Red | 3.2 ± 0.1 | 0.17 ± 0.0 | 0.6 ± 0.0 | 19.4 ± 0.1 | 0.3 ± 0.2 | 5.5 ± 0.4 | 32.2 ± 0.8"
+
+  flagged_not_usable_as_baseline:
+
+    - value: "biomass yield on glucose 0.10 g g-1, anaerobic"
+      publication: "doi:10.1186/1475-2859-9-16"
+      why_flagged: >-
+        Not measured. It is an assumption read off a figure and used to control a fed-batch feed
+        rate: the text says YXS "was assumed from data in Figure to be 0.10 (g/g)". Recording it as
+        an anaerobic biomass yield would put an assumed number into the atlas as a measurement.
+      evidence:
+        - quote: >-
+            "YXSis the yield coefficient for biomass formation from glucose which was assumed from
+            data in Figure to be 0.10 (g/g)"
+
+    - value: "ethanol percent yield 92.0 +/- 4.7 % anaerobic / 8.1 g L-1 aerobic titre, BY4741"
+      publication: "doi:10.3390/microorganisms10061173"
+      why_flagged: >-
+        No dilution rate and no specific growth rate; test-tube batch; anaerobiosis achieved with "a
+        tightly held lid"; the yield is a percentage of a theoretical titre with no carbon balance.
+        This is the pool's only same-strain aerobic-vs-anaerobic comparison, which is exactly why it
+        is tempting — and exactly why it should be flagged rather than recorded. If the owner wants
+        the comparison, take it as a qualitative direction, not as a number.
+      evidence:
+        - quote: >-
+            "Aerobic and anaerobic conditions were created with a test-tube equipped with a silico
+            plug and a tightly held lid."
+        - quote: >-
+            "The theoretical ethanol yield from 20 g·L−1 of glucose was 10.2 g·L−1, and wildtype and
+            no.7 displayed 92.0 ± 4.7% and 92.4 ± 4.7% of the percent yield of ethanol in the
+            culturing condition under the anaerobic condition in this study."
+
+    - value: "ethanol yield 0.39 to 0.40 g g-1 on total sugars"
+      publication: "doi:10.1186/1754-6834-7-49"
+      why_flagged: >-
+        Anaerobic and the medium is defined M-medium for the reference cultures, but the quoted
+        yields are from wheat straw HYDROLYZATE fermentations, and no dilution rate or mu is
+        attached to them in the abstract statement. A hydrolysate yield is a process number, which
+        is precisely the conflation the project already identified.
+      evidence:
+        - quote: >-
+            "With all strains, yield coefficients based on total sugar consumed were high for
+            ethanol (0.39 to 0.40 g/g) and notably low for fermentation by-products (glycerol: ≤0.10
+            g/g; xylitol: ≤0.08 g/g; acetate: 0.04 g/g)."
+
+pool_assessment:
+
+  is_20_fillable_at_chemostat_standard: >-
+    No. Not remotely. At the stated preference — chemostat, defined medium, CEN.PK — the E3 pool
+    of 91 yields ONE paper, and that one is aerobic and on ethanol rather than glucose. If
+    "chemostat-grade" is relaxed to "bioreactor with a stated oxygen regime, a defined medium and a
+    reported carbon balance", the pool yields roughly three to five. If relaxed again to "defined
+    medium, stated oxygen regime, yields reported with a growth rate", perhaps eight to twelve. The
+    20-publication budget cannot be spent at the standard the slot asks for, and the shortfall is
+    the finding — PLAN.md's own rule applies: an unspent share is reported, not consumed.
+
+  why_the_pool_looks_like_this: >-
+    The pool is dominated by lignocellulose and strain-engineering papers — xylose and arabinose
+    utilisation, cellulase secretion, hydrolysate tolerance, ALE. Reference physiology appears in
+    them only as a control arm, which is why every candidate above is somebody else's control. That
+    is not a defect in the discovery; it reflects what "wild-type baseline" papers look like in a
+    corpus assembled around ethanol production. But it means the slot's ruler will be a by-product
+    of an engineering study unless the pool is widened.
+
+  the_finding_that_matters_most: >-
+    THE PAPERS THE SLOT WANTS ARE IN THE CORPUS BUT NOT IN THE E3 POOL. A corpus-wide search for
+    anaerobic sugar-limited or glucose-limited chemostat cultures returns seven documents, of which
+    at least four are Delft-lineage studies carrying reference-strain anaerobic chemostat
+    physiology, and NONE of them is tagged E3. They were therefore outside the pool I was permitted
+    to shortlist from. Before the owner picks from the three candidates above, it is worth deciding
+    whether these should be re-tagged into E3 — one of them appears to carry precisely the
+    dilution-rate series plus deposited transcriptome data that the differentiation brief asks for
+    and that no pool candidate can supply.
+  out_of_pool_papers_worth_retagging:
+    - doi: "10.1186/s13068-023-02329-9"
+      corpus_file: "00804.txt"
+      title: >-
+        Quantification and mitigation of byproduct formation by low-glycerol-producing Saccharomyces
+        cerevisiae strains containing Calvin-cycle enzymes.
+      what_it_appears_to_carry: >-
+        anaerobic glucose-limited chemostat cultures of a reference strain (IME324) AND an
+        engineered strain at THREE dilution rates, with transcriptome data from those same cultures
+        — a dilution-rate series with omics, which is the ideal third candidate the E3 pool cannot
+        provide
+      evidence:
+        - quote: >-
+            "In anaerobic, glucose-limited chemostat cultures of strains IMX1489 and IME324 grown at
+            0.05, 0.1 and 0.25 h−1, transcript levels of DAN1 and prk expressed from the DAN1
+            promoter did not show a significant correlation with specific growth rate (Fig. )."
+      note: "Not read in full; surfaced by corpus-wide search only. Nothing here is verified."
+    - doi: "10.1186/s13068-017-1001-z"
+      corpus_file: "00747.txt"
+      title: >-
+        Optimizing anaerobic growth rate and fermentation kinetics in Saccharomyces cerevisiae
+        strains expressing Calvin-cycle enzymes for improved ethanol yield.
+      what_it_appears_to_carry: >-
+        anaerobic glucose-limited chemostats across a range of dilution rates with an isogenic
+        non-engineered reference strain (IME324), explicitly relating specific growth rate to
+        product yields
+      evidence:
+        - quote: >-
+            "The performance of the constructed strains was quantitatively analysed in anaerobic
+            glucose-limited chemostats and batch cultures."
+      note: "Not read in full. Nothing here is verified."
+    - doi: "10.1186/1754-6834-6-125"
+      corpus_file: "00606.txt"
+      title: "Carbon dioxide fixation by Calvin-Cycle enzymes improves ethanol yield in yeast."
+      what_it_appears_to_carry: "anaerobic sugar-limited chemostats with an isogenic reference strain and ethanol/glycerol yields"
+      evidence:
+        - quote: >-
+            "Therefore, ethanol and glycerol yields of PRK- and Rubisco-expressing S. cerevisiae were
+            compared to those of an isogenic reference strain in anaerobic, sugar-limited chemostats"
+      note: "Not read in full. Nothing here is verified."
+    - doi: "10.1186/s12934-016-0465-z"
+      corpus_file: "00670.txt"
+      title: >-
+        Improving ethanol yield in acetate-reducing Saccharomyces cerevisiae by cofactor engineering
+        of 6-phosphogluconate dehydrogenase and deletion of ALD6.
+      what_it_appears_to_carry: >-
+        an analysis built on anaerobic glucose-limited chemostat cultures of WILD-TYPE S. cerevisiae
+        at a fixed specific growth rate of 0.10 h-1
+      evidence:
+        - quote: >-
+            "Calculations were based on a previous analysis of anaerobic, glucose-limited chemostat
+            cultures of wild-type S. cerevisiae growing at a fixed specific growth rate of 0.10 h−1 []."
+      note: "Not read in full. Nothing here is verified."
+
+  recommendation_on_the_budget: >-
+    Spending 20 on this slot from this pool would mean admitting hydrolysate fermentations and
+    sealed-tube batches as reference physiology, which would lower the standard everything else in
+    the ethanol layer is read against. The cheaper and better move is to re-tag the anaerobic
+    chemostat papers already in the corpus into E3 and re-run the shortlist for the anaerobic half,
+    then spend a small number — five to eight — on genuinely comparable studies and report the
+    unspent share.
+
+provenance:
+  produced_by: "literature shortlisting pass for slot 1 (criterion E3), read-only"
+  pool_file: "scratchpad ethanol/E3.json — 91 readable candidates with stored full text"
+  what_was_read: >-
+    All 91 texts were scanned mechanically for condition and physiology vocabulary; 11 were read in
+    full or in the depth needed to settle conditions and numbers; 3 were shortlisted.
+  quote_handling: >-
+    Every quote was taken verbatim from the stored full text, including the empty bracket pairs and
+    run-together words that the stored text contains where citations and italics were stripped. No
+    quote is spliced with an ellipsis; where two passages are needed they are listed separately.
+  not_done:
+    - "Nothing under data/ was read or modified."
+    - "No confidence value is written anywhere in this file."
+    - "Nothing is marked accepted or verified; the owner picks one candidate."

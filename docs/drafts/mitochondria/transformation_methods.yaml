@@ -1,0 +1,735 @@
+# Transformation method records — how a construct actually gets into yeast mtDNA, in whose hands,
+# at what cost, and whether anybody checked that it stayed there.
+#
+# MITOCHONDRIAL_PROGRAM.md §3 budgets this as "~30–60 papers" and §2.4 names the fields:
+# technique, recipient_state, marker, recoded_for_table_3, heteroplasmy_achieved,
+# generations_to_homoplasmy, stability_tested. This file is that table, built from the 1,309
+# readable stored full texts.
+#
+# THE HEADLINE, and it is a downward correction. There are FIFTEEN papers in this corpus that
+# report a yeast mitochondrial transformation the authors themselves performed. Not 30–60. The
+# earlier keyword sweep that found 43 documents mentioning biolistic/microprojectile/bombardment
+# was counting the word, not the experiment: of those 43, most are plant or algal chloroplast
+# transformation, Cryptococcus or C. elegans nuclear biolistics, or reviews citing the yeast
+# technique in passing. §3's size estimate was written from the technique's reputation. The
+# corpus says the technique is practised by a handful of groups, nearly all of them working from
+# one ρ0 kar1-1 strain out of one laboratory. That is a finding about who to ask, which is what
+# §3 said this table was for.
+#
+# THE NUMBER THE PROGRAMME ASKED FOR. "Efficiency is transformation's binding constraint" and the
+# corpus yields exactly ONE reported frequency, from the one paper written as a protocol rather
+# than as a result:
+#
+#     "In our hands only around 0.1% of the tested colonies contained the mitochondrial plasmid
+#      and could restore fully functional Cox2."   — doi:10.1016/j.xpro.2022.101359
+#
+# That is 0.1% of the NUCLEAR (Leu+) transformants recovered from a shot, not 0.1% of cells shot,
+# and it is a screening yield, not a transformation frequency. Every other number in this file is
+# operational scale rather than efficiency: 10^9 cells per shoot, seven plates per bombardment, a
+# few hundred nuclear transformants per plate, at least 1,000 colonies to restreak and screen.
+# Fourteen of the fifteen papers report NO efficiency at all — they report the strain they got.
+# See `efficiency` at the foot for what those numbers do and do not license.
+#
+# WHAT §2.4 GETS RIGHT: the five-step route is confirmed, almost step for step, by thirteen of the
+# fifteen records. Construct on a pUC/pJM2-family plasmid → biolistic bombardment of a ρ0 kar1-1
+# recipient → synthetic ρ- clone → cross to a mit- ρ+ strain → recombination and mitotic
+# segregation. It is not a reconstruction from memory; it is what these labs write down.
+#
+# WHERE §2.4 IS WRONG OR THIN, three places:
+#
+#   1. `marker` is not one field. Every classical record uses TWO tiers, and they do different
+#      jobs. A nuclear marker (LEU2 on pRS315 or Yep351, URA3 on pYES2) on a CO-BOMBARDED plasmid
+#      SELECTS the shot — it is what makes any colony at all appear. The mitochondrial event is
+#      then SCREENED, not selected: the candidate is mated to a tester carrying a mit- lesion
+#      (cox2-62, cox2-75c, cox2-22, cox2-208, cox3-10) and scored for respiratory rescue of the
+#      diploid. Nothing selects the mitochondrial transformant directly, which is precisely why
+#      1,000 colonies have to be restreaked by hand. §2.4's selection-marker note (mit-
+#      complementation, or ARG8m) describes the SECOND tier only. The schema needs
+#      `nuclear_selection_marker` and `mitochondrial_screen` as separate fields.
+#
+#   2. Homoplasmy is the CHEAP step, and the corpus gives it a number. §2.4 treats "select and
+#      screen for homoplasmy by mitotic segregation" as a step to design around. Three independent
+#      papers say it happens by itself in roughly ten to forty divisions with no selection at all:
+#      "about a dozen mitotic divisions" (doi:10.1242/dmm.049783), "20-40 generations"
+#      (doi:10.1016/bs.mie.2024.07.028), "two passages" (doi:10.1038/s41598-023-36637-9). Yeast
+#      does not stably hold heteroplasmy, and that is a gift, not an obstacle. The expensive step
+#      is upstream: getting the plasmid into a mitochondrion at all.
+#
+#   3. `stability_tested` is the field this corpus mostly cannot fill, and §2.4's own instruction
+#      — "insert stability must be tested over generations rather than assumed, especially under
+#      non-selective conditions" — is met by NOBODY for a classical homoplasmic integrant. Of
+#      fifteen records, thirteen confirm the integration once, by PCR and sequencing, and stop.
+#      Two tested persistence over generations, and neither is a homoplasmic chromosomal insert:
+#      an autonomous Cas9 Edit Plasmid (doi:10.7717/peerj.8362) and a transplanted mouse mtDNA
+#      (doi:10.4014/jmb.2004.04033). Both LOST it. See `contradictions` and `open_gaps`.
+#
+# EVERY QUOTE BELOW is a single verbatim span of one stored full text, sliced from the text by
+# offset rather than retyped, and re-resolved in that text after this file was parsed: 50 spans,
+# 50 exact single-occurrence matches. Quotes are written as double-quoted YAML scalars, not folded
+# ones, because several come from PDF text layers where the line wraps and the private-use rho
+# glyph (U+F072) are part of the string and folding would silently destroy them. No quote here
+# splices two passages; where two passages are needed, there are two strings.
+
+version: 1
+zone: R
+question: "What does it actually take to put a construct into yeast mtDNA, and does it stay there?"
+answer_in_one_line: >-
+  Thirteen papers run §2.4's route almost verbatim, one number exists for its efficiency (0.1% of
+  screened colonies), homoplasmy arrives free in about a dozen divisions, and nobody has tested
+  whether a mtDNA insert survives non-selective growth — which is the condition DUET would use it
+  under.
+
+corpus_searched:
+  stored_full_texts: 1309
+  documents_matching_biolistic_keywords: 43
+  documents_reporting_a_transformation_the_authors_performed: 15
+  note: >-
+    The 43 is the earlier keyword count and it is reproduced here so the gap is visible rather than
+    quietly corrected. Searches run: biolistic|microprojectile|bombard; kar1-1|cytoduct; synthetic
+    rho|rho0 strain|transformed into rho; mitochondrial transformation phrasings; and
+    transformation/transformant within 80 characters of frequency/efficiency/rate, required to
+    co-occur with "mitochondri". Greek rho was searched as ρ, rho, and the private-use glyph U+F072
+    together, because doi:10.1016/bs.mie.2024.07.028 renders it that way throughout its body text
+    and a plain ρ search misses its entire methods section.
+
+# =============================================================================== the records
+
+records:
+
+  - publication: doi:10.1016/j.xpro.2022.101359
+    year: 2022
+    journal: STAR protocols
+    what_they_did: "step-by-step protocol; recoded nanoluciferase (mtnLuc) added as a ninth ORF via pPT24"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "Bio-Rad Biolistic PDS-1000/He, tungsten microcarriers"
+    recipient_strain: MOY160
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "MOY457 (ρ+ cox2-62)"
+    nuclear_selection_marker: "LEU2 on co-bombarded pRS315 (SD-Leu)"
+    mitochondrial_screen: "mate to cox2-62 tester; score respiratory growth of the diploid on YPG"
+    marker_costs_a_locus: false
+    recoded_for_table_3: true
+    heteroplasmy_achieved: "transient by design — recombination in the zygote, then segregation"
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: "~0.1% of tested colonies; at least 1,000 colonies restreaked; 7 bombardment plates per transformation"
+    evidence:
+      - "Biolistic transformation of the mtDNA has low success rate comparing to nuclear DNA transformation. In our hands only around 0.1% of the tested colonies contained the mitochondrial plasmid and could restore fully functional Cox2. It might therefore be advisable to start with at least 1,000 colonies for screening. We have also observed varying efficiency for cytoductions, which can require further testing to find the best time points, where enough haploid cells are obtained that carry recombined mitochondrial genomes."
+      - "The success rate of biolistic transformation with the selection plasmid pRS315 is high, but low for penetrating mitochondria with pPT24-mtnLuc plasmid. If no colonies are positive after step 11, one has to test more colonies."
+      - "MOY160: S. cerevisiae strain Mat α, ade2-101, Δleu2, ura3-52, Δarg8::URA3, kar1-1; mtDNA: rho0"
+      - "MOY457: S. cerevisiae strain Mat a, lys2, Δarg8::hisG, ura3-52, leu2-3,112; his3ΔHinDIII; mtDNA: cox2-62, rho+"
+      - "Identification of the transformants is a key aspect of the method. Here, a two-step procedure is used (). First, general transformants are identified with the help of a nuclear plasmid that carries a selection marker cassette that reverts leucine auxotrophy. The plasmid is co-delivered with pPT24 into cells during the biolistic transformation. Next, mitochondrial transformants are identified by regain of respiratory growth. Because recombination restores the damaged COX2 gene, cells that show respiratory competence have obtained the transformed plasmid ()."
+      - "To express the reporter gene from mitochondrial DNA, its nucleotide sequence has to be recoded to match mitochondrial codon usage."
+      - "4.Restreak at least 1,000 colonies from the biolistic plates to SD-Leu plates (approximately 100 colonies per plate)."
+      - "During the cytoduction, exchange of cytoplasmic organelles occurs regularly, in our hands this process starts around 3 h 30 min after the two strains were mixed. On the other hand, nuclear genomes’ recombination is delayed by around 30 min. This timeframe between 3 h 30 min and 4 h allows for stopping the cytoduction, when the mitochondrial transfer occurred, but the original nuclear genomes are maintained."
+      - "However, the flanking sequences of COX2 could be advantageous because they are rather short, which can decrease the probability of spontaneous rearrangements by recombination."
+    why_it_matters: >-
+      The only paper in the corpus that states a mitochondrial transformation efficiency, and the
+      only one that states it as a failure rate rather than a success. Read the two numbers
+      together: the nuclear shot works well, the mitochondrial hit is ~1 in 1,000 of what the shot
+      produces, and the gap is bridged by hand-restreaking colonies. That is the throughput
+      §2.4 calls "a handful of constructs rather than a library", quantified — and it also prices
+      the labour, which §2.4 does not. Two further things this protocol alone supplies: a
+      cytoduction timing window of 3 h 30 min to 4 h, narrow enough that the paper warns it varies
+      between hands; and the only stability-adjacent design argument in the whole file, that SHORT
+      COX2 flanks are preferred because long ones invite spontaneous recombination. That is a
+      construct-design rule DUET can use immediately, and it points the same way as the
+      instability actually observed in doi:10.26508/lsa.202301965.
+
+  - publication: doi:10.1091/mbc.e17-09-0560
+    year: 2018
+    journal: Molecular biology of the cell
+    what_they_did: "point mutation (COX2 W56R) placed in mtDNA, to compare against the same protein expressed allotopically"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "high-velocity micro projectile bombardment (device not named)"
+    recipient_strain: DFS160
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "SCS188A (ρ+ cox2-75c) for the screen; EHW154 (ρ+ cox2-208::ARG8m) for the cytoduction"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: "rescue of respiratory growth on mating to the cox2 deletion strain; cytoductants selected on YPEG as haploids"
+    marker_costs_a_locus: true
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "The COX2 mitochondrial gene expressing the protein with the W56R mutation (mtCox2W56R) was constructed using site-directed mutagenesis (QuikChange II site-directed mutagenesis kit, Agilent Technologies) on the pJM2 plasmid (). This plasmid was transformed by high-velocity micro projectile bombardment into the ρ0 strain DFS160 (). Transformants were selected by their ability to rescue respiratory growth when mated with the strain SCS188 carrying a partial deletion of cox2. Transformants with the mtCox2W56R plasmid were mated with the EHW154 strain and cytoductants were selected for their ability to grow in YPEG as haploids. Correct integration of the mtCox2W56R construct into mtDNA was confirmed by PCR and DNA sequencing."
+      - "DFS160 | D273-10B; MATα, arg8Δ::ura3, ura3-52, leu2Δ, ade2-101, kar1-1, [rho0] | Thomas D. Fox, Cornell University"
+      - "EHW154 | D273-10B; MATa, lys2, arg8::hisG, ura3-52, leu2-3, 112,his3-ΔHindIII, [rho+] cox2-208::ARG8m | Thomas D. Fox, Cornell University"
+      - "SCS188A | D273-10B; MATa, ade2-101, ura3-52, kar1-1, [rho+] cox2-75c | Thomas D. Fox, Cornell University"
+    why_it_matters: >-
+      This is the reference implementation of §2.4's route and the strain table is the reason to
+      keep it: DFS160, SCS188A and EHW154 are all attributed, in the paper's own source column, to
+      Thomas D. Fox at Cornell University. Three of the four components of the classical workflow
+      come from one laboratory, which makes the reagent supply a named single point of failure
+      rather than a vague one.
+      Note also what this paper does NOT record: no nuclear co-selection marker is named, no
+      efficiency, no generation count, and integration is confirmed once by PCR and sequencing.
+      That silence is the norm across the whole table.
+
+  - publication: doi:10.1016/bs.mie.2024.07.028
+    year: 2024
+    journal: Methods in enzymology
+    what_they_did: "two successive biolistic transformations to build the BiG Mito-Split-GFP strain RKY176 (GFPß1-10 at the ATP6 locus, ATP6 itself re-provided at COX2)"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "biolistic bombardment (device not named); 10^9 cells per shoot"
+    recipient_strain: DFS160
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "RKY83 (ρ+ atp6::ARG8m cox2-62); NB40-3C (ρ+ cox2-62) as the screening tester"
+    nuclear_selection_marker: "LEU2 on co-bombarded Yep351 (biolistic medium lacking leucine)"
+    mitochondrial_screen: "Gly+ clones after crossing to a lawn of NB40-3C; re-crossed for confirmation, repeatedly"
+    marker_costs_a_locus: false
+    recoded_for_table_3: true
+    heteroplasmy_achieved: "transient — recombination then mitotic segregation after the cross"
+    generations_to_homoplasmy: "20–40 generations (stated for the RKY83 construction cross)"
+    stability_tested: false
+    efficiency_reported: "no frequency; 10^9 cells shot per bombardment, and purification needs repeating a few times"
+    evidence:
+      - "pUC19-based plasmid. This plasmid must be introduced by the biolistic transformation \n(Bonnefoy & Fox, 2002) inside the mitochondria of a yeast strain totally lacking mtDNA \n(0) and bearing kar1-1 mutation in the nuclear KAR1 gene, which block the fusion of \nthe nuclei during crossing with another haploid strain  (Conde & Fink, 1976) ."
+      - "This plasmid was introduced by the biolistic \nbombardment into the DFS160 strains ( Matkar1-1 [0]) giving the synthetic - strain \nRKY89 (Matkar1-1 [- 5`UTRCOX2 ATP6 3`UTRCOX2 COX2])."
+      - "Shooting of 10 9 cells of \nthe ρ0 strain DFS160 plated on biolistic medium lacking leucine with plasmids Yep351 \ncontaining the LEU2 gene and pRK49 results in the emergence of nuclear Leu + \ntransformants of which some contain pRK49 in their mitochondria ( ρ- RKY89)."
+      - "The purification of the \nsynthetic - mitochondrial transformants after the biolistic transformation by sub -\ncloning and re -crossing with the NB40 -3C is shown and described in the legend to \nFigure 3"
+      - "Usualy this step \nneeds to be repeated a few times."
+      - "After crossing, cells were allowed to divide during 20-\n40 generations to allow mtDNA recombination and mitotic segregation of the double \nmutation."
+    why_it_matters: >-
+      Two numbers nothing else in the corpus gives. First, the input scale: 10^9 cells are shot to
+      produce a transformant, which combined with the 0.1% screening yield above is the honest
+      arithmetic of this technique. Second, the segregation time — 20 to 40 generations — stated
+      as a deliberate step ("cells were allowed to divide") rather than an observation, which is
+      how §2.4's `generations_to_homoplasmy` should be read: a waiting period you schedule, not a
+      risk you manage.
+      The third fact is the one that costs time and is almost never written down: the synthetic ρ-
+      transformant is not clean when you get it, and the purification step usually has to be
+      repeated. Budget sub-cloning and re-crossing rounds, not a single screen.
+      CAUTION on searching this paper: its body text renders ρ as U+F072 but its figure legends use
+      a real ρ (U+03C1). Both appear in the quotes above, exactly as the source has them.
+
+  - publication: doi:10.15698/mic2018.03.621
+    year: 2018
+    journal: Microbial cell
+    what_they_did: "superfolder GFP added as a ninth ORF via pPT24*, respiration retained"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "particle gun (Biorad); tungsten 0.5 µm, CaCl2/spermidine precipitation"
+    recipient_strain: DFS160
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "a cox2-62 tester strain, then W303 ρ0 as the final host"
+    nuclear_selection_marker: "LEU2 on co-bombarded pRS315 (5 µg), with 10–15 µg of the mitochondrial plasmid"
+    mitochondrial_screen: "cross to cox2-62 tester, screen diploids for respiratory growth — repeated twice more"
+    marker_costs_a_locus: false
+    recoded_for_table_3: true
+    heteroplasmy_achieved: "transient — repopulation of the synthetic ρ- by cytoduction with a cox2-62 ρ+ strain"
+    generations_to_homoplasmy: not_recorded
+    stability_tested: "no — the protein's turnover was measured (chloramphenicol chase), which is a different question"
+    efficiency_reported: none
+    evidence:
+      - "pPT24*-sfGFPm was integrated into the mitochondrial genome via biolistic transformation and homologous recombination."
+      - "Briefly, the rho0 kar1-1 DFS160 strain was grown in YP medium containing 2% raffinose and spread on SD-Leu plates containing sorbitol (1 M). The nuclear marker plasmid pRS315 (5 µg), as well as the pPT24*-sfGFPm (10-15 µg), were precipitated on tungsten particles (100 µl tungsten particle (0.5 µm), 1 M CaCl2, 16 mM spermidine) and spread on flying discs. The particles were bombarded onto a lawn of yeast cells with a particle gun (Biorad, USA). After four to five days positive nuclear transformants were collected on a master plate and crossed to a cox2-62 tester strain . The diploids were screened for respiratory growth. This crossing step was repeated twice with positive clones. Eventually the stable synthetic rho- strain containing pPT24*-sfGFPm was repopulated with mtDNA via cytoduction with a strain containing the cox2-62 mutation. A haploid clone that regained respiratory competence was identified and used to transfer mitochondrial DNA into W303 rho0 to create strain MOY1355"
+    why_it_matters: >-
+      The only record that gives the DNA amounts — 5 µg nuclear marker plasmid against 10–15 µg of
+      the mitochondrial construct, a deliberate 2–3-fold excess of the thing you cannot select for.
+      It also names the third strain move that the shorter methods sections omit: transformant →
+      cox2-62 cytoductant → W303, i.e. the engineered genome is finally walked into a standard
+      laboratory background, which for DUET means the production chassis is reachable but is two
+      crosses downstream of the shot.
+      Read the `stability_tested` value carefully. This paper does measure a decline of sfGFPm over
+      hours — that is protein turnover under translational arrest, and it says nothing about
+      whether the INSERT persists in mtDNA over generations. Conflating the two would be the easy
+      mistake here, and it is the mistake §2.4 is warning against.
+
+  - publication: doi:10.1126/sciadv.abi8886
+    year: 2021
+    journal: Science advances
+    what_they_did: "two independent constructions — COB replaced by ARG8-TetO, and ATP6 C-terminally tagged with mNeonGreen or mKate2"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "PDS-1000/He particle delivery system (Bio-Rad Laboratories)"
+    recipient_strain: "αDFS160"
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "NB40-3C (ρ+ cox2-62) as tester; Δarg8 W303 and MR10 as cytoduction recipients"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: "rescue of the cox2-62 mutation of NB40-3C; then arginine prototrophy (COB construct) or growth on a non-fermentable carbon source (ATP6 constructs)"
+    marker_costs_a_locus: true
+    recoded_for_table_3: true
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "pCO307 was introduced into the kar1-1 strain αDFS160 ρ0 by biolistic transformation with the PDS-1000/He particle delivery system (Bio-Rad Laboratories), and transformants were selected by their ability to rescue the cox2-62 mutation of the strain NB40-3C ()."
+      - "pCO444 and pCJ013 were introduced into the kar1-1 strain αDFS160 ρ0 by biolistic transformation, and transformants were selected by their ability to rescue the cox2 mutation of NB40-3C (). pCO444 and pCJ013 were then cytoducted into the strain MR10 (). Colonies in which ATP6-NG (yCJ043) or ATP6-mKate2 (yCJ120) had successfully integrated into the ATP6 locus were identified by their ability to grow on a non-fermentable carbon source."
+    why_it_matters: >-
+      The clearest worked example of the two-tier marker logic that §2.4 collapses into one field.
+      The cox2-62 rescue is a SCREEN used to find the transformant; arginine prototrophy or
+      respiratory growth is the SELECTION used afterwards to find the integrant. They are different
+      markers, at different steps, doing different jobs, and a schema with a single `marker` column
+      cannot represent this record without losing one of them.
+
+  - publication: doi:10.1242/dmm.049783
+    year: 2023
+    journal: Disease models & mechanisms
+    what_they_did: "eight human MT-ATP6 patient variants rebuilt in the yeast ATP6 gene, in one campaign"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "Biolistic PDS-1000/He particle delivery system (Bio-Rad)"
+    recipient_strain: DFS160
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "MR10 (ρ+ atp6::ARG8m)"
+    nuclear_selection_marker: "LEU2 on co-bombarded Yep351"
+    mitochondrial_screen: "cross-replication onto MR10; recombination replaces ARG8m with the mutant ATP6; respiring clones selected on YPGlyA"
+    marker_costs_a_locus: true
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: "transient, and explicitly stated to be unmaintainable in this organism"
+    generations_to_homoplasmy: "about a dozen mitotic divisions, without selection pressure"
+    stability_tested: false
+    efficiency_reported: "a few hundred Leu+ nuclear transformants per plate (not a mitochondrial frequency); 8 of 8 constructs eventually yielded respiring clones"
+    evidence:
+      - "These plasmids, together with a plasmid (Yep351) carrying the nuclear LEU2 gene, were introduced into the ρ0 strain DFS160 by microprojectile bombardment using a biolistic PDS-1000/He particle delivery system (Bio-Rad) as described (). The Leu+ transformants (a few hundred per plate) were cross-replicated during one night on a rich glucose medium (YPGA) with cells from strain MR10, in which the coding sequence of ATP6 is replaced by the ARG8m genetic marker ()."
+      - "its mitochondrial genome can be modified [using a biolistic particle delivery system ()], and heteroplasmy is highly unstable in this organism, making it possible to isolate strains homoplasmic for a given mtDNA mutation."
+      - "The modified mitochondrial genome then segregates to homoplasmy in about a dozen mitotic divisions (without any selection pressure in rich 10% glucose), giving the strains ρ+ atp6mut used in the experiments described below."
+      - "Respiring clones were obtained with the eight pATP6mut plasmids, and the presence in these clones of the atp6mut mutations was confirmed by DNA sequencing with primers oATP6-1 and oATP6-10 ()."
+    why_it_matters: >-
+      The single most useful record in this file for planning, for two reasons. It is the only one
+      that puts a number on §2.4's homoplasmy step — "about a dozen mitotic divisions (without any
+      selection pressure in rich 10% glucose)" — and it is the only one that reports a CAMPAIGN
+      rather than a construct: eight independent mutant plasmids taken through the route, eight
+      sets of respiring clones. That is the closest thing the corpus offers to a throughput
+      estimate for §2.4's "handful of constructs", and the handful is at least eight in one study.
+      It also states plainly why yeast is the tractable case: heteroplasmy is unstable here. For
+      DUET that cuts both ways — homoplasmy is free, and so is loss.
+      What it does NOT give, and this is the pattern: no mitochondrial transformation frequency.
+      "A few hundred per plate" counts Leu+ nuclear transformants, the denominator, not the hits.
+
+  - publication: doi:10.1038/s41598-023-36637-9
+    year: 2023
+    journal: Scientific reports
+    what_they_did: "the atp8-L13T patient-variant equivalent built into mtDNA at the ATP8 locus"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "Biolistic PDS-1000/He particle delivery system (Bio-Rad)"
+    recipient_strain: DFS160
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "MR6 atp8Δ-ATP6-HisHA / RKY194 (atp8Δ::ARG8m-bearing ρ+)"
+    nuclear_selection_marker: "LEU2 on co-transformed Yep351"
+    mitochondrial_screen: "respiring clones on mating to NB40-3C (cox2 deletion); final integrant scored by glycerol growth plus arginine auxotrophy"
+    marker_costs_a_locus: true
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: "transient"
+    generations_to_homoplasmy: "two passages in rich 10% glucose"
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "To receive the atp8-L13T mutant the pCP1 plasmid was introduced by co-transformation with the LEU2 gene containing plasmid Yep351 into the ρ0 strain DFS160 by microprojectile bombardment using a biolistic PDS-1000/He particle delivery system (Bio-Rad) as described. To learn more about the technique developed by us see. Mitochondrial transformants were identified among the Leu+ nuclear transformants by their ability to produce respiring clones when mated to the non-respiring NB40-3C strain bearing a deletion in the mitochondrial COX2 gene."
+      - "Because the ρ− synthetic strain bears the mutation kar1-1 which blocks the fusion of the nuclei, during the crosses the cytoplasm and the mitochondrial network fuse permitting for homologous recombination between the two mtDNA molecules and the replacement of ARG8m gene present in the ATP8 locus by atp8 sequence bearing atp8-L13T mutation. During the two passages of cells resulting from the crosses in the rich 10% glucose medium the mtDNAs separate till the homoplasmic state."
+    why_it_matters: >-
+      A second, independent statement of the homoplasmy timescale from a different laboratory, in
+      different units — two passages of non-selective growth. Taken with the "dozen divisions" of
+      doi:10.1242/dmm.049783 and the "20-40 generations" of doi:10.1016/bs.mie.2024.07.028, three
+      groups agree that segregation is a matter of days, not a screening problem.
+      It is also the cleanest demonstration of the ARG8m marker being SPENT rather than kept: the
+      final strain is scored for its INABILITY to grow without arginine, because the incoming
+      construct displaced the ARG8m that got it there. The marker is a landing pad, not a
+      permanent tag — a point §2.4's "the marker also needs a locus and a leader" gestures at but
+      does not follow to its conclusion.
+
+  - publication: doi:10.1126/sciadv.aav1848
+    year: 2019
+    journal: Science advances
+    what_they_did: "S. cerevisiae mitochondrial genes swapped for S. uvarum alleles, to map thermotolerance"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "biolistic PDS-1000/He particle delivery system (Bio-Rad)"
+    recipient_strain: "DFS160 (MATα ade2-101 leu2Δ ura3-52 arg8Δ::URA3 kar1-1, rho0)"
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "mitochondrial knockout strains in which the target gene is replaced by ARG8m"
+    nuclear_selection_marker: "LEU2 on co-bombarded pRS315 (CEN)"
+    mitochondrial_screen: "replica-mate to the knockout, replica-plate to YPGly; YPGly+ colonies carry the integrated allele"
+    marker_costs_a_locus: false
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: "transient — heteroplasmy stated elsewhere in the paper to be unstable in yeast, which is what makes the selection work"
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: "construct-level attrition only — 2 of 4 attempted genes yielded allele replacements"
+    evidence:
+      - "The alleles were Gibson-assembled into an ARG8m-baring pBluescript plasmid such that the mitochondrial allele is flanked by 69- and 1113-bp ARG8m sequences at its 5′ and 3′ end, respectively (fig. S6C)."
+      - "We bombarded the mitochondrial plasmid and pRS315 (CEN plasmid carrying LEU2) into S. cerevisiae strain DFS160 (MATα ade2-101 leu2Δ ura3-52 arg8Δ::URA3 kar1-1, rho0) () using a biolistic PDS-1000/He particle delivery system (Bio-Rad) and selected for Leu+ colonies on MM plates."
+      - "The YPGly+ colonies carry a mitochondrial genome with the allele of interest integrated at their endogenous loci."
+      - "We obtained allele replacements for two of the four genes in the region conferring heat tolerance ()."
+    why_it_matters: >-
+      The only per-construct success rate in the corpus, and it is not encouraging: two of four
+      genes attempted. §2.4 says throughput is "a handful of constructs rather than a library";
+      this says that even within a handful, half may not come back, for reasons the paper does not
+      diagnose. A programme planning strategy E should budget attempts, not constructs.
+      The design trick is worth stealing independently of the yield. Rather than borrow a gene's
+      leader, they made ARG8m itself the homology: the incoming allele is flanked by 69 bp and
+      1,113 bp of ARG8m sequence, so the marker previously parked at the target locus IS the
+      recombination substrate. That is a general way to put an arbitrary sequence at an arbitrary
+      mtDNA locus in one cross, and it composes with the neutral-site insertion recorded in
+      activator_map.yaml rather than competing with it.
+
+  - publication: doi:10.1242/jcs.263694
+    year: 2025
+    journal: Journal of cell science
+    what_they_did: "a cox1Δ construct integrated into ρ+ mtDNA, to study COX1 translational activation"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "high-velocity microprojectile bombardment (device not named)"
+    recipient_strain: "Nab69"
+    recipient_state: "ρ° — kar1 allele not stated in this paper, although cytoductants were isolated, which requires one"
+    resident_mtdna_partner: "a ρ+ strain bearing the A114-to-stop mutation in mitochondrial cox2; TF258 for the cytoduction"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: "rescue of respiratory growth on mating to the cox2 nonsense mutant"
+    marker_costs_a_locus: true
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "This plasmid was transformed on Nab69 ρ° by high-velocity microprojectile bombardment (). Mitochondrial transformants were identified by their ability to rescue respiratory growth when mated to a ρ+ strain bearing the A114 to stop mutation in the mitochondrial cox2 gene. The cox1Δ construct was integrated by homologous recombination into ρ+ mtDNA by isolating cytoductants issued from crosses of the transformant to strain TF258 ()."
+    why_it_matters: >-
+      Recorded mainly to establish that the recipient strain is not universally DFS160 — Nab69/NAB69
+      is the second ρ0 lineage in this corpus, shared with doi:10.26508/lsa.202201858. Two
+      independent sources of the critical reagent is a materially better position than one, which
+      is what the strain tables would suggest at a glance.
+      Note the gap the record has to carry honestly: this paper's methods do not state the kar1
+      allele, yet it isolates cytoductants, which the route requires. The field is recorded as not
+      stated rather than inferred.
+
+  - publication: doi:10.26508/lsa.202201858
+    year: 2023
+    journal: Life science alliance
+    what_they_did: "two C-terminal truncations of cytochrome b (CytbΔC8, CytbΔC13) inserted into mtDNA"
+    technique: biolistic_into_rho0_then_cytoduction
+    device: "Biolistic PDS-1000/He Particle Delivery System (BIO-RAD)"
+    recipient_strain: "NAB69"
+    recipient_state: "ρ0"
+    resident_mtdna_partner: "DFM2 (BY4742-derived) and DFM16 (D273-10b-derived), both carrying cytbΔ::ARG8m"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: not_recorded
+    marker_costs_a_locus: true
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "The plasmids were transformed into NAB69 rho0 strain by high-velocity microprojectile bombardment (Biolistic PDS-1000/He Particle Delivery System; BIO-RAD) () to create the Rho-synthetic strains DFM7 and DFM8 containing CYTBΔC13 and CYTBΔC8, respectively. CYTB mutants were inserted into DFM2 (strain derived from BY4742, that has intronless COX1 and the construct cytbΔ::ARG8m) mitochondria by cytoduction to create DFM9 and DFM10."
+      - "The mutants were corroborated by PCR and sequencing."
+    why_it_matters: >-
+      Useful for one structural reason: the same synthetic ρ- donor (DFM7) is cytoduced into two
+      different nuclear backgrounds, BY4742-derived and D273-10b-derived. The engineered mtDNA is
+      therefore portable across chassis by cytoduction alone, without re-bombarding — which is the
+      property that makes the expensive step a one-off. For DUET this is the difference between
+      paying the 0.1% cost once per CONSTRUCT and paying it once per STRAIN.
+      The one-sentence verification quoted above is the entire verification, and it is quoted
+      because it is verbatim the thirteen-record norm: integration is confirmed once, and then
+      nothing is asked about the following generations.
+
+  - publication: doi:10.26508/lsa.202301965
+    year: 2023
+    journal: Life science alliance
+    what_they_did: "ARG8m, and later a recoded COX6, inserted into an AT-rich region downstream of VAR1 under the ATP9 promoter"
+    technique: biolistic_into_rho0_then_cross
+    device: "biolistic transformation (device not named)"
+    recipient_strain: "DFKρ0"
+    recipient_state: "ρ0, kar1"
+    resident_mtdna_partner: "aM9-94/A1 (cox2 tester); MRS-3A (nuclear arg8 null) for the recombinant selection"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: "cross to the cox2 tester, respiratory competence of the diploid"
+    marker_costs_a_locus: false
+    recoded_for_table_3: true
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: "no — but a spontaneous deletion in the insert region was observed and diagnosed"
+    efficiency_reported: none
+    evidence:
+      - "The resultant plasmid, pVAR1/ST12 was introduced into the mitochondria of the kar1 mutant DFKρ0 by biolistic transformation (). The presence of the ARG8m allele in mtDNA was tested by a cross to the cox2 tester aM9-94/A1 and by checking the diploid cells issued from the cross for respiratory competence. The synthetic petite DFK/VAR1/ST12ρ− obtained from the transformation was crossed to MRS-3A, a strain that harbors an arg8 null mutation. Recombinants were selected by their arginine prototrophy, yielding strain aMRS-A9R."
+      - "The strain aMRS-sA9R (s stands for short ATP9 promoter) was obtained by a spontaneous deletion that occurred in the ATP9 promoter region of aMRS-A9R leaving only 11 nucleotides right after the stop codon of VAR1, followed by 410 nucleotides upstream of the methionine initiation codon of ATP9. The deletion probably occurred because of the presence of an identical 44-nucleotide sequence (ATAGTTCCGGGGCCCGGCCACGGGAGCCGGAACCCCGAAAGGAG) in both 5′UTR of ATP9 and 3′UTR of VAR1 that is only about 600 nucleotides away in the aMRS-A9R strain."
+    why_it_matters: >-
+      The only direct observation in this corpus of an engineered mtDNA insert REARRANGING, and the
+      mechanism is named: a 44-nucleotide sequence identical between the ATP9 5'UTR and the VAR1
+      3'UTR, about 600 nucleotides apart in the construct, recombined out and deleted the promoter
+      region between them. Nobody was testing stability; it happened, and they worked out why.
+      This is the empirical form of the warning §2.4 gives in the abstract ("mtDNA is
+      recombinogenic and AT-rich, so insert stability must be tested over generations rather than
+      assumed") and it converts that warning into a checkable design rule: scan a proposed insert
+      for repeats shared with its flanks before synthesising it. It also confirms from the other
+      direction the preference stated in doi:10.1016/j.xpro.2022.101359 for short flanking
+      sequences.
+      A second point for §2.1's map: this is a second neutral insertion site — downstream of VAR1,
+      in an AT-rich region — independent of the pPT24 site upstream of COX2.
+
+  - publication: doi:10.1093/genetics/iyaf037
+    year: 2025
+    journal: Genetics
+    what_they_did: "built the WT and Δcox2::ARG8m mtDNA backgrounds used as the test bed for an allotopic COX2 screen"
+    technique: biolistic_into_rho0_then_cross
+    device: "biolistic transformation (device not named)"
+    recipient_strain: "DFS160 (YCy3894)"
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "NB64/YCy4097 (ρ+ cox2-22)"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: "crossing to the cox2-22 mutant; restored COX2 locus versus the ARG8m deletion strain"
+    marker_costs_a_locus: true
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "Biolistic transformation () was used to deliver constructs containing either the wild-type (WT) COX2 locus or the cox2::ARG8m deletion cassette to the mitochondria of the ρ0 yeast strain DFS160 (strain YCy3894; ). Crossing between respective transformants of DFS160 and a strain carrying a mutant allele of the mitochondrial COX2 gene (cox2-22) (strain NB64/YCy4097) was performed (). This generated a strain with a restored WT COX2 locus (strain YCy5051, referred to as WT) and a Δcox2::ARG8m deletion strain (strain YCy4179)."
+    why_it_matters: >-
+      A 2025 paper still running §2.4's route unchanged and still using DFS160, which is the best
+      evidence in the corpus that the classical workflow is current rather than historical. It is
+      also a reminder of how the technique is usually USED: the mtDNA transformation here is not
+      the experiment, it is the construction of a Δcox2::ARG8m tester so that a much larger
+      nuclear-side screen can be run against it. Most mtDNA transformations in this corpus are
+      infrastructure for something else.
+
+  - publication: doi:10.7554/elife.35330
+    year: 2018
+    journal: eLife
+    what_they_did: "promoter-attenuating point mutations placed in the cox1 and cob promoters of an intronless mtDNA"
+    technique: biolistic_into_rho0_then_cross
+    device: "Biolistic PDS-1000/He particle delivery system (BioRad); Tungsten M-10 microcarriers"
+    recipient_strain: not_recorded
+    recipient_state: "ρ0"
+    resident_mtdna_partner: "a recipient ρ+ strain (not named in the methods passage)"
+    nuclear_selection_marker: not_recorded
+    mitochondrial_screen: not_recorded
+    marker_costs_a_locus: false
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: not_recorded
+    generations_to_homoplasmy: not_recorded
+    stability_tested: false
+    efficiency_reported: none
+    evidence:
+      - "In order to introduce promoter-attenuating mutations into mitochondrial DNA, we followed the protocol described in ) for the integration of altered mtDNA sequences by homologous double crossovers. Briefly, a mutant fragment of mtDNA (in this case promoter sequences) flanked by WT mtDNA sequence is first transformed into a rho0 strain, which is then mated with a recipient rho+ strain. Upon mating, mitochondria from the two strains fuse and recombination between the two mtDNAs produces recombinant rho+ strains in which the new mtDNA sequence is integrated by double crossover. For transformation, tungsten powder was used as a carrier of DNA (Tungsten M-10 Microcarriers #1652266, BioRad, Hercules, CA). Bombardment was performed using the Biolistic PDS-1000/He particle delivery system (BioRad). Cells were transformed with linear DNA fragments obtained by ligation of each mutated promoter region with 500 bp of up- and downstream flanking DNA ()."
+    why_it_matters: >-
+      The one technique variant worth flagging in an otherwise uniform set: the transforming DNA is
+      a LINEAR fragment — the mutated promoter ligated between 500 bp homology arms — not a
+      plasmid. §2.4's route assumes a plasmid carried into a synthetic ρ-, and a linear fragment
+      cannot replicate there, so this is a genuinely different intermediate. It works, and the
+      resulting promoter-attenuated strain is used throughout the paper.
+      Also the only record where no marker at all is described for either tier. Recorded as
+      not_recorded rather than guessed; the reader who needs it should go to the cited protocol
+      rather than to this row.
+
+  - publication: doi:10.7717/peerj.8362
+    year: 2020
+    journal: PeerJ
+    what_they_did: "Cas9 and gRNAs, both recoded for the mitochondrial code and driven by mitochondrial promoters, delivered on an Edit Plasmid that also carries the donor DNA; the plasmid then edits the resident ρ+ genome"
+    technique: cas9_gRNA_edit_plasmid
+    technique_note: "delivered biolistically into ρ0 and crossed into ρ+ like the classical route, but the integration is driven by a Cas9 double-strand break rather than by complementation of a mit- lesion"
+    device: "biolistic microprojectile method"
+    recipient_strain: "MCC109ρ0"
+    recipient_state: "ρ0, kar1-1"
+    resident_mtdna_partner: "MCC125 (cox3-10 ρ+) for the screen; CUY563 or NB80 (wild-type ρ+) as the editing target"
+    nuclear_selection_marker: "URA3 on co-bombarded pYES2 (minimal medium lacking uracil)"
+    mitochondrial_screen: "rescue of the cox3-10 deletion of MCC125 after the cross; screen repeated three times to obtain clean lines"
+    marker_costs_a_locus: false
+    recoded_for_table_3: true
+    heteroplasmy_achieved: "yes, and it stayed heteroplasmic — the Edit Plasmid coexists with wild-type mtDNA and is then lost"
+    generations_to_homoplasmy: "never reached; the paper states homoplasmy as future work"
+    stability_tested: true
+    stability_result: "lost — undetectable within about 30–40 generations in the presence of wild-type mtDNA, without selection"
+    efficiency_reported: "no frequency; editing detected by junction PCR across the two Cas9 sites"
+    evidence:
+      - "The constructs were transformed into a yeast line that lacked mitochondrial DNA (ρ0), MCC109ρ0, using the biolistic microprojectile method as described in . The transformation was performed together with pYES2 (Invitrogen) as a carrier plasmid with URA3 selectable marker, so that URA+ nuclear transformants could be selected first on minimal medium lacking uracil in supplements. To identify mitochondrial transformants, URA+ colonies were assayed for the ability to rescue the cox3 deletion mutation of the ρ+ line, MCC125, after the cross. The URA+ transformants that carried Edit Plasmids in mitochondria through co-transformation events were able to provide the wild-type COX3 fragment to rescue the cox3 deletion by homologous recombination. The screen was repeated three times to obtain clean lines with Edit Plasmids in mitochondria."
+      - "Also, a number of TGG were replaced with UGA, which is a stop codon in the universal codon system but is translated into tryptophan in yeast mitochondria ()."
+      - "Furthermore, the donor DNA was so modified that it did not carry functional gRNA target sites, allowing the stability of the integrated DNA without being excised by further Cas9/gRNAs activity."
+      - "We also showed that Edit Plasmids persist and replicate in mitochondria autonomously for several dozens of generations in the presence of the wild-type genomes."
+      - "This demonstrates that the Edit Plasmid tends to cease its presence in mitochondria in the presence of wild-type mitochondrial DNA within about 30–40 generations."
+      - "Without any positive selection, Edit Plasmids tend to segregate away after many generations as shown for yeast mitochondria in this study. To prolong the activity of Edit Plasmids and to obtain the homoplasmic state of engineered DNA, we plan to test mitochondrial rep/ori elements that are more efficient than the one carried on pBR322 or have a selectable marker on the Edit Plasmid, such as ARG8m for yeast (), to enhance their stability."
+    why_it_matters: >-
+      The only paper in the corpus that measured what §2.4 asks for — whether an engineered element
+      survives generations of NON-SELECTIVE growth — and the answer is no. It falls below detection
+      in about 30 to 40 generations. That single measurement is worth more to a production-strain
+      decision than any of the successful constructions above, because production conditions are
+      non-selective and 30–40 generations is a seed train, not a long experiment.
+      One correction to how this paper was labelled in earlier notes. It is NOT an alternative to
+      biolistic delivery: the Edit Plasmid still goes into a ρ0 kar1-1 recipient by microprojectile
+      bombardment and still reaches the ρ+ genome by a kar1-1 cross. What is genuinely different is
+      what happens after arrival — a Cas9-induced double-strand break drives the donor in, so no
+      mit- lesion has to be complemented and no gene has to be displaced to make room. That is the
+      one route here that could edit mtDNA without spending a locus or a marker.
+      And its own diagnosis of the loss is the actionable part: the plasmid is autonomous and
+      unselected. The authors' proposed fix is to put ARG8m on it. Which returns the design to
+      §2.4's selection problem, from the other side.
+
+  - publication: doi:10.4014/jmb.2004.04033
+    year: 2020
+    journal: Journal of microbiology and biotechnology
+    what_they_did: "an entire mouse mtDNA genome, previously transplanted into yeast mitochondria, moved between yeast strains by spheroplast fusion and its persistence measured"
+    technique: spheroplast_fusion
+    technique_note: "marker-free cytoplasmic transfer; the biolistic step is described in the methods but sourced to a published method, and the new work here is the fusion and the retention assay"
+    device: "chemical (N-ethylmaleimide) inactivation of one partner, then spheroplast fusion; PDS-1000/He named for the transformation"
+    recipient_strain: "3482-16-1 ρ0 derivatives expressing mouse Tfam in place of Abf2"
+    recipient_state: "ρ0"
+    resident_mtdna_partner: none
+    nuclear_selection_marker: "URA3 for the nuclear Tfam insertion; none for the mitochondrial transfer"
+    mitochondrial_screen: "PCR with mouse-mtDNA-specific primers; Southern blot"
+    marker_costs_a_locus: false
+    recoded_for_table_3: not_applicable
+    heteroplasmy_achieved: "not applicable — the recipient is ρ0, so there is no competing genome"
+    generations_to_homoplasmy: not_recorded
+    stability_tested: true
+    stability_result: "more than 75% of cells retained the mouse mtDNA over four days of serial non-selective culture with the native Abf2; 15–25% with mouse Tfam substituted"
+    efficiency_reported: none
+    evidence:
+      - "To transfer the mitochondria containing full mouse mtDNA genomes to the Tfam strain, a method for spheroplast fusion without the use of either nuclear or mitochondrial genetic markers of the partners was employed []."
+      - "Yeast mitochondrial transformation was carried out according to a published method using a biolistic transformation apparatus, PDS-1000/He (Bio-Rad) []. To screen mitochondrial transformants, a PCR assay was carried out using mouse mtDNA-specific primers [, ]."
+      - "This serial dilution and cultivation was repeated for 4 consecutive days, and the presence of mouse mtDNA genomes was assayed by PCR using mouse mtDNA-specific primers at each time point (days 1, 2, 3 and 4) [, ]."
+      - "In the wild-type ABF2 donor and recipient strains (, black and white bars, respectively), more than 75% of the cells carried the mouse mtDNA genomes, which was a considerably high percentage of the yeast population and indicated that the mouse mtDNA was stably maintained in these yeast mitochondrial environments []. In the Tfam strain (, gray bars), however, the percentage of the yeast population containing the mouse mtDNA genomes decreased to between 15 and 25%, which was relatively low compared to the wild-type yeast strains."
+    why_it_matters: >-
+      The second of only two records that measured retention over generations, and the only one
+      that did it for a genome rather than a plasmid. The design of the assay is what to copy:
+      serial overnight passages in rich non-selective medium, colonies scored by PCR at each of
+      four days, reported as the PERCENTAGE OF CELLS still carrying the construct. That is exactly
+      the experiment §2.4 asks for and nobody ran on a homoplasmic insert, and it is cheap.
+      The result also isolates a determinant DUET would otherwise not have thought about: the same
+      mtDNA is held at more than 75% with the native nucleoid protein Abf2 and at 15–25% when Abf2
+      is replaced by mouse Tfam. Retention of an engineered mitochondrial genome depends on the
+      nuclear-encoded packaging machinery, not only on the construct — which means a stability
+      result measured in one chassis does not transfer to another.
+      Recorded as a distinct `technique` because the transfer here is marker-free spheroplast
+      fusion, which §2.4's route does not contain, and which needs neither kar1-1 nor a mit-
+      lesion.
+
+# ==================================================================== what the numbers support
+
+efficiency:
+  reported_frequencies:
+    - value: "~0.1%"
+      denominator: "colonies tested after the shot (i.e. nuclear Leu+ transformants), not cells bombarded"
+      numerator: "colonies whose mitochondria received the plasmid and could restore functional Cox2"
+      publication: doi:10.1016/j.xpro.2022.101359
+  operational_scale:
+    - "10^9 cells plated and shot per bombardment — doi:10.1016/bs.mie.2024.07.028"
+    - "7 bombardment plates per transformation, at least 1,000 colonies restreaked for screening — doi:10.1016/j.xpro.2022.101359"
+    - "a few hundred nuclear (Leu+) transformants per plate — doi:10.1242/dmm.049783"
+    - "5 µg nuclear marker plasmid, 10–15 µg mitochondrial construct, tungsten 0.5 µm — doi:10.15698/mic2018.03.621"
+  construct_level_attrition:
+    - "2 of 4 attempted mitochondrial genes yielded allele replacements — doi:10.1126/sciadv.aav1848"
+    - "8 of 8 attempted ATP6 point-mutant constructs yielded respiring clones — doi:10.1242/dmm.049783"
+  what_this_does_not_license: >-
+    There is no transformants-per-µg figure, no transformants-per-bombardment figure and no
+    cells-transformed-per-cells-shot figure anywhere in the 1,309 texts. The 0.1% is a screening
+    yield and it is stated "in our hands" by one group in one protocol; it should not be
+    multiplied against 10^9 cells to estimate anything, because the two numbers have different
+    denominators and come from different laboratories. For a strategy-E decision, the defensible
+    statement is the qualitative one both numbers support and which §2.4 already makes: throughput
+    is a handful of constructs, the limiting resource is colony screening by hand, and the
+    campaign that most resembles a library in this corpus is eight constructs, not eighty.
+  absence_is_the_finding: >-
+    Fourteen of fifteen papers report no efficiency of any kind. This is not an oversight in the
+    curation; it is the literature's convention. A mitochondrial transformation is reported as the
+    strain it produced, because the frequency is not the result and nobody is optimising it. A
+    programme that needs an efficiency number to size strategy E will have to generate it, or ask
+    a practising laboratory directly — which is the other thing §3 said this table was for.
+
+# ============================================================ where the corpus contradicts §2.4
+
+contradictions:
+
+  - field: marker
+    says_2_4: >-
+      "Selection markers: complementation of a mit- lesion restoring growth on a non-fermentable
+      carbon source (the classical COX2/COX3 approach), or ARG8m complementing a nuclear arg8Δ."
+    corpus_says: >-
+      Both are real, but neither is the marker that makes the transformation work. In every
+      classical record the FIRST marker is nuclear — LEU2 on pRS315 or Yep351, URA3 on pYES2 — on a
+      separate plasmid co-bombarded with the construct, and it is the only thing under selection.
+      The mitochondrial event is a SCREEN performed afterwards by mating. §2.4's single `marker`
+      field cannot hold this, and a record filled in from §2.4 alone would omit the reagent without
+      which nothing grows.
+
+  - field: generations_to_homoplasmy
+    says_2_4: >-
+      Homoplasmy is framed as a step to "select and screen for ... by mitotic segregation".
+    corpus_says: >-
+      It is not screened for so much as waited out, and the wait is short: about a dozen mitotic
+      divisions with no selection pressure (doi:10.1242/dmm.049783), 20-40 generations
+      (doi:10.1016/bs.mie.2024.07.028), two passages (doi:10.1038/s41598-023-36637-9). Yeast cannot
+      stably hold heteroplasmy, which two papers state as the reason the method is tractable at all.
+
+  - field: heteroplasmy_achieved
+    says_2_4: >-
+      Listed as a field to record, implying heteroplasmy is a state a construct can be held in.
+    corpus_says: >-
+      In the classical route it is transient by construction and nobody measures it. The one record
+      where a heteroplasmic state PERSISTED is the autonomous Cas9 Edit Plasmid
+      (doi:10.7717/peerj.8362), and there it persisted only because the element was not integrated
+      — and it was then lost. So for yeast the field is close to binary: an integrated construct
+      goes homoplasmic quickly, and an unintegrated one goes away.
+
+  - field: technique
+    says_2_4: >-
+      One route: biolistic bombardment of a ρ0 recipient, then kar1-1 cytoduction.
+    corpus_says: >-
+      That route holds for 13 of 15 records. Two variants exist and both matter. Cas9/gRNA
+      editing (doi:10.7717/peerj.8362) still enters through a ρ0 biolistic shot but then edits the
+      resident genome at a double-strand break instead of complementing a mit- lesion, so it need
+      not spend a locus or a marker. Marker-free spheroplast fusion (doi:10.4014/jmb.2004.04033)
+      moves a whole mitochondrial genome between strains with neither kar1-1 nor a mit- tester.
+      A third, smaller variant: doi:10.7554/elife.35330 transforms LINEAR homology-armed fragments
+      rather than a plasmid.
+
+# =============================================================== what this corpus cannot tell you
+
+open_gaps:
+
+  - gap: "insert stability over generations for a homoplasmic chromosomal insert, under non-selective growth"
+    status: never_tested
+    note: >-
+      This is §2.4's own explicit requirement and the answer is that no one in this corpus has done
+      it for the construct class DUET would build. Thirteen records confirm integration once by PCR
+      or sequencing and stop. The two that did measure retention measured something else: an
+      autonomous plasmid, lost in 30–40 generations (doi:10.7717/peerj.8362), and a transplanted
+      foreign genome in a ρ0 host, retained at more than 75% over four days of passaging
+      (doi:10.4014/jmb.2004.04033). Neither is a homoplasmic insert in an otherwise wild-type ρ+
+      genome. Note that most constructs in this corpus carry a built-in selection — respiration
+      restored via COX2, or arginine prototrophy via ARG8m — so even the strains that have been
+      propagated for years have been propagated under selection.
+      The experiment is cheap and already designed: four days of serial non-selective passaging,
+      PCR-scoring colonies at each passage, reported as percent of cells retaining the insert. It
+      should be phase-1 work, not phase-3.
+
+  - gap: "transformation frequency per bombardment or per µg DNA"
+    status: not_reported_anywhere
+    note: >-
+      One screening yield (0.1%) from one protocol paper. No frequency with cells or DNA in the
+      denominator exists in the 1,309 texts. See `efficiency.what_this_does_not_license`.
+
+  - gap: "whether any of this has been done with a construct that must fold a soluble, cofactor-dependent, oligomeric enzyme"
+    status: never_attempted
+    note: >-
+      Out of scope for this table and answered as far as it can be in
+      heterologous_orf_precedents.yaml. Recorded here only so the two files agree on where the risk
+      sits: the transformation is a solved, slow, low-yield but reliable procedure. The uncertainty
+      is entirely downstream of it.
+
+  - gap: "current source of the critical reagents"
+    status: open
+    note: >-
+      Nine of fifteen records use DFS160, which doi:10.1091/mbc.e17-09-0560 attributes together
+      with SCS188A and EHW154 to Thomas D. Fox at Cornell University. The second lineage is
+      NAB69/Nab69 (doi:10.1242/jcs.263694, doi:10.26508/lsa.202201858); MOY160, MCC109ρ0 and DFKρ0
+      appear once each. The corpus can name the strains and the originating laboratories but
+      cannot say who currently distributes them, and that is a phone call rather than a search.
+
+# ---------------------------------------------------------------------------------- provenance
+#
+# Fifteen records from 1,309 readable stored full texts. Method: regex sweeps over the corpus for
+# biolistic/microprojectile/bombardment, kar1-1/cytoduction, synthetic-rho and rho0-strain
+# phrasings, and transformation-frequency phrasings; then every matching document read at its
+# methods section to separate a transformation the authors PERFORMED from one they cited. Papers
+# excluded on that test include reviews that describe the technique
+# (doi:10.3390/microorganisms11041040, doi:10.1093/nar/gkr580, doi:10.3389/fgene.2014.00454) and
+# biolistics in other organisms (plant and algal chloroplasts, Cryptococcus, C. elegans), which is
+# where most of the earlier keyword count of 43 went.
+#
+# Every quote was sliced from the stored text by offset and re-resolved in that text after this
+# file was parsed as YAML: 50 spans, 50 exact single-occurrence matches, no ellipses, no splices,
+# no joined line wraps. Quotes from doi:10.1016/bs.mie.2024.07.028 retain the private-use-area rho
+# glyph (U+F072) and the internal line breaks of the PDF text layer, because that is what the
+# source contains; the same paper's figure legend uses a real U+03C1, and both forms appear above
+# exactly as found.
+#
+# No `confidence` values are written here. A human sets those.

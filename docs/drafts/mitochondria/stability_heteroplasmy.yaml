@@ -1,0 +1,787 @@
+# Stability and heteroplasmy data for engineered yeast mtDNA — does the insert stay?
+#
+# MITOCHONDRIAL_PROGRAM.md §3 budgets this as ~10 records. §2.4 states the requirement it exists
+# to meet: "mtDNA is recombinogenic and AT-rich, so insert stability must be tested over
+# generations rather than assumed, especially under non-selective conditions — which production
+# conditions usually are." §5 asks it as question 5, "Does the insert stay?", and adds: "if the
+# corpus cannot answer it, that is a required experiment, not an assumption."
+#
+# THE ANSWER IS: NO, NOT FOR A HETEROLOGOUS ORF. It is a required experiment. The corpus answers a
+# narrower question well and the asked question not at all, and the shape of that gap is the point
+# of this file. Three findings, in order of how much they change the programme:
+#
+#   1. A NEUTRAL-SITE INSERT IS NOT COUNTER-SELECTED, and that is measured, not assumed. The best
+#      single sentence in this corpus for strategy E is a control buried in a figure supplement:
+#      doi:10.1126/sciadv.abi8886 found no selection against mtDNA carrying "an ARG8 gene inserted
+#      into a noncoding region", concluding "the ARG8 gene does not impart a strong selective
+#      disadvantage on the mtDNA". The pPT24 ninth-ORF design in
+#      heterologous_orf_precedents.yaml is exactly that geometry. Good news, for one marker.
+#
+#   2. A DISPLACEMENT INSERT IS PURGED EVEN WITHOUT RESPIRATORY SELECTION. The same paper, and its
+#      2026 successor doi:10.1371/journal.pgen.1011836, show that an mtDNA that has LOST an OXPHOS
+#      gene loses the competition against intact mtDNA in heteroplasmic cells grown on GLUCOSE —
+#      conditions under which respiration is not required and the construct pays no growth
+#      penalty. Purifying selection against Δcob, Δcox2 and Δatp6 mtDNA operates inside the cell,
+#      not through the medium. Consequence for design: "respiration_retained: false" is not merely
+#      a metabolic cost that a fermentative process could shrug off. It makes the construct
+#      intracellularly uncompetitive in any heteroplasmic cell, whatever the carbon source. That
+#      is a second, independent argument for the intergenic site over a real locus, and it is not
+#      the argument activator_map.yaml currently makes.
+#
+#   3. NOBODY HAS PASSAGED A HETEROLOGOUS mtDNA ORF AND ASKED IF IT IS STILL THERE. Not sfGFPm,
+#      not mtnLuc, not GFPß1-10. Zero papers, under selection or without it. Every retention
+#      measurement in this corpus is on a MARKER (ARG8ᵐ) or on a DELETION, over ≤5 generations or
+#      ≤24 h, in laboratory haploids and their diploids, at bench scale. Nothing reaches the
+#      hundreds of generations a seed train plus a 5,000 L fermentation represents, and nothing is
+#      in a polyploid industrial background.
+#
+# THE SELECTION TALLY, which the task predicted would be the finding. Of 12 papers here that
+# measured mtDNA retention over time at all, 6 concern an engineered insert. Their
+# `selection_applied` values are below; `not_stated` did NOT dominate, which is a genuine surprise
+# and is worth stating plainly, because it is the opposite of the expected result. The literature
+# that bears on this is recent (2015–2026), single-cell, and written by people studying purifying
+# selection, so it states its carbon source carefully and usually chooses glucose on purpose. The
+# gap is not that selection went unrecorded. The gap is that the thing measured was never a
+# heterologous ORF, and never for long enough.
+#
+# AND THE INHERITED CAUTION IS CONFIRMED. Both neutral-site precedents do carry a built-in
+# selection, and it is worse than that: neither paper measures retention at all, under any
+# condition. See `caution_verified` at the foot. That caution should be carried forward as a fact
+# about those two papers, not softened.
+#
+# CONFIDENCE. No record below carries a `confidence` value. CONVENTIONS.md reserves that for a
+# human curator, and this is a draft under docs/drafts/, not data/.
+#
+# CONDITIONS. MITOCHONDRIAL_PROGRAM.md's own rule — a number without its conditions is not usable
+# — is enforced here by `conditions_complete`. A generations figure or a loss rate that does not
+# carry strain, carbon source and selection state is marked false with the reason. Several of the
+# most quotable numbers in the field fail this test; they are kept, flagged, and must not be
+# copied into a design document without the flag.
+
+version: 1
+zone: R
+question: "Does a heterologous insert in yeast mtDNA stay there, without selection, for long enough to run a production fermentation?"
+answer_in_one_line: >-
+  Unknown, and not answerable from this corpus. A neutral-site marker insert is measurably NOT
+  counter-selected and a gene-displacing insert measurably IS — both on glucose, both over ≤5
+  generations. No paper has ever followed a heterologous mtDNA ORF over generations, and the
+  background ρ⁻ rate of 0.1–1% per generation alone would consume a fermentation. Bench experiment
+  required.
+
+corpus_searched:
+  stored_full_texts: 1309
+  keyword_hits_heteroplasmy_or_homoplasmy: 55
+  papers_measuring_mtdna_retention_over_time: 12
+  of_those_measuring_an_engineered_insert: 6
+  of_those_measuring_a_heterologous_orf: 0
+  search_note: >-
+    Greek rho was searched both as U+03C1 and as the private-use glyph U+F072 that some
+    PDF-sourced texts render it with, plus the spellings rho0/rho-/petite. The one quote below
+    drawn from a PDF-sourced text (doi:10.1016/bs.mie.2024.07.028) is given as two separate
+    single-line fragments rather than joined across its line wrap — see that record.
+
+# ---------------------------------------------------------------- the selection tally, as asked
+
+selection_applied_tally:
+  scope: "the 6 records under `insert_retention` — measurements on an engineered mtDNA insert"
+  "false": 5
+  "true": 0
+  not_stated: 1
+  reading: >-
+    `not_stated` does not dominate, and the reason matters more than the count. The retention
+    literature that exists is recent purifying-selection work whose whole design depends on
+    removing respiratory selection, so it names glucose explicitly. What is missing is not the
+    selection label. It is the cargo (a marker, never a heterologous enzyme) and the horizon
+    (five generations, never five hundred). MITOCHONDRIAL_PROGRAM.md §5 question 5 is therefore
+    unanswered for a different reason than the one the plan anticipated, and the required
+    experiment is correspondingly different: not "repeat it without selection" but "run it long,
+    with the real cargo, in the real chassis".
+
+# ============================================================ 1. HOW HETEROPLASMY RESOLVES, AND
+#                                                                 OVER HOW MANY GENERATIONS
+
+heteroplasmy_resolution:
+
+  - id: HR-01
+    finding: "97% homoplasmic after 24 h; ~50% homoplasmic by 7.5 h — measured, single-cell, no selection"
+    publication: doi:10.1038/s44318-024-00183-5
+    organism: "S. cerevisiae, diploids from mated haploids carrying mtDNA^Atp6-NG or mtDNA^Atp6-mKate2"
+    carbon_source: glucose (rich for pre-growth, minimal for imaging)
+    selection_applied: false
+    generations_to_homoplasmy: "not counted as generations; 24 h of growth, ~50% homoplasmic at 7.5 h"
+    conditions_complete: true
+    evidence: >-
+      The carbon source is stated and it is fermentable throughout, so neither mtDNA variant is
+      under respiratory selection: "Unless otherwise stated, for all experiments, cells were
+      pre-grown in glucose-containing rich medium, because of higher mating efficiency, while
+      imaging was performed in minimal medium containing glucose, due to lower background
+      fluorescence." The result: "Based on these cutoffs, 97% of cells were characterized as
+      homoplasmic, revealing, as expected, nearly complete segregation of two mtDNA variants
+      within a growing yeast population after 24 h."
+    why_it_matters: >-
+      This is the cleanest timescale number in the corpus and the only one obtained by direct
+      single-cell observation rather than colony scoring. Read it for what it is: BOTH competing
+      genomes here carry a heterologous insert (a fluorescent protein fused to Atp6), so it
+      measures how fast heteroplasmy collapses, not whether an insert survives. For strategy E it
+      sets the clock — a biolistic construct will be homoplasmic or gone within about a day of
+      vegetative growth, long before any production run begins. Stability over a fermentation is a
+      separate question from reaching homoplasmy, and this record answers only the second.
+
+  - id: HR-02
+    finding: "ten to twenty generations to homoplasmy, explicitly with no selective pressure"
+    publication: doi:10.3390/genes2010169
+    organism: "S. cerevisiae, heteroplasmic zygotes from a × α matings with differing mitochondrial markers"
+    carbon_source: not stated
+    selection_applied: false
+    generations_to_homoplasmy: "10–20"
+    conditions_complete: false
+    incomplete_because: "review statement; strain and carbon source are not given"
+    evidence: >-
+      "The heteroplasmic yeast cells segregate the homoplasmic progeny during zygote outgrowth in
+      the absence of any selective pressure, and after ten to twenty generations, all of the cells
+      in the culture are homoplasmic []."
+    why_it_matters: >-
+      The only generations-to-homoplasmy figure in the corpus that names the absence of selection
+      in the same sentence. Flagged incomplete because it is a review's summary of older primary
+      work not held here, and carries neither strain nor carbon source.
+
+  - id: HR-03
+    finding: "within 20 generations, from 50–100 mtDNA copies per diploid"
+    publication: doi:10.3390/genes11050514
+    organism: "S. cerevisiae diploids following mating of haploids"
+    carbon_source: not stated
+    selection_applied: not_stated
+    generations_to_homoplasmy: "20"
+    conditions_complete: false
+    incomplete_because: "review statement; carbon source and selection not given"
+    evidence: >-
+      "Following mating of Saccharomyces cerevisiae haploid cells, the resultant diploids contain
+      50–100 copies of mtDNA [], which segregate to homoplasmy within 20 generations [,]."
+    why_it_matters: >-
+      Carries the copy-number figure MITOCHONDRIAL_PROGRAM.md §1 marks ⚠ ("roughly 50–200 copies
+      per cell"). This corpus says 50–100 per diploid, from a review, which is the low end of the
+      programme's remembered range and should be treated as the figure to verify rather than as a
+      correction.
+
+  - id: HR-04
+    finding: "within eight generations, via concatemer transmission"
+    publication: doi:10.1091/mbc.e15-10-0690
+    organism: "budding yeast (stated as background to a human-cell study)"
+    carbon_source: not stated
+    selection_applied: not_stated
+    generations_to_homoplasmy: "8"
+    conditions_complete: false
+    incomplete_because: "background statement in a paper whose experiments are in human fibroblasts"
+    evidence: >-
+      "allowing for inheritance of multiple mtDNA genome units as a single segregation unit,
+      thereby allowing most progeny cells to become homoplasmic within eight generations of growth
+      from a heteroplasmic ancestor cell"
+    why_it_matters: >-
+      Included because it is the fastest figure in the corpus and because the spread of reported
+      values — 1, 8, 10–20, 20 generations — is itself worth recording. The values are not
+      inconsistent so much as differently defined (first daughter vs. whole culture, colony
+      scoring vs. cytometry). Do not quote a single number for "generations to homoplasmy" in a
+      design document; quote the range and the method.
+
+  - id: HR-05
+    finding: "within 20 generations of vegetative growth, by rolling-circle concatemer transmission"
+    publication: doi:10.1038/s41598-025-23888-x
+    organism: "S. cerevisiae"
+    carbon_source: not stated in this sentence (the paper's own experiments use 0.5% and 2% glucose)
+    selection_applied: not_stated
+    generations_to_homoplasmy: "20"
+    conditions_complete: false
+    incomplete_because: "introductory statement citing prior work; strain and carbon source not attached"
+    evidence: >-
+      "enabling a rapid reversion from heteroplasmy to homoplasmy within 20 generations of yeast
+      vegetative growth"
+    why_it_matters: >-
+      The mechanism it names is the one that makes mtDNA segregation fast: concatemers make many
+      genome copies behave as one segregation unit. A construct is carried, or not carried, by
+      whole concatemers. That is why segregation is rapid and why an intermediate heteroplasmic
+      state is not a stable place for a production strain to sit.
+
+  - id: HR-06
+    finding: "interspecies hybrids: two mtDNA types still present at 20 divisions, one at 80 generations"
+    publication: doi:10.3389/fmicb.2020.00838
+    organism: "Saccharomyces interspecies hybrids (cited work on 'cevarum' hybrids)"
+    carbon_source: not stated
+    selection_applied: not_stated
+    generations_to_homoplasmy: "between 20 and 80"
+    conditions_complete: false
+    incomplete_because: "the paper reports another study's figures and criticises their interpretation"
+    evidence: >-
+      "They found two types of mitochondria in certain cevarum hybrids after 20 rounds of
+      vegetative divisions but only one type after 80 generations."
+    why_it_matters: >-
+      The one record here on a NON-laboratory-haploid background, and it is slower than the
+      haploid-cross figures by several-fold. The citing paper's own caveat is as useful as the
+      number — that a culture scored as heteroplasmic at generation 20 may in fact be a mixture of
+      homoplasmic subpopulations, one of which then overgrows. Applied to strategy E: a
+      colony-level assay can report "the insert is still here" while the cells carrying it are
+      already a shrinking subpopulation. Any retention assay must be per-cell or per-colony, not
+      per-culture.
+
+  - id: HR-07
+    finding: "20–40 generations allowed for recombination and mitotic segregation when BUILDING an insert strain"
+    publication: doi:10.1016/bs.mie.2024.07.028
+    organism: "S. cerevisiae, cross of kar1-1 [ρ+ cox2-62] with [ρ+ atp6::ARG8m] to build the GFPß1-10 chassis"
+    carbon_source: not stated
+    selection_applied: not_stated
+    generations_to_homoplasmy: "20–40 (allowed for, not measured)"
+    conditions_complete: false
+    incomplete_because: "a construction step, not a measurement; no carbon source given for the outgrowth"
+    quote_note: >-
+      This text is PDF-sourced and the sentence is broken by a hard line wrap. It is given below as
+      the two single-line fragments it actually occupies, NOT joined, so each re-resolves at its
+      own offset. The same file renders Greek rho as U+F072, which is why no ρ appears inside the
+      quoted fragments.
+    quotes:
+      - "After crossing, cells were allowed to divide during 20-"
+      - "40 generations to allow mtDNA recombination and mitotic segregation of the double"
+    why_it_matters: >-
+      The only number in the corpus for how long a real mtDNA-engineering workflow waits for
+      segregation, and it is a budget rather than a result: the authors allow 20–40 generations,
+      they do not report measuring when homoplasmy arrived. Useful for planning the bench protocol
+      in §2.4; useless as evidence of stability.
+
+# ============================================================ 2. RETENTION OF AN ENGINEERED
+#                                                                 INSERT — the records §5 asked for
+
+insert_retention:
+
+  - id: IR-01
+    finding: "a marker inserted at a NEUTRAL SITE is not counter-selected — the best news in this file"
+    publication: doi:10.1126/sciadv.abi8886
+    insert: "ARG8 in a noncoding region of mtDNA"
+    locus_type: intergenic / noncoding
+    displaced_gene: null
+    organism: "S. cerevisiae, heteroplasmic zygotes from pedigree matings"
+    carbon_source: glucose (rich medium, YPD)
+    selection_applied: false
+    horizon: "up to 5 generations, pedigree by microdissection"
+    loss_rate_reported: "none detected — reported as absence of selection, no number given"
+    conditions_complete: true
+    evidence: >-
+      The condition, stated so that neither genome is under respiratory selection: "Microdissection
+      was used to transfer single zygotes to a cell-free area on an agar plate containing rich
+      medium and glucose as a fermentable carbon source, which supports growth of cells containing
+      WT, Δcob::ARG8, or both mtDNA species." And the control that is the finding: "Furthermore, we
+      did not observe selection against mtDNA variants with an ARG8 gene inserted into a noncoding
+      region of mtDNA, indicating that the ARG8 gene does not impart a strong selective
+      disadvantage on the mtDNA (fig. S2B)."
+    why_it_matters: >-
+      This is the closest thing the corpus holds to a direct answer to §5 question 5, and it is
+      favourable. The geometry tested — an ORF added to a silent region, no resident gene
+      displaced — is precisely the pPT24 ninth-ORF design that activator_map.yaml records as
+      `intergenic_upstream_COX2` and that heterologous_orf_precedents.yaml calls "the single most
+      useful design fact in this file". A marker in that position is carried without intracellular
+      penalty on glucose. THE LIMITS, which are large: the cargo is ARG8ᵐ, a small soluble
+      yeast-derived enzyme the mitochondrion has been asked to make for decades, not a
+      TPP-dependent tetrameric decarboxylase; the horizon is five generations; the result is
+      reported as an absence in a supplementary figure, with no rate and no confidence interval.
+      It licenses the design choice. It does not retire the risk.
+
+  - id: IR-02
+    finding: "an insert that DISPLACES an OXPHOS gene is purged within five generations, on glucose"
+    publication: doi:10.1126/sciadv.abi8886
+    insert: "ARG8 replacing COB (Δcob::ARG8)"
+    locus_type: "resident locus, gene displaced"
+    displaced_gene: COB
+    organism: "S. cerevisiae, heteroplasmic zygotes from matings of two Δarg8 strains"
+    carbon_source: glucose (rich medium, YPD)
+    selection_applied: false
+    horizon: "5 generations"
+    loss_rate_reported: >-
+      construct-only colonies ~15% at generation 1; >80% of fifth-generation colonies carry WT
+      mtDNA only; 3% still heteroplasmic at generation 5
+    conditions_complete: true
+    evidence: >-
+      "More than 60% of the colonies derived from the first-generation daughter contained
+      exclusively the WT mtDNA, while only about ∼15% of the colonies contained exclusively the
+      Δcob::ARG8 mtDNA and ~25% remained in a heteroplasmic state ()." And by the fifth: "More than
+      80% of colonies derived from daughters of the fifth generation contained only the WT mtDNA
+      ()." For the background rate against which this bias is read: "rapid segregation of mtDNA
+      variants containing neutral genetic markers within less than 10 and often within one
+      generation ()"
+    why_it_matters: >-
+      Paired with IR-01 this is the whole design lesson, because the two differ in one variable.
+      Same paper, same medium, same assay, same ARG8 cargo: at a neutral site it is kept, in place
+      of COB it is purged. The cell is not selecting against the insert. It is selecting against
+      the loss of an OXPHOS gene — and doing so on GLUCOSE, where respiration is dispensable. That
+      makes `respiration_retained: false` in the mtdna_insertion schema a stability field, not only
+      a metabolic one, and it applies to any heteroplasmic intermediate on the way to a construct.
+      Note the practical corollary for the workflow in §2.4: the kar1-1 cross deliberately creates
+      the heteroplasmic state in which this purge operates.
+
+  - id: IR-03
+    finding: "purifying selection against Δcob, Δcox2 and Δatp6 mtDNA under fermentative conditions"
+    publication: doi:10.1371/journal.pgen.1011836
+    insert: "gene-deletion variants of mtDNA competed against intact mtDNA^ATP6-NG"
+    locus_type: "resident loci — COB, COX2, ATP6"
+    displaced_gene: "COB | COX2 | ATP6"
+    organism: "S. cerevisiae, populations from heteroplasmic zygotes, flow cytometry (FAST)"
+    carbon_source: glucose
+    selection_applied: false
+    horizon: "~20 h of growth from a heteroplasmic founder"
+    loss_rate_reported: "Δcob: ~82.1% intact-mtDNA cells vs ~17.9% construct-only cells"
+    conditions_complete: true
+    evidence: >-
+      The framing, from the abstract: "Using this approach, we observe purifying selection against
+      mtDNA lacking subunits of complex III (COB), complex IV (COX2) or the ATP synthase (ATP6),
+      under fermentative conditions that do not require respiratory activity." The condition, stated
+      outright: "Note that all FAST analyses were performed on cells mated and grown on glucose
+      containing medium." The number: "mating WT mtDNAATP6-NG with mtDNAΔcob resulted in a
+      significant skew towards cells containing intact mtDNA, with approximately 82.1% WT
+      mtDNAATP6-NG-containing cells and only around 17.9% dark cells (B)." And the respiratory
+      phenotype of all three: "Like the mtDNAΔcob strain, mtDNAΔcox2 and mtDNAΔatp6 strains were
+      unable to grow on non-fermentable carbon sources ()."
+    why_it_matters: >-
+      IR-02 generalised, three loci deep, and published in 2026 — the most recent evidence in the
+      corpus on this question. It also splits the mechanism: the paper attributes the decline of
+      Δatp6 mostly to reduced mtDNA copy number plus a growth disadvantage, while Δcob and Δcox2
+      lose for reasons growth and copy number do not explain. For strategy E that distinction is
+      actionable: some displacement costs can be compensated by restoring copy number or growth,
+      and some cannot. A construct at COX2 — the best-precedented insertion site in
+      activator_map.yaml — sits in the second category.
+
+  - id: IR-04
+    finding: "a recoded ARG8ᵐ insert flanked by 96 bp direct repeats is deleted ~160-fold faster than the same geometry in the nucleus"
+    publication: doi:10.1371/journal.pgen.1005664
+    insert: "ARG8ᵐ inserted 99 bp into COX2, followed by an intact COX2 lacking its start codon"
+    locus_type: "resident locus, with engineered direct repeats"
+    displaced_gene: COX2 (functionally)
+    organism: "S. cerevisiae, wild-type and rad51Δ / rad52Δ / rad59Δ derivatives"
+    carbon_source: "YPD (glucose) for the outgrowth; YPG (glycerol) and SD-Arg only for scoring"
+    selection_applied: false
+    horizon: "3 days growth on YPD from single cells, scored by replica plating"
+    loss_rate_reported: >-
+      spontaneous mitochondrial deletion rate ≈160× the nuclear rate for similar repeats; after
+      induced DSBs, 50% of wild-type colonies contained cells that had lost the insert
+    conditions_complete: true
+    evidence: >-
+      The construct geometry, which is the point: "The ARG8 m gene is inserted 99 bp into the COX2
+      gene followed by the entire COX2 gene lacking the start codon (). This generates 96 bp of
+      directly repeated sequence flanking ARG8 m." The rate: "As we have previously shown, the
+      mitochondrial deletion rate is approximately160-fold greater than the nuclear rate for
+      similar repeats in wild-type cells." The non-selective growth step, stated twice: "Cells from
+      time 0 in the above experiments () were plated on non-selective medium, allowed to grow, and
+      individual colonies were tested for the presence of the intact reporter (Arg+) or the
+      deletion (respiration proficient) by replica plating. We found that 50% of the population is
+      respiration competent, consistent with a wide distribution of mitochondrial genomes
+      containing deletions ()." and "Growth on YPG was scored in order to determine the percent of
+      colonies that had at least some cells that had undergone a deletion after non-selective
+      growth."
+    why_it_matters: >-
+      This is §2.4's "mtDNA is recombinogenic" turned into a number, and the number is about a
+      construct, not about wild-type genome maintenance. Two design consequences, both concrete
+      and neither currently in the plan. FIRST: the 160-fold figure means intuitions carried over
+      from nuclear integration are wrong by two orders of magnitude, so a stability argument of
+      the form "we integrate constructs all the time" does not transfer. SECOND, and sharper: what
+      is being deleted here is a marker sandwiched between 96 bp of DIRECT REPEAT, and direct
+      repeats are what homology-arm-based mtDNA integration creates by construction. A DUET
+      cassette placed by homologous recombination into the pPT24 silent region will be flanked by
+      whatever homology it was given. Repeat length and repeat placement are therefore stability
+      design parameters, and the codon recoder deliverable in §2.2 should be asked to report
+      internal repeats in the recoded output alongside AT content and rare codons. Caveat to carry:
+      the 50% figure follows an induced double-strand break, not spontaneous growth, and the
+      strain's intact construct is respiration-deficient, so glycerol scoring selects FOR loss.
+      Read the 160-fold ratio as the transferable quantity, not the 50%.
+
+  - id: IR-05
+    finding: "an autonomous mitochondrial editing plasmid persists ~20 generations, then segregates away without positive selection"
+    publication: doi:10.7717/peerj.8362
+    insert: "Cas9/gRNA 'Edit Plasmid' delivered to yeast mitochondria"
+    locus_type: "episomal, not integrated"
+    displaced_gene: null
+    organism: "S. cerevisiae, after crossing the Edit Plasmid strain to a wild-type mitochondrial genome"
+    carbon_source: not stated
+    selection_applied: false
+    horizon: "20 generations, plasmid recovered intact; longer horizons stated as loss"
+    loss_rate_reported: "qualitative — 'tend to segregate away after many generations'"
+    conditions_complete: false
+    incomplete_because: "carbon source and strain background not given for the 20-generation outgrowth"
+    evidence: >-
+      "The cells were grown over 20 generations after crossing the Edit Plasmid and the wild-type
+      mitochondrial genome together. We could successfully retrieve intact Edit Plasmid. Without
+      any positive selection, Edit Plasmids tend to segregate away after many generations as shown
+      for yeast mitochondria in this study."
+    why_it_matters: >-
+      The only statement in the corpus that directly couples "without selection" to "the engineered
+      mitochondrial DNA goes away", and the authors treat it as a feature — an editing reagent that
+      clears itself. For DUET it is the same physics read as a liability, and their own proposed
+      remedy names the trade the programme must make: they plan to add "a selectable marker on the
+      Edit Plasmid, such as ARG8m for yeast (), to enhance their stability". An ARG8ᵐ marker keeps
+      the construct only where arginine is limiting. Production medium is not arginine-limiting.
+      Note the record's scope: this is a non-integrated ρ⁻-like episome, so its segregation is
+      faster and less relevant than an integrated ORF would be — which is why IR-01's integrated
+      neutral-site result deserves more weight than this one.
+
+  - id: IR-06
+    finding: "construction of an mtDNA insert strain relies on respiratory selection at every screening step"
+    publication: doi:10.1016/bs.mie.2024.07.028
+    insert: "GFPß1-10 at the ATP6 locus, with ATP6 re-provided at COX2"
+    locus_type: "resident locus with second-locus rescue"
+    displaced_gene: ATP6 (re-provided)
+    organism: "S. cerevisiae, kar1-1 crosses"
+    carbon_source: not stated
+    selection_applied: not_stated
+    horizon: "20–40 generations of outgrowth allowed during construction"
+    loss_rate_reported: none
+    conditions_complete: false
+    incomplete_because: >-
+      no retention measurement is made; the generations figure is the construction budget recorded
+      in HR-07, and neither carbon source nor selection state is given for it
+    evidence: "see HR-07 for the two verbatim fragments; no stability claim appears in this paper"
+    why_it_matters: >-
+      Recorded as a presence-of-absence: the corpus's third heterologous-ORF precedent, like the
+      other two, never asks whether the ORF stays. Its construction does pass through respiratory
+      screening, so whatever survived construction survived under selection.
+
+# ============================================================ 3. WHOLE-GENOME RETENTION WITHOUT
+#                                                                 SELECTION — the background rate
+#
+# These do not measure an insert. They measure whether mtDNA itself survives non-selective growth,
+# which is the floor beneath any insert-retention number: an insert cannot outlast its genome.
+
+genome_retention_without_selection:
+
+  - id: GR-01
+    finding: "150 generations of fermentative industrial-style culture: one clone lost all mtDNA, two cut 82 kb to 5 kb"
+    publication: doi:10.1128/aem.01015-25
+    organism: "autochthonous cider S. cerevisiae strain, evolved in buckwheat and barley worts"
+    carbon_source: "wort (fermentative)"
+    selection_applied: false
+    horizon: "150 generations"
+    loss_rate_reported: "1 of 3 buckwheat clones → ρ0; 2 of 3 reduced to 5 kb retaining only ATP6"
+    conditions_complete: true
+    evidence: >-
+      "From de novo assemblies of the mitochondrial DNA of the ancestor and evolved clones, we
+      compared their size and gene content after 150 generations under fermentative conditions ()."
+      "Of the three buckwheat-wort-adapted clones, clone A1 lost the complete mitochondrial genome
+      (ρ0), whereas clones A6 and A9 kept only the ATP6 gene and reduced their genome from 82 to 5
+      kb." The framing the paper gives it: "These mutants arise spontaneously in response to
+      various stress factors under industrial conditions ()."
+    why_it_matters: >-
+      The single most programme-relevant record in this file, because it is the only one run in an
+      industrial strain under industrial-style conditions for an industrial number of generations.
+      At 150 generations of wort fermentation, the question is not whether a 1–2 kb insert survives
+      but whether 77 kb of the genome around it survives — and in two clones of three it did not.
+      Anything the programme inserts sits inside the region that was deleted. A stability claim for
+      strategy E that stops at "the construct was stable in the laboratory" is answering a
+      different question from the one a 5,000 L run asks.
+
+  - id: GR-02
+    finding: "~700 generations of serial passage on fermentable medium: complete mtDNA loss, by mutation pressure not selection"
+    publication: doi:10.17912/micropub.biology.000831
+    organism: "Saccharomyces uvarum, experimentally evolved at rising temperature"
+    carbon_source: "YPD (glucose), solid plates"
+    selection_applied: false
+    horizon: "346 days, 136 transfers, ~700 generations"
+    loss_rate_reported: "evolved clone ρ0; ancestor at 34 °C for 5 days showed a large rise in petite frequency"
+    conditions_complete: true
+    evidence: >-
+      "This experiment lasted 346 days, included 136 transfers, and represented ~700 generations of
+      evolution (See methods)." "Additionally, the evolved clone lost its mitochondrial genome and
+      cannot respire." And the attribution, which is the useful part: "Also, incubation of the
+      ancestor at 34°C for 5 days increased the frequency of petite mutants drastically compared to
+      22°C, supporting the notion that mutation pressure rather than selection drove loss of mtDNA
+      in the evolved clone."
+    why_it_matters: >-
+      Two things the programme needs. First, the longest horizon in the corpus, and mtDNA does not
+      survive it without selection. Second, temperature raises the loss rate — so process
+      temperature is a stability variable for strategy E, alongside carbon source. The paper's own
+      remedy is the one the programme would have to adopt: propagate on a non-fermentable carbon
+      source, or build a strain that cannot tolerate mtDNA loss.
+
+  - id: GR-03
+    finding: "mtDNA copy number falls within hours of release from glycerol into glucose"
+    publication: doi:10.1093/nar/gku1148
+    organism: "S. cerevisiae W303, wild type and irc3Δ"
+    carbon_source: "glycerol for pre-selection, then glucose"
+    selection_applied: false
+    horizon: "several days of maintained exponential growth; steepest drop in the first 8 h"
+    loss_rate_reported: "qualitative — 'rapidly declined' in irc3Δ, 'only a small decrease' in wild type"
+    conditions_complete: true
+    evidence: >-
+      "To analyze the stability of wt mtDNA in the W303 irc3Δ yeast strain, we measured the ratio of
+      mtDNA to nuclear DNA (relative mtDNA copy number) during yeast growth under non-selective
+      conditions by qPCR." "Respiratory-proficient yeast cells were pre-selected on glycerol and
+      then released into glucose-containing medium where exponential growth was maintained for
+      several days."
+    why_it_matters: >-
+      The protocol this programme should copy for its own experiment: pre-select on glycerol,
+      release into glucose, then measure copy number by qPCR over days. It is the shape of the
+      required bench assay, already validated in a W303 background, and it separates the two
+      failure modes — losing the insert from the genome, and losing genomes from the cell. Note
+      that even wild type shows a decrease, so "small" is not "none".
+
+  - id: GR-04
+    finding: "10 days of liquid YPD passage is a standard, effective way to lose mtDNA"
+    publication: doi:10.1186/gb-2009-10-9-r95
+    organism: "S. cerevisiae deletion collection, class IV respiratory mutants, mtDNA replenished by cytoduction"
+    carbon_source: "glucose (liquid YPD)"
+    selection_applied: false
+    horizon: "10 days of replicative growth"
+    loss_rate_reported: ">=90% of cells carried mtDNA immediately after cytoduction; loss increased over the passage"
+    conditions_complete: true
+    evidence: >-
+      "However, mtDNA is not stably inherited and is gradually lost after several generations of
+      growth in glucose-containing medium []." "To test this systematically for all class IV
+      mutants, we replenished mtDNA by cytoduction and then passaged the strains in liquid YPD
+      medium for 10 days to allow for loss of mtDNA."
+    why_it_matters: >-
+      Note the phrasing — the passage is performed "to allow for loss of mtDNA". Non-selective
+      glucose passage is used in the field as a positive method for REMOVING mitochondrial genomes.
+      That is the same operation as a production seed train.
+
+  - id: GR-05
+    finding: "a foreign mtDNA is lost rapidly the moment mitochondrial selection is removed"
+    publication: doi:10.4014/jmb.2004.04033
+    organism: "S. cerevisiae expressing mouse Tfam in place of Abf2p, carrying yeast or mouse mtDNA"
+    carbon_source: "nonselective complete glucose medium"
+    selection_applied: false
+    horizon: not stated
+    loss_rate_reported: "qualitative — 'rapidly lost'"
+    conditions_complete: false
+    incomplete_because: "no horizon in generations or hours is given for the loss"
+    evidence: >-
+      "The yeast mtDNA maintenance activity was also rapidly lost when the Tfam ρ+ strain was
+      subjected to growth on nonselective complete glucose medium in which the selection pressure
+      to maintain mitochondrial function was absent ( and )."
+    why_it_matters: >-
+      The nearest analogue in the corpus to "a genuinely foreign sequence held in yeast
+      mitochondria, then released from selection", and it does not survive. The mechanism here is
+      nucleoid packaging rather than recombination, so it does not transfer directly to a small
+      insert in an otherwise native genome — but it is the clearest statement of the pattern the
+      whole section shows: mitochondrial content that is not being selected for is not kept.
+
+# ============================================================ 4. WHAT DRIVES LOSS
+
+loss_drivers:
+
+  - driver: recombination between direct repeats
+    publication: doi:10.1371/journal.pgen.1005664
+    mechanism: >-
+      Direct-repeat-mediated deletion excises whatever lies between two repeats. See IR-04 for the
+      evidence and the 160-fold mitochondrial-versus-nuclear ratio. The programme-facing point is
+      that homology arms used for integration ARE direct repeats.
+    design_consequence: >-
+      Treat repeat length and repeat content as construct design parameters. Ask the §2.2 codon
+      recoder to report internal repeats in the recoded ORF, not only AT content and rare codons.
+
+  - driver: hypersuppressive ρ⁻ genomes
+    publication: doi:10.1534/g3.117.043851
+    mechanism_evidence: >-
+      "Fragments of mtDNA containing an active origin of replication (ori) sequence were discovered
+      to be hypersuppressive (HS), as they rapidly replicate during heteroplasmy with wild-type
+      mtDNA and become the major mtDNA allele within a few generations, which causes loss of
+      respiratory function in >95% of colonies ()."
+    corroborating_publication: doi:10.1038/s41598-025-23888-x
+    corroborating_evidence: >-
+      "In extreme cases of hypersuppressive (HS ρ−) petites, over 95% of the progeny from ρ+ × HS
+      ρ− crosses exhibit the HS ρ− genome,."
+    design_consequence: >-
+      This is the worst case for strategy E and it needs no selection to operate: a deletion
+      derivative that happens to keep an active ori replicates faster than the full-length
+      construct-bearing genome and takes over the cell within a few generations. It is the
+      mechanism by which a construct does not merely drift out of a population but is actively
+      displaced from inside the cell. Two consequences. First, any retention assay must score for
+      ρ⁻ as well as for the insert, because a culture can be 95% ρ⁻ and still look healthy on
+      glucose. Second, a construct near an ori region is worse placed than one far from it — which
+      is a question the mtDNA reference annotation in §3 can answer and this file cannot.
+
+  - driver: spontaneous ρ⁻ / ρ0 petite formation as a background process
+    publications: [doi:10.1093/femsre/fuv028, doi:10.3390/microorganisms10030601]
+    rate_evidence: >-
+      "Cytoplasmic petite mutations occur spontaneously in budding yeast at a frequency of 1% per
+      generation (Ephrussi )." and, with a carbon source attached: "Since ρ+ cells grown in YPD
+      medium spontaneously generate ρ0/− cells that lack mitochondrial DNA at a rate of 0.1–1% per
+      generation, the above studies could have used mixed cultures of ρ+ and ρ0/− cells [,]."
+    selection_applied: false
+    conditions_complete: false
+    incomplete_because: >-
+      neither figure names a strain; the FEMS review figure names no carbon source either. The
+      0.1–1% figure at least specifies YPD. Both are secondary citations of Ephrussi-era primary
+      work not held in this corpus. Do not put either number in a design document without this
+      flag and without checking the primary source.
+    design_consequence: >-
+      This is the arithmetic that makes the bench experiment unavoidable. A background loss of
+      0.1–1% per generation is independent of the insert and independent of any selection. Over the
+      25–30 generations a seed train and a production fermentation typically span, even the low end
+      compounds into a materially ρ⁻ population, and the high end into most of it. Every ρ⁻ cell
+      has lost part or all of its mtDNA, and with it the insert and its gene dosage. Strategy E's
+      headline advantage in §1 — 50–200 copies per cell — is exactly what this process removes.
+
+  - driver: nuclear-mitochondrial mismatch in a non-native background
+    publication: doi:10.3390/biology13110927
+    evidence: >-
+      "As expected, we found that all tested strains contained more petite cells when grown on YPD
+      compared to YPGly medium ()." "Importantly, on both tested media, the W303mtSK1 strain
+      produced significantly more petite cells than the parental W303 strain. This observation
+      suggests that the mitochondrial DNA of the SK1 strain cannot be stably maintained in the W303
+      background."
+    selection_applied: "both — YPD without selection, YPGly with"
+    design_consequence: >-
+      Two facts in one experiment. The medium comparison confirms in a single strain pair what the
+      whole of section 3 asserts across papers: petite frequency is higher on glucose than on
+      glycerol, i.e. removing selection is itself a loss mechanism. And the strain comparison says
+      mtDNA stability is a property of the nuclear-mitochondrial PAIR, not of the mtDNA. A
+      construct validated in a laboratory haploid is not thereby validated in a production
+      chassis; moving it is a new stability question, not a transfer.
+
+  - driver: measurement artefact — petite frequency is condition-dependent
+    publication: doi:10.3390/genes12020300
+    evidence: >-
+      "an extrinsic factor which depends on the growth conditions, such as the medium, carbon
+      source, and temperature, which can influence both the onset of petite cells and the growth
+      rates []."
+    design_consequence: >-
+      The methodological warrant for MITOCHONDRIAL_PROGRAM.md's own rule that a number without its
+      conditions is not usable. Petite frequency is not a strain constant. Any stability figure the
+      programme generates must be reported with medium, carbon source and temperature, and figures
+      taken from the literature without them — HR-02 through HR-06, and both rates under the
+      spontaneous-petite driver above — must keep their `conditions_complete: false` flag.
+
+# ============================================================ 5. THE INDUSTRIAL AND POLYPLOID
+#                                                                 CHASSIS
+
+industrial_and_polyploid_chassis:
+
+  - id: IC-01
+    finding: "mtDNA copy number scales linearly with ploidy — the one genuinely encouraging chassis fact"
+    publication: doi:10.1186/s12915-020-00786-4
+    evidence: >-
+      "the mtDNA copy number scales up with ploidy in a linear way, with diploid strains having
+      around double number of mitochondrial genomes and triploid having three times the number,
+      compared to haploid cells (Fig. a)." The same survey also reports natural loss in the wild:
+      "Fifteen natural petite isolates were detected."
+    why_it_matters: >-
+      Strategy E's gene-dosage argument survives the move to a polyploid industrial strain, and
+      improves with it: a triploid carries roughly three times the mtDNA of a haploid. That is the
+      only ploidy-related fact in the corpus that favours the strategy. Set against it, the same
+      dataset finds naturally occurring petites among wild and domesticated isolates, so mtDNA loss
+      is a population-level fact of life rather than a laboratory artefact.
+
+  - id: IC-02
+    finding: "petite formation in industrial fermentation is expected, strain-dependent and substrate-dependent"
+    publication: doi:10.1128/aem.01015-25
+    evidence: "see GR-01 for the 150-generation result and the industrial framing"
+    why_it_matters: >-
+      The record that connects §2.4's abstract worry to a real process. Brewing already treats
+      spontaneous petite formation as a known operational phenomenon; this paper adds that
+      substrate composition is one of its drivers. A strategy-E strain would be carrying an
+      additional, non-essential, recombinogenic cassette into a process that already loses mtDNA on
+      its own.
+
+  - id: IC-03
+    finding: "petite derivatives are sometimes DELIBERATELY selected in industrial yeast development"
+    publication: doi:10.3390/ijms10010385
+    note: >-
+      Recorded as a caution rather than with a quote-backed claim about stability: this wine-to-
+      bioethanol adaptation paper reports selecting petite, mitochondria-deficient derivatives for
+      higher ethanol tolerance. If a process or a strain-improvement programme is even weakly
+      selecting toward petites, strategy E's construct is being selected against at the same time.
+      Flagged for the chassis discussion in metabolic/chassis.py; not curated further here because
+      it is an aside in that paper rather than a stability measurement.
+
+# ============================================================ 6. THE INHERITED CAUTION, CHECKED
+
+caution_verified:
+  claim_under_test: >-
+    That both neutral-site insertion precedents in this corpus — doi:10.1016/j.xpro.2022.101359 and
+    doi:10.15698/mic2018.03.621 — carry a built-in selection, because an intact COX2 restores
+    respiration and growth on glycerol therefore keeps selecting for the construct; and that they
+    say little about non-selective retention despite looking like stability evidence.
+  verdict: "CONFIRMED, and stronger than stated"
+  what_the_check_found: >-
+    The selection is real and explicit. doi:10.1016/j.xpro.2022.101359: "After mating and
+    homologous recombination in mitochondria, the mtDNA regains the functional COX2 sequence and
+    the resulting strain is able to respire as scored by growth on plates containing glycerol (YP+
+    2% glycerol, YPG)." The same paper states the dependence as a limitation of the whole system:
+    "One limitation is that the reporter system should not jeopardize mitochondrial functionality,
+    as this will impact the different selection steps." doi:10.15698/mic2018.03.621 uses the same
+    route: "After selection, the resulting strain that carried pPT24*-sfGFPm was used to cytoduce
+    strain cox2-62, which lacks a functional COX2 gene, to gain respiratory competence by
+    homologous recombination" and "Eventually the stable synthetic rho- strain containing
+    pPT24*-sfGFPm was repopulated with mtDNA via cytoduction with a strain containing the cox2-62
+    mutation."
+  the_stronger_finding: >-
+    The caution understates the problem. Both full texts were read end to end for the vocabulary of
+    retention — stability, homoplasmy, heteroplasmy, generations, retained, lost, passage. NEITHER
+    PAPER MEASURES RETENTION AT ALL, under selection or without it. Not over generations, not over
+    passages, not at a single later timepoint. The word "stable" occurs in
+    doi:10.1016/j.xpro.2022.101359 only about nanoluciferase's protein stability in denaturing
+    conditions, and in doi:10.15698/mic2018.03.621 only about superfolder GFP's folding and about
+    the "stable synthetic rho- strain" produced during construction. What both papers do measure is
+    that expression does not COST respiration — a different claim, and the one they are routinely
+    cited for. So these are not weak stability evidence. They are not stability evidence.
+  consequence: >-
+    heterologous_orf_precedents.yaml records this as `open_gaps` entry "insert stability over
+    generations under non-selective conditions", status `open`, with the note that the neutral-site
+    precedents "say nothing about a construct held without selection". That note is correct and
+    should be upgraded from an inference to a checked fact, citing this file.
+
+# ============================================================ 7. WHAT THE CORPUS CANNOT ANSWER
+
+required_experiment:
+  the_question_that_remains: >-
+    MITOCHONDRIAL_PROGRAM.md §5 question 5 — "Does the insert stay?" — for a heterologous,
+    cofactor-dependent, oligomeric enzyme, at the intergenic COX2-upstream site, in a polyploid
+    industrial chassis, over the number of generations a seed train plus a 5,000 L fermentation
+    spans, with no selection applied.
+  what_the_corpus_does_answer:
+    - "A neutral-site ARG8 marker is not counter-selected on glucose over five generations (IR-01)."
+    - "A gene-displacing insert IS counter-selected on glucose, within five generations (IR-02, IR-03)."
+    - "Heteroplasmy collapses to homoplasmy in roughly 1–20 generations, so a construct is fixed or gone within about a day (HR-01 to HR-06)."
+    - "Direct repeats around an insert are deleted ~160× faster in mtDNA than in the nucleus (IR-04)."
+    - "Background ρ⁻ formation runs at 0.1–1% per generation on glucose, independent of the insert (loss_drivers)."
+    - "Over 150 generations of industrial fermentative culture, the mitochondrial genome itself is not reliably kept (GR-01)."
+  what_it_does_not_answer:
+    - "No measurement of any heterologous mtDNA ORF's retention, at any horizon, under any selection regime. Zero papers."
+    - "No retention measurement beyond ~20–40 generations for any engineered mtDNA construct."
+    - "No retention measurement in a polyploid or industrial background for any engineered mtDNA construct."
+    - "No loss rate per generation for an mtDNA insert. The only per-generation rates here are for ρ⁻ formation and for nuclear-versus-mitochondrial deletion ratios."
+  verdict: >-
+    A bench experiment is REQUIRED. §5's own standard — "if the corpus cannot answer it, that is a
+    required experiment, not an assumption" — is met. Note carefully what the corpus changes about
+    the experiment's design: it is no longer a question of whether selection was applied in the
+    literature (it was recorded, and usually absent), but of cargo and horizon. The experiment must
+    run long and must carry the real ORF.
+  proposed_design: >-
+    The protocol already exists in this corpus and needs only to be pointed at a construct. Follow
+    doi:10.1093/nar/gku1148 (GR-03): pre-select the insert-bearing strain on glycerol, release into
+    glucose, maintain exponential growth for days, and track by qPCR both the insert and a
+    mitochondrial reference locus against a nuclear locus — which separates losing the insert from
+    the genome from losing genomes from the cell. Score ρ⁻ frequency in parallel by YPD/YPG replica
+    plating at every timepoint, because the hypersuppressive driver above means a culture can be
+    largely ρ⁻ while looking healthy on glucose. Run it to at least 150 generations to match GR-01,
+    in both a laboratory haploid and the intended polyploid chassis, since doi:10.3390/biology13110927
+    shows stability is a property of the nuclear-mitochondrial pair. Report medium, carbon source
+    and temperature with every number, per doi:10.3390/genes12020300.
+  cheaper_precursor_worth_doing_first: >-
+    Before any DUET cargo exists, the IR-01 control can be repeated and extended at low cost: take
+    the published pPT24 ninth-ORF sfGFPm or mtnLuc strain, which already exists in two laboratories,
+    and simply passage it in glucose without respiratory selection, scoring fluorescence or
+    luminescence per cell over 150 generations. That single experiment would convert the largest
+    "not measured" in this file into a number, needs no new construct, and is the smallest possible
+    step that would let §5 question 5 be answered rather than deferred.
+
+# ============================================================ PROVENANCE
+#
+# Method. All 1,309 readable stored full texts were searched by regex for heteroplasmy/homoplasmy
+# (55 documents), for selection vocabulary crossed with mitochondrial context, for petite and
+# suppressivity vocabulary, for per-generation rates, and for stability vocabulary crossed with
+# mtDNA. Greek rho was searched as U+03C1, as the PDF private-use glyph U+F072, and as the
+# spellings rho0/rho-/petite, per the known trap in these texts.
+#
+# Quotes. 48 quoted spans appear in this file. Every one was checked against the stored full text
+# before being written here: byte-exact, whitespace included, and UNIQUE in its document, so each
+# re-resolves to a single offset. 48/48 passed. No quote joins a line wrap and no quote splices two
+# passages; the one PDF-sourced sentence that is broken by a hard wrap
+# (doi:10.1016/bs.mie.2024.07.028, record HR-07) is given as the two separate single-line fragments
+# it occupies, under a `quotes:` list, with a note.
+#
+# No `confidence` value is written anywhere in this file. A human curator sets those.
+#
+# Nothing under data/ was modified.

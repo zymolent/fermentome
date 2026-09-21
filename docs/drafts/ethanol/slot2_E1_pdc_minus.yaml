@@ -1,0 +1,778 @@
+# Slot 2 — pdc-minus / Pdc-attenuated background (criterion E1).
+# THREE CANDIDATES. The owner picks one. This file does not choose.
+#
+# ────────────────────────────────────────────────────────── READ THIS FIRST
+#
+# THIS SLOT IS THE ROAD NOT TAKEN. PLAN.md B.3.1 (amended 2026-09-20, DUET §5.1) struck the
+# sentence that called a Pdc-minus background "the likely starting chassis" and replaced it with
+# the opposite: "The chassis is Pdc-POSITIVE." DUET keeps Pdc because the ethanol–acetaldehyde
+# shuttle is the mechanism, not the competition. Whatever the owner admits here characterises the
+# ALTERNATIVE DUET REJECTED, never DUET itself. An assertion about DUET derived from any record in
+# this slot is a cross-chassis inference and is capped under J.3.
+#
+# ALWAYS STATE THE GENOTYPE. Every candidate below names which PDC genes are deleted, because
+# single, double and triple deletions have different phenotypes and the corpus itself confuses
+# them. "pdc-minus" without a genotype is not usable.
+#
+# THE POOL IS SHORT AND THE SHORTAGE IS AN ACQUISITION GAP, NOT SCARCITY. 16 readable candidates
+# against a 25 budget. See pool_assessment: all 16 were opened, 5 read end to end, and the missing
+# 9 are not missing from the literature — they are sitting in the manual download queue. The
+# founding measurements of the Pdc-minus phenotype (Flikweert 1996, van Maris 2004) are among
+# them, which is why NO candidate below is a primary characterisation of the defect itself.
+#
+# ONE CANDIDATE IS NOT FROM THE E1 POOL. Candidate 1 (doi:10.1186/s13068-019-1486-8) currently
+# carries E3 and E5, not E1. It is flagged in mis_tagged_candidates and would need re-tagging if
+# chosen. It is proposed anyway because it is the only paper found anywhere in the 1,311-document
+# corpus that measures the FULL E1 cost ledger — ethanol abolished, growth crippled, C2 auxotrophy
+# tested and excluded as the bottleneck, glycerol compensation, and the Pdc dual role — inside an
+# isobutanol-producing strain. Hiding it in a footnote would not serve the choice.
+#
+# NO `confidence` FIELD IS WRITTEN ANYWHERE IN THIS FILE, and nothing is marked accepted or
+# verified. A human sets those. Nothing under data/ was touched.
+#
+# QUOTE HANDLING. Every `evidence` string is a verbatim, unspliced run of text from the stored full
+# text. No ellipses; where two passages are needed they are listed as separate quotes. Quotes are
+# written as YAML folded scalars (>-): the source passages are single continuous paragraphs with
+# single spaces, so folding line breaks back to single spaces reproduces them character for
+# character. Empty reference brackets "[]" and empty parentheses "(Fig. )" are artefacts of the
+# stored text and are preserved as they stand.
+
+version: 1
+zone: R
+status: draft
+
+slot:
+  number: 2
+  name: "pdc-minus / Pdc-attenuated background"
+  criterion: E1
+  plan_section: "PLAN.md B.3.1"
+  budget: 25
+  question: "What does removing the pyruvate sink actually cost?"
+  framing: "counterfactual, not the plan"
+  pool_file: "scratchpad/ethanol/E1.json"
+  pool_size: 16
+  pool_papers_opened: 16
+  pool_papers_read_in_full: 5
+
+# ═══════════════════════════════════════════════════════════════════ THE THREE CANDIDATES
+
+candidates:
+
+  # ──────────────────────────────────────────────────────────────────────────────────────
+  - rank_in_shortlist: 1
+    role_in_the_trio: "speaks to the Pdc dual role, and prices the whole cost ledger in an isobutanol strain"
+    pmid: "31303893"
+    doi: "10.1186/s13068-019-1486-8"
+    title: >-
+      Improving isobutanol production with the yeast Saccharomyces cerevisiae by successively
+      blocking competing metabolic pathways as well as ethanol and glycerol formation
+    year: 2019
+    journal: "Biotechnology for Biofuels"
+    corpus_file: "00765.txt"
+    pool_status: >-
+      NOT IN THE E1 POOL. Discovery tagged it E3 and E5. See mis_tagged_candidates.
+
+    pdc_genes_deleted:
+      primary_pdc_strain: "JWY13 — pdc1Δ pdc5Δ, plus an engineered internal deletion in MTH1 (MTH1ΔT, +169/+393)"
+      comparison_strain: "JWY12 — pdc1Δ::MTH1 (PDC1 coding region replaced by MTH1, i.e. MTH1 under the PDC1 promoter) pdc5Δ"
+      single_deletion_controls: "JWY14 — pdc1Δ; JWY15 — pdc5Δ"
+      pdc6: >-
+        NOT deleted. The authors state PDC6 is normally not expressed and that deleting PDC1 with
+        PDC5 was therefore sufficient to block ethanol. This is a double, not a triple, and the
+        distinction is the paper's own argument.
+      background: "CEN.PK113-7D, on top of ilv2Δ bdh1Δ bdh2Δ leu4Δ leu9Δ ecm31Δ ilv1Δ"
+
+    strains: >-
+      S. cerevisiae CEN.PK113-7D and a stepwise deletion series JWY0 → JWY23; the Pdc-relevant
+      members are JWY12, JWY13 (pdc1Δ pdc5Δ), JWY14 (pdc1Δ) and JWY15 (pdc5Δ), all carrying the
+      2µ plasmid IsoV100 expressing cytosolic Ilv2Δ54 / Ilv5Δ48 / Ilv3Δ19.
+    conditions: >-
+      Aerobic shake flask, 30 °C, selective SC medium without valine, 40 g/L glucose, inoculated at
+      OD600 8, duplicate per experiment and repeated at least twice; a parallel series with 1% (v/v)
+      ethanol supplemented as a C2 source. HPLC for glucose, ethanol, glycerol, isobutanol,
+      isobutyrate.
+
+    what_data_it_actually_contains: >-
+      Figures only for the primary time courses — no supplementary data tables and no deposited
+      raw data. What it does contain, in text, are the paired titres that matter: ethanol titre for
+      wild type, for each single pdc deletion and for the double; glucose consumption at 24 h and
+      168 h for the Pdc-deficient strains; isobutanol titre with and without ethanol supplementation
+      for Pdc-deficient and Pdc-proficient strains; and glycerol titres across the adh1Δ gpd1Δ gpd2Δ
+      series. No transcriptomics, no proteomics, no enzyme assays, no chemostats.
+    accessions: "none — no sequence, expression or raw-data accession is reported"
+    open_access: >-
+      BMC / Biotechnology for Biofuels — fully open access, CC-BY. Full text held in the project
+      corpus.
+
+    why_this_slot: >-
+      It is the only paper located in this corpus that measures, in one strain series, every
+      consequence B.3.1 says E1 exists to record: ethanol abolished, glucose consumption crippled,
+      the C2 auxotrophy explicitly tested and then EXCLUDED as the limiting factor, the glycerol
+      branch taking over NAD+ regeneration, and the MTH1 workaround applied in two forms and shown
+      to be insufficient. It also carries the finding the programme most needs from this slot: that
+      Pdc1 and Pdc5 are not purely competitors but also perform the KIV → isobutyraldehyde step,
+      so deleting them destroys the product as well as the by-product. That is the sharpest
+      available argument for a Pdc-positive chassis, made by a group that was trying to build a
+      Pdc-minus one.
+
+    what_it_lacks:
+      - >-
+        It is a DOUBLE deletion (pdc1Δ pdc5Δ), not the triple. PDC6 is intact. The authors argue
+        PDC6 is not expressed on glucose, but the atlas cannot record this strain as a Pdc-null.
+      - >-
+        Shake flask only. No bioreactor, no pH control, no chemostat, no gas analysis — so there
+        are no specific rates, no carbon balance and no biomass yields. Everything is titre at a
+        time point.
+      - >-
+        Aerobic throughout. It says nothing about anaerobic or micro-aerobic Pdc-minus physiology,
+        which is where DUET's process sits.
+      - >-
+        No accessions and no supplementary datasets; the numbers must be read from the text and
+        from figures.
+      - >-
+        The dual-role conclusion is inferential, not enzymological — it rests on isobutanol going
+        to zero in the double mutant, not on a KIV decarboxylase assay in that strain. The assay
+        evidence for the dual role is in candidate-adjacent doi:10.1186/1754-6834-5-65 (see
+        pdc_dual_role below).
+      - >-
+        Every effect is measured in a heavily modified background (seven prior deletions plus a
+        multicopy plasmid), so the Pdc phenotypes are not isogenic-to-wild-type comparisons.
+      - >-
+        It is currently tagged E3/E5. Choosing it means correcting the tag.
+
+    evidence:
+      - quote: >-
+          Additional deletions of PDC1 and PDC5, even after restoring slow growth by overexpressing
+          Mth1 (strain JWY12) or by engineering Mth1∆T (strain JWY13), had negative effects and
+          stopped isobutanol biosynthesis completely (Fig. b, c). Even after 168 h, isobutanol was
+          not detectable (data not shown). This confirmed the results of Choo et al. [], Brat et al.
+          [] and Milne et al. [], indicating that Pdc1 and Pdc5 significantly contribute also in the
+          conversion of KIV to isobutyraldehyde within the Ehrlich pathway.
+        what_it_establishes: "the Pdc dual role, and that deleting the sink deletes the product"
+      - quote: >-
+          Compared to the wt strain CEN.PK113-7D (13 g/L), JWY0 (13.8 g/L) and JWY04 (13.4 g/L),
+          single deletion strains JWY14 (∆pdc1) and JWY15 (∆pdc5) showed only minor effects in
+          ethanol production, resulting in ethanol titers of 12.6 g/L and 12.3 g/L, respectively,
+          whereas the pdc1/5 double deletion strain JWY13 showed an ethanol titer of only 0.01 g/L
+          (Fig. c).
+        what_it_establishes: >-
+          the single-vs-double genotype distinction, quantitatively. This is the source of the
+          12.6 / 13 / 0.01 g/L figures carried in earlier project notes; they are confirmed here in
+          the paper's own words, and the pdc5Δ single (12.3 g/L) is added.
+      - quote: >-
+          Since PDC6 normally is not expressed [], deletions of PDC1 together with PDC5 were
+          sufficient to block ethanol biosynthesis. However, pdc− strains cannot grow on high
+          glucose concentrations [].
+        what_it_establishes: >-
+          the paper's own justification for leaving PDC6 intact, and the glucose-sensitivity
+          premise
+      - quote: >-
+          Moreover, while glucose was consumed completely within 24 h in strains JWY0 to JWY04,
+          pdc1/5 double deletions severely affected the glucose consumption even with overexpressed
+          or engineered Mth1ΔT (glucose consumption after 168 h: 7.54 g/L for JWY12 and 6.79 g/L for
+          JWY13) (Fig. a).
+        what_it_establishes: >-
+          the size of the glycolytic penalty, and that the MTH1 workaround does not remove it —
+          under 7 g/L of 40 g/L glucose consumed in a week
+      - quote: >-
+          This clearly demonstrates that a potential C2 auxotrophy is not the bottleneck for
+          isobutanol production in Pdc-deficient cells.
+        what_it_establishes: >-
+          a NEGATIVE result the atlas should carry: C2 supplementation is not sufficient rescue.
+          Read with the preceding sentence, which reports that ethanol supplementation raised
+          JWY13 only to 0.03 g/L isobutanol while also raising the Pdc-proficient strains.
+      - quote: >-
+          Due to an autoregulation of PDC expression, pdc1 and pdc5 single mutants exhibit only
+          slightly reduced Pdc activities [, ].
+        what_it_establishes: >-
+          the derepression mechanism behind the near-null effect of a single deletion
+
+  # ──────────────────────────────────────────────────────────────────────────────────────
+  - rank_in_shortlist: 2
+    role_in_the_trio: "engineering around the defect — the workaround priced"
+    pmid: "22978798"
+    doi: "10.1186/1475-2859-11-131"
+    title: >-
+      An internal deletion in MTH1 enables growth on glucose of pyruvate-decarboxylase negative,
+      non-fermentative Saccharomyces cerevisiae
+    year: 2012
+    journal: "Microbial Cell Factories"
+    corpus_file: "00564.txt"
+    pool_status: "in the E1 pool"
+
+    pdc_genes_deleted:
+      genotype: "pdc1Δ(-6,-2)::loxP pdc5Δ(-6,-2)::loxP pdc6Δ(-6,-2)::loxP — full triple"
+      background: "RWB837, CEN.PK background, ura3-52"
+      evolved_parent: "TAM — the same triple, evolved for C2 independence and glucose tolerance"
+      the_engineered_allele: "MTH1-ΔT, a 225 bp in-frame internal deletion spanning MTH1 codons 57–131"
+      cross_reference: "MY2243 is a pdc1Δ pdc5Δ double, used as the mating partner"
+
+    strains: >-
+      RWB837 (Pdc- MTH1), TAM (evolved Pdc-), IMI078 (Pdc- MTH1-ΔT, reverse engineered), IMI082
+      (Pdc- URA3 control), IMI083 (evolved Pdc- URA3), IMZ104 (Pdc- overexpressing wild-type MTH1
+      from PGK1p on a multicopy plasmid), IMZ103 (empty plasmid control), CEN.PK113-7D (Pdc+
+      reference).
+    conditions: >-
+      Synthetic medium agarose plates with 20 g/L glucose, ± 0.3% (v/v) ethanol, ± 2% (v/v)
+      glycerol, 30 °C. Aerobic pH-controlled 2 L bioreactors, 1 L working volume, pH 5 (methods say
+      5.5), 500 mL/min air, 800 rpm, 30 °C, on 7.5 g/L glucose with and without 0.3% (v/v) ethanol.
+      Exhaust-gas O2/CO2 analysis and HPLC for glucose, ethanol and pyruvate.
+
+    what_data_it_actually_contains: >-
+      Quantitative maximum specific growth rates from controlled bioreactors, in replicate:
+      0.24 ± 0.00 h-1 (reverse-engineered MTH1-ΔT) versus 0.23 ± 0.00 h-1 (evolved) on glucose plus
+      ethanol, and 0.097 ± 0.007 h-1 across four replicates on glucose as sole carbon source.
+      Pyruvate yields on substrate for both strains with a t-test. Tetrad segregation data (23
+      tetrads, 52 spores scored) establishing that the glucose-tolerance trait is monogenic and
+      dominant. Sanger sequence of the MTH1 ORF locating the deletion. Growth-profile figures, gas
+      data and metabolite time courses. All of it is in-text or figures; nothing is deposited.
+    accessions: >-
+      none. The MTH1-ΔT allele sequence is described positionally (225 bp, positions 169–393 of the
+      ORF) and shown in an alignment figure, but no GenBank or SRA accession is given.
+    open_access: >-
+      BMC / Microbial Cell Factories — fully open access, CC-BY. Full text held in the project
+      corpus.
+
+    why_this_slot: >-
+      This is the paper that prices the workaround, and MTH1-ΔT is the exact allele the incumbent
+      Pdc-minus isobutanol literature runs on — it reappears in the Delft chassis IMI302/IMX708
+      (doi:10.1016/j.meteno.2016.01.002) and in the Frankfurt strain JWY13 (candidate 1). Reading
+      the Gevo/Butamax-lineage literature at all requires knowing what this allele does and what it
+      costs. It is also the cleanest available statement of the two-part Pdc-minus defect — C2
+      auxotrophy and glucose sensitivity — as separable phenotypes, since MTH1-ΔT fixes the second
+      fully and the first only partially. And it names the redox reading of the defect explicitly:
+      that alcoholic fermentation exists to reoxidise glycolytic NADH, which is precisely DUET's
+      reason for keeping it.
+
+    what_it_lacks:
+      - >-
+        It does not characterise the unmodified Pdc- defect quantitatively. The ancestral strain's
+        phenotype is reported as growth/no-growth on plates and cited to earlier work; there is no
+        measured growth rate, biomass yield or C2 requirement titration for RWB837 itself.
+      - >-
+        The mechanism is left as a hypothesis, and the paper says so — reduced glucose uptake may
+        prevent toxic pyruvate accumulation OR may be a redox effect, and the study does not
+        separate them. No intracellular pyruvate, no NADH/NAD+ measurement.
+      - >-
+        The reverse-engineered strain does not reproduce the evolved strain. 0.097 h-1 versus
+        0.20 h-1 on glucose alone, and a 4-fold lower pyruvate yield, so unidentified additional
+        mutations in TAM are doing real work and are not identified here.
+      - >-
+        Aerobic only, and at low glucose (7.5 g/L in the bioreactor). Nothing anaerobic, nothing at
+        industrial sugar concentrations.
+      - "No deposited data of any kind, and 2012-era methods (no whole-genome sequencing in this paper)."
+      - >-
+        Nothing about isobutanol, KIV or branched-chain metabolism. Its relevance to DUET is
+        entirely through the incumbent chassis, not through any measurement made here.
+
+    evidence:
+      - quote: >-
+          Pyruvate-decarboxylase negative (Pdc-) strains of Saccharomyces cerevisiae combine the
+          robustness and high glycolytic capacity of this yeast with the absence of alcoholic
+          fermentation. This makes Pdc-S. cerevisiae an interesting platform for efficient
+          conversion of glucose towards pyruvate-derived products without formation of ethanol as a
+          by-product. However, Pdc- strains cannot grow on high glucose concentrations and require
+          C2-compounds (ethanol or acetate) for growth under conditions with low glucose
+          concentrations, which hitherto has limited application in industry.
+        what_it_establishes: "the two-part defect, stated as two separable phenotypes"
+      - quote: >-
+          S. cerevisiae strains in which all three structural genes encoding pyruvate decarboxylase
+          (PDC1PDC5 and PDC6[]) were deleted, did not produce ethanol, but were unable to grow in
+          the presence of high glucose concentrations and, when grown in glucose-limited cultures,
+          required the addition of ethanol or acetate to growth media, due to their inability to
+          synthesize cytosolic acetyl-CoA from pyruvate [-].
+        what_it_establishes: >-
+          the triple-deletion phenotype and the cytosolic acetyl-CoA mechanism behind the C2
+          auxotrophy. Note the gene names run together as "PDC1PDC5" in the stored text; this is a
+          markup artefact and is preserved verbatim.
+      - quote: >-
+          This experiment confirmed that introduction of the MTH1-ΔT mutation was sufficient to
+          enable growth in batch cultures on glucose as sole carbon source (Figure ). In four
+          replicate experiments a reproducible specific growth rate of 0.097 ± 0.007 h-1 was
+          observed. This specific growth rate is lower than that of the evolved Pdc- strain under
+          these conditions (0.20 h-1) [], suggesting that this strain may harbor additional
+          mutations which could also contribute to the growth on glucose in the absence of added
+          C2-compounds.
+        what_it_establishes: >-
+          the price of the workaround, and the admission that the workaround is incomplete
+      - quote: >-
+          The observed increase of glucose tolerance in Pdc-S. cerevisiae upon expression of a
+          mutated allele of MTH1 does not, in itself, explain the mechanism by which Pdc- strains
+          become glucose sensitive. Pdc- strains are pyruvate hyperproducers and, in contrast to
+          ethanol, pyruvate is unlikely to be exported by passive diffusion through the yeast plasma
+          membrane. If it is assumed that the MTH1 mutation mainly acts by restricting glucose
+          transport and, therefore, glycolytic flux, it might prevent intracellular accumulation of
+          pyruvate to toxic levels. A possible alternative explanation is related to redox
+          metabolism. The major function of alcoholic fermentation in wild-type S. cerevisiae is the
+          fast reoxidation of NADH formed in glycolysis. Unrestricted glycolytic activity in a Pdc-
+          strain, in combination with a limited capacity of the mitochondrial respiratory chain for
+          reoxidation of cytosolic NADH, might lead to a reduction of the cytosolic NADH/NAD+ pool
+          and thereby inhibit key reactions in biosynthesis.
+        what_it_establishes: >-
+          the redox reading of the Pdc- defect, in the authors' own hedged terms — and the sentence
+          DUET's architecture inverts: alcoholic fermentation exists to reoxidise glycolytic NADH
+      - quote: >-
+          Reverse engineering of phenotypes obtained by laboratory evolution has the added benefit
+          that potential detrimental effects of random mutations obtained during evolution can be
+          eliminated.
+        what_it_establishes: "the methodological claim the paper's value rests on"
+
+  # ──────────────────────────────────────────────────────────────────────────────────────
+  - rank_in_shortlist: 3
+    role_in_the_trio: >-
+      characterising the defect and cataloguing every known workaround — but as a review, not a
+      primary measurement
+    pmid: "40121184"
+    doi: "10.1093/femsyr/foaf014"
+    title: >-
+      The advances in creating Crabtree-negative Saccharomyces cerevisiae and the application for
+      chemicals biosynthesis
+    year: 2025
+    journal: "FEMS Yeast Research"
+    corpus_file: "00341.txt"
+    pool_status: "in the E1 pool"
+    publication_type: "REVIEW — this is the single most important thing to know about it"
+
+    pdc_genes_deleted:
+      genotype: >-
+        none of its own — it is a review. It surveys, and names genotypes for, pdc1Δ singles,
+        pdc1Δ pdc5Δ doubles, pdc1Δ pdc5Δ pdc6Δ triples, PDC2 deletion and the Pdc2Δ519 truncation,
+        and ADH combinatorial deletions, and a table of applied strains gives explicit genotypes
+        (e.g. ΔPDC1 ΔADH1; ΔPDC1 ΔPDC5 ΔPDC6 MTH1L165F; ΔPDC1 ΔPDC6 ΔADH1 ΔCYB2 ΔGPD1 ΔGPD2).
+      why_that_matters_here: >-
+        It is the only item in the pool that holds the whole genotype ladder in one place, which is
+        exactly the distinction PLAN.md insists on and which individual papers keep collapsing.
+
+    strains: "n/a — secondary source covering S. cerevisiae lab and engineered strains"
+    conditions: "n/a"
+
+    what_data_it_actually_contains: >-
+      No primary data. Figures are schematics. One substantial table summarising titre, yield,
+      productivity and conditions for lactic acid, 2,3-butanediol, malic acid, succinic acid and
+      isobutanol production in Crabtree-negative strains, each row with an explicit genotype and a
+      citation. Narrative sections on the two mechanisms of the growth defect (cytosolic acetyl-CoA
+      shortage; NADH/NAD+ imbalance), on the ALE-derived suppressor catalogue (MTH1Δ57–131,
+      MTH1A81D, MTH1A81P, PYK1R68*/K196*/R91I, OCA5S383*, MED2*432Y, SNF1/MIG1), and on the
+      acetyl-CoA replenishment strategies (GLY1, PFL, CIT1 deletion with the Ach1 route, PO/PTA,
+      cytoPDH, carnitine shuttle, ACL).
+    accessions: "none"
+    open_access: >-
+      FEMS Yeast Research, Oxford University Press. FEMS titles are published open access; the
+      specific licence was not independently verified in this session. Full text held in the
+      project corpus.
+
+    why_this_slot: >-
+      The programme needs the cost of pdc-minus stated once, completely, with the suppressor
+      landscape attached — and the primary papers that would supply it are in the download queue,
+      not here. This review is the only item in the pool that delivers that whole picture, and it
+      is current (2025), so it includes suppressors discovered after the MTH1 papers (PYK1, OCA5,
+      MED2) that no other readable candidate mentions. It also states the two independent causes of
+      the growth defect cleanly, and it confirms from the literature side the two facts earlier
+      project notes carry: PDC6 is not transcribed on glucose, and PDC5 derepresses when PDC1 is
+      removed. As a curator's reference for framing the counterfactual it is unusually efficient.
+
+    what_it_lacks:
+      - >-
+        It is a review. Every number in it is somebody else's, at one remove, and several of its
+        summary sentences are looser than the papers they compress. Anything admitted from it is
+        secondary evidence and should be capped as such.
+      - >-
+        Its framing is Crabtree-negativity for chemical production, not the cost of pdc-minus as
+        such. The counterfactual reading is the owner's to impose; the review itself is arguing
+        FOR removing Pdc.
+      - "No accessions, no deposited data, no measurements, no error bars."
+      - >-
+        It treats PDC deletion and ADH deletion as alternative routes to the same end. For DUET
+        that conflation is actively unhelpful, because the ethanol–acetaldehyde shuttle depends on
+        both enzymes being present and on Adh3 in particular.
+      - >-
+        Its isobutanol coverage is thin — one line in the applications table — so it does not
+        connect the Pdc-minus cost to the branched-chain pathway, which is the join the programme
+        needs.
+      - >-
+        Because it is recent and broad, several of its claims rest on papers not present in this
+        corpus, so they cannot be checked here.
+
+    evidence:
+      - quote: >-
+          Deletion of all PDC genes prevented ethanol production, but because the Pdc defect
+          resulted in a deficiency of cytoplasmic acetyl-coenzyme A, the strain could not grow in
+          medium with glucose as the sole carbon source (Flikweert et al. , Zhang et al. ) (Fig. ).
+          Growth can be partially restored by adding acetic acid or ethanol to the medium (Van Maris
+          et al. ).
+        what_it_establishes: "the C2 auxotrophy, with the founding citations named"
+      - quote: >-
+          Pdc1 plays a major role and has a very high expression level. Pdc5 is only active when
+          there is no Pdc1 protein expression, because its promoter is inhibited by Pdc1 protein
+          (Eberhardt et al. ). Pdc2 is not a direct PDC gene, but a transcription factor (Iosue et
+          al. ). It regulates the expression of Pdc1 and Pdc5, and is important for their functions
+          (Mojzita and Hohmann , Nosaka et al. ). With a nonfermentable carbon source, Pdc6 is
+          activated under sulfur limitation. When glucose is the carbon source, PDC6 cannot be
+          transcribed (Boer et al. ).
+        what_it_establishes: >-
+          both of the isozyme facts earlier project notes carry — PDC5 derepression on loss of
+          Pdc1, and PDC6 silence on glucose — in one passage
+      - quote: >-
+          It is suspected that the deficiency of intracellular C2 compounds and cofactor imbalance
+          are the possible causes of growth defect. First, PDC deletion causes a deficiency of
+          intracellular C2 compounds, such as ethanol and acetic acid, resulting in a lack of
+          acetyl-CoA in the cytoplasm. Thus, the synthesis of lysine and fatty acids is affected,
+          which is essential for cell growth (Flikweert et al. , Pham et al. ). Second,
+          Crabtree-negative strains grow very slowly on fermentable carbon sources because of the
+          redox imbalance. NADH produced by glycolysis is generally oxidized by Adh to generate
+          ethanol. The deletion of PDC blocks this reaction, meanwhile glucose inhibits respiration
+          and NADH cannot be fully oxidized through the respiratory chain, thereby cause cofactor
+          imbalance (Pronk et al. ).
+        what_it_establishes: "the two independent causes of the defect, separated"
+      - quote: >-
+          For example, the mutations of Mth1 including Mth1∆57–131 (Oud et al. ), Mth1A81D (Zhang et
+          al. ), and Mth1A81P (Kim et al. ) were found to restore the cell growth. Mth1 mutations are
+          primarily associated with glucose uptake. Pyruvate kinase mutations Pyk1R68*, Pyk1K196*,
+          Pyk1R91I (Yu et al. ), pyrophosphatase Oca5S383* (Qin et al. ), and RNA polymerase II
+          mediator complex Med2*432Y (Dai et al. ) were also identified which have a beneficial
+          effect on balancing glycolysis and respiratory metabolism.
+        what_it_establishes: >-
+          the evolved-suppressor catalogue — the answer to "what does it take to make such a strain
+          viable"
+      - quote: >-
+          Although the mutations identified from the evolved strains are different, they generally
+          play a role in limiting glucose uptake, decreasing glycolytic flux, and elevating
+          respiratory metabolism (Fig. ). These mutations balance the flux of glycolysis, TCA cycle,
+          and oxidative phosphorylation, thereby contributing to NAD+/NADH homeostasis and growth
+          recovery.
+        what_it_establishes: >-
+          the unifying mechanism of every known suppressor — they all slow the cell down. This is
+          the sentence that makes the counterfactual argument for the owner: the price of removing
+          the pyruvate sink is throttled glycolysis.
+      - quote: >-
+          PDC-negative strains slow down glucose utilization, and the rate of product production
+          decreases.
+        what_it_establishes: "the process consequence, stated plainly"
+
+# ═══════════════════════════════════════════════════════ THE PARAGRAPH A CURATOR CAN REUSE
+
+counterfactual_framing: >-
+  Criterion E1 records the road DUET did not take. Most of the isobutanol literature reaches for
+  pyruvate by deleting pyruvate decarboxylase, and the records admitted under E1 exist so that the
+  atlas can read that literature and price what it costs — not so that they can describe the DUET
+  chassis, which they may never be used to do. DUET is deliberately Pdc-POSITIVE (DUET_TARGET §5.1;
+  PLAN.md B.3.1 as amended 2026-09-20), because in DUET's architecture ethanol is the mechanism
+  rather than the competitor: ethanol diffuses into the matrix, Adh3 oxidises it there, and the
+  resulting matrix NADH feeds both the final Ehrlich reduction and, through Pos5, the matrix NADPH
+  that Ilv5 requires. Deleting PDC would remove that carrier, not merely a by-product. The measured
+  cost of removing it, as recorded in this slot, is fourfold. First, C2 auxotrophy: with no
+  cytosolic acetyl-CoA route from pyruvate, a pdc1Δ pdc5Δ pdc6Δ strain cannot grow on glucose as
+  sole carbon source and must be fed ethanol or acetate. Second, glucose sensitivity: the strain
+  cannot grow at high glucose at all until a suppressor throttles hexose uptake. Third, redox: the
+  principal NADH sink is gone, glucose still represses respiration, and the cell compensates
+  through the glycerol branch — which is itself carbon lost, and which GPD1 deletion alone does not
+  abolish because GPD2 remains. Fourth, and most directly relevant here, Pdc1 and Pdc5 also
+  catalyse the KIV → isobutyraldehyde step of the Ehrlich pathway, so deleting them does not merely
+  redirect flux toward isobutanol, it removes the decarboxylase that makes isobutanol. The known
+  workarounds — the MTH1-ΔT internal deletion and its point-mutant relatives, and the PYK1, OCA5
+  and MED2 alleles found by adaptive evolution — all work the same way: they slow glycolysis down.
+  That is the trade. A Pdc-minus chassis buys the absence of ethanol by becoming a slower, C2-fed,
+  redox-constrained cell, and by 2019 it was still not producing isobutanol at all in an academic
+  strain. Every record in this slot characterises that alternative. None of them characterises DUET,
+  and an assertion about DUET derived from any of them is a cross-chassis inference capped under
+  J.3.
+
+# ═══════════════════════════════════════════════════════ PDC1/PDC5 ALSO DECARBOXYLATE KIV
+
+pdc_dual_role:
+  bearing_on_duet: >-
+    This is the finding in the slot that touches DUET most directly, and it cuts in DUET's favour.
+    If Pdc1 and Pdc5 carry a substantial share of the KIV → isobutyraldehyde flux, then a
+    Pdc-positive chassis is not merely tolerating a competing sink, it is retaining a
+    KIV-decarboxylating enzyme that the Ehrlich pathway uses. The corpus supports the claim from
+    two independent directions — a phenotype and an enzyme assay — but note that both come from the
+    same laboratory lineage (Boles, Frankfurt), so this is not two fully independent groups.
+
+  the_phenotype:
+    publication: "doi:10.1186/s13068-019-1486-8"
+    genotype: "pdc1Δ pdc5Δ (PDC6 intact), CEN.PK113-7D background, with MTH1ΔT or MTH1 overexpression"
+    quote: >-
+      Additional deletions of PDC1 and PDC5, even after restoring slow growth by overexpressing
+      Mth1 (strain JWY12) or by engineering Mth1∆T (strain JWY13), had negative effects and stopped
+      isobutanol biosynthesis completely (Fig. b, c). Even after 168 h, isobutanol was not
+      detectable (data not shown). This confirmed the results of Choo et al. [], Brat et al. [] and
+      Milne et al. [], indicating that Pdc1 and Pdc5 significantly contribute also in the conversion
+      of KIV to isobutyraldehyde within the Ehrlich pathway.
+    caveat: >-
+      The strain also consumed almost no glucose (6.79 g/L of 40 g/L in 168 h), so "no isobutanol"
+      is confounded with "almost no flux through anything". The authors do not separate the two.
+
+  the_enzyme_assay:
+    publication: "doi:10.1186/1754-6834-5-65"
+    pmid: "22954227"
+    corpus_file: "00603.txt"
+    pool_status: "in the E1 pool"
+    genotype: >-
+      Isoy21 — MATa leu2-3,112 ura3-52 trp1-289 his3-Δ1 MAL2-8c SUC2 Δpdc1::loxP Δpdc5::loxP
+      Δpdc6::loxP, carrying unknown beneficial mutations for growth on glucose as sole carbon
+      source. A FULL TRIPLE, with an unidentified suppressor.
+    quote: >-
+      Pdc1,5,6 triple mutants expressed only a very low KDC activity (8.66 ± 0.41 mU mg protein-1)
+      whereas the wild-type strain exhibited the highest activity (38.73 ± 6.24 mU mg protein-1).
+    second_quote: >-
+      Overexpression of ARO10 in strain Isoy21 could nearly fully substitute the KDC activity of Pdc
+      enzymes (32.83 ± 8.72 mU mg protein-1) (Figure ) whereas kivD overexpression resulted in only
+      partial complementation (19.61 ± 2.52 mU mg protein-1) (Figure ). As ARO10 overexpression
+      could not restore ethanolic fermentation of Isoy21 and did not show any decarboxylation
+      activity on pyruvate (data not shown), Aro10 was a promising candidate enzyme for increasing
+      the decarboxylation of KIV for increased isobutanol production.
+    what_the_numbers_say: >-
+      Roughly 78% of cellular 2-ketoisovalerate decarboxylase activity is lost when all three PDC
+      genes are removed, measured in crude extract with 2 mM KIV. That is a direct measurement of
+      the dual role rather than an inference from a titre. It also shows the loss is recoverable:
+      ARO10 overexpression restores KDC activity to near wild-type WITHOUT restoring pyruvate
+      decarboxylation, which is the one clean piece of evidence in this slot that the two Pdc
+      activities can in principle be separated.
+    caveat: >-
+      Crude-extract activity, not in vivo flux, and Isoy21 carries unidentified suppressor
+      mutations. The residual 8.66 mU/mg in the triple mutant is presumably native Aro10 and Thi3.
+
+  what_the_pool_does_not_settle:
+    - >-
+      No paper in the pool measures the KIV decarboxylase contribution of Pdc1 and Pdc5
+      SEPARATELY. The assay is on the triple; the phenotype is on the double. The relative
+      contribution of each isozyme is unresolved here.
+    - >-
+      No paper measures isobutanol in a strain where PDC is retained and the ethanol–acetaldehyde
+      shuttle is deliberately strengthened, which is DUET's actual design. The dual-role evidence
+      supports keeping Pdc; it does not demonstrate DUET.
+    - >-
+      One candidate-adjacent paper reports the OPPOSITE expectation and fails to reproduce it —
+      doi:10.1186/s13068-019-1486-8 notes that single PDC1 or PDC5 deletion is described in the
+      literature as improving isobutanol significantly, but in its own hands both single deletions
+      slightly REDUCED isobutanol (0.54 and 0.48 g/L against 0.56 g/L). That disagreement is on the
+      record and should not be smoothed over.
+
+# ═══════════════════════════════════════════════════════════════ IS 25 FILLABLE?
+
+pool_assessment:
+  budget: 25
+  readable_candidates: 16
+  shortfall: 9
+  fillable: false
+
+  verdict: >-
+    NOT fillable from what is readable, and the gap is an ACQUISITION GAP, not scarcity in the
+    literature. 52 further E1-tagged publications sit in the manual download queue and cannot be
+    opened in this session. The shortfall is therefore a statement about this workstation, not
+    about the field.
+
+  but_the_admissible_fraction_is_genuinely_small: >-
+    The more useful finding is inside the 16. Of the pool, only about six papers carry a
+    S. cerevisiae PDC deletion genotype that is both explicit and load-bearing for their result —
+    doi:10.1186/1475-2859-11-131, doi:10.1186/s12934-015-0305-6, doi:10.1186/1754-6834-5-65,
+    doi:10.1186/s12934-021-01594-3, doi:10.1002/elsc.201900080 and doi:10.3390/foods15071163. The
+    remainder are in the pool for weaker reasons: three are about Pdc2 as a thiamine-pathway
+    transcription factor in Candida glabrata / Nakaseomyces glabratus rather than about removing
+    the pyruvate sink (doi:10.1093/g3journal/jkae132, doi:10.1371/journal.pone.0286744); one is a
+    tombusvirus replication study that uses pdc1 pdc5 genetics as a tool
+    (doi:10.1371/journal.ppat.1008092); one is a PFK1 co-culture study that only measures PDC
+    transcript levels (doi:10.1007/s00253-024-13091-9); three are PDC knockouts in other yeasts —
+    Pichia pastoris, Candida sonorensis, Issatchenkia orientalis
+    (doi:10.3390/bioengineering5010017, doi:10.1186/1475-2859-12-53, doi:10.1002/bit.28877) — whose
+    transfer to S. cerevisiae is not established; one is a wine-strain PDC1 deletion aimed at
+    acetate rather than at the Pdc-minus phenotype (doi:10.1186/s12934-016-0555-y); and one is an
+    isopentanol screen in which PDC barely appears (doi:10.1016/j.synbio.2024.12.010). So the
+    honest reading is: the acquisition gap is real, and even the acquired fraction is thinner than
+    16 suggests.
+
+  the_structural_hole: >-
+    THE FOUNDING MEASUREMENTS ARE NOT HERE. Nothing readable in this pool is a primary
+    characterisation of the pdc1Δ pdc5Δ pdc6Δ phenotype itself. Flikweert et al. (the C2 auxotrophy
+    and cytosolic acetyl-CoA argument) and van Maris et al. (the TAM evolution, C2 independence,
+    glucose tolerance and pyruvate hyperproduction) are cited by almost every candidate above and
+    are readable in none of them. That is why candidate 3 is a review: it is the only readable
+    route to that material. If the owner can acquire those two papers, the slot's composition
+    should be revisited before it is closed.
+
+  unspent_share: >-
+    Reported, not reallocated, per ETHANOL_REFERENCE_SLOTS.md. Nine of the 25 cannot be spent from
+    what is held. The recommendation is to leave the share unspent and re-run the slot after the
+    download queue clears, rather than to pad it with the Pdc2/thiamine and non-cerevisiae papers
+    listed above, which would satisfy the count without answering the question.
+
+  runners_up_the_owner_may_prefer_to_swap_in:
+    - doi: "10.1186/s12934-015-0305-6"
+      pmid: "26253003"
+      corpus_file: "00664.txt"
+      pool_status: "in the E1 pool"
+      genotype: "pdc1Δ pdc5Δ pdc6Δ (PDC-E1), CEN.PK 113-5D × CEN.PK 110-10C background"
+      one_line: >-
+        Three independent adaptive evolution lines with Illumina whole-genome sequencing,
+        converging on MTH1, HXT2, CIT1 and RPD3; MTH1(A81D) reverse engineered to 0.053 h-1 and
+        CIT1 deletion pushing it to 0.069 h-1, with an Ach1-based mechanism for cytosolic
+        acetyl-CoA. Richer data than candidate 2 and a better answer to "how does the cell evolve
+        around it", but the reverse-engineered growth is worse and no sequence accession is given.
+      swap_it_in_if: >-
+        the owner wants EVOLVED suppressors and genome sequencing rather than the specific MTH1-ΔT
+        allele that the incumbent isobutanol chassis actually uses.
+    - doi: "10.1186/s12934-021-01594-3"
+      pmid: "34098954"
+      corpus_file: "00684.txt"
+      pool_status: "in the E1 pool"
+      genotype: >-
+        diploid xylose-utilizing S. cerevisiae; both copies of PDC1, PDC5 and PDC6 replaced, plus a
+        different MTH1 internal deletion (MTH1ΔM41-T78)
+      one_line: >-
+        The only pool candidate with a deposited accession (NCBI BioProject PRJNA699459, whole-genome
+        sequencing of five independent pdc-negative transformants) and the only one that shows the
+        MTH1 workaround failing in an industrially shaped, diploid background — it states that the
+        internal deletion "only partially overcame the C2 requirement and ethanol addition was still
+        necessary for efficient sugar consumption", and reports ploidy changes across the
+        transformants.
+      swap_it_in_if: >-
+        the owner wants deposited data and an industrial-strain reality check on the workaround,
+        and can accept that the Pdc content is incidental to a muconic acid paper.
+    - doi: "10.1016/j.meteno.2016.01.002"
+      pmid: "29142820"
+      corpus_file: "00126.txt"
+      pool_status: "NOT in any ethanol criterion pool — see mis_tagged_candidates"
+      genotype: >-
+        IME307 — pdc1Δ pdc5Δ pdc6Δ MTH1ΔT ilv2Δ, CEN.PK, carrying a bacterial cofactor-balanced
+        isobutanol pathway; IMZ500 (pdc1Δ pdc5Δ pdc6Δ MTH1ΔT) as the Pdc- reference
+      one_line: >-
+        The most complete mass balance of a Pdc-minus isobutanol chassis in the corpus: the strain
+        would not grow anaerobically even after weeks of attempted selection, ~45% of carbon went
+        to glycerol to hold the redox balance, 2,3-butanediol reached 0.649 ± 0.067 mol/mol glucose
+        against isobutanol at 0.018 ± 0.003, and the DHAD iron–sulfur cluster is identified as the
+        bottleneck.
+      swap_it_in_if: >-
+        the owner wants the counterfactual chassis costed end to end rather than the Pdc genetics
+        per se. It overlaps candidate 1 thematically, which is why it is listed here rather than
+        shortlisted.
+
+  a_result_that_should_be_treated_with_caution:
+    doi: "10.3390/foods15071163"
+    pmid: "41976457"
+    corpus_file: "01128.txt"
+    pool_status: "in the E1 pool"
+    genotype: "S. cerevisiae GlmDP/pdc1Δpdc5Δpdc6Δ, CRISPR-Cas9, sequential knockouts"
+    the_problem: >-
+      This 2026 paper reports a claimed pdc1 pdc5 pdc6 TRIPLE deletant that still produces
+      6.05 ± 0.13 g/L ethanol (a 26% reduction from 8.20 ± 0.21 g/L) and grows normally on YPD. Its
+      own abstract says the improvement came "without significantly affecting cell growth or glucose
+      consumption". That is irreconcilable with every other Pdc-null description in this pool and
+      in the wider literature, where the triple abolishes ethanol, imposes C2 auxotrophy and cannot
+      grow on glucose at all. Either the deletions are incomplete, or the strain carries a
+      compensating activity, or the phenotype was not confirmed. The paper does not address the
+      discrepancy. It should not be admitted as evidence about the pdc-minus phenotype, and if it
+      is recorded at all it should be recorded as a contradiction.
+
+# ═══════════════════════════════════════════════════════════════ TAGGING PROBLEMS FOUND
+
+mis_tagged_candidates:
+
+  - doi: "10.1186/s13068-019-1486-8"
+    pmid: "31303893"
+    corpus_file: "00765.txt"
+    currently_tagged: "E3 and E5"
+    should_carry: "E1 (in addition to, or instead of, its current tags)"
+    severity: "high — this is candidate 1 above"
+    why: >-
+      Its central Pdc results are pure E1 material: a pdc1Δ pdc5Δ strain with ethanol driven from
+      13 g/L to 0.01 g/L, glucose consumption crippled, both MTH1 workarounds applied, C2
+      supplementation tested and excluded as the bottleneck, and the glycerol branch taking over
+      NAD+ regeneration when ADH1 is deleted. Tagging it E3 (wild-type baseline physiology) and E5
+      (redox shuttle) but not E1 means the counterfactual slot's strongest paper is invisible to
+      the query that should find it. The E5 tag is defensible on the NADH/NADPH discussion; the E3
+      tag looks like an artefact of the CEN.PK113-7D wild-type controls.
+
+  - doi: "10.1016/j.meteno.2016.01.002"
+    pmid: "29142820"
+    corpus_file: "00126.txt"
+    currently_tagged: >-
+      none of E1–E6 — it is in the 1,311-document corpus but absent from every ethanol criterion
+      pool, so it is presumably held in the isobutanol layer rather than the ethanol layer
+    should_carry: "E1 as well"
+    severity: "high"
+    why: >-
+      IMZ500 and IME307 are pdc1Δ pdc5Δ pdc6Δ MTH1ΔT strains, and the paper's quantitative finding
+      is precisely what the Pdc-minus route costs: no anaerobic growth, ~45% of carbon to glycerol,
+      and 2,3-butanediol outyielding isobutanol thirty-six-fold. If the ethanol layer's E1 records
+      are meant to let the atlas read the Gevo/Butamax-lineage literature, this is the paper that
+      shows why the academic version of that lineage does not work.
+
+  - doi: "10.1186/s13068-015-0374-0"
+    corpus_file: "00725.txt"
+    currently_tagged: "none of E1–E6"
+    should_carry: "worth checking for E1"
+    severity: "medium"
+    why: >-
+      Titled "Comparative assessment of native and heterologous 2-oxo acid decarboxylases for
+      application in isobutanol production by Saccharomyces cerevisiae". It matched the pdc-minus
+      sweep and is directly on the Pdc/Aro10/KdcA dual-role question that this slot must document.
+      Not read in full in this session; flagged for triage rather than asserted.
+
+  - doi: "10.1016/j.synbio.2022.02.007"
+    corpus_file: "00141.txt"
+    currently_tagged: "none of E1–E6"
+    should_carry: "worth checking for E1 and E5"
+    severity: "medium"
+    why: >-
+      "Comparative functional genomics identifies an iron-limited bottleneck in a Saccharomyces
+      cerevisiae strain with a cytosolic-localized isobutanol pathway" — matched the pdc-minus
+      sweep. Not read in full in this session.
+
+  - doi: "10.1128/mbio.00520-16"
+    corpus_file: "00489.txt"
+    currently_tagged: "none of E1–E6"
+    should_carry: "worth checking for E1"
+    severity: "low-to-medium"
+    why: >-
+      "Requirements for Carnitine Shuttle-Mediated Translocation of Mitochondrial Acetyl Moieties to
+      the Yeast Cytosol" — the carnitine shuttle is one of the named routes for relieving the
+      cytosolic acetyl-CoA shortage that causes the Pdc-minus C2 auxotrophy, and candidate 3's
+      review cites exactly this line of work. Not read in full in this session.
+
+  - doi: "10.3390/ijms242216378"
+    corpus_file: "01162.txt"
+    currently_tagged: "E2"
+    should_carry: "possibly E1 as well"
+    severity: "low"
+    why: >-
+      "Improved 2,3-Butanediol Production Rate of Metabolically Engineered Saccharomyces cerevisiae
+      by Deletion of RIM15 and Activation of Pyruvate Consumption Pathway" — 2,3-butanediol strains
+      in this field are routinely pdc1 pdc5 pdc6 triples with MTH1 alleles, and candidate 3's
+      applications table lists several. Tagged E2 (performance ceiling), which is a poor fit for an
+      engineered non-ethanol producer. Genotype not confirmed in this session.
+
+  - doi: "10.1128/spectrum.02277-22"
+    corpus_file: "00515.txt"
+    currently_tagged: "E2"
+    should_carry: "possibly E1 as well"
+    severity: "low"
+    why: >-
+      "Metabolic Engineering and Adaptive Evolution for Efficient Production of l-Lactic Acid in
+      Saccharomyces cerevisiae" — lactic acid strains in this field carry PDC and ADH deletions plus
+      adaptive evolution, which is E1 material. Tagged E2. Genotype not confirmed in this session.
+
+# ═══════════════════════════════════════════════════════════════════════ PROVENANCE
+
+provenance:
+  read_in_full:
+    - "00564.txt — doi:10.1186/1475-2859-11-131 (candidate 2)"
+    - "00664.txt — doi:10.1186/s12934-015-0305-6 (runner-up)"
+    - "00603.txt — doi:10.1186/1754-6834-5-65 (pdc_dual_role enzyme assay)"
+    - "00011.txt — doi:10.1002/elsc.201900080"
+    - "00765.txt — doi:10.1186/s13068-019-1486-8 (candidate 1, from outside the pool)"
+  read_in_substantial_part:
+    - "00341.txt — doi:10.1093/femsyr/foaf014 (candidate 3) — all narrative sections plus the applications table"
+    - "00126.txt — doi:10.1016/j.meteno.2016.01.002 — abstract, strain table, results and discussion"
+    - "00684.txt — doi:10.1186/s12934-021-01594-3 — strain construction, results, discussion"
+    - "01128.txt — doi:10.3390/foods15071163 — abstract, results, discussion"
+  triaged_by_abstract_and_genotype_grep:
+    - "00145.txt, 00004.txt, 00041.txt, 00358.txt, 00917.txt, 00925.txt, 01093.txt, 00570.txt, 00672.txt"
+  corpus_searches_run:
+    - "pdc1[ΔD]?\\s*pdc5 | PDC1 and PDC5 | pyruvate decarboxylase[- ]negative | Pdc(-|minus| negative) | pdc1Δ pdc5Δ pdc6Δ | triple.{0,20}pyruvate decarboxylase — 34 documents matched across the 1,311-document corpus"
+    - "pdc1.{0,6}pdc5 | PDC1.{0,10}PDC5 with 500-character windows, to recover genotypes from strain tables"
+    - "cross-check of every corpus_file hit against E1.json through E6.json to establish current tagging"
+  not_done:
+    - "No paper in the manual download queue was opened; 52 further E1-tagged publications remain unread."
+    - "Open-access licence was assumed from publisher for BMC titles and not individually verified for the OUP title."
+    - "No `confidence` value was written, and nothing was marked accepted or verified."
+    - "Nothing under data/ was read for writing or modified."

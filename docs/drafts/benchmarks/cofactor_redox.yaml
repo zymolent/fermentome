@@ -1,0 +1,228 @@
+# Draft evidence for data/benchmarks/known_positives.yaml, category: cofactor_redox
+# Read-only evidence-finding pass against the local stored-fulltext corpus (1,309 papers).
+# No confidence value is asserted here and nothing is marked verified: that is a curator's act.
+# Quotes are verbatim substrings of the named corpus file, copied character-for-character.
+
+- id: BM-COF-001
+  verdict: supported
+  publication: "doi:10.1186/s13068-019-1486-8"
+  corpus_file: "00765.txt"
+  quote: |-
+    In the native pathway, after transport into mitochondria, two molecules of pyruvate are condensed to one molecule of 2-acetolactate (ALAC) by the Ilv2Ilv6 complex. Reduction and isomerization of ALAC to 2,3-dihydroxyisovalerate (DIV) by Ilv5 requires redox cofactor NADPH.
+  quote_supports: >-
+    Establishes all three things the benchmark's expected_outcome asks for: the enzyme (Ilv5,
+    the KARI step), the cofactor identity as NADPH specifically rather than "NAD(P)H", and the
+    compartment (the native reaction runs in the mitochondria, after pyruvate import). It does
+    NOT give a numeric signed stoichiometric coefficient; "requires" implies consumption
+    (negative for NADPH, positive for NADP+) but no coefficient is printed.
+  searches_run:
+    - "(Ilv5|IlvC|ketol-?acid reductoisomerase|KARI)[^.]{0,120}NADPH"
+    - "(mitochondrial NADPH|NADPH in the mitochondri|matrix NADPH|NADPH supply)"
+  note: >-
+    Very widely corroborated; this is the least contested statement in the category. Independent
+    corroborations in the corpus, any of which a curator could swap in: doi:10.1093/femsyr/foae006
+    (00336.txt) states the direction of the couple explicitly, in the words "in which NADPH is
+    used as redox cofactor and oxidized to NADP + ", which is the closest the corpus comes to a
+    signed coefficient, so it may be the better row if the atlas wants directionality;
+    doi:10.1186/1754-6834-5-65 (00603.txt) says "Ilv5 in the isobutanol pathway exclusively uses
+    NADPH", the strongest specificity wording found; and doi:10.1093/femsyr/foaf014 (00341.txt)
+    gives the generic "the Kari is NADPH-dependent".
+    No statement was found anywhere in the corpus contradicting NADPH specificity for wild-type
+    Ilv5. The one caveat a curator should keep separate: engineered KARI variants (Ec IlvC6E6,
+    Ec IlvC P2D1-A1, Lb IlvC DD/DDV) are deliberately NADH-preferring, so a row keyed on the step
+    role "KARI" must not inherit NADPH from Ilv5. See BM-COF-004.
+
+- id: BM-COF-002
+  verdict: supported
+  publication: "doi:10.1016/j.synbio.2022.02.007"
+  corpus_file: "00141.txt"
+  quote: |-
+    the redox cofactor-imbalance that exists between glycolysis and isobutanol fermentation; glycolysis produces two NADH per molecule of glucose, while isobutanol fermentation consumes one NADPH by ILV5 and one NADH by ADH. This results in an NADPH shortage and NADH excess.
+  quote_supports: >-
+    Establishes the whole arithmetic the benchmark wants to survive summation: the ADH step is
+    NADH-consuming, the KARI step is NADPH-consuming, and the two do not cancel. The paper names
+    the residue as a species-resolved pair of non-zero terms, "an NADPH shortage and NADH
+    excess", which is exactly the outcome the benchmark says must not collapse into a single
+    "reducing equivalents" total. It does not by itself establish the "cannot close on its own"
+    clause; that rests on the absence of a transhydrogenase, quoted in the note.
+  searches_run:
+    - "NADH-?(dependent|preferring|specific)[^.]{0,80}(KARI|IlvC|ketol)"
+    - "(Adh6|ADH6)[^.]{0,100}NADPH"
+    - "(lacks?|absence of|no)[^.]{0,60}transhydrogenase"
+  note: >-
+    The "cannot close on its own" clause is directly supported by doi:10.1186/1754-6834-5-65
+    (00603.txt): "Ilv5 in the isobutanol pathway exclusively uses NADPH. As S. cerevisiae lacks
+    transhydrogenases to transfer hydride-ions from NADH to NADP+, the cofactor levels within the
+    cell will be imbalanced []." Also doi:10.1093/femsyr/foaf014 (00341.txt): "Among them, the
+    Kari is NADPH-dependent and the Adh is NADH-dependent."
+    IMPORTANT SCOPE QUALIFICATION, which the source_hint anticipated and which the corpus
+    confirms: "the alcohol dehydrogenase step that finishes isobutanol" is not one enzyme in
+    yeast, and the NADH claim holds only for the Adh1/Adh2-type ADHs.
+    doi:10.3389/fmicb.2025.1753983 (01069.txt) states "The yeast alcohol dehydrogenase Adh2 is
+    NADH-dependent, while the bacterial aldehyde reductase YqhD, yeast Adh6, and Adh7 are
+    NADPH-dependent", and elsewhere in the same paper "Adh6/7 are NADPH-dependent with strong
+    preference for branched alcohols". Several S. cerevisiae isobutanol builds in this corpus
+    deliberately overexpress ADH6, e.g. doi:10.1186/s12934-015-0240-6 (00662.txt): "Isobutanol
+    biosynthesis requires NADPH as a cofactor for the reaction catalyzed by KARI (Ilv5) and ADH
+    (Adh6)". doi:10.1093/femsyr/foae006 (00336.txt) hedges correspondingly, writing
+    "NADH/NADPH utilization by Adhs". So the atlas must not store a single cofactor on a generic
+    "ADH" step role.
+    Suggested precise wording: "The ADH step is NADH-dependent when carried by Adh1/Adh2 or by
+    heterologous L. lactis AdhA; when carried by Adh6 or Adh7 it is NADPH-dependent, in which
+    case the pathway demands two NADPH rather than one NADPH plus one NADH and the imbalance is
+    larger, not absent. Either way S. cerevisiae has no transhydrogenase to interconvert the
+    pools, so the mismatch cannot be closed by redox arithmetic alone."
+    That qualification strengthens rather than undermines the benchmark's point, but it is a
+    per-part fact, not a per-pathway fact, and a flattened row would get it wrong.
+
+- id: BM-COF-003
+  verdict: supported
+  publication: "doi:10.1128/aem.00362-26"
+  corpus_file: "00468.txt"
+  quote: |-
+    Because the yeast inner mitochondrial membrane is impermeable to NADH and NAD+, respiratory reoxidation of NADH is strictly compartmentalized (). In the model yeast Saccharomyces cerevisiae, oxidation of NADH generated in the mitochondrial matrix is coupled to respiration by a simple, non-proton-translocating NADH dehydrogenase (Ndi) ().
+  quote_supports: >-
+    Establishes the NAD(H) half of the statement outright. The inner membrane is impermeable to
+    NADH and NAD+, so NADH balance is "strictly compartmentalized", and the quote confirms the
+    source_hint's recalled route by naming Ndi as the matrix-facing dehydrogenase. It does NOT
+    cover NADPH, and it says nothing about the isobutanol route or about the four
+    compartment_strategy values; it establishes the physical premise those rest on.
+  searches_run:
+    - "(inner mitochondrial membrane|mitochondrial membrane)[^.]{0,160}(impermeable|not permeable|cannot (freely )?(cross|pass|traverse))"
+    - "(Ndi1|Nde1|internal NADH dehydrogenase|external NADH dehydrogenase)[^.]{0,200}(cytosolic|matrix|compartment)"
+    - "NADP\\(?H\\)?[^.]{0,80}(cannot|does not|not)[^.]{0,60}(cross|traverse|permeate|transported across)"
+    - "(NADPH|NADP\\(H\\)|NAD\\(P\\)H)[^.]{0,120}(compartment|pools? (are|is) (separate|distinct))"
+  note: >-
+    The NADPH half needs a second source, and the corpus has one:
+    doi:10.1371/journal.pone.0333299 (00920.txt), which states "The presence of a cytosolic malic
+    enzyme is important as NADPH cannot freely cross the mitochondrial membrane." A curator may
+    prefer to split BM-COF-003 into two rows, one per cofactor species, since no single paper
+    found in this corpus states both in one sentence.
+    Topology of the recalled route is confirmed by doi:10.3389/fgene.2015.00206 (01005.txt):
+    "the internal mitochondrial membrane contains two NADH dehydrogenases facing the inner
+    membrane space (Nde1p and Nde2p) and one facing the matrix (Ndi1p)".
+    The corpus also supplies direct experimental support for the harder claim implicit in
+    comparing compartment strategies, namely that matrix NADH cannot simply be shuttled out:
+    doi:10.1111/1751-7915.12160 (00438.txt) reports that permeabilized cells of the internal-NADH-
+    dehydrogenase null mutant show no oxidation of matrix NADH, which the authors say suggests
+    that shuttle systems to transfer NADH from the mitochondrial matrix to the cytosol are not
+    functional. THAT SENTENCE IS PARAPHRASED HERE, NOT VERBATIM, because the source spells the
+    strain name with a Greek delta; a curator citing it must re-copy it from 00438.txt. It is
+    also Kluyveromyces lactis, not S. cerevisiae.
+    The source_hint's Bakker et al., FEMS Microbiology Reviews 2001 review was NOT found in the
+    corpus. The hint's own caution that the textbook malate-aspartate account is not
+    straightforwardly transferable is consistent with what the corpus does say: the cytosolic-NADH
+    routes named here are the glycerol-3-phosphate shuttle and the external NADH dehydrogenases
+    NDE1/NDE2, per doi:10.1186/1475-2859-9-36 (00584.txt).
+
+- id: BM-COF-004
+  verdict: partially_supported
+  publication: "doi:10.3389/fmicb.2012.00196"
+  corpus_file: "01015.txt"
+  quote: |-
+    To overcome this cofactor imbalance issue, constructed an NADH-dependent pathway by engineering a ketol-acid reductoisomerase IlvC (E. coli) and ADH AdhA (L. lactis). Directed evolution approaches () were applied to IlvC and AdhA to switch cofactor dependence from NADPH to NADH. In an anaerobic, fully NADH-dependent strain containing AdhARE1 and IlvC6E6-his6, 13.4 g/L isobutanol at 100% theoretical maximum yield was produced in M9 media supplemented with glucose, yeast extract, and trace met als (hereafter modified M9).
+  quote_supports: >-
+    Confirms the factual core: an engineered NADH-preferring IlvC variant (IlvC6E6) exists, it was
+    used in E. coli, and the resulting strain reached 13.4 g/L isobutanol at 100% of theoretical
+    maximum yield anaerobically. It CONTRADICTS the benchmark's attribution. The KARI switch was
+    not "the change" on its own: two enzymes were cofactor-swapped in the same build, IlvC AND
+    AdhA, and the quote names the strain as carrying both (AdhARE1 and IlvC6E6-his6). The quote
+    says nothing at all about the second clause, that cofactor preference is "the single
+    highest-leverage part choice in the catalog", which is an editorial extrapolation.
+    Note that "met als" with the interior space is a PDF-extraction artifact present in the source
+    and is reproduced here verbatim as required.
+  searches_run:
+    - "NADH-?(dependent|preferring|specific)[^.]{0,80}(KARI|IlvC|ketol)"
+    - "(Ilv5|IlvC|ketol-?acid reductoisomerase|KARI)[^.]{0,120}NADPH"
+  note: >-
+    OVERSTATED IN TWO SEPARATE WAYS.
+    (1) Attribution. Independently corroborated by doi:10.1007/s10295-020-02319-y (00054.txt),
+    which describes the same E. coli work as a pair of changes and uses the plural: "overexpression
+    of adhA from L. lactis is advantageous due to utilization of NADH rather than NADPH as a
+    cofactor []. A mutant of adhA was shown to have higher affinity towards isobutyraldehyde. In a
+    mutated form of ilvC, the cofactor was exchanged from NADPH to NADH. These mutations enabled
+    anaerobic isobutanol production at 100% of the theoretical yield []." Likewise
+    doi:10.1186/s13068-020-01862-1 (00779.txt) frames it as "two genetic modifications".
+    PROPOSED WEAKER WORDING: "Switching KARI cofactor preference from NADPH to NADH, together with
+    an NADH-dependent ADH (L. lactis AdhA-RE1), enabled anaerobic isobutanol production at 100% of
+    theoretical maximum yield (13.4 g/L) in E. coli."
+    (2) The "single highest-leverage part choice in the catalog" clause is not supported, and the
+    corpus supplies direct counter-evidence. This matters because the benchmark's own
+    expected_outcome warns that the yeast rows "must not inherit the E. coli outcome", and the
+    corpus shows the outcome genuinely does not transfer. doi:10.3389/fbioe.2022.1080024
+    (00989.txt), in S. cerevisiae, reports that strains carrying the NADH-dependent KARI variants
+    "did not outperform sJD107 with the wild-type, NADPH-dependent LbIlvC", and that "We suspect
+    the lower isobutanol titer with the LbIlvC DD and LbIlvC DDV variants was due to a reduced
+    specific activity of the KARI enzyme". doi:10.1128/aem.00976-22 (00474.txt) makes the same
+    point for E. coli 2-ketoisovalerate: "although an alternative ketol-acid reductoisomerase
+    (IlvC) mutant has been engineered to be NADH dependent to avoid NADPH requirement, the
+    enzymatic activity is significantly lower () and was not involved in the present study."
+    In yeast the corpus's own head-to-head comparison (doi:10.1016/j.synbio.2022.02.007,
+    00141.txt) found pathway LOCALIZATION to be the larger lever, reporting that pathway
+    localization had a large effect with the mitochondrial-localized strain producing 3.8-fold
+    more isobutanol, while the NADPH- versus NADH-dependent KARI contrast did not dominate.
+    RECOMMEND the "single highest-leverage part choice" clause be dropped from the benchmark
+    statement, or demoted to an explicitly E. coli-scoped observation, since the catalog it
+    refers to is the yeast catalog.
+
+- id: BM-COF-005
+  verdict: partially_supported
+  publication: "doi:10.1186/s13068-023-02309-z"
+  corpus_file: "00803.txt"
+  quote: |-
+    While the cytosolic NADPH is mainly derived from the reactions catalyzed by glucose-6-phosphate dehydrogenase Zwf1, acetaldehyde dehydrogenase Ald6 and isocitrate dehydrogenase Idp2, the mitochondrial NADPH is relying on the reactions catalyzed by NAD+/NADH kinase Pos5 and NADP+ dependent enzymes, including acetaldehyde dehydrogenases Ald4 and Ald5, isocitrate dehydrogenase Idp1, and malic enzyme Mae1 [, ]. Pos5 is considered as the main source of mitochondrial NADPH and possesses higher NADH kinase activity than NAD kinase activity [, ], suggesting active NADPH synthesis from NADH with ATP consumed, both of which are abundant in the mitochondriona.
+  quote_supports: >-
+    Establishes that matrix NADPH supply is known QUALITATIVELY. The corpus can name the
+    contributing enzymes and rank Pos5 first, which is the part of the benchmark statement that is
+    weaker than stated. It does NOT establish any quantity: no concentration, no NADPH/NADP+
+    ratio, no flux, and nothing about fermentative or production conditions. So it supports the
+    "not quantified" half only by conspicuously failing to quantify, which is absence of evidence
+    rather than a positive statement of a gap. "mitochondriona" is the source's own typo,
+    reproduced verbatim.
+  searches_run:
+    - "mitochondrial NADPH"
+    - "NADPH/NADP\\+? ratio[^.]{0,200}(mitochondri|matrix|compartment)"
+    - "(biosensor|sensor|iNap|Apollo-NADP|SoNar|Peredox)[^.]{0,160}(NADPH|NADP\\+|NADP\\(H\\))"
+    - "(compartment-specific|compartment-resolved|subcellular)[^.]{0,120}(NADPH|NADP\\(H\\)|redox)"
+    - "(NADPH|NADP\\(H\\))[^.]{0,200}(mitochondri|matrix)[^.]{0,200}(unclear|unknown|not (been )?(quantified|measured|determined)|remains to be|poorly understood|limit)"
+    - "(mitochondrial NADPH|NADPH in the mitochondri|matrix NADPH|NADPH supply)"
+  note: >-
+    THE GAP CLAIM HOLDS FOR THIS CORPUS, but for a narrower reason than the statement implies, and
+    the statement should say which kind of "not quantified" it means.
+    Searches for compartment-resolved NADPH concentrations or NADPH/NADP+ ratios returned nothing.
+    The ratio search matched zero documents. The genetically-encoded-biosensor search
+    (iNap / Apollo-NADP / SoNar / Peredox) matched only doi:10.3390/microorganisms13010046
+    (01220.txt), which is a metabolite-reporter proxy (3-HP titer) in Komagataella phaffii
+    peroxisomes, not a measurement of matrix NADPH in S. cerevisiae. The nearest compartment-
+    resolved probe in the corpus, doi:10.1016/j.xpro.2020.100160 (00153.txt), images mito-roGFP,
+    which reports glutathione/thiol redox state, not NADPH. No numeric matrix NADPH value under
+    any condition, let alone a fermentative one, was found in 1,309 stored texts.
+    PROPOSED WORDING, which is what the corpus actually supports: "The enzymes supplying
+    mitochondrial-matrix NADPH in S. cerevisiae are qualitatively known (Pos5, Ald4/Ald5, Idp1,
+    Mae1, with Pos5 regarded as the main source), but no compartment-resolved matrix NADPH
+    concentration, NADPH/NADP+ ratio or supply flux under fermentative or production conditions
+    was found. The quantity, not the identity of the sources, is the open gap."
+    Two further facts a curator should carry into any Pos5 row derived from this entry, because
+    they are what neighbouring benchmark statements are most likely to overstate.
+    (a) POS5 IS THE MAIN SOURCE, NOT THE SOLE SOURCE. The quoted paper names Ald4, Ald5, Idp1 and
+    Mae1 alongside it, and doi:10.1371/journal.pone.0333299 (00920.txt) independently lists
+    "Mitochondrial NADPH is generated through the mitochondrial NAD+ kinase (Pos5), through the
+    activity of aldehyde dehydrogenases (Ald4/5) and through the activity of mitochondrial
+    NADP+-dependant malic enzyme (Mae1) []." doi:10.1128/spectrum.00108-23 (00510.txt) adds
+    "the deletion of Pos5 is not lethal, and there are other NADH kinases in yeast ()".
+    (b) POS5 IS ATP-COUPLED. Confirmed independently here: doi:10.1093/femsyr/foae006 (00336.txt)
+    states "POS5 transforms NADH to NADPH by consuming ATP (Liu et al. )", and
+    doi:10.1016/j.mec.2024.e00245 (00124.txt) attributes the growth penalty of cytosolically
+    retargeted Pos5 to exactly this, writing that the effect "is obviously a consequence of energy
+    dissipation, since the kinase consumes ATP and decreases the amount of NADH available for
+    respiration ()". Matrix NADPH is therefore not free: any configuration running KARI in the
+    matrix is buying NADPH with ATP and with NADH that respiration would otherwise use.
+    EMPIRICAL EVIDENCE THAT THE GAP BITES. doi:10.1186/s12934-015-0240-6 (00662.txt) tried to
+    raise matrix NADPH for the Ilv5 step by overexpressing mitochondrial Mae1 and it backfired:
+    the strain overexpressing mitochondrial Mae1 showed lower isobutanol production than its
+    parent, as well as lower ethanol production and no cell growth during fermentation. THAT
+    SENTENCE IS PARAPHRASED, NOT VERBATIM, because the source spells the strain names with a Greek
+    delta; re-copy it from 00662.txt before citing. By contrast doi:10.1186/1475-2859-12-119
+    (00569.txt) reports mitochondrial Mae1 overexpression raising isobutanol to 139 mg/L. The two
+    outcomes disagree, which is itself the argument that matrix NADPH supply under production
+    conditions is unquantified rather than merely unrecorded.

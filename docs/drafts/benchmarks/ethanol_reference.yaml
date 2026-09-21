@@ -1,0 +1,81 @@
+# DRAFT - evidence proposals for benchmark claims in data/benchmarks/known_positives.yaml
+# Category: ethanol_reference
+# Produced by a corpus-evidence pass over the 1,309 stored full texts. NOT a curation act:
+# no confidence value is asserted here and nothing is marked verified. A human curator decides.
+# Every `quote` is copied character-for-character out of the named corpus file, including the
+# empty-bracket artefacts ("[]", "[, ]", "()") left by reference stripping during text
+# extraction, and including hard line breaks. Do not normalise them before comparing.
+
+- id: BM-ETH-001
+  verdict: partially_supported
+  publication: "doi:10.1093/femsyr/foag024"
+  corpus_file: "00348.txt"
+  corpus_title: "Overexpression of the MAPK transcription factor gene MSS11 enhances ethanol biosynthesis in Saccharomyces cerevisiae via coordinated metabolic and stress-response reprogramming."
+  quote: |-
+    Notably, while the theoretical maximum mass yield of ethanol from glucose in S. cerevisiae is 0.511 g/g (based on EMP pathway stoichiometry), the experimentally achieved yields remain below this thermodynamic limit due to metabolic constraints and cellular maintenance requirements.
+  quote_supports: >-
+    Establishes the first half of the statement exactly as written: the ceiling is 0.511 g/g, the substrate is named (glucose), the organism is named (S. cerevisiae), and the basis is named (EMP pathway stoichiometry). It does NOT establish the second half - that every ethanol yield stored in the atlas is expressible as a fraction of it. That is a property of the atlas own data model and unit handling, not a claim any paper makes, and it has to be tested against stored rows rather than looked up in the literature.
+  endpoint_stated: not_applicable
+  searches_run:
+    - "0\\.51[0-9]?\\s*g\\s*(ethanol)?\\s*[/ ]\\s*g"
+    - "theoretical\\s+(maximum\\s+)?yield   [--require 0\\.51]"
+    - "(8[5-9]|9[0-5])\\s*(%|percent|per cent)\\s*of (the )?(maximum )?theoretical"
+  note: >-
+    NUMERIC CHECK - the benchmark 0.511 g/g is corroborated, but it is the MINORITY spelling in this corpus. Only four files write 0.511 (00348, 00240, 00717, 01269); the large majority round to 0.51 g/g (00053, 00234, 00290, 00351, 00579, 00581, 00646, 00740, 00745, 00747, 00754, 00773, 00782, 00793, 01193, 01223, 01291). An atlas that stores 0.511 and compares against papers that print 0.51 will show spurious over-100-percent-of-theoretical rows in the third significant figure; the curator should decide whether the stored ceiling is 0.511 or 0.51 and record which. SUBSTRATE-BASIS WARNING, and this is the more serious point: a large number of corpus papers apply the SAME 0.51 g/g figure to XYLOSE, not glucose - 00579 ('0.51 g g consumed xylose-1'), 00581, 00754, 00793, 00909 ('0.51 g ethanol per g xylose (1.67 mol of ethanol per mol of xylose)'), 00646 ('g sugars'), 01193 (mixed WIS sugars). So '0.51 g/g' in a paper does NOT imply the substrate was glucose, and the benchmark requirement that the substrate be named is doing real work: a scraper that reads the number without the substrate will silently mix hexose and pentose bases. ARITHMETIC independently confirmed in the corpus by 00782.txt (doi:10.1186/s13068-021-01903-3), which writes out the stoichiometry: '=0.51 g/g, where molecular weights of ethanol and glucose are 46.07 and 180.156 g/mol, respectively, and one molecule of glucose stoichiometrically produces two molecules of ethanol.' 2 x 46.07 / 180.156 = 0.51142, so 0.511 is the correctly rounded value and the source_hint molar masses are confirmed. Candidate alternates if the curator prefers a paper that shows the working rather than asserting the number: 00782.txt (full derivation, but rounds to 0.51) and 00717.txt (doi:10.1186/s13068-015-0224-0, '0.511 is the theoretical yield factor for the alcoholic fermentation process').
+
+- id: BM-ETH-002
+  verdict: partially_supported
+  publication: "doi:10.1186/s12934-015-0232-6"
+  corpus_file: "00661.txt"
+  corpus_title: "Isobutanol production from cellobionic acid in Escherichia coli."
+  quote: |-
+    Glucose
+
+    C6H12O6 → C4H10O + 2 CO2 + H2O
+
+    Stoichiometric conversion gives the following ratio: 0.41 g isobutanol/g glucose
+  quote_supports: >-
+    Confirms independently, as the source_hint demanded, BOTH the assumed stoichiometry (1 glucose -> 1 isobutanol + 2 CO2 + 1 H2O) and the resulting mass ratio. It does NOT confirm the benchmark third decimal place (see note), and it does not state the ethanol ceiling, so it cannot on its own establish the comparison between the two ceilings. It is an E. coli paper; the ceiling is pure stoichiometry and so is organism-independent, but the curator should note the host if provenance matters for the record.
+  endpoint_stated: not_applicable
+  searches_run:
+    - "0\\.4[01][0-9]?\\s*(g|mol)   [--require isobutanol]"
+    - "theoretical   [--require isobutanol]"
+    - "0\\.41\\s*g   [--require 0\\.51]"
+  note: >-
+    NUMERIC MISMATCH. Benchmark says 0.411 g/g isobutanol from glucose. NOT ONE file in this corpus writes 0.411 for glucose. The corpus consistently writes 0.41 g/g: 00661 (stoichiometry above), 00189.txt Atsumi/Liao Nature 2008 ('The theoretical maximum yield of isobutanol is 0.41 g g 21' - the '21' is an extraction artefact for superscript minus one), 00463.txt ('0.41 g of isobutanol per gram glucose'), 00678.txt ('the maximal theoretical yield (0.41 g/g)'), 00779.txt ('The TMY value for the isobutanol production is 0.41 gIbOH.ggluc.cons-1'). The benchmark 0.411 IS arithmetically right (74.12 / 180.156 = 0.41142), so this is a precision mismatch rather than an error of fact - but see the next point, which may be its actual origin. LIKELY SOURCE OF THE 0.411: 00336.txt (doi:10.1093/femsyr/foae006, FEMS Yeast Research, S. cerevisiae) writes 'However, the current maximum isobutanol production with S. cerevisiae is still far below the theoretical yields of 410 mg isobutanol/g glucose (Generoso et al. ), or 411 mg/g xylose (Zhang et al. ).' - i.e. in the one corpus source that gives three significant figures, 0.411 is the XYLOSE ceiling and 0.410 is the GLUCOSE ceiling. The benchmark attaches 0.411 to glucose. Report both; do not reconcile. SECOND HALF OF THE CLAIM NOT FOUND: no single file in this corpus states the ethanol and isobutanol ceilings side by side. The only file matching both '0.41 g' and '0.51' in one window is 00793.txt, and that is a coincidence (0.41 g/g is an achieved ethanol yield there, not the isobutanol ceiling). So 'materially lower than the ethanol ceiling' has to be assembled from two publications, which is exactly the two-stored-rows comparison the benchmark expected_outcome demands in place of a product-identity code branch. Yeast-specific alternate if the curator wants an S. cerevisiae source rather than an E. coli one: 00336.txt, quoted above.
+
+- id: BM-ETH-003
+  verdict: partially_supported
+  publication: "doi:10.1186/s13068-017-1001-z"
+  corpus_file: "00747.txt"
+  corpus_title: "Optimizing anaerobic growth rate and fermentation kinetics in Saccharomyces cerevisiae strains expressing Calvin-cycle enzymes for improved ethanol yield."
+  quote: |-
+    For example, sugar-cane-based bioethanol production in Brazil often approaches 92% of the theoretical maximum of 0.51 g ghexose−1 []. Since the feedstock is the largest cost contributor in first-generation industrial ethanol production [], even modest improvements in ethanol yield can significantly improve process economics.
+
+    Carbon losses during anaerobic bioethanol production result from the formation of biomass, CO2, and by-products, with glycerol formation requiring up to 4% of the sugar substrate in industrial processes [, ].
+  quote_supports: >-
+    This is the only quote found carrying BOTH halves of the statement: a quantitative fraction-of-theoretical (92 percent) against a named ceiling and substrate basis (0.51 g per g hexose), AND the destination of the remainder (biomass, CO2, by-products, with glycerol specifically quantified at up to 4 percent of the substrate). What it does NOT establish is the subject of the benchmark sentence. The 92 percent is for sugar-cane-based first-generation INDUSTRIAL bioethanol production in Brazil, a process figure. It is not a measurement of wild-type S. cerevisiae under defined anaerobic glucose fermentation, and the condition context is not one the atlas can match a lab row against.
+  endpoint_stated: not_applicable
+  searches_run:
+    - "anaerobic   [--require (glycerol|biomass).{0,400}carbon (balance|recovery)]"
+    - "anaerobic.{0,200}chemostat   [--require (ethanol yield|glycerol)]"
+    - "(8[5-9]|9[0-5])\\s*(%|percent)\\s*of (the )?(maximum )?theoretical   [--require anaerobic|wild.?type|CEN\\.PK]"
+  note: >-
+    NUMERIC MISMATCH, and the direction of the error matters. Benchmark says 'in the region of 90 percent of theoretical'. The corpus industrial/process numbers cluster just above that - 92 percent (00747, quoted), 'high ethanol yields on fermentable sugars (>90% of the theoretical maximum yield of 0.51 g ethanol.(g hexose sugar)-1)' for first-generation processes (00351.txt, doi:10.1093/femsyr/fox044), and 'At industrial scale, ethanol is produced with a yield that is higher than 90% of the theoretical maximum []' (00053.txt, doi:10.1007/s10295-019-02242-x). But the LABORATORY wild-type reference number is materially LOWER: 00606.txt (doi:10.1186/1754-6834-6-125) reports, for the isogenic reference strain IMU032 in anaerobic sugar-limited chemostat at D = 0.05 h-1 on 12.5 g/L glucose plus 12.5 g/L galactose, 'Ethanol yield on sugar (mol mol-1) | 1.56 +/- 0.03' with 'Glycerol yield on sugar (mol mol-1) | 0.14 +/- 0.00' and 'Biomass yield on sugar (g g-1) | 0.083 +/- 0.000'. Against the 2 mol/mol ceiling that is 78 percent of theoretical, not 90. Record both with their condition contexts; do not average them. THE DEEPER PROBLEM, which the atlas must model or the benchmark is unanswerable: the wild-type anaerobic ethanol yield is not a constant, it is a function of specific growth rate. 00140.txt (doi:10.1016/j.synbio.2021.12.010, a review of exactly this question) states 'Even in anaerobic glucose-limited cultures of wild-type S. cerevisiae, ethanol yields on glucose approach the theoretical maximum of 2 mol ethanol/mol glucose at near-zero growth rates []' and, earlier, 'The fraction of the consumed sugar that is fermented to ethanol therefore increases with decreasing specific growth rate'. So a stored row for this claim is not usable without its specific growth rate or dilution rate, alongside the basis the benchmark already requires. THE SOURCE_HINT PRIMARY WAS NOT FOUND: the recalled Verduyn / van Dijken / Pronk anaerobic chemostat carbon-balance paper is not in this corpus as a primary source. What is here is the Pronk-lineage secondary literature citing it (00140, 00747, 00351, 00606, 00670). If the curator wants the primary carbon balance it must be fetched; 00670.txt (doi:10.1186/s12934-016-0465-z) points at it - 'Calculations were based on a previous analysis of anaerobic, glucose-limited chemostat cultures of wild-type S. cerevisiae growing at a fixed specific growth rate of 0.10 h-1 [] ... an experimentally determined biomass yield on glucose of 0.103 gx g-1 []'.
+
+- id: BM-ETH-004
+  verdict: supported
+  publication: "doi:10.1186/1475-2859-12-83"
+  corpus_file: "00572.txt"
+  corpus_title: "Impact of oleic acid as co-substrate of glucose on 'short' and 'long-term' Crabtree effect in Saccharomyces cerevisiae."
+  quote: |-
+    The onset of the transition from respiratory to oxido-reductive metabolism, corresponding to the Dc, was characterized by the increase in the ethanol production and the decrease in the biomass yield (Yx/s). This happened at 0.24 h-1 on sole glucose (Figure A) but the presence of oleic acid in the fermentation broth led to an 8% increase at 0.26 h-1 (Figure B).
+  quote_supports: >-
+    Supplies the quantitative anchor the source_hint asked for instead of a qualitative assertion: a measured critical dilution rate for the onset of aerobic ethanol formation, Dc = 0.24 h-1, in S. cerevisiae CEN.PK 113-7D in an aerobic glucose-limited accelerostat, with the onset operationally defined (rise in ethanol production plus fall in biomass yield). It establishes that oxygen availability alone does not determine whether the ethanol sink is active - the glucose feeding regime does. It does not by itself state the glucose-excess batch case; for that see the companion passage in the note.
+  endpoint_stated: not_applicable
+  searches_run:
+    - "Crabtree   [--require aerobic|oxygen|dilution rate|excess]"
+    - "critical (specific growth|dilution|glucose)"
+    - "Dc\\s*(of|=|was|value)|critical dilution rate of|0\\.2[0-9]\\s*h"
+  note: >-
+    NO NUMERIC MISMATCH - the benchmark asserted no number, and the corpus supplies one: Dc = 0.24 h-1 for CEN.PK 113-7D on sole glucose (0.26 h-1 with oleic acid as co-substrate). COMPANION PASSAGE, same file, offset approx. 2668, which the curator should read alongside the quote because it is the direct test of the benchmark failure condition: 'It is named “long-term” effect when it appears in glucose excess batch and fed-batch or in glucose-limited chemostat at dilution rates over the critical dilution rate (Dc), involving adaptation of cell metabolism, while it is named “short-term” effect after a glucose pulse in glucose-limited chemostat at dilution rates under Dc[].' The literature therefore distinguishes FOUR aerobic contexts, not two: glucose-excess batch/fed-batch, glucose-limited chemostat above Dc, glucose-limited chemostat below Dc, and glucose pulse below Dc. A condition model that only carries an aerobic/anaerobic flag, or even only aerobic-batch vs aerobic-glucose-limited, is too coarse for this question. CAVEAT on storing Dc as a constant: it is strain- and condition-dependent, not a species constant. The same file reports a mig1 mig2 deletion raising Dc by 5 percent and HAP4 overexpression by 10 percent, and warns that 'the range of S. cerevisiae strains used in industry is wide and their behavior could largely differ from CEN.PK 113-7D'. 00672.txt (doi:10.1186/s12934-016-0555-y) adds that a change in Dc measured in carbon-limited chemostat 'might appear as almost irrelevant for cultures in batch, especially for growth in high sugar content media' - so Dc must be stored with its strain and cultivation mode and must not be used to predict batch behaviour. Supporting sources for the effect itself if a review anchor is wanted: 00199.txt (doi:10.1038/s41467-022-28467-6, 'at a specific critical dilution (=growth) rate, ethanol formation starts and increases linearly with growth rate') and 00283.txt (doi:10.1073/pnas.2112836118, 'Adaptations in metabolism and protein translation give rise to the Crabtree effect in yeast').

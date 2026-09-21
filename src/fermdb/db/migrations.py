@@ -191,8 +191,58 @@ _V7_TO_V8: Final[Migration] = Migration(
     statements=("ALTER TABLE chassis_profile ADD COLUMN ploidy_candidates TEXT",),
 )
 
+#: v8 -> v9. `mtdna_locus`: the translational activator map as a table the atlas can be QUERIED
+#: against, rather than a YAML file nothing reads.
+#:
+#: Why this exists. `MITOCHONDRIAL_PROGRAM.md` §2.1 calls the activator constraint "the binding
+#: constraint" and §3 budgets the map as phase-1b curation. The map was curated -- all 8
+#: protein-coding loci plus a non-displacing intergenic site -- into
+#: `data/mitochondria/activator_map.yaml`, and then nothing loaded it. Benchmark BM-MIT-004's
+#: query shape is a design lookup ("for a proposed insertion locus, return utr_source,
+#: activator_required and displaced_gene") and it returned nothing, because the only table that
+#: could answer it was `mtdna_insertion`, which holds proposed EDITS and not the catalogue of
+#: sites an edit may target. Those are different things and they need different tables.
+#:
+#: This is the sixth instance of the failure mode the 2026-09-21 handover names: a fact recorded
+#: faithfully and never wired to anything that reads it.
+_V8_TO_V9: Final[Migration] = Migration(
+    from_version=8,
+    to_version=9,
+    summary="mtdna_locus -- the activator map, queryable (MITOCHONDRIAL_PROGRAM.md §2.1)",
+    statements=(
+        """CREATE TABLE mtdna_locus (
+    id                   TEXT PRIMARY KEY,
+    -- A gene name for a real locus (COX2, VAR1), or a site name for one that is not a gene
+    -- (intergenic_upstream_COX2). Unique because this is a catalogue, not an observation.
+    locus                TEXT NOT NULL UNIQUE,
+    encodes              TEXT,
+    -- The nuclear-encoded translational activators that license this leader, as a JSON array.
+    -- NULL means "not recorded", never "none required" -- an insert designed against a locus
+    -- with NULL here is exactly the failure BM-MIT-004 exists to catch, so the two must not be
+    -- spelled the same way.
+    activators           TEXT,
+    -- Whose 5' leader drives an insert placed here. Usually the locus's own; the intergenic site
+    -- borrows COX2's, which is why this is a separate column rather than an assumption.
+    utr_source           TEXT,
+    -- NULL = an insert here displaces nothing. True of the intergenic site and of nothing else,
+    -- which is the single most consequential fact in the map.
+    displaced_if_used    TEXT,
+    respiration_retained_if_used INTEGER
+                         CHECK (respiration_retained_if_used IN (0, 1)),
+    -- How a displaced gene can be re-provided, where the corpus documents a way.
+    rescue_available     TEXT CHECK (rescue_available IN ('none', 'nuclear_allotopic_copy',
+                                                          'second_locus', 'other', 'unknown')),
+    zone                 TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence             TEXT NOT NULL,
+    confidence           TEXT NOT NULL
+                         CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
+);""",
+        "CREATE INDEX mtdna_locus_by_displacement ON mtdna_locus(displaced_if_used)",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
-MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6, _V6_TO_V7, _V7_TO_V8)
+MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6, _V6_TO_V7, _V7_TO_V8, _V8_TO_V9)
 
 
 def pending(conn: sqlite3.Connection, *, to: int = SCHEMA_VERSION) -> tuple[Migration, ...]:

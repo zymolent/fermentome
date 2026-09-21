@@ -375,6 +375,59 @@ def test_coverage_entities_are_real_tables() -> None:
     assert listed <= present, f"not in the schema: {sorted(listed - present)}"
 
 
+def test_accepted_but_unpromotable_is_not_reported_as_never_looked() -> None:
+    """The three kinds of empty are three different gates, and the page must not conflate them.
+
+    This is a regression test for a real lie. After a queue was bulk-accepted, `_pending_by_kind`
+    counted only `status = 'pending'`, so proposals that had been read and agreed to vanished
+    from the count and the state fell through to `never_populated` -- "nothing has been proposed,
+    never looked" -- about six condition facets a person had just reviewed. The page reported the
+    opposite of what had happened, and reported it about the exact distinction it exists to draw.
+    """
+    zero_rows = {"count": 0, "entity": "condition_context", "label": "condition contexts"}
+
+    never = C.EntityCoverage(**zero_rows, pending=0, accepted_unpromotable=0)
+    assert never.state == "never_populated"
+    assert "never looked" in never.note
+
+    queued = C.EntityCoverage(**zero_rows, pending=6, accepted_unpromotable=0)
+    assert queued.state == "awaiting_curation"
+    assert queued.is_actionable, "a queued proposal is work a curator can do today"
+
+    stuck = C.EntityCoverage(**zero_rows, pending=0, accepted_unpromotable=6)
+    assert stuck.state == "awaiting_promoter"
+    assert "never looked" not in stuck.note, "these were proposed, read and accepted"
+    assert "code, not curation" in stuck.note
+    assert not stuck.is_actionable, "no amount of reviewing writes these rows"
+    assert stuck.as_json()["accepted_unpromotable"] == 6
+
+    # A kind with both wants the promoter written first: reviewing more of it changes nothing
+    # until something can write the rows.
+    both = C.EntityCoverage(**zero_rows, pending=6, accepted_unpromotable=6)
+    assert both.state == "awaiting_promoter"
+
+
+def test_unpromotable_count_covers_only_kinds_with_no_promoter() -> None:
+    """A task blocked on a missing field is a curator's problem, not a missing promoter.
+
+    `bottlenecks` is promotable -- it just needs an `observation_type` a payload cannot supply.
+    Counting it here would send someone to write a promoter that already exists.
+    """
+    from fermdb.curate.promote import PROMOTABLE_KINDS
+    from fermdb.db import IN_MEMORY, open_db
+
+    connection = open_db(IN_MEMORY)
+    try:
+        counts = C._accepted_unpromotable_by_kind(connection)
+    finally:
+        connection.close()
+
+    assert set(counts) == set(C.RECORD_KINDS), "every kind present, even at zero"
+    for kind in PROMOTABLE_KINDS:
+        assert counts[kind] == 0, f"{kind} has a promoter and must never be counted here"
+    assert "conditions" in counts, "the kind that triggered this must be reachable"
+
+
 # --------------------------------------------------------------------------- pathways
 
 

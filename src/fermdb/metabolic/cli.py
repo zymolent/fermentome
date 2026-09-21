@@ -17,7 +17,31 @@ from ..db import open_db
 from ..db.vocabularies import load_vocabularies
 from .chassis import iter_context, load_profiles, selected_profile, write_profiles
 from .curated import load_parts, load_pathways, write_parts, write_pathways
-from .routes import enumerate_routes, explain, rank, write_routes
+from .mtdna_loci import (
+    load_activator_map,
+    load_programme_gaps,
+    loci_without_activator,
+    non_displacing_loci,
+    write_loci,
+    write_programme_gaps,
+)
+from .routes import (
+    OBJECTIVES,
+    describe_demand,
+    enumerate_routes,
+    explain,
+    insertion_plan,
+    rank,
+    write_routes,
+)
+
+#: One clause per objective, printed beside the ranking so the reader knows which question the
+#: list in front of them answers. The handover's finding was that a reader takes "the top route"
+#: to mean "the route to build"; naming the objective is the cheapest correction to that.
+_OBJECTIVE_MEANS = {
+    "easiest": "least trouble to build",
+    "programme": "closest to what this programme is trying to build",
+}
 
 __all__ = ["add_atlas_subcommand"]
 
@@ -97,16 +121,73 @@ def cmd_atlas_chassis(_args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_atlas_loci(_args: argparse.Namespace) -> int:
+    """The activator map as a design lookup: where an insert can go, and what it costs.
+
+    This is benchmark BM-MIT-004's query shape — "for a proposed insertion locus, return
+    utr_source, activator_required and displaced_gene". Until `mtdna_locus` existed the atlas
+    could not answer it, although the map had been curated: the knowledge was in the repository
+    and unreachable from a query.
+    """
+    settings = Settings.load()
+    loci = load_activator_map(settings)
+    gaps = load_programme_gaps(settings)
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        stored = write_loci(conn, loci)
+        stored_gaps = write_programme_gaps(conn, gaps)
+    finally:
+        conn.close()
+
+    print(f"{stored} mtDNA loci — where a heterologous ORF could go, and what it costs")
+    print()
+    print(f"{'locus':28}{'leader':10}{'displaces':12}{'resp':7}activators")
+    for locus in loci:
+        activators = ", ".join(locus.activators) if locus.activators else "NOT RECORDED"
+        displaced = locus.displaced_if_used or "—"
+        retained = {True: "kept", False: "lost", None: "?"}[locus.respiration_retained_if_used]
+        print(f"{locus.locus:28}{locus.utr_source or '—':10}{displaced:12}{retained:7}{activators}")
+
+    free = non_displacing_loci(loci)
+    print()
+    if free:
+        names = ", ".join(locus.locus for locus in free)
+        print(f"Displaces nothing and keeps respiration: {names}")
+        print("  So MITOCHONDRIAL_PROGRAM.md §2.1's 'inserting costs you the gene whose UTR you")
+        print("  borrowed' holds for the replacement route, and not in general.")
+    else:
+        print("Every locus costs a resident gene. Strategy E pays a respiration burden whatever")
+        print("  it targets, and `rescue_strategy` is the only way to discharge it.")
+
+    missing = loci_without_activator(loci)
+    if missing:
+        names = ", ".join(locus.locus for locus in missing)
+        print()
+        print(f"OFFERED AS TARGETS WITH NO ACTIVATOR RECORDED: {names}")
+        print("  BM-MIT-004 exists to catch exactly this. An insert designed here has no named")
+        print("  requirement, which reads as 'no requirement' and is not the same thing.")
+
+    print()
+    print(f"{stored_gaps} programme-level knowledge gaps recorded (kind='never_attempted'):")
+    for gap in gaps:
+        print(f"  {gap.status:6} {gap.description}")
+    print("  MITOCHONDRIAL_PROGRAM.md §2.3 said the atlas recorded these. Until today it did not:")
+    print("  knowledge_gap held 208 rows and none of this kind.")
+    return 0
+
+
 def cmd_atlas_routes(args: argparse.Namespace) -> int:
     """Enumerate, gate, rank and optionally store every route."""
     settings = Settings.load()
     parts = load_parts(settings)
     chassis = selected_profile(load_profiles(settings))
     routes = enumerate_routes(parts, chassis=chassis)
-    ordered = rank(routes)
+    ordered = rank(routes, objective=args.objective)
     excluded = [route for route in routes if not route.viable]
 
     print(f"{len(routes)} routes enumerated, {len(ordered)} viable, {len(excluded)} excluded")
+    print(f"ranked by objective={args.objective} ({_OBJECTIVE_MEANS[args.objective]})")
     print()
     print(f"{'#':>4}  {'strategy':28}{'gaps':>5}{'risks':>7}{'feas':>7}  parts")
     for index, route in enumerate(ordered[: args.limit], start=1):
@@ -153,20 +234,27 @@ def cmd_atlas_routes(args: argparse.Namespace) -> int:
 def cmd_atlas_explain(args: argparse.Namespace) -> int:
     """Explain why one route ranks where it does, by naming the dominating term."""
     settings = Settings.load()
-    routes = rank(enumerate_routes(load_parts(settings)))
+    routes = rank(enumerate_routes(load_parts(settings)), objective=args.objective)
+    loci = load_activator_map(settings)
     matches = [route for route in routes if args.route in route.id]
     if not matches:
         print(f"no route id contains {args.route!r}", file=sys.stderr)
         return 2
     for route in matches[: args.limit]:
         print(route.id)
-        print(f"   {explain(route)}")
+        print(f"   {explain(route, objective=args.objective)}")
         for requirement in route.construction_requirements:
             print(f"   construction: {requirement}")
         for gap in route.transport_gaps:
             print(f"   transport gap: {gap}")
         for risk in route.cofactor_risks:
             print(f"   cofactor risk: {risk}")
+        for line in describe_demand(route.redox_demand):
+            print(f"   redox demand: {line}")
+        # PLAN.md phase 3: a strategy-E route must name its locus, leader, displaced gene and
+        # recoding requirement. Empty for every other strategy, because nothing is in the mtDNA.
+        for line in insertion_plan(route.steps, loci):
+            print(f"   mtDNA insertion: {line}")
     return 0
 
 
@@ -212,16 +300,30 @@ def add_atlas_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
     )
     p_pathways.set_defaults(func=cmd_atlas_pathways)
 
+    p_loci = atlas_sub.add_parser(
+        "loci", help="the mtDNA activator map: where an insert can go and what it displaces"
+    )
+    p_loci.set_defaults(func=cmd_atlas_loci)
+
     p_routes = atlas_sub.add_parser("routes", help="enumerate, gate and rank every route (G.7)")
     p_routes.add_argument("--limit", type=int, default=15, help="how many ranked routes to show")
     p_routes.add_argument(
         "--write", action="store_true", help="store the routes and their knowledge gaps"
+    )
+    p_routes.add_argument(
+        "--objective",
+        choices=OBJECTIVES,
+        default="easiest",
+        help="which question to rank by: 'easiest' (least trouble to build) or 'programme' "
+        "(what this programme is trying to build). They are different questions; the default "
+        "answers the first, and programme_fit is unrecorded so both currently agree",
     )
     p_routes.set_defaults(func=cmd_atlas_routes)
 
     p_explain = atlas_sub.add_parser("explain", help="why one route ranks where it does")
     p_explain.add_argument("route", help="substring of a route id, e.g. 'E_mtdna' or 'kivd'")
     p_explain.add_argument("--limit", type=int, default=3, help="how many matches to explain")
+    p_explain.add_argument("--objective", choices=OBJECTIVES, default="easiest")
     p_explain.set_defaults(func=cmd_atlas_explain)
 
     p_chassis = atlas_sub.add_parser(

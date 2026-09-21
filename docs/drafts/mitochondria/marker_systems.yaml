@@ -1,0 +1,631 @@
+# Marker systems for yeast mtDNA engineering, and what each one costs.
+#
+# MITOCHONDRIAL_PROGRAM.md §3 budgets this as ~10 records. §2.4 states the marker options from
+# memory — "complementation of a mit⁻ lesion restoring growth on a non-fermentable carbon source
+# (the classical COX2/COX3 approach), or ARG8ᵐ complementing a nuclear arg8Δ" — and then names the
+# tension this file exists to resolve: "Note the tension with 2.1 — the marker also needs a locus
+# and a leader."
+#
+# THE HEADLINE. The tension is real for one marker and false for the other, and §2.4 files them
+# side by side as if they cost the same thing. They do not.
+#
+#   * ARG8ᵐ costs a locus. It is an ORF that has to sit somewhere behind somebody's leader, and
+#     in every published use in this corpus it is the resident gene's own leader, at that gene's
+#     own locus, with the gene gone. That is §2.1's constraint paid in full.
+#   * The COX2 route costs NOTHING. It is not a marker you add; it is a lesion you repair. The
+#     recipient is a cox2 mit⁻ mutant, the delivery plasmid carries an intact COX2 in cis, and
+#     recombination hands the recipient its own wild-type COX2 back. The final genome is COX2⁺
+#     and unmarked. §2.4 calls this "the classical COX2/COX3 approach" and groups it with the
+#     locus-consuming case; it is the opposite of that case.
+#
+# AND THE QUESTION THE PROGRAMME ASKED — can a marker be removed or reused, or does every
+# construct permanently consume a site? ANSWER: markers can be removed, three documented ways,
+# and one of them is a genuine loop-out. Details in `removal_and_reuse` below. But read the
+# distinction there between what a paper DID and what its result would permit: nobody in this
+# corpus has published marker recycling as a procedure. They have published the three mechanisms
+# that would make it work, each for some other purpose.
+#
+# NOT FOUND, and each absence is load-bearing:
+#   * No positively selectable drug-resistance marker for mtDNA transformation. The classical
+#     mitochondrial drug-resistance alleles exist in this corpus and are used as genetic markers
+#     in crosses and mutagenesis assays — never to select a transformant.
+#   * No Cre/loxP, FLP/FRT or any site-specific recombinase acting on mtDNA.
+#   * No counter-selectable mtDNA marker (no mitochondrial 5-FOA / canavanine equivalent).
+#   * No mitochondrial base editor (DdCBE, TALED, mitoTALEN) anywhere in 1,309 full texts.
+#     The only base editing in the corpus is bacterial. So there is no marker-free edit route.
+#
+# NO `confidence` FIELD IS WRITTEN IN THIS FILE. It is a draft; a human sets confidence.
+#
+# EVERY QUOTE BELOW was extracted from the stored full text by offset, not retyped: 33 spans,
+# character-for-character, no ellipsis splices. Where a claim needs two passages they are given
+# as two separate quotes. Provenance note at the foot.
+
+version: 1
+zone: R
+status: draft
+question: >-
+  What can be selected for in yeast mtDNA engineering, what does each selection require of the
+  host, what does it consume, and can any of it be taken back?
+answer_in_one_line: >-
+  Four selection principles, only one of which consumes an mtDNA locus; and markers CAN be
+  removed — by payload replacement, by direct-repeat loop-out, or by simply being a lesion that
+  gets repaired — but nobody has yet published recycling as a protocol.
+
+corpus_searched:
+  stored_full_texts: 1309
+  papers_mentioning_ARG8m: 27
+  papers_cited_in_this_file_for_ARG8m: 15
+  note: >-
+    The earlier keyword count reported 34. Re-running it here over the readable corpus with all
+    three spellings the corpus actually uses (ARG8m, Arg8m and "ARG8 m", the last being a PDF
+    pipeline splitting the subscript) returns 27 documents. 15 of those are cited in this file;
+    the other 12 mention ARG8ᵐ only inside a strain-table genotype or a citation, and describe no
+    marker configuration. This file does not know how the 34 was counted and does not claim the
+    earlier number was wrong — only that 27 is what this spelling set returns today.
+
+# =========================================================================== the marker systems
+
+markers:
+
+  # --------------------------------------------------------------- 1. ARG8m, the classical form
+  - name: ARG8ᵐ — ORF replacement
+    configuration: "recoded ARG8 substituted for a resident mtDNA ORF, behind that ORF's own leader"
+    what_it_is: >-
+      The S. cerevisiae nuclear ARG8 gene (acetylornithine aminotransferase, a soluble matrix
+      biosynthetic enzyme) recoded to translation table 3 so mitochondrial ribosomes can make it.
+    selects_for: growth on minimal medium lacking arginine (arginine prototrophy)
+    host_genotype_required:
+      nuclear: "arg8Δ — seen in the corpus as arg8::hisG, arg8::HIS3 and arg8Δ::URA3"
+      mitochondrial: "none beyond the locus being replaced"
+    locus_consumed: "COX1 | COX2 | COX3 | COB | ATP6 | ATP8 | VAR1 — all seven verified in this corpus"
+    leader_consumed: "the displaced gene's own 5′ (and usually 3′) UTR"
+    displaced_gene: "whichever locus is used"
+    respiration_retained: false
+    removable: "yes, but only by recombination — see removal_and_reuse"
+    co_selectable_with_payload: "no — it IS the payload's competitor for the site"
+    publications:
+      - doi:10.1091/mbc.e16-11-0775
+      - doi:10.1093/nar/gkx426
+      - doi:10.1091/mbc.e15-04-0222
+      - doi:10.1093/nar/gkac1229
+      - doi:10.3390/ijms21103414
+      - doi:10.1091/mbc.e17-09-0560
+      - doi:10.15698/mic2020.09.729
+    evidence: >-
+      What it is and what host it needs: "The strains are deleted for the nuclear ARG8 gene, and
+      the reporter is a recoded version of ARG8, termed ARG8m, that encodes a matrix-localized
+      biosynthetic enzyme, which allows us to look directly at mitochondrial translation by" —
+      doi:10.1093/nar/gkx426. That it is a genuine selection, not a screen:
+      "Using a mitochondrial genome carrying a selectable marker, ARG8m, we screened for mutants
+      that are specifically defective in maintenance of mtDNA and mitochondrial protein
+      synthesis." — doi:10.15698/mic2020.09.729. The replacement principle stated generally:
+      "When the nuclear-encoded ARG8 gene is recoded to the mitochondrial genetic code (ARG8m)
+      (,,) and used to replace mitochondrial encoded open reading frames (ORFs), its expression
+      becomes independent of the p" — doi:10.1093/nar/gkac1229 (the sentence is cut here where
+      the quote ends; it continues about activator dependence, which is activator_map.yaml's
+      subject, not this file's).
+      THE COST, stated in one experiment that pays it and then buys it back at a second site:
+      "In agreement with earlier studies (; ), substitution of mitochondrial ATP8 with ARG8m
+      restored growth of an arg8 mutant in medium lacking arginine (). This confirms the
+      expression of a functional ARG8m when it is flanked by the 5′ and 3′ flanking sequences of
+      ATP8. As expected, absence of ATP8 in the arginine-independent clones precluded growth on
+      respiratory carbon sources, which was rescued by nATP8ADH1, a nuclear version of ATP8" —
+      doi:10.1091/mbc.e16-11-0775. Read that sentence twice: the marker works AND the cell stops
+      respiring AND a nuclear allotopic copy puts respiration back. All three in one line.
+      Locus coverage, each verified here rather than inherited. COX3:
+      "we chose to assay COX3 translation in mam33∆ mutants by monitoring expression of the ARG8m
+      reporter under the control of COX3 5′ and 3′ UTRs (cox3∆::ARG8m; )." —
+      doi:10.1091/mbc.e15-04-0222. COX2 and COB: "We had two yeast strains, where COX2 or COB
+      open reading frames were replaced by the mitochondrial version of ARG8 (further referred to
+      as ARG8m) (both strains were kindly provided by Martin Ott)." — doi:10.3390/ijms21103414.
+      COX2 again, with the scoring medium named:
+      "Growth in minimal media lacking arginine (SD-arg) was included to confirm the presence of
+      the ARG8m cassette inserted in the mitochondrial cox2 locus" — doi:10.1091/mbc.e17-09-0560,
+      whose strain table records the allele:
+      "EHW154 | D273-10B; MATa, lys2, arg8::hisG, ura3-52, leu2-3, 112,his3-ΔHindIII, [rho+] cox2-208::ARG8m | Thomas D. Fox, Cornell University".
+    why_it_matters: >-
+      This is the marker §2.4 had in mind and it is the expensive one. For DUET it is the wrong
+      default: it consumes exactly the resource — a locus with a working leader — that the payload
+      itself needs, and it takes respiration with it. Its real use for this programme is as a
+      LANDING PAD, not as a marker on the final construct (record 4).
+
+  # ------------------------------------------------ 2. ARG8m at a site that belongs to no gene
+  - name: ARG8ᵐ — neutral insertion downstream of VAR1, on the ATP9 promoter
+    configuration: "ARG8ᵐ fused to the ATP9 promoter and inserted at a BamHI site 3′ of VAR1"
+    what_it_is: >-
+      The same marker, placed where no gene is displaced. A second insertion site to set beside
+      `intergenic_upstream_COX2` in activator_map.yaml — and a different one, with a different
+      leader and a different bill.
+    selects_for: arginine prototrophy
+    host_genotype_required:
+      nuclear: "Δarg8::HIS3 (strain MRS-3A background)"
+      mitochondrial: none
+    locus_consumed: "none — the site is 3′ of VAR1 and displaces no ORF"
+    leader_consumed: "ATP9 promoter / 5′ UTR, supplied on the construct rather than borrowed in place"
+    displaced_gene: null
+    respiration_retained: "yes in principle, but see the cost below"
+    cost_paid_instead: "mtDNA stability — ~60% ρ⁻/ρ⁰ cells, attributed to the duplicated ATP9 promoter"
+    removable: "not tested"
+    co_selectable_with_payload: "not simultaneously — it was used to qualify the site, then the payload took the site"
+    publications:
+      - doi:10.26508/lsa.202301965
+    evidence: >-
+      The construction, the selection and the cost, in one passage:
+      "A yeast strain (aMRS-A9R) in which ARG8m, fused at its 5′ end to the ATP9 promoter, was
+      inserted at the BamHI site downstream of the mitochondrial VAR1 gene (). ARG8m of aMRS-A9R
+      at this location complemented the arginine auxotrophy of the arg8 mutation of MRS-3A (,
+      lower panels). Growth in rich ethanol glycerol (YPEG), however, was slower than that of the
+      WT, probably because aMRS-A9R cultures consist of about 60% ρ−/0 cells (, upper panels)."
+      And the marker's actual job — it was a site qualification assay, and once the site passed,
+      the marker was not kept: "As ARG8m fused to the ATP9 promoter with a location downstream of
+      the VAR1 locus complemented the arg8 mutant, we proceeded with insertion of the recoded
+      COX6-C m allele under the control of ATP9 promoter downstream of VAR1."
+    why_it_matters: >-
+      Two things DUET should take from this. First, it is a third neutral site, and it is not
+      restricted to the COX2 leader — this construct brings its own ATP9 promoter to a place that
+      has none, which is a stronger statement about what mtDNA will tolerate than the pPT24 route
+      makes. Second, and this is the warning: a neutral site is not a free site. Duplicating a
+      promoter sequence already present in the genome destabilised mtDNA badly enough that 60% of
+      cells lost it, and the fix was a spontaneous partial deletion of the duplicated promoter,
+      which then cost expression. A recombinogenic genome punishes sequence duplication. Any DUET
+      design that borrows a leader by COPYING it rather than sitting behind the original is
+      exposed to this, including the pPT24 route, whose COX2 5′ UTR is likewise a second copy.
+      NOT CHECKED in the pPT24 papers: whether they report a ρ⁻ fraction. This is a specific,
+      cheap question to ask of doi:10.15698/mic2018.03.621 and doi:10.1016/j.xpro.2022.101359.
+
+  # --------------------------------------------------------- 3. the COX2 lesion, repaired in cis
+  - name: COX2 marker rescue — the marker that is a lesion, not an insert
+    configuration: >-
+      recipient carries a cox2 mit⁻ allele; the delivery plasmid (pPT24, pJM2 and derivatives)
+      carries an intact COX2 in cis with the payload; recombination restores COX2
+    what_it_is: >-
+      Not a marker gene at all. The selectable difference is the ABSENCE of a defect. §2.4's
+      "classical COX2/COX3 approach", and the single most important design fact in this file.
+    selects_for: respiratory growth on glycerol / ethanol-glycerol
+    host_genotype_required:
+      nuclear: "none for the selection itself; kar1-1 in the ρ⁰ recipient for the cytoduction step"
+      mitochondrial: "a cox2 mit⁻ lesion in the mating partner — cox2-62, cox2-22, cox2-75c, cox2-17, cox2-208::ARG8m all used in this corpus"
+    locus_consumed: "none"
+    leader_consumed: "none for the marker; the payload separately borrows COX2's 5′/3′ UTR on the same plasmid"
+    displaced_gene: null
+    respiration_retained: "yes — restored respiration IS the readout"
+    removable: "it removes itself; the finished genome is wild type at COX2"
+    co_selectable_with_payload: "yes, and this is the point — the payload rides in cis with the marker"
+    publications:
+      - doi:10.1016/j.xpro.2022.101359
+      - doi:10.15698/mic2018.03.621
+      - doi:10.1093/genetics/iyaf037
+      - doi:10.1091/mbc.e17-09-0560
+      - doi:10.1126/sciadv.abi8886
+      - doi:10.1038/s41598-023-36637-9
+      - doi:10.3389/fgene.2014.00454
+    evidence: >-
+      The principle, stated as a two-step selection:
+      "Identification of the transformants is a key aspect of the method. Here, a two-step
+      procedure is used (). First, general transformants are identified with the help of a nuclear
+      plasmid that carries a selection marker cassette that reverts leucine auxotrophy. The
+      plasmid is co-delivered with pPT24 into cells during the biolistic transformation. Next,
+      mitochondrial transformants are identified by regain of respiratory growth. Because
+      recombination restores the damaged COX2 gene, cells that show respiratory competence have
+      obtained the transformed plasmid ()." — doi:10.1016/j.xpro.2022.101359.
+      And the end state, which is the fact §2.4 does not have:
+      "After mating and homologous recombination in mitochondria, the mtDNA regains the functional
+      COX2 sequence and the resulting strain is able to respire as scored by growth on plates
+      containing glycerol (YP+ 2% glycerol, YPG)."
+      The tester-cross form, used as a screen on the synthetic ρ⁻ intermediate:
+      "After four to five days positive nuclear transformants were collected on a master plate and
+      crossed to a cox2-62 tester strain . The diploids were screened for respiratory growth. This
+      crossing step was repeated twice with positive clones." — doi:10.15698/mic2018.03.621. Same
+      step in another lab's hands: "Mitochondrial transformants were identified among the Leu+
+      nuclear transformants by their ability to produce respiring clones when mated to the
+      non-respiring NB40-3C strain bearing a deletion in the mitochondrial COX2 gene." —
+      doi:10.1038/s41598-023-36637-9. And with the payload being a COB replacement rather than a
+      neutral insert, showing the marker is independent of where the payload goes:
+      "pCO307 was introduced into the kar1-1 strain αDFS160 ρ0 by biolistic transformation with
+      the PDS-1000/He particle delivery system (Bio-Rad Laboratories), and transformants were
+      selected by their ability to rescue the cox2-62 mutation of the strain NB40-3C (). pCO307
+      was then cytoducted into a Δarg8 W303 WT strain, which resulted in the deletion of the COB
+      gene by ARG8-TetO through homologous recombination. Cells containing the
+      Δcob::ARG8-TetO-mtDNA were selected on the basis of their arginine prototrophy."
+      — doi:10.1126/sciadv.abi8886.
+      That last passage is a two-marker workflow: COX2 rescue selects the delivery, ARG8ᵐ then
+      selects the integration.
+      THAT THE MARKER LEAVES NOTHING BEHIND is demonstrated most directly by a cross that produces
+      the marked and the unmarked strain side by side, from the same bombardment:
+      "Crossing between respective transformants of DFS160 and a strain carrying a mutant allele
+      of the mitochondrial COX2 gene (cox2-22) (strain NB64/YCy4097) was performed (). This
+      generated a strain with a restored WT COX2 locus (strain YCy5051, referred to as WT) and a
+      Δcox2::ARG8m deletion strain (strain YCy4179)." — doi:10.1093/genetics/iyaf037.
+      The mit⁻ tester panel is wider than cox2-62 and predates the pPT24 work:
+      "mit− testers PTY6 (MATα, ade2, ura3-52, kar1-1, cox2-17), K2145 (MATa, ade2, lys, kar1-1,
+      cox2-17)" and "A similar selection procedure is widely used when DNA is delivered to
+      mitochondria by biolistics (Fox et al., )." — doi:10.3389/fgene.2014.00454. A cox2-75c
+      tester is also stocked: "SCS188A | D273-10B; MATa, ade2-101, ura3-52, kar1-1, [rho+] cox2-75c
+      | Thomas D. Fox, Cornell University" — doi:10.1091/mbc.e17-09-0560.
+    why_it_matters: >-
+      This resolves §2.4's tension. The marker needs no locus and no leader of its own, because
+      it is not a gene being added — it is a gene being un-broken. For DUET this means the
+      selection is FREE and the only locus decision left is the payload's own, which is where the
+      argument belongs. Combine it with the `intergenic_upstream_COX2` row of activator_map.yaml
+      and the whole construct costs zero resident genes.
+      One caveat that belongs on the record: the corpus does NOT document this trick at COX3, COB
+      or any other locus, despite §2.4 naming "the classical COX2/COX3 approach". Every worked
+      example here is COX2. COX3 is background knowledge, not evidence.
+
+  # ------------------------------------------------------ 4. ARG8m used as a site to be taken back
+  - name: ARG8ᵐ landing pad — the marker as a target, not a tag
+    configuration: >-
+      the recipient ρ⁺ strain carries geneX::ARG8ᵐ; the payload plasmid carries the new allele
+      flanked by homology, and recombination replaces ARG8ᵐ with the payload
+    what_it_is: >-
+      An inversion of record 1. ARG8ᵐ is installed once, in a stock strain, to mark and hold a
+      locus open; every subsequent construct DELETES it. The marker is spent, not carried.
+    selects_for: >-
+      respiratory growth of the recombinant (the payload restores the gene), with LOSS of
+      arginine prototrophy as the direct confirmation that the marker is gone
+    host_genotype_required:
+      nuclear: "arg8Δ, so that the marker's loss is visible as returned auxotrophy"
+      mitochondrial: "geneX::ARG8ᵐ in the ρ⁺ mating partner"
+    locus_consumed: "temporarily the target locus; returned to the payload"
+    leader_consumed: "the target gene's leader, which the payload then inherits"
+    respiration_retained: "restored by the payload"
+    removable: "yes — removal is the mechanism, not an afterthought"
+    co_selectable_with_payload: "yes, in the negative sense: payload-in and marker-out are the same event"
+    publications:
+      - doi:10.1016/bs.mie.2024.07.028
+      - doi:10.1242/dmm.049783
+      - doi:10.1126/sciadv.aav1848
+      - doi:10.1126/sciadv.abi8886
+    evidence: >-
+      The design, stated as a design: "In these strains, the target gene was replaced with ARG8m,
+      so our constructs carrying the allele of interest can integrate into their endogenous loci
+      by homologous recombination with ARG8m (fig. S6C)." — doi:10.1126/sciadv.aav1848.
+      Worked at ATP6, with the segregation behaviour spelled out:
+      "In ρ− atp6mut×MR10 (atp6::ARG8m) zygotic cells, the variant of the ATP6 gene can be
+      integrated into a complete (ρ+) mitochondrial genome by mtDNA recombination. The modified
+      mitochondrial genome then segregates to homoplasmy in about a dozen mitotic divisions
+      (without any selection pressure in rich 10% glucose), giving the strains ρ+ atp6mut used in
+      the experiments described below." — doi:10.1242/dmm.049783.
+      And the marker's disappearance scored explicitly, for a HETEROLOGOUS payload rather than a
+      repaired native gene — this is the single most useful sentence in the file for the
+      removal question. From doi:10.1016/bs.mie.2024.07.028, the strain that resulted from
+      crossing the GFPβ1-10 donor into the atp6::ARG8ᵐ recipient:
+      "(Mata [+ atp6:: GFPß1-10 5`UTRCOX2ATP63`UTRCOX2], which were not able to grow on"
+      "minimal medium without arginine, with GFPß1-10 gene sequence integrated in the locus"
+      (two consecutive lines of a hard-wrapped PDF, given separately rather than spliced; the
+      glyph before "+" is U+F072, the private-use rho this corpus's PDFs use — see provenance.)
+      A payload arriving at a locus and being confirmed by respiration alone, with no marker read
+      at all: "Colonies in which ATP6-NG (yCJ043) or ATP6-mKate2 (yCJ120) had successfully
+      integrated into the ATP6 locus were identified by their ability to grow on a non-fermentable
+      carbon source." — doi:10.1126/sciadv.abi8886.
+    why_it_matters: >-
+      This is the answer to "does every construct permanently consume a site". No — a site can be
+      held by a marker and then handed to a payload, and the handover is verifiable in both
+      directions (payload in: respiration or fluorescence; marker out: Arg⁻). For DUET's KDC/ADH
+      this is the cheapest way to use a real locus if one is ever wanted: build the arg8Δ
+      [locus::ARG8ᵐ] recipient once, then every candidate enzyme variant costs one cross.
+
+  # ------------------------------------------------------------- 5. a marker that loops itself out
+  - name: ARG8ᵐ between 96 bp direct repeats — the loop-out cassette
+    configuration: >-
+      ARG8ᵐ inserted 99 bp into COX2, followed by the whole of COX2 lacking its start codon, so
+      that 96 bp of direct repeat flanks the marker
+    what_it_is: >-
+      Built as an assay for direct-repeat-mediated deletion (DRMD) in mtDNA, not as a marker
+      system. But its behaviour is exactly marker excision: the cassette deletes itself by
+      recombination between its own flanking repeats, and what is left behind is an intact COX2.
+    selects_for: >-
+      in the marked state, arginine prototrophy AND respiratory deficiency; after excision,
+      respiratory growth on glycerol AND arginine auxotrophy — a clean two-way readout
+    host_genotype_required:
+      nuclear: "arg8Δ"
+      mitochondrial: "the cassette itself, at COX2"
+    locus_consumed: "COX2, until excision returns it"
+    leader_consumed: COX2
+    respiration_retained: "false while marked; true after loop-out"
+    removable: "YES — spontaneously, and inducibly with a targeted double-strand break"
+    co_selectable_with_payload: "not demonstrated — no payload was carried in this construct"
+    publications:
+      - doi:10.1371/journal.pgen.1005664
+    evidence: >-
+      The cassette and both of its phenotypic states:
+      "The ARG8 m gene is inserted 99 bp into the COX2 gene followed by the entire COX2 gene
+      lacking the start codon (). This generates 96 bp of directly repeated sequence flanking
+      ARG8 m. Strains that contain an intact reporter are phenotypically Arg+ and respiration
+      deficient. When a mitochondrial DRMD event occurs, the strain becomes respiration proficient
+      and will become Arg- following sorting to homoplasmy, which occurs rapidly in yeast."
+      The same construction restated in the figure legend, with the repeat length:
+      "The ARG8 m gene was inserted 99 bp into the COX2 sequence, and is followed directly by the
+      entire COX2 gene lacking the start codon, resulting in a 96 bp direct repeat flanking the
+      ARG8 m marker."
+      And that excision is selectable, not merely observable:
+      "Spontaneous deletions are selected on medium containing glycerol as the sole carbon source,
+      and rates were determined using the method of the median."
+    why_it_matters: >-
+      §2.4 says "mtDNA is recombinogenic", and treats that as a hazard. Here it is the tool. 96 bp
+      of direct repeat is enough for a marker to remove itself at a rate high enough to measure by
+      fluctuation analysis, and the excision event is positively selectable on glycerol. That is a
+      marker-recycling scheme in all but name.
+      TWO HONEST LIMITS, and rule 5 of this curation applies hard here. (i) This paper did not
+      recycle a marker; it measured genome instability. Reading it as a recycling protocol is an
+      inference from its mechanism, and it is labelled as such. (ii) The rates are reported in
+      figure panels, not in the body text, so this file carries no number — someone must read
+      Fig 3D to learn whether the frequency is workable at bench scale. Both of those are cheap
+      to close and neither is closed here.
+      A DESIGN WARNING that falls out of the same fact: any DUET construct that carries a repeat
+      of ≥96 bp — including a borrowed 5′ UTR that duplicates a sequence already in the genome —
+      has a built-in deletion substrate. That is the mechanistic link to the ρ⁻ problem in
+      record 2, and it is the reason `stability_tested` is a mandatory field rather than a nicety.
+
+  # --------------------------------------------- 6. the marker that selects the shot, not the edit
+  - name: nuclear LEU2 co-transformation marker (pRS315, YEp351)
+    configuration: "a nuclear CEN or 2μ plasmid co-precipitated onto the tungsten particles"
+    what_it_is: >-
+      The first-stage marker of every biolistic workflow in this corpus. It selects cells that
+      received ANY DNA from the gun. It says nothing whatever about mitochondria.
+    selects_for: leucine prototrophy
+    host_genotype_required:
+      nuclear: "leu2 — leu2Δ or leu2-3,112 in every recipient here (DFS160 is leu2Δ)"
+      mitochondrial: "ρ⁰, for the biolistic step"
+    locus_consumed: "none in mtDNA"
+    leader_consumed: none
+    respiration_retained: "unaffected"
+    removable: "the plasmid is episomal and lost without selection; not addressed in these papers"
+    co_selectable_with_payload: "it is not co-selected WITH the payload — it is co-DELIVERED, then discarded"
+    publications:
+      - doi:10.1016/j.xpro.2022.101359
+      - doi:10.15698/mic2018.03.621
+      - doi:10.1126/sciadv.aav1848
+      - doi:10.1038/s41598-023-36637-9
+      - doi:10.1242/dmm.049783
+    evidence: >-
+      "The nuclear marker plasmid pRS315 (5 µg), as well as the pPT24*-sfGFPm (10-15 µg), were
+      precipitated on tungsten particles" — doi:10.15698/mic2018.03.621. The full first stage,
+      including what it does and does not establish:
+      "We bombarded the mitochondrial plasmid and pRS315 (CEN plasmid carrying LEU2) into S.
+      cerevisiae strain DFS160 (MATα ade2-101 leu2Δ ura3-52 arg8Δ::URA3 kar1-1, rho0) () using a
+      biolistic PDS-1000/He particle delivery system (Bio-Rad) and selected for Leu+ colonies on
+      MM plates. The colonies were replica-mated to the mitochondrial knockout strains at 30°C for
+      2 days. The mating mixtures were replica-plated to YPGly plates and incubated at 30°C." —
+      doi:10.1126/sciadv.aav1848.
+    why_it_matters: >-
+      Listed because leaving it out would misdescribe the cost of the workflow. There is no direct
+      selection for a mitochondrial transformation event: you select a nuclear event, then screen
+      hundreds of those colonies by crossing. doi:10.1242/dmm.049783 reports "a few hundred per
+      plate" Leu⁺ transformants to be cross-replicated. THE CONSTRAINT THIS IMPOSES on DUET is the
+      one §2.4 already predicted from efficiency — throughput is a handful of constructs — but the
+      reason is sharper than "efficiency is low": it is that the mtDNA event is screened, not
+      selected, so the labour scales with the number of nuclear transformants.
+      The nuclear marker also costs a nuclear auxotrophy the production strain must carry, which
+      is a real constraint on an industrial chassis and is not mentioned anywhere in
+      MITOCHONDRIAL_PROGRAM.md.
+
+  # ------------------------------------------------- 7. when the payload is the marker
+  - name: payload-as-marker — restoring the gene you are editing
+    configuration: "the construct IS a functional allele of a respiratory gene the recipient lacks"
+    what_it_is: >-
+      Used throughout the mitochondrial-disease-modelling papers: a mutant ATP6, ATP8, COX2 or
+      COB allele is delivered into a recipient whose corresponding gene is deleted, and any
+      recombinant that respires has by definition integrated the construct.
+    selects_for: growth on a non-fermentable carbon source
+    host_genotype_required:
+      mitochondrial: "a null or mit⁻ allele of the gene being supplied"
+      nuclear: "none for this step"
+    locus_consumed: "none beyond the gene's own locus, which the payload occupies legitimately"
+    leader_consumed: "the gene's own"
+    respiration_retained: true
+    removable: n/a
+    co_selectable_with_payload: "identical to the payload"
+    caveat: >-
+      only works when the payload is itself a respiratory gene. A KDC or an ADH confers no
+      respiratory phenotype, so this route is unavailable to DUET.
+    publications:
+      - doi:10.1242/dmm.049783
+      - doi:10.1126/sciadv.abi8886
+      - doi:10.26508/lsa.202301965
+    evidence: >-
+      "Colonies in which ATP6-NG (yCJ043) or ATP6-mKate2 (yCJ120) had successfully integrated into
+      the ATP6 locus were identified by their ability to grow on a non-fermentable carbon source."
+      — doi:10.1126/sciadv.abi8886. The same logic with a partial phenotype, which is where it
+      gets fragile: "If the atp6 mutation does not fully inactivate the ATP synthase, the mutant
+      cells can be isolated by virtue of their ability to grow (even slowly) on respiratory carbon
+      sources like glycerol." — doi:10.1242/dmm.049783.
+    why_it_matters: >-
+      Recorded so the table is not read as offering DUET a marker it cannot have. Every
+      respiratory-growth selection in this corpus works because something respiratory was being
+      restored. DUET's payload restores nothing, which is precisely why it needs record 3's
+      cis-COX2 or record 4's landing pad.
+
+  # -------------------------------------- 8. the classical drug markers, and why they are not here
+  - name: mtDNA drug-resistance alleles (ErythroR, OliR, AntR, ChlR, ParR)
+    configuration: "point mutations in the 21S rRNA, 15S rRNA, OLI1/OLI2 and COB genes"
+    what_it_is: >-
+      The founding markers of yeast mitochondrial genetics. They are present in this corpus and
+      they are used — but never for what this table is about.
+    selects_for: growth in the presence of the antibiotic
+    host_genotype_required: "none nuclear; the resistance allele must already be in the mtDNA"
+    locus_consumed: "none — they are point mutations in genes that keep working"
+    used_as_transformation_marker_in_this_corpus: false
+    what_they_are_used_for_here:
+      - "scoring mtDNA point-mutation frequency (mutator assays)"
+      - "unselected control markers in recombination crosses"
+      - "distinguishing ρ⁻ from ρ⁰ by marker retention"
+    removable: n/a
+    publications:
+      - doi:10.1093/nar/gkt273
+      - doi:10.3390/microorganisms12102077
+      - doi:10.1007/s00439-015-1578-x
+      - doi:10.1093/femsre/fuv028
+    evidence: >-
+      Their origin, from a participant: "The Monash lab had been involved in establishing the
+      first mutations of mtDNA that conferred drug resistance []. For example, Linnane’s group
+      found chloramphenicol, erythromycin and oligomycin resistances, which exhibited cytoplasmic
+      genetics." — doi:10.3390/microorganisms12102077. Their modern use, which is as passive
+      landmarks in a cross: "control markers, EryR (erythromycin-resistant) and AntR
+      (antimycin-resistant) in loci distant from the Oli2 locus" — doi:10.1093/nar/gkt273.
+    why_it_matters: >-
+      THIS IS AN ABSENCE, and it is the one a synthetic biologist would most expect to be filled.
+      A drug-resistance marker would be ideal for DUET: it costs no locus (point mutation), needs
+      no auxotrophic host, and could in principle be selected directly on the bombardment plate
+      without the cross. No paper in these 1,309 texts uses one that way. Whether that is because
+      it does not work, because the alleles are recessive in heteroplasmy, or simply because the
+      Fox-lab COX2 route arrived first and was good enough, THIS CORPUS DOES NOT SAY. It is the
+      single most valuable follow-up question this table generated, and it is open.
+
+  # ---------------------------------------------------- 9. things that look like markers and aren't
+  - name: mtDNA-encoded reporters (sfGFPm, mtnLuc, ARG8-TetO, ATP6-mNeonGreen, ATP6-mKate2)
+    configuration: "recoded reporter ORFs carried at the neutral COX2-upstream site or fused to ATP6"
+    what_it_is: >-
+      Readouts, not selections. Every one of them was itself installed using record 3 or record 4;
+      none of them selects anything.
+    selects_for: "nothing — they are screened by fluorescence, luminescence or blot"
+    locus_consumed: "varies; see heterologous_orf_precedents.yaml, which is the file for these"
+    removable: "not addressed"
+    co_selectable_with_payload: "they ARE payloads"
+    publications:
+      - doi:10.15698/mic2018.03.621
+      - doi:10.1016/j.xpro.2022.101359
+      - doi:10.1126/sciadv.abi8886
+    evidence: >-
+      The neutral-site construction that makes them cheap: "To avoid the respiratory deficiency
+      associated with inactivation of mitochondrial genes, we engineered a new mitochondrial
+      genome that coded for sfGFP as an additional ninth open reading frame." —
+      doi:10.15698/mic2018.03.621. And the contrast with the older, locus-consuming reporter
+      practice: "Originally, a method was developed in the laboratory of Tom Fox to integrate a
+      reporter gene into a certain open reading frame of the mitochondrial genome (). For this,
+      yeast cells were transformed with a biolistic gene delivery system, followed by screening
+      for a reporter activity. The exchange of an authentic open reading frame to that of the
+      reporter caused inability to perform oxidative phosphorylation with consequences for
+      cellular physiology." — doi:10.1016/j.xpro.2022.101359.
+    why_it_matters: >-
+      Included so that a reader counting "marker systems" in this corpus does not count these.
+      They are the reason ARG8ᵐ-at-a-locus looks more common than it is: many ARG8ᵐ hits are
+      reporter-strain genotypes in a table, not marker choices anyone made for a construct.
+
+# ================================================== the question the programme actually asked
+
+removal_and_reuse:
+  question: >-
+    Can a marker be used and then removed or reused, or does every construct permanently consume
+    a site?
+  answer: "It can be removed. Three mechanisms are documented, and they are not equally proven."
+  mechanisms:
+
+    - mechanism: "the marker repairs itself out of existence (COX2 route)"
+      status: demonstrated, routine
+      strength: >-
+        The strongest of the three, and the least like what the question expected. Because the
+        selectable difference is a LESION, selection succeeding means the lesion is gone. The
+        finished genome carries no marker sequence at all — it carries wild-type COX2.
+        doi:10.1093/genetics/iyaf037 produces the unmarked WT strain and the ARG8ᵐ-marked strain
+        from the same cross, which is as direct a demonstration as one could ask.
+      caveat: "the payload's own insert is of course still there; only the marker vanishes"
+
+    - mechanism: "the payload evicts the marker (ARG8ᵐ landing pad)"
+      status: demonstrated, for a heterologous payload
+      strength: >-
+        doi:10.1016/bs.mie.2024.07.028 replaced atp6::ARG8ᵐ with GFPβ1-10 and reports the
+        resulting strain as arginine-auxotrophic — the marker is not merely inactivated, it is
+        physically gone, and its absence is the confirmation assay. The locus is therefore
+        REUSABLE: marked, then unmarked, then occupied by something else.
+      caveat: >-
+        each round costs a cross and a segregation, and the marker is not re-installable at the
+        same site afterwards without starting over.
+
+    - mechanism: "direct-repeat loop-out (96 bp repeats flanking ARG8ᵐ)"
+      status: "mechanism demonstrated; never used as a marker-recycling protocol"
+      strength: >-
+        doi:10.1371/journal.pgen.1005664 shows a marker flanked by 96 bp of direct repeat excising
+        itself in mtDNA, spontaneously and at DSB-inducible frequency, with the excision event
+        positively selectable on glycerol. Nothing in principle stops a DUET cassette being built
+        the same way.
+      caveat: >-
+        DISTINGUISH WHAT THE PAPER DID. It built this to measure genome instability in RAD52-group
+        mutants. It did not recycle a marker, did not report the rate in text, and did not test
+        whether a payload sitting inside such a cassette survives. Treat as the best-supported
+        hypothesis for marker recycling in mtDNA, not as a method.
+
+  what_is_absent:
+    - "No site-specific recombinase (Cre/loxP, FLP/FRT) acting on mtDNA in any of the 1,309 texts.
+      Marker recycling in this corpus is homology-driven or it does not happen."
+    - "No counter-selection against ARG8ᵐ. Loss of the marker is always SCORED (Arg⁻ replica) and
+      never SELECTED. For DUET this means marker removal is a screen, which caps throughput."
+    - "No mitochondrial base editor or mitoTALEN anywhere in the corpus, so there is no route that
+      avoids a marker altogether."
+
+# ========================================================================== stacking and budgets
+
+marker_stacking:
+  documented_maximum: 2
+  the_one_worked_example: >-
+    doi:10.1016/bs.mie.2024.07.028 builds strain RKY83 carrying BOTH a cox2-62 lesion and
+    atp6::ARG8ᵐ in one ρ⁺ genome, so that the COX2 marker selects the delivery of the next
+    construct while ARG8ᵐ marks the locus that construct will take. Two markers, two different
+    jobs, one genome — and neither is on the final product, because the COX2 lesion is repaired
+    and the ARG8ᵐ is evicted.
+  consequence: >-
+    The marker budget for a DUET construct is therefore ZERO permanent sites, if the workflow is
+    built this way. §2.4's tension resolves entirely in the programme's favour — but only for a
+    workflow that uses the markers transiently. Any design that leaves ARG8ᵐ in the production
+    strain pays a locus, a leader, respiration and a nuclear arg8Δ, permanently.
+
+# ===================================================================== what this file cannot say
+
+open_gaps:
+  - gap: "whether any mtDNA drug-resistance allele can select a transformant directly"
+    status: never_attempted_in_this_corpus
+    note: >-
+      See marker record 8. Would remove the cross entirely and with it the throughput ceiling of
+      record 6. Nothing here says it is impossible; nothing here says anyone tried.
+
+  - gap: "the frequency of direct-repeat loop-out, as a number"
+    status: in_figures_not_text
+    note: >-
+      doi:10.1371/journal.pgen.1005664 Fig 3D and Fig 5. This search read text only. A human with
+      the figure can close this in minutes, and the number decides whether loop-out recycling is a
+      bench method or a curiosity.
+
+  - gap: "marker stability under non-selective conditions over production timescales"
+    status: open
+    note: >-
+      The only non-selective datum in the corpus is doi:10.1242/dmm.049783's "about a dozen mitotic
+      divisions (without any selection pressure in rich 10% glucose)" — which is a statement about
+      reaching homoplasmy, not about staying there. MITOCHONDRIAL_PROGRAM.md §2.4 asks for
+      generational stability data and this table does not supply it; it is the `stability and
+      heteroplasmy` line of the §3 corpus table and belongs to that curation pass.
+
+  - gap: "whether the cis-COX2 route's duplicated COX2 5′ UTR destabilises mtDNA"
+    status: not_reported
+    note: >-
+      Raised by record 2, where a duplicated ATP9 promoter gave 60% ρ⁻/ρ⁰, and by record 5, where
+      96 bp of repeat is enough to drive deletion. The pPT24 papers report respiratory competence
+      but this search found no ρ⁻ fraction for a pPT24-derived strain. If the cheap neutral site
+      turns out to be a deletion substrate, that changes the recommendation in record 3.
+
+  - gap: "COX3 as a marker-rescue locus"
+    status: not_found
+    note: >-
+      MITOCHONDRIAL_PROGRAM.md §2.4 writes "the classical COX2/COX3 approach". Every worked
+      example in this corpus is COX2. COX3 appears only as an ARG8ᵐ replacement target
+      (cox3∆::ARG8m, doi:10.1091/mbc.e15-04-0222), which is the opposite configuration. The ⚠ on
+      §2.4's COX3 claim should stay.
+
+# ---------------------------------------------------------------------------------- provenance
+#
+# Method. Every stored full text was read through the same decoder the span verifier uses, and
+# searched with regex. Each quote above was then extracted BY OFFSET from that text rather than
+# retyped — 33 spans, every one an exact substring of its source, single-line, no ellipsis
+# splices. Where a claim needed two passages, both are given in full and labelled.
+#
+# Two mechanical notes for whoever re-resolves these.
+#
+#   1. doi:10.1016/bs.mie.2024.07.028 is PDF-sourced and hard-wrapped at ~85 characters, so no
+#      quote from it can run past one line without carrying a newline. The two quotes taken from
+#      it are consecutive source lines, given separately for exactly that reason. Its text also
+#      renders ρ as U+F072, a private-use glyph — it is preserved verbatim in the quote and will
+#      not match a search for ρ (U+03C1). The same paper uses the real ρ elsewhere in the same
+#      document, so BOTH spellings occur in one file.
+#   2. ARG8ᵐ is spelled three ways across the corpus — ARG8m, Arg8m and "ARG8 m" (the last in
+#      doi:10.1371/journal.pgen.1005664, where the PDF pipeline split the subscript). A search for
+#      only the first spelling misses the loop-out paper, which is the most important record in
+#      this file. That is how the DRMD cassette went unnoticed until this pass.

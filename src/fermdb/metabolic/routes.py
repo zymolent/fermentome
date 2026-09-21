@@ -38,14 +38,20 @@ from typing import Final
 from ..genetic_code import table_for_compartment
 from .chassis import ChassisGate, ChassisProfile, gates_for
 from .curated import Part
+from .mtdna_loci import MtdnaLocus
 
 __all__ = [
     "CARRIER_KNOWN",
     "COFACTOR_POOLS",
+    "OBJECTIVES",
+    "PROGRAMME_FIT",
     "STEP_ORDER",
     "STRATEGY_PLANS",
     "Route",
     "RouteStep",
+    "cofactor_demand",
+    "describe_demand",
+    "insertion_plan",
     "enumerate_routes",
     "explain",
     "rank",
@@ -185,6 +191,9 @@ class Route:
     cofactor_risks: tuple[str, ...]
     construction_requirements: tuple[str, ...]
     transport_gaps: tuple[str, ...]
+    #: Reducing equivalents wanted per (compartment, cofactor). Empty for a route with no redox
+    #: step, which no real route is.
+    redox_demand: Mapping[tuple[str, str], int]
     score_balance: float | None
     score_transport: float | None
     score_feasibility: float | None
@@ -223,6 +232,87 @@ def _cofactor_gate(steps: Sequence[RouteStep]) -> list[str]:
                 f"supplies only {', '.join(sorted(available)) or 'nothing recorded'}"
             )
     return problems
+
+
+def insertion_plan(steps: Sequence[RouteStep], loci: Sequence[MtdnaLocus]) -> tuple[str, ...]:
+    """For a route carrying genes in mtDNA: where each could go, and what it costs.
+
+    PLAN.md's phase-3 acceptance asks that strategy E routes be ranked "as *reachable but costly*
+    rather than either dropped or flattered, and each names its **locus, leader, displaced gene
+    and recoding requirement**." Until `mtdna_locus` existed the ranker could name only the last
+    of those four, because the activator map was a YAML file nothing read.
+
+    The plan is offered per mtDNA-carried step and is deliberately NOT a choice: the ranker states
+    the cheapest option and what the alternatives cost, and a curator picks. Choosing a locus is
+    construct design.
+    """
+    carried = [step for step in steps if step.needs_recoding]
+    if not carried or not loci:
+        return ()
+
+    free = [locus for locus in loci if locus.is_free]
+    costly = [locus for locus in loci if not locus.is_free and locus.activators]
+    lines: list[str] = []
+    for step in carried:
+        if free:
+            site = free[0]
+            activators = ", ".join(site.activators or ()) or "none recorded"
+            lines.append(
+                f"{step.step_role} ({step.part.id}) -> locus {site.locus}, leader "
+                f"{site.utr_source}, activator {activators}, displaces nothing, respiration "
+                f"kept; recode to NCBI table 3"
+            )
+        else:
+            site = costly[0]
+            activators = ", ".join(site.activators or ()) or "none recorded"
+            lines.append(
+                f"{step.step_role} ({step.part.id}) -> locus {site.locus}, leader "
+                f"{site.utr_source}, activator {activators}, displaces "
+                f"{site.displaced_if_used}, respiration lost; recode to NCBI table 3"
+            )
+    if free and costly:
+        lines.append(
+            f"alternative: any of {len(costly)} gene loci "
+            f"({', '.join(locus.locus for locus in costly[:3])}...) would instead displace that "
+            f"gene and cost respiration -- see data/mitochondria/activator_map.yaml"
+        )
+    return tuple(lines)
+
+
+def cofactor_demand(steps: Sequence[RouteStep]) -> dict[tuple[str, str], int]:
+    """Reducing equivalents this route consumes, per compartment and per cofactor.
+
+    ``_cofactor_gate`` above asks whether a compartment supplies a cofactor **at all**. This asks
+    **how much** is wanted there, which is a different question and the one PLAN.md G.7's
+    per-compartment redox criterion turns on. A route can be composed entirely of reactions that
+    each balance -- ``curated.py`` refuses to load one that does not -- and still concentrate two
+    NADPH demands in a compartment whose supply is the thin one.
+
+    That is not hypothetical. The published yeast route is KivD + **Adh6**, and Adh6 is NADPH-
+    dependent, so running it in the matrix wants **2 NADPH there** (Ilv5 and Adh6) rather than the
+    one NADPH and one NADH that ISOBUTANOL_PROGRAM.md's prose describes. The parts catalog has
+    carried the right cofactor per part all along; nothing added them up.
+    """
+    demand: dict[tuple[str, str], int] = {}
+    for step in steps:
+        wanted = step.part.cofactor_preference
+        # 'either' is a genuine third answer for a promiscuous enzyme and is not a demand for a
+        # particular pool; 'NA' means the step is not a redox step at all.
+        if wanted in {"NA", "unknown", "either"}:
+            continue
+        key = (step.compartment, wanted)
+        demand[key] = demand.get(key, 0) + 1
+    return demand
+
+
+def describe_demand(demand: Mapping[tuple[str, str], int]) -> tuple[str, ...]:
+    """The demand tally as lines a route card can print, heaviest first."""
+    return tuple(
+        f"{count}x {cofactor} in {compartment}"
+        for (compartment, cofactor), count in sorted(
+            demand.items(), key=lambda item: (-item[1], item[0])
+        )
+    )
 
 
 def _code_gate(steps: Sequence[RouteStep]) -> list[str]:
@@ -312,6 +402,7 @@ def enumerate_routes(
                 for role, part in zip(STEP_ORDER, combination, strict=True)
             )
             cofactor_risks = _cofactor_gate(steps)
+            demand = cofactor_demand(steps)
             requirements = _code_gate(steps)
             gaps = _transport_gate(steps)
 
@@ -336,6 +427,7 @@ def enumerate_routes(
                     # the list carrying its gate, because a cost is for the reader to weigh.
                     excluded_because=disqualifying,
                     cofactor_risks=tuple(cofactor_risks),
+                    redox_demand=demand,
                     construction_requirements=tuple(requirements),
                     chassis_gates=gates,
                     transport_gaps=tuple(gaps),
@@ -353,33 +445,103 @@ def enumerate_routes(
     return routes
 
 
-def rank(routes: Sequence[Route]) -> list[Route]:
+#: The two questions ``rank`` can answer. They are different questions and the answer to one is
+#: not the answer to the other, which is the whole reason this parameter exists.
+OBJECTIVES: Final[tuple[str, ...]] = ("easiest", "programme")
+
+
+#: How well each strategy fits **this programme's design intent**, 0..1, or None for "not
+#: recorded".
+#:
+#: DELIBERATELY SEPARATE FROM ``feasibility``, and the separation is the point.
+#: ``MITOCHONDRIAL_PROGRAM.md`` §4 already keeps two questions apart -- *is this technique
+#: possible at all* (``feasibility_rating``) and *is it possible for you* (``available_here``).
+#: This is a third question again: *is this what the programme is trying to build at all*. Folding
+#: it into ``feasibility`` would destroy the first distinction to express the third, which is why
+#: the obvious fix -- making feasibility chassis-aware -- is the wrong one.
+#:
+#: WHY EVERY VALUE IS None. These numbers encode design intent, and design intent is the owner's
+#: to state, not the atlas's to infer. Seeded None so that ``objective="programme"`` currently
+#: reproduces ``objective="easiest"`` exactly: the mechanism exists, and it changes nothing until
+#: somebody fills it in. ``docs/design/DUET_TARGET.md`` §5 is where the reasoning for a value
+#: would have to come from.
+#:
+#: THE OBSERVATION THIS EXISTS FOR (handover, 2026-09-21): confirming the chassis is rho+ cleared
+#: strategy C's chassis gate and the ranking did not move, because ``rank`` separates B from C at
+#: its *third* key -- feasibility, 0.80 against 0.60 -- while the chassis gate is the fourth. Those
+#: constants encode technique difficulty, and DUET chose strategy C for reasons no measure of
+#: technique difficulty knows about. The defect was never the constants; it was that the ranker
+#: answers "easiest" while being read as "best".
+PROGRAMME_FIT: Final[Mapping[str, float | None]] = {
+    "A_native_split": None,
+    "B_cytosolic_relocalization": None,
+    "C_mitochondrial_ehrlich": None,
+    "D_alternative_compartment": None,
+    "E_mtdna_encoded": None,
+}
+
+
+def rank(
+    routes: Sequence[Route],
+    *,
+    objective: str = "easiest",
+    programme_fit: Mapping[str, float | None] = PROGRAMME_FIT,
+) -> list[Route]:
     """Order viable routes by named components, lexicographically. Never by a weighted total.
 
-    Order: transport gaps first (a missing carrier is a hard engineering problem), then cofactor
-    supply risks, then feasibility, then construction requirements. Evidence would lead if any
-    existed; see :func:`enumerate_routes` on why it is NULL for every route today.
+    ``objective`` names **which question is being asked**, because there are two and they have
+    different answers:
+
+    ``"easiest"`` (the default, and the historical behaviour byte-for-byte)
+        Transport gaps first -- a missing carrier is a hard engineering problem -- then cofactor
+        supply risks, then feasibility, then chassis burdens, then construction requirements.
+        This answers *what would be least trouble to build*.
+
+    ``"programme"``
+        The same order, except that programme fit is consulted **before** feasibility. This
+        answers *what is this programme trying to build*, which is a question a measure of
+        technique difficulty cannot reach. With ``PROGRAMME_FIT`` unfilled it returns the same
+        order as ``"easiest"``; that is intended, not a stub.
+
+    Evidence would lead under either objective if any existed; see :func:`enumerate_routes` on why
+    it is NULL for every route today.
     """
-    return sorted(
-        (route for route in routes if route.viable),
-        key=lambda r: (
-            len(r.transport_gaps),
-            len(r.cofactor_risks),
-            -(r.score_feasibility or 0.0),
-            len([g for g in r.chassis_gates if not g.excludes]),
-            len(r.construction_requirements),
-            r.id,
-        ),
-    )
+    if objective not in OBJECTIVES:
+        raise ValueError(f"objective must be one of {OBJECTIVES}, got {objective!r}")
+
+    def key(route: Route) -> tuple[object, ...]:
+        head: tuple[object, ...] = (len(route.transport_gaps), len(route.cofactor_risks))
+        if objective == "programme":
+            head += (-(programme_fit.get(route.strategy) or 0.0),)
+        return head + (
+            -(route.score_feasibility or 0.0),
+            len([g for g in route.chassis_gates if not g.excludes]),
+            len(route.construction_requirements),
+            route.id,
+        )
+
+    return sorted((route for route in routes if route.viable), key=key)
 
 
-def explain(route: Route) -> str:
-    """Why this route ranks where it does, by naming the dominating term."""
+def explain(
+    route: Route,
+    *,
+    objective: str = "easiest",
+    programme_fit: Mapping[str, float | None] = PROGRAMME_FIT,
+) -> str:
+    """Why this route ranks where it does, by naming the dominating term.
+
+    The objective is printed rather than assumed. A reader who does not know which question was
+    asked cannot read the answer, and "easiest" being the default makes that misreading easy.
+    """
     if not route.viable:
         return f"EXCLUDED: {'; '.join(route.excluded_because)}"
+    fit = programme_fit.get(route.strategy)
     parts = [
+        f"objective={objective}",
         f"strategy={route.strategy}",
         f"feasibility={route.score_feasibility:.2f}",
+        f"programme_fit={'unrecorded' if fit is None else format(fit, '.2f')}",
         f"transport_gaps={len(route.transport_gaps)}",
         f"cofactor_risks={len(route.cofactor_risks)}",
         f"construction_requirements={len(route.construction_requirements)}",

@@ -1,0 +1,113 @@
+# Draft evidence for data/benchmarks/known_positives.yaml, category: competing_pathway
+# Source: local corpus of 1,309 stored full texts. Quotes are verbatim, including line breaks,
+# soft hyphens and the empty brackets left where the extractor dropped citation markers.
+# No confidence value is stated here and nothing is marked verified - that is a curator's act.
+
+- id: BM-CMP-001
+  verdict: supported
+  publication: "doi:10.1093/femsyr/foaf014"
+  corpus_file: "00341.txt"
+  quote: |-
+    Pdc1, Pdc5, and Pdc6 are three isoenzymes. Pdc1 plays a major role and has a very high expression level. Pdc5 is only active when there is no Pdc1 protein expression, because its promoter is inhibited by Pdc1 protein (Eberhardt et al. ). Pdc2 is not a direct PDC gene, but a transcription factor (Iosue et al. ). It regulates the expression of Pdc1 and Pdc5, and is important for their functions (Mojzita and Hohmann , Nosaka et al. ). With a nonfermentable carbon source, Pdc6 is activated under sulfur limitation. When glucose is the carbon source, PDC6 cannot be transcribed (Boer et al. ).
+  evidence_kind: review_statement
+  quote_supports: >-
+    Establishes that PDC1, PDC5 and PDC6 are the three pyruvate decarboxylase isozymes of S. cerevisiae, that Pdc1 plays the major role and is very highly expressed, that Pdc5 is only active in the absence of Pdc1 protein, and that PDC6 is not transcribed on glucose - so the three are explicitly not equivalent under fermentative conditions. It does not itself measure the ethanol sink and it does not mention isobutanol, so the framing of these reactions as competing with the isobutanol route for cytosolic pyruvate is not established by this quote.
+  searches_run:
+    - "PDC1[^.]{0,80}PDC5[^.]{0,80}PDC6"
+    - "(Pdc1|PDC1)[^.]{0,120}(major|main|dominant|predominant|most abundant)"
+    - "(C2 compound|C2-compound|two-carbon|acetate requirement|C2 source) --require (Pdc|pyruvate decarboxylase)"
+  note: >-
+    This is a 2025 review of Crabtree-negative yeast engineering and every clause carries a citation to earlier work, so it is background, not an own result. I found no own-result paper in the corpus that establishes isozyme dominance directly; 00515.txt and 00672.txt also call PDC1 the main isozyme while citing others. An own-result corroboration of the ethanol-sink half is in 00765.txt (doi:10.1186/s13068-019-1486-8), where deleting PDC1 plus PDC5 collapsed ethanol from about 13 g/L to 0.01 g/L; the same paper says: "Since PDC6 normally is not expressed [], deletions of PDC1 together with PDC5 were sufficient to block ethanol biosynthesis." A caveat the curator should carry into the atlas: in the isobutanol context these enzymes are not purely competing. 00765.txt concludes, after its own pdc1/5 deletions stopped isobutanol completely: "This confirmed the results of Choo et al. [], Brat et al. [] and Milne et al. [], indicating that Pdc1 and Pdc5 significantly contribute also in the conversion of KIV to isobutyraldehyde within the Ehrlich pathway." Storing PDC1/5/6 with role='competing' alone would therefore misrepresent the corpus; they are dual-role at this node.
+
+- id: BM-CMP-002
+  verdict: partially_supported
+  publication: "doi:10.1186/s13068-019-1486-8"
+  corpus_file: "00765.txt"
+  quote: |-
+    Compared to the wt strain CEN.PK113-7D (13 g/L), JWY0 (13.8 g/L) and JWY04 (13.4 g/L), single deletion strains JWY14 (∆pdc1) and JWY15 (∆pdc5) showed only minor effects in ethanol production, resulting in ethanol titers of 12.6 g/L and 12.3 g/L, respectively, whereas the pdc1/5 double deletion strain JWY13 showed an ethanol titer of only 0.01 g/L (Fig. c).
+  evidence_kind: own_result
+  quote_supports: >-
+    Own fermentation data. It establishes the abolition half quantitatively: the pdc1/5 double deletion strain produced only 0.01 g/L ethanol against about 13 g/L for the Pdc-proficient strains. It does not support the first half of the claim as written - a single PDC1 deletion gave 12.6 g/L against 13 g/L for the wild type, which the authors themselves call only minor effects. The quote says nothing about growth on glucose or about a C2 supplement.
+  searches_run:
+    - "PDC1[^.]{0,80}PDC5[^.]{0,80}PDC6"
+    - "(C2 compound|C2-compound|two-carbon|acetate requirement|C2 source) --require (Pdc|pyruvate decarboxylase)"
+    - "(Pdc1|PDC1)[^.]{0,120}(major|main|dominant|predominant|most abundant)"
+  note: >-
+    Three corrections for the curator. (1) The clause 'deletion of PDC1 reduces ethanol formation' is contradicted as a meaningful effect by two independent own-result measurements: 00765.txt measures 12.6 g/L against 13 g/L for the wild type, and 00672.txt (doi:10.1186/s12934-016-0555-y) reports of its own industrial wine strain: "Deletion of this gene in the FX10 background resulted in little impact under anaerobic conditions, but it had relevant consequences for aerobic fermentation. Under these conditions, the ethanol yield of FDC1 was similar to the control strain, but it showed a clear reduction in acetic acid yield, as well as acetoin and 2,3 butanediol." The corpus reason is autoregulation - PDC5 is derepressed when Pdc1 is absent. (2) 'all three PDC isozymes' is more than the corpus requires: 00765.txt states "Since PDC6 normally is not expressed [], deletions of PDC1 together with PDC5 were sufficient to block ethanol biosynthesis." (3) The C2/glucose-growth half is supported, but in the corpus only as a background premise. The cleanest instance is the abstract of 00564.txt (doi:10.1186/1475-2859-11-131): "However, Pdc- strains cannot grow on high glucose concentrations and require C2-compounds (ethanol or acetate) for growth under conditions with low glucose concentrations, which hitherto has limited application in industry." The same premise, also citing prior work, appears in 00664.txt, 00725.txt and 00989.txt; 00765.txt does run its own ethanol supplementation experiment on pdc-deficient cells. The Flikweert and van Maris primaries named in the source hint are cited by these papers but are not themselves in the corpus.
+
+- id: BM-CMP-003
+  verdict: supported
+  publication: "doi:10.1016/j.synbio.2021.12.010"
+  corpus_file: "00140.txt"
+  quote: |-
+    In contrast, due to the essential role of glycerol formation in NADH redox-cofactor balancing in non-respiratory cultures, double deletion of GPD1 and GPD2 prevents anaerobic growth [,].
+  evidence_kind: review_statement
+  quote_supports: >-
+    Establishes both the anaerobic growth phenotype of the gpd1 gpd2 double deletion and the mechanistic reason the claim gives - the essential role of glycerol formation in NADH redox-cofactor balancing in non-respiratory cultures. It reports no glycerol measurement and no growth rate, so the quantitative side of the claim rests on the sources in the note.
+  searches_run:
+    - "gpd1[^.]{0,40}gpd2|GPD1[^.]{0,40}GPD2 --require (anaerobic|glycerol)"
+    - "(unable to grow|cannot grow|no growth|growth arrest|abolished growth|not able to grow) --require (gpd1|GPD1|glycerol-3-phosphate dehydrogenase)"
+    - "GPD1 and GPD2|gpd1/2|gpd1Δgpd2Δ --require glycerol"
+  note: >-
+    No single corpus paper reports both halves as its own result, so a curator should split the evidence. Own result for the glycerol half, aerobic and in an isobutanol strain background, 00765.txt (doi:10.1186/s13068-019-1486-8): "Moreover, double deletion of GPD1 and GPD2 in strain JWY19 abolished glycerol synthesis almost completely (0.15 g/L after 120 h) and the isobutanol level was even further increased showing a maximum isobutanol titer of 1.32 g/L (40.51 mg/g glucose) after 120 h." Those fermentations were aerobic, so they carry no anaerobic facet at all - which is precisely the condition-context risk the benchmark's expected_outcome is testing for. The quantitative anaerobic statement, attributed to Nissen et al., is in 00584.txt (doi:10.1186/1475-2859-9-36): "The double deletion mutant was not able to grow under anaerobic conditions and showed a 12.7% yield improvement, but also a 29% reduction in biomass yield in aerobic conditions." 00184.txt (doi:10.1021/acssynbio.5c00316) adds, again citing prior work, that the paralogues differ - GPD1 deletion gives an extremely osmosensitive strain while gpd2 cells are impaired in anaerobic culture - and 00765.txt's own data agree that they are not interchangeable: gpd1 deletion alone left glycerol at 11.04 g/L while gpd2 deletion alone reduced it to 9.14 g/L. The claim treats the double deletion as one unit and so hides that.
+
+- id: BM-CMP-004
+  verdict: partially_supported
+  publication: "doi:10.1186/s13068-019-1560-2"
+  corpus_file: "00767.txt"
+  quote: |-
+    We also explored the effect of deleting the mitochondrial branched-chain amino acid transaminase encoded by BAT1, which converts the α-KIV precursor to valine exclusively in mitochondria (Fig. a). We found that deleting BAT1 in YZy165 results in a strain (YZy173, Table ) that produces 358 ± 13 mg/L isobutanol (from 15% xylose in 72 h high cell-density fermentations), which is a substantial improvement relative to deletions of PHO13 (YZy178) or ALD6 (YZy183) alone, and 2.5-times higher than the isobutanol produced by the parental YZy165 strain (Fig. a).
+  evidence_kind: own_result
+  quote_supports: >-
+    Own deletion experiment with a measured consequence. It establishes that BAT1 encodes the mitochondrial branched-chain aminotransferase, that it converts the alpha-KIV precursor to valine exclusively in mitochondria, and that deleting it raises isobutanol 2.5-fold to 358 mg/L - so the drain is real and quantified for Bat1. It establishes nothing about Bat2: neither its cytosolic localisation nor that a bat2 deletion behaves differently.
+  searches_run:
+    - "(BAT1|Bat1p?)[^.]{0,120}(mitochondri)"
+    - "(bat1|BAT1)[^.]{0,60}(bat2|BAT2) --require (deletion|deleted|disrupt|knock)"
+    - "bat2(Δ|∆|D| deletion|-deletion)"
+    - "(Bat2|BAT2)[^.]{0,100}(cytosol|cytoplasm) --require (we |our |Fig)"
+  note: >-
+    The compartment split itself is asserted often in the corpus but never, as far as I could find, as anyone's own localisation experiment - it is always background. Representative, 00597.txt (doi:10.1186/1754-6834-4-21): "The bidirectional reaction between 2-ketoisovalerate and valine is catalysed by the branched-chain amino-acid aminotransferases (Bat1 and Bat2, present in the mitochondrial matrix and the cytosol, respectively)." 00470.txt (doi:10.1128/aem.00557-22) explains it by an N-terminal mitochondrial targeting signal on Bat1, citing earlier work, and 01017.txt (doi:10.3389/fmicb.2014.00528) reproduces the GO annotations - Bat1 GO:0005739 mitochondrion, Bat2 GO:0005829 cytosol, both IDA from PMID:8798704. That PMID is the primary the claim actually needs and it is not in the corpus. For the non-equivalence half the closest is the discussion of 00470.txt, which mixes its own figure with citations: "In fact, yeast cells expressing only Bat2 in the cytosol (bat1Δ cells) basically exhibited a growth defect with an increase in BCHA content compared to yeast cells expressing only Bat1 in mitochondria (bat2Δ cells) (, , ) ()." Its own data make the same point: in a bat1 bat2 double-deletion background, cells carrying only Bat2 made 45 ppm isobutanol against 16 ppm for cells carrying only Bat1. Counter-evidence worth storing: 00765.txt deleted BAT1 and BAT2 separately in its own background and found both harmful - "However, even slight reductions of the valine synthesis by deleting only BAT1 (JWY05) or BAT2 (JWY06) had negative effects on growth in media without valine and on isobutanol production, in contrast to other work []." So the sign of the BAT1 deletion effect is background-dependent, which if anything strengthens the claim's point that the two deletions must not be merged into one row.
+
+- id: BM-CMP-005
+  verdict: supported
+  publication: "doi:10.1186/s13068-019-1486-8"
+  corpus_file: "00765.txt"
+  quote: |-
+    Further suppression of leucine biosynthesis by deletion of LEU4/9 (strain JWY02) had an additional large effect on isobutanol levels and resulted in a titer of 0.50 g/L (12.31 mg/g glucose). Further blocking of pantothenate biosynthesis by deletion of ECM31 (strain JWY03) had no statistically significant effect on isobutanol production (0.52 g/L, 12.69 mg/g glucose).
+  evidence_kind: own_result
+  quote_supports: >-
+    Own fermentation data giving exactly the deletion consequence the query shape asks for: deleting LEU4 and LEU9 together raised isobutanol from 0.28 g/L to 0.50 g/L (12.31 mg/g glucose). It deletes the pair as one unit, so it does not separate the two gene products, and it does not state the underlying biochemistry.
+  searches_run:
+    - "(LEU4|Leu4)[^.]{0,60}(LEU9|Leu9)"
+    - "(LEU4|LEU9)[^.]{0,80}(isopropylmalate)"
+    - "(bat1|BAT1)[^.]{0,60}(bat2|BAT2) --require (deletion|deleted|disrupt|knock)"
+  note: >-
+    The biochemical half is stated in the introduction of the same paper, as background: "Within leucine biosynthesis, 2-isopropylmalate synthases Leu4 and Leu9 catalyze the first step from KIV to 2-isopropylmalate." So no never_attempted gap is needed for the pair - the consequence on isobutanol titer has been measured. I found no corpus measurement of LEU4 or LEU9 deleted singly against isobutanol titer; that single-gene gap is real. The trailing sentence in the quote is included deliberately: ECM31, the pantothenate drain at the same branch point, was deleted in the same series and had no statistically significant effect, which belongs next to this row. On the flagged Leu4 localisation question the corpus does not settle it and disagrees with itself: 01044.txt (doi:10.3389/fmicb.2020.01843) says the S. cerevisiae Leu4/Leu9 enzymes are mitochondrially located, while 00198.txt (doi:10.1038/s41467-021-27852-x) says alpha-KIV is acetylated in either mitochondria or the cytosol by the alpha-IPM synthases encoded by LEU4 and LEU9. Both are background statements. Leave the compartment open.
+
+- id: BM-CMP-006
+  verdict: supported
+  publication: "doi:10.1038/nbt.2509"
+  corpus_file: "00190.txt"
+  quote: |-
+    Isopentanol and 2-­methyl-­1-­butanol titers also increased in strains 
+    containing mitochondrial isobutanol pathways. These increased titers 
+    are likely due to (i) overexpression of the upstream ILV gene products 
+    (ILV2, ILV3 and ILV5), also involved in the biosynthetic pathways 
+    of leucine and isoleucine, resulting in the production of the rele -­
+    vant α-­ketoacids ( α-­ketoisocaproate and α-­keto-­3-­methylvalerate,  
+    respectively; Fig. 4c); (ii) the two α-­ketoacid precursors to these alco-­
+    hols being suitable substrates for the overexpressed α-­KDCs, with 
+    Ll-­kivd having a bias for isopentanol production, Sc -­aro10 having 
+    higher activity for 2 -­methyl-­1-­butanol production and Sc -­kid1 with 
+    no detectable activity; and (iii) the aldehydes they produce being 
+    potential substrates for the three overexpressed ADHs, which have 
+    no apparent preference for the production of either alcohol ( Fig. 4 
+    and Supplementary Table 4).
+  evidence_kind: own_result
+  quote_supports: >-
+    Own result, and it supports the mechanistic core precisely: the alpha-ketoacid precursors of isopentanol and 2-methyl-1-butanol are suitable substrates for the overexpressed alpha-KDCs, and the KDC homologs differ in their bias - Ll-kivd toward isopentanol, Sc-aro10 toward 2-methyl-1-butanol, Sc-kid1 with no detectable activity. That difference in bias is what makes the ratio between the alcohols an informative readout of the configuration rather than a contaminant. The quote does not itself carry the titers; those are in Table 1 of the same paper.
+  searches_run:
+    - "(broad substrate (specificity|range)|promiscuit|substrate specificit) --require (2-(keto|oxo) ?acid decarboxylase|ketoacid decarboxylase|KivD|Kdc|KDC)"
+    - "(isoamyl alcohol|isopentanol|3-methyl-1-butanol|2-methyl-1-butanol) --require (also produced|co-produc|by-product|byproduct|side product|in addition to isobutanol|alongside)"
+  note: >-
+    This file is PDF-extracted: the quote carries hard line breaks and soft hyphens (U+00AD) inside hyphenated words such as 2-<shy>methyl-<shy>1-<shy>butanol. They are reproduced exactly as stored and must not be normalised before comparison. Table 1 of the same paper is the co-reported-titer evidence the expected_outcome asks for, from one S. cerevisiae configuration (JAy161): isobutanol 635 +/- 23, isopentanol 95 +/- 12, 2-methyl-1-butanol 118 +/- 28 mg/L, total fusel alcohols 850 +/- 60 - so the ratios are computable from a single row. Other corpus configurations co-report the same alcohols: 00767.txt (S. cerevisiae, isobutanol and 2-methyl-1-butanol from xylose), 00129.txt and 00029.txt in non-yeast hosts. The bare promiscuity assertion appears in 00189.txt (doi:10.1038/nature06450) and 00492.txt while citing prior work; 00725.txt (doi:10.1186/s13068-015-0374-0) is the corpus's own-result source for quantitative decarboxylase substrate specificity in S. cerevisiae and is the better citation if a curator wants enzyme kinetics rather than titers. The Hazelwood 2008 Ehrlich review named in the source hint is not in the corpus.

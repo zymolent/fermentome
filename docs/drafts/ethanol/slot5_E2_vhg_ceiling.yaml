@@ -1,0 +1,441 @@
+# Slot 5 candidate shortlist — ethanol reference layer
+# Criterion E2, "the performance ceiling the programme is calibrated against"
+# (docs/reference/ETHANOL_REFERENCE_SLOTS.md; PLAN.md B.3.2)
+#
+# This is a SHORTLIST, not a decision. The agent does not choose; the owner picks one.
+# Nothing here is marked accepted or verified and no confidence value is asserted.
+# Every quote is a verbatim character-for-character substring of the named corpus file.
+# Quotes are never spliced: where two passages are needed they are listed separately.
+# Every titre / yield / productivity below is stated with the conditions it was measured under.
+# Arithmetic the agent performed (e.g. % v/v -> g/L at 0.789 g/mL) is labelled as such and is
+# never presented as the paper's own number.
+
+slot:
+  number: 5
+  name: "Industrial strain under VHG (Very High Gravity)"
+  criterion: E2
+  question: "What does a high-performing fermentation actually look like?"
+  budget: 20
+  slots_doc_wording: "Ethanol Red or equivalent"
+  calibration_target: "The owner's own chassis reaches ~120 g/L ethanol; a candidate at or above that, with conditions, is directly calibrating."
+  what_makes_a_candidate_strong: >-
+    Completeness of the process record, not novelty. The atlas needs gravity/initial sugar, final
+    titre, yield as a fraction of theoretical, volumetric productivity, duration, temperature,
+    nitrogen supplementation, batch vs fed-batch vs SSF vs cell-recycle, and the strain.
+    condition_context is mandatory (PLAN.md C.5); a headline titre without conditions is close to useless.
+  standing_cautions_applied_here:
+    - "Industrial process yields (90-95% of theoretical) and laboratory wild-type physiology (~78% in anaerobic chemostat) are different quantities and must not be pooled. All three candidates below are batch or fed-batch with an uncontrolled, non-zero growth rate — none is a chemostat, so none reports a dilution rate, and none of these yields is the near-theoretical, near-zero-growth figure."
+    - "The theoretical ceiling from glucose is 0.511 g/g. Denominators were checked per candidate; see `yield_denominator_check` on each."
+  differentiation_intended:
+    A: "most complete process record (fed-batch feed + 6-cycle cell recycle, sugarcane juice, nitrogen arm)"
+    B: "named commercial strain — Ethanol Red measured directly, on defined YP + glucose"
+    C: "different substrate and process mode — corn dry-grind SSF at high solids, with Ethanol Red as the control"
+
+candidates:
+
+  - id: SLOT5-A
+    label: "most complete process record"
+    pmid: "30237826"
+    doi: "10.1186/s13068-018-1239-0"
+    title: "Conditions promoting effective very high gravity sugarcane juice fermentation."
+    year: 2018
+    journal: "Biotechnology for Biofuels"
+    corpus_file: "00755.txt"
+    open_access: "Open access (BioMed Central / Biotechnology for Biofuels); full text stored in the corpus."
+    strains:
+      - "S. cerevisiae CAT-1 (Brazilian industrial bioethanol strain, purchased from LNF Latino Americana)"
+      - "S. cerevisiae PE-2 (Brazilian industrial bioethanol strain, same supplier)"
+      - "S. cerevisiae W303-1A (laboratory strain, used only for the gene-expression arm)"
+    conditions:
+      substrate: "sugarcane juice (SCJ), variety SP83-2487, concentrated then diluted to 25, 30 or 35 degrees Brix; no other added carbon source"
+      gravity_initial_sugar: "25 / 30 / 35 degrees Bx (g sugar per 100 g juice); sugar actually consumed reported per condition, e.g. 261 +/- 22 g/L by CAT-1 under supplementation, against an apparent ~250 g/L ceiling without supplementation"
+      process_mode: "fed-batch inoculation into cell-recycle: 7 g yeast wet biomass fed with must at 20 mL/h for 5 h, then 6 consecutive 24-h cycles with the pellet recovered by centrifugation and re-fed — a reduced-scale mimic of the Brazilian Melle-Boinot industrial process"
+      duration: "6 cycles x 24 h (the industrial process it mimics uses 8-h cycles; the paper says so explicitly)"
+      temperature: "30 degrees C"
+      agitation: "orbital, 70 rpm"
+      volume: "100 mL broth in 150 mL tubes"
+      inoculum: "~10^8 cells (Neubauer chamber count)"
+      nitrogen_supplementation: "three arms — none, 16 mM urea, or 24 mM diammonium phosphate (DAP)"
+      titre: "CAT-1, 30 degrees Bx + urea: 17% (v/v) ethanol (agent's arithmetic at 0.789 g/mL: ~134 g/L). Across the study the per-cycle maximum was ~15% (v/v) (~118 g/L), ~14% (v/v) of it already in cycle 1."
+      yield: "CAT-1, 30 degrees Bx + urea: 91.32% of theoretical. PE-2, 35 degrees Bx + urea: 93% of theoretical."
+      productivity: "CAT-1, 30 degrees Bx + urea: 5.63 +/- 0.28 g/L/h (highest in the study). PE-2, 35 degrees Bx + urea: 4.19 g/L/h."
+      residual_sugar: "0.2% unfermented (the abstract writes w/v, the body writes v/v — see what_it_lacks)"
+      viability: "~60% of the initial viable inoculum fraction surviving 6 cycles of 24 h"
+      growth_regime: "batch/fed-batch with cell recycle and an uncontrolled growth rate; no dilution rate, no specific growth rate reported"
+    yield_denominator_check: >-
+      The paper states its denominator explicitly: 100 g glucose -> 51.1 g (64.75 mL) ethanol, i.e.
+      the correct 0.511 g/g glucose figure, and defines fermentation efficiency as produced/theoretical
+      x 100. The substrate, however, is sugarcane juice, whose sugar is largely sucrose; 1 g sucrose
+      takes up water on inversion and yields ~1.053 g hexose, so the sucrose-basis ceiling is ~0.538 g/g.
+      If "total fermentable sugar" was measured on a sucrose basis rather than as post-inversion
+      reducing sugar, the reported efficiencies would be high by roughly 5% relative (91.32% would be
+      ~86.7%). The paper does not say which basis the sugar assay used. A curator should resolve this
+      before the 91.32% is admitted as a yield fraction.
+    what_data_it_actually_contains: >-
+      Processed tabular fermentation data in the paper's own tables (ethanol produced and sugar consumed
+      per strain x gravity x nitrogen arm; derived efficiency and productivity tables), biomass wet
+      weight and viability across all six cycles as figures, intracellular and extracellular glycerol by
+      HPLC after TCA deproteinisation, and qRT-PCR expression for STL1 and FPS1 in CAT-1 and W303-1A.
+      No raw deposited datasets; the cycle-resolved numbers that are not tabulated live only in figures.
+    accessions: "none found in the stored text (no sequencing; the molecular work is qRT-PCR only)"
+    why_this_slot: >-
+      This is the most complete process record found anywhere in the 209-candidate pool: it is the only
+      shortlisted paper that carries all nine fields the atlas asks for and carries them per condition
+      rather than only for a headline — gravity, titre, yield as a stated fraction of a stated
+      theoretical, productivity in g/L/h, duration, temperature, an explicit nitrogen-source arm, the
+      process mode, and named industrial strains. It is also the only candidate whose process mode is the
+      real industrial one (cell recycle across cycles), and the nitrogen arm directly answers the
+      "nitrogen supplementation" field the slot demands rather than leaving it to a medium recipe.
+      CAT-1 at 17% (v/v) with 91.32% of theoretical and 5.63 g/L/h sits above the owner's ~120 g/L chassis.
+    what_it_lacks: >-
+      (1) Internal unit inconsistencies that a curator must resolve before extraction. The abstract says
+      "17% (w/v) ethanol yield" while the body says "17% (v/v)"; residual sugar is "0.2% (w/v)" in the
+      abstract and "0.2% (v/v)" in the body. (2) The Methods define productivity as fermentation
+      efficiency (%) divided by cycle extension (h) — a dimensionless-over-hours quantity — yet the
+      Results report productivity in g/L/h. The two definitions cannot both be right and the paper never
+      reconciles them, so 5.63 g/L/h should not be taken at face value without recomputing it from the
+      titre and cycle time. (3) No ethanol figure is ever printed in g/L; every titre needs converting.
+      (4) The sucrose-vs-glucose denominator question above. (5) No sequencing, no accessions, no raw
+      data deposit. (6) 17% (v/v) is a striking number for a strain the same paper says loses viability
+      above ~14-15% (v/v); whether it is a per-cycle titre or a cumulative figure is not stated in the
+      running text and must be read off the table.
+    evidence:
+      - claim: "Headline result: strain, gravity, nitrogen source, titre, residual sugar."
+        quote: |-
+          Highest process efficiency, with a 17% (w/v) ethanol yield and only 0.2% (w/v) sugar remaining unfermented, was observed with the Saccharomyces cerevisiae industrial strain CAT-1 in 30 °Bx broth with urea supplementation.
+      - claim: "Best condition with all four performance numbers and the viability figure."
+        quote: |-
+          Still, when all is taken into consideration, the best performance in VHG conditions was for CAT-1 at 30 °Bx with SCJ supplemented with urea: (a) highest ethanol production (17% (v/v)—Table ), (b) low residual unfermented sugar (0.2% (v/v)—not shown), (c) high ethanol yield (91.32%—Table ), (d) highest productivity (5.63 ± 0.28 g L−1 h−1—Table ), and (e) high yeast viability after 6 cycles of 24 h (approximately 60% of the initial fraction of the viable inoculum—Fig. ).
+      - claim: "Second-best condition (PE-2, 35 degrees Bx, urea) with its yield and productivity."
+        quote: |-
+          In fact, at 35 °Bx/urea, PE-2 presented the extraordinary yield of 93% with a matching productivity of 4.19 g L−1 h−1 (Table ).
+      - claim: "Process mode, volume, inoculum, duration, temperature, agitation, cell recycle."
+        quote: |-
+          Fermentations were carried out with ~ 108 cells (enumerated with a Neubauer chamber and Leica light microscope) in 100 mL broth, in 150 mL tubes, for 24 h at 30 °C with orbital agitation at 70 rpm (New Brunswick Scientific Co., US), followed by centrifugation (Damon IEC BP-6000) at 2250 rpm for 10 min. The cell pellet was weighed and supplemented with an identical number of grams of fresh must, followed by a new 24-h fermentation cycle, and this whole process was repeated 6 times.
+      - claim: "Fed-batch feed rate and the industrial process being mimicked."
+        quote: |-
+          A reduced scale fermentation procedure which mimics the industrial fermentation process used in the Brazilian bioethanol industry was utilised. Yeast wet biomass (7 g) was gradually supplemented with must, prepared as described above, at 20 mL h−1 for 5 h.
+      - claim: "The nitrogen supplementation arms and their concentrations."
+        quote: |-
+          Both non-supplemented and 16 mM urea ((NH2)2CO) or 24 mM diammonium phosphate (DAP) ((NH4)2HPO) supplemented musts were used.
+      - claim: "The theoretical denominator the yield fractions are computed against."
+        quote: |-
+          Ethanol yield was calculated according to the theoretical consideration that the conversion of 100 g glucose should give rise to 51.1 g, or 64.75 mL, ethanol
+      - claim: "The per-cycle ethanol ceiling and its viability cost."
+        quote: |-
+          In the present study, ethanol production reached a maximum of ~ 15% (v/v) (Table , italics); ~ 14% (v/v) of which was already reached in the first cycle of fermentation and which was accompanied by a strong reduction in cell viability (Fig. ).
+      - claim: "Sugar actually consumed under supplementation."
+        quote: |-
+          CAT-1 in particular consumed more sugar (261 ± 22 g L−1) (Table )
+
+  - id: SLOT5-B
+    label: "named commercial strain — Ethanol Red measured directly"
+    pmid: "25759747"
+    doi: "10.1186/s13068-015-0216-0"
+    title: "Large-scale robot-assisted genome shuffling yields industrial Saccharomyces cerevisiae yeasts with increased ethanol tolerance."
+    year: 2015
+    journal: "Biotechnology for Biofuels"
+    corpus_file: "00715.txt"
+    open_access: "Open access (BioMed Central / Biotechnology for Biofuels); full text stored in the corpus."
+    strains:
+      - "Ethanol Red (commercial biofuel strain, coded P7) — used as the in-batch control strain in every fermentation"
+      - "Hybrids H1-H9 from genome shuffling of eight heterothallic parents drawn from a 318-strain Saccharomyces collection"
+      - "Industrial isolates Y145, Y116, Y111 (pilot scale comparators)"
+    conditions:
+      substrate: "defined rich medium — YP + 35% (w/v) glucose for the small-scale VHG comparison; 320 g/L glucose with 2% peptone, 2% malt extract, 0.12% Fermaid and ZnSO4.7H2O for the semi-industrial pre-screen; 8 L VHG medium with 32% (w/v) glucose for the pilot"
+      gravity_initial_sugar: "350 g/L glucose (small scale), 320 g/L glucose (semi-industrial pre-screen and 8 L pilot)"
+      process_mode: "batch. Small scale: 150 mL in sealed 250 mL Schott bottles with a waterlock (self-anaerobic via CO2 blanket). Pilot: 8 L stirred bioreactor (Sartorius Biostat B plus)"
+      duration: "small scale terminated per-flask when daily weight loss fell below 0.20 g/day; the productivity column is normalised to day 7, the day Ethanol Red finished. Pilot terminated after 7 days."
+      temperature: "30 degrees C (small scale, and the 100 mL semi-industrial pre-screen). The 8 L pilot temperature is not stated in the stored Methods text."
+      inoculum: "small scale: OD600 = 1.0, approximately 2.0 x 10^7 cells/mL, from YP + 4% glucose stationary phase. Pilot: 80 mL of a 50 g wet biomass / 100 mL Ringer suspension into 8 L."
+      nitrogen_supplementation: "supplied as the medium, not as a variable — YP (yeast extract + peptone) at small scale; peptone + malt extract + Fermaid at semi-industrial scale; 12% ammonia used for pH control at pilot scale (pH held at 4.5)"
+      agitation: "150 rpm magnetic stirring (small scale); 300 rpm for 4 h then 50 rpm (pilot); static for the 100 mL pre-screen"
+      titre: "Ethanol Red, small-scale VHG (150 mL YP + 35% w/v glucose, 30 degrees C, 150 rpm): 19.0 +/- 0.40% (v/v) = 149.7 +/- 2.94 g/L. Best hybrid H1 same conditions: 20.0 +/- 0.22% (v/v) = 158.1 +/- 1.70 g/L. H1 at 8 L pilot on 32% (w/v) glucose: 18.7% (v/v)."
+      yield: "Ethanol Red, small-scale VHG: 0.49 +/- 0.01 g/g sugar consumed (agent's arithmetic against 0.511 g/g: ~96% of theoretical). H1 at pilot on 32% (w/v) glucose: 0.45 g/g, which the paper's own table reports as 88.8%."
+      productivity: "Ethanol Red, small-scale VHG, estimated at day 7: 0.90 +/- 0.03 g/L/h. H1 same basis: 0.94 +/- 0.01 g/L/h. H1 at 8 L pilot: 0.90 g/L/h."
+      growth_regime: "batch from a stationary-phase inoculum, growth rate uncontrolled and unreported; no chemostat, no dilution rate"
+    yield_denominator_check: >-
+      Substrate is pure glucose throughout, so 0.511 g/g is the right ceiling and the paper applies it
+      consistently: the pilot table's 0.45 g/g and 88.8% agree (0.45/0.511 = 88.1%). Yield is defined in
+      the supplementary legend as ethanol formed against the maximum formable from glucose consumed —
+      i.e. per sugar consumed, not per sugar charged. Ethanol Red's 0.49 g/g is therefore a
+      consumed-basis number, and at 96% of theoretical it is close enough to the ceiling that a curator
+      should note it is a consumed-basis yield before comparing it with charged-basis figures elsewhere.
+    what_data_it_actually_contains: >-
+      Two in-paper tables of processed fermentation data (Table 1: relative and absolute ethanol in
+      % v/v and g/L, relative and absolute estimated productivity, and yield in g/g, for nine hybrids
+      against Ethanol Red in triplicate; Table 2: % v/v, yield % , yield g/g and productivity g/L/h for
+      four strains at 8 L pilot), plus five supplementary data files carrying the per-strain fermentation
+      data for the full hybrid panel and a 26-strain screen. Genetic fingerprints and a 318-strain
+      phenotype screen are reported as figures/heat maps. No sequencing deposits.
+    accessions: "none found in the stored text; the strain collection is described but no INSDC/SRA accessions are given"
+    why_this_slot: >-
+      This is the only candidate in the pool that puts a number on Ethanol Red itself, in triplicate,
+      in the same batch as everything it is compared with: 149.7 +/- 2.94 g/L at 0.49 +/- 0.01 g/g and
+      0.90 +/- 0.03 g/L/h from 350 g/L glucose at 30 degrees C. The slots doc names "Ethanol Red or
+      equivalent", and this gives Ethanol Red as an in-batch control rather than as a citation. The
+      substrate is pure glucose in a defined rich medium, which makes it the most directly comparable of
+      the three to a lab chassis measured on glucose — the owner's ~120 g/L is read against 149.7 g/L
+      without a feedstock conversion in between. It also supplies a matched pilot-scale (8 L bioreactor)
+      point for the same process, which is the closest thing in the pool to a scale check.
+    what_it_lacks: >-
+      (1) The productivity figure is not a measured completion rate: hybrids took longer than Ethanol Red
+      to finish, so the paper normalises everything to day 7, the day Ethanol Red finished. 0.90 g/L/h is
+      therefore an "estimated productivity at d = 7" and is not comparable with a productivity computed to
+      actual completion. (2) Fermentation duration is a stopping rule (weight loss < 0.20 g/day), not a
+      stated time, so per-flask duration is not recoverable from the text. (3) The 8 L pilot temperature
+      is not stated. (4) Ethanol Red was not run at pilot scale at all — it ranked ninth in the pre-screen
+      and was dropped — so the pilot numbers belong to H1/Y145/Y116/Y111, not to the commercial strain.
+      (5) Nitrogen is a fixed medium component, not a studied variable, so this candidate cannot answer
+      the nitrogen-supplementation question the slot lists. (6) YP + 35% glucose is a laboratory VHG
+      medium, not an industrial feedstock; it is clean but it is not a plant. (7) No accessions, no
+      deposited raw data.
+    evidence:
+      - claim: "Ethanol Red's own titre, yield and productivity, with the hybrid panel, in the small-scale VHG comparison."
+        quote: |-
+          H1 | 47 | F1 | 107.3 ± 1.16 | 20.0 ± 0.22 | 158.1 ± 1.70 | 105.7 ± 1.27 | 0.94 ± 0.01 | 0.49 ± 0.00
+
+          H2 | Unknown | F1 | 107.3 ± 0.21 | 20.0 ± 0.04 | 158.2 ± 0.32 | 106.7 ± 0.19 | 0.95 ± 0.00 | 0.49 ± 0.00
+
+          H3 | Unknown | F3 | 106.2 ± 1.16 | 19.8 ± 0.22 | 156.6 ± 1.71 | 103.6 ± 1.32 | 0.93 ± 0.01 | 0.49 ± 0.00
+
+          H4 | Unknown | F1 | 105.4 ± 2.35 | 19.4 ± 0.44 | 153.2 ± 0.66 | 104.8 ± 1.89 | 0.94 ± 0.02 | 0.49 ± 0.00
+
+          H5 | 12364578 | F3 | 105.0 ± 0.41 | 19.6 ± 0.08 | 154.8 ± 0.60 | 104.5 ± 0.31 | 0.93 ± 0.00 | 0.48 ± 0.00
+
+          H6 | Unknown | F1 | 104.9 ± 1.01 | 19.6 ± 0.19 | 154.6 ± 1.49 | 104.7 ± 0.51 | 0.94 ± 0.00 | 0.49 ± 0.01
+
+          H7 | Unknown | F1 | 103.9 ± 0.45 | 19.4 ± 0.08 | 153.2 ± 0.66 | 102.3 ± 0.45 | 0.91 ± 0.00 | 0.50 ± 0.01
+
+          H8 | Unknown | F3 | 102.0 ± 0.70 | 19.0 ± 0.13 | 150.3 ± 1.03 | 98.3 ± 0.59 | 0.88 ± 0.01 | 0.49 ± 0.00
+
+          H9 | 78 | F1 | 100.0 ± 1.05 | 19.1 ± 0.20 | 151.0 ± 1.58 | NA | NA | 0.48 ± 0.01
+
+          P7 | EtOH Red | - | 100 ± 0.83 | 19.0 ± 0.40 | 149.7 ± 2.94 | 100 ± 0.84 | 0.90 ± 0.03 | 0.49 ± 0.01
+      - claim: "Small-scale VHG conditions: volume, medium and gravity, inoculum density, seal, agitation, temperature."
+        quote: |-
+          250-ml Schott bottles each filled with 150 ml YP + 35% (w/v) glucose and a magnetic rod (35 × 5 mm) were inoculated to a starting OD600 = 1.0 (approximately 2.0 × 107 cells/ml). These bottles were sealed with a waterlock and stirred continuously at 150 rpm on a magnetic stirring platform (IKA® RO 15) at 30°C.
+      - claim: "The stopping rule that stands in for a stated fermentation duration."
+        quote: |-
+          The bottles were weighed on a daily base to determine the cumulative weight loss, a proxy for CO2 production. Each fermentation was terminated when its weight loss dropped below 0.20 g/day.
+      - claim: "Ethanol Red's yield stated in running text, and the basis (per gram of sugar consumed)."
+        quote: |-
+          For the improved hybrids, the ethanol yield (grams of ethanol produced per grams of sugar consumed) was not statistically different from the yield of Ethanol Red (0.49 g/g), indicating that these hybrids ferment with an efficiency similar to Ethanol Red (Additional file ).
+      - claim: "How the productivity column was computed — the day-7 normalisation."
+        quote: |-
+          Since it took these hybrids longer to complete the fermentation than Ethanol Red, we calculated an estimated ethanol productivity after 7 days (when Ethanol Red finished the fermentation).
+      - claim: "Pilot-scale summary: gravity, titre, productivity, yield."
+        quote: |-
+          In an 8-l pilot-scale test, the best-performing hybrid fermented medium containing 32% (w/v) glucose to dryness, yielding 18.7% (v/v) ethanol with a productivity of 0.90 g ethanol/l/h and a yield of 0.45 g ethanol/g glucose.
+      - claim: "Pilot-scale table, showing the yield % and g/g columns together."
+        quote: |-
+          H1 | 18.7 | 88.8 | 0.45 | 0.90
+
+          Y145 | 17.9 | 86.5 | 0.44 | 0.87
+
+          Y116 | 17.0 | 88.8 | 0.45 | 0.71
+
+          Y111 | 16.0 | 88.0 | 0.45 | 0.77
+      - claim: "Pilot-scale process conditions: vessel, inoculum, aeration, pH control, agitation profile, duration."
+        quote: |-
+          Sartorius Biostat B plus fermentors filled with 8 l VHG medium were inoculated with 80 ml biomass suspension. This medium was aerated for 30 min pre-fermentation; the pH was kept at 4.5 as soon as it reached this value by addition of 12% ammonia. Fermentations were stirred at 300 rpm for the first 4 h after which the stirring speed was adjusted to 50 rpm for the remaining time. Fermentations were terminated after 7 days.
+      - claim: "The lab-scale VHG screening condition used for the 318-strain collection."
+        quote: |-
+          We first determined the ethanol accumulation capacity under lab-scale VHG conditions (fermentation of 150 ml YP + 35% (w/v) glucose).
+
+  - id: SLOT5-C
+    label: "different substrate and process mode — corn dry-grind SSF at high solids"
+    pmid: "38647773"
+    doi: "10.1186/s40643-022-00580-w"
+    title: "Brazilian industrial yeasts show high fermentative performance in high solids content for corn ethanol process."
+    year: 2022
+    journal: "Bioresources and Bioprocessing"
+    corpus_file: "00840.txt"
+    open_access: "Open access (SpringerOpen / Bioresources and Bioprocessing); full text stored in the corpus."
+    strains:
+      - "Ethanol Red (ER) — the control, donated by Leaf by Lesaffre"
+      - "BG-1, CAT-1, PE-2, SA-1 (Brazilian industrial sugarcane-ethanol strains)"
+    conditions:
+      substrate: "dent-type corn, hammer-milled, dry-grind; liquefied with Liquozyme alpha-amylase then saccharified in parallel with fermentation (SSF) using Spirizyme Ultra XHS glucoamylase"
+      gravity_initial_sugar: "expressed as solids loading, 30% (standard) or 35% (high-solids), assuming 10% corn moisture. Initial fermentable sugar is never given in g/L — see what_it_lacks."
+      process_mode: "simultaneous saccharification and fermentation (SSF) in batch; glucose is released slowly rather than charged, which the paper notes avoids the initial osmotic shock of a VHG sugar charge"
+      duration: "72 h standard; extended to 96 h for the high-solids condition because sugars were not exhausted at 72 h"
+      temperature: "32 degrees C standard; a 35 degrees C stress arm"
+      pH: "5.3 for liquefaction (85 degrees C, 90 min), adjusted to 4.9 for SSF, both with 10 N sulfuric acid"
+      nitrogen_supplementation: "urea, 160 microlitres of a 50% w/v solution per 100 mL (agent's arithmetic: ~0.8 g urea per kg of paste)"
+      enzymes: "Liquozyme 0.02% m/m at liquefaction; Spirizyme 0.035% m/m at SSF"
+      inoculum: "0.4% initial cell concentration (standard) or 0.02% (low-inoculum stress arm), from a 14-h YPD propagation"
+      volume_and_vessel: "100 g liquefied paste in a 250 mL Erlenmeyer, shaken at 150 rpm, biological triplicates"
+      titre: "35% solids, 0.02% inoculum, 32 degrees C, 96 h: ER 18.78, BG-1 19.81, CAT-1 17.06, PE-2 17.27, SA-1 18.82% (v/v) (agent's arithmetic at 0.789 g/mL: ER ~148 g/L, BG-1 ~156 g/L). 30% solids, 0.4% inoculum, 32 degrees C, 72 h: ER 16.46, BG-1 16.7, CAT-1 16.89, PE-2 16.47, SA-1 16.76% (v/v) (~130-133 g/L)."
+      yield: "reported only as L ethanol per kg of dry corn, in a figure; no fraction of the 0.511 g/g theoretical is given anywhere. Relative changes are given: BG-1 and ER lose at least 9.3% of conversion efficiency at 72 h under high solids, recovering 2.75% and 2.15% respectively by 96 h."
+      productivity: "reported in g/L.h in a figure only; the text gives relative changes at 35% vs 30% solids over 72 h — BG-1 +5.8%, ER +3.4%, CAT-1 -14.1%"
+      growth_regime: "batch SSF from a defined inoculum; growth rate uncontrolled and unreported"
+    yield_denominator_check: >-
+      Not applicable as printed: this paper never expresses yield as a fraction of theoretical. Its yield
+      is L ethanol per kg dry corn (Kumar's method 1, over the whole slurry volume and the initial dry
+      corn mass), which is a feedstock-conversion metric, not a sugar-to-ethanol metric. Converting it to
+      a fraction of 0.511 g/g would require the starch content of the corn, which is not reported. This
+      is the single largest gap in the candidate.
+    what_data_it_actually_contains: >-
+      Fermentation profiles (glucose and ethanol over time, for five strains x four conditions) as
+      figures; productivity and yield as figures only; full time-resolved profiles including maltose,
+      maltotriose, glycerol and acetic acid in four supplementary tables (S1-S4); growth curves at
+      30/35 degrees C with and without 14% ethanol in supplementary tables S5-S6. The final ethanol
+      concentrations for every strain and condition are given numerically in the running text. No raw
+      deposited data; the paper states all data are in the main text and the additional file. Genomic
+      claims about BG-1 (STL1, PAD1, FDC1, MCH2, YKL222C copy number) are cited to another paper, not
+      generated here.
+    accessions: "none found in the stored text; no sequencing performed in this work"
+    why_this_slot: >-
+      It is the kind of reference the other two are not: a starch feedstock under industrial dry-grind
+      SSF, where sugar is released slowly instead of charged, at solids loadings (35%) above the 30-32%
+      the paper says the industry is normally restricted to. It carries Ethanol Red as an explicit
+      in-batch control against four named industrial strains, so it gives a five-strain spread rather
+      than a single number, and it reaches the highest titres of the three candidates (BG-1 19.81% v/v,
+      ER 18.78% v/v at 96 h). If the owner wants the ceiling defined by what a plant actually runs rather
+      than by a defined-medium VHG flask, this is the candidate. It also separates two stresses the other
+      papers conflate — temperature (35 degrees C) and solids/ethanol — into distinct arms.
+    what_it_lacks: >-
+      (1) No yield as a fraction of theoretical, anywhere, and no starch content with which to compute
+      one. For a slot whose stated purpose is "the achievable yield fraction", this is a serious
+      omission. (2) No initial sugar in g/L — only solids %, which is not a gravity a measurement can be
+      keyed to without the corn composition. (3) Productivity and yield exist only inside figures; the
+      text gives percentage changes, not absolute g/L/h. (4) Ethanol is reported in % v/v throughout, so
+      every titre needs converting. (5) The abstract says BG-1 reached "higher than 19% w/v" while the
+      results say 19.81% v/v — w/v and v/v are not interchangeable and the abstract appears to be wrong.
+      (6) The text quotes BG-1's peak twice with different digits, "19.81" in one sentence and "19.78%"
+      with "18,79%" for ER a few lines later (comma decimal), so the figures need reading off the source
+      table. (7) The 96-h high-solids point was collected because 72 h was incomplete, so the 72-h and
+      96-h numbers are not two timepoints of one designed series. (8) No accessions, no sequencing.
+    evidence:
+      - claim: "Headline: high-solids condition, strain, titre, productivity gain."
+        quote: |-
+          In fermentations with high solids concentration (35%), strain BG-1 reached ethanol contents higher than 19% w/v and had a productivity gain of 5.8% compared to fermentation at 30%.
+      - claim: "SSF conditions: vessel, mass, pH, enzyme dose, urea dose, temperature, duration, agitation."
+        quote: |-
+          All fermentation experiments were carried out in triplicate, in a 250-mL Erlenmeyer flask, containing 100 g of the liquefied paste. After the liquefied paste had undergone cooling, its pH was applied to 4.9 using using sulfuric acid solution (10 N). Then, the Spirizyme enzyme was added in an amount of 0.035% m/m and urea (160 µL of solution at 50% w/v in 100 mL). Then, the inoculum of the yeasts was made in a standardized way for all strains, and the cell concentration was measured by measurements in an optical spectrometer. The SSF process took place at 32 °C for 72 h in a shaker with a continuous output of 150 rpm.
+      - claim: "Liquefaction conditions preceding SSF."
+        quote: |-
+          The pH of the mixture was prepared to 5.3 (optimal pH for alpha-amylase) using sulfuric acid solution (10 N). The mixture was then conducted to a reactor with a heating mantle and continuous suspension of 1200 rpm, and subjected to liquefaction for 90 min at a temperature of 85 ºC, the amount of Liquozyme added was 0.02% m / m.
+      - claim: "The standard condition's three defining parameters."
+        quote: |-
+          The standard fermentation condition (initial cell concentration of 0.4%, solids content of 30%, and temperature of 32 °C) was based on the work of Kumar and Singh and represents the basic operating parameters used by corn-ethanol plants.
+      - claim: "Standard-condition titres for all five strains including Ethanol Red."
+        quote: |-
+          The final ethanol concentrations were 16.46, 16.7, 16.89, 16.47, and 16.76% v/v for ER, BG-1, CAT-1, PE-2, and SA-1, respectively.
+      - claim: "High-solids titres for all five strains at 96 h."
+        quote: |-
+          Thus, a second point was collected at 96 h of fermentation that resulted in average final ethanol concentrations of 18.78, 19.81, 17.06, 17.27, 18.82% v/v, respectively.
+      - claim: "Productivity reported as relative change only."
+        quote: |-
+          When comparing the productivity (Fig. .A) of the standard condition (30%) versus the high solids condition (35%) in 72 h, we observe a productivity gain of 5.8% and 3.4% using the BG-1 and ER, respectively, while for the CAT-1 yeast there is a loss of productivity of 14.1%.
+      - claim: "How yield was defined — per kg of dry corn, not against theoretical."
+        quote: |-
+          Productivity was obtained by concentration as a function of time, and yield was calculated using method 1 described by Kumar, , which considers the entire volume of slurry and the initial mass of dry corn.
+
+how_i_narrowed: >-
+  209 candidates is far past reading, so the triage was mechanical first and manual only at the end.
+  Step 1 — scripted scoring over all 209 stored full texts, not over titles. Titles alone were
+  unreliable here: several of the strongest VHG papers do not say "VHG" in the title, and several that
+  do are brewing or wine papers with beverage-scale titres. So each document was scanned for eight
+  regex families corresponding to the fields the slot demands — VHG/very-high-gravity wording, named
+  commercial strains (Ethanol Red, Thermosacc, Fermiol, Angel), fed-batch, a theoretical-yield
+  denominator, a volumetric productivity in g/L/h, an ethanol titre in g/L or % v/v, a temperature in
+  the 25-39 degrees C band, and a nitrogen term (urea, DAP, ammonium, yeast extract, Fermaid) — and
+  scored. Step 2 — a targeted pass for the two phrases that define the slot: "Ethanol Red" (29
+  documents mention it, most only as a citation) and VHG/very-high-gravity used three or more times
+  (18 documents, which separates papers about VHG from papers that mention it once in an
+  introduction). Their union is 43 documents, of which about 25 survived a look at title and journal. Step 3 — a separate scripted sweep for any ethanol titre at
+  or above 120 g/L anywhere in the pool, so that a high-performing paper missed by the keyword pass
+  would still surface; this added 00043, 00264, 00699 and 01118 to the reading list and confirmed
+  nothing above 158 g/L exists in the pool. Step 4 — read the abstracts of the leading 12, then the
+  Methods and Results of the leading 8 in full (00755, 00840, 00715, 00609, 00602, 00879, 00110,
+  00184), checking each against the nine required condition fields one at a time. Step 5 — chose for
+  difference rather than for score: the three shortlisted are a fed-batch cell-recycle sugar-juice
+  process, a defined-glucose batch with the commercial strain itself as the control, and a starch SSF
+  at high solids. Papers that scored well but were dropped: 00609 (Ethanol Red with the highest yield
+  fraction in the pool, 94.9% of theoretical, but only ~98 g/L — below the owner's chassis, so it
+  calibrates yield and not the ceiling); 00602 (excellent VHG record but the interesting variable is
+  redox-potential control, a process intervention the programme is not calibrating against); 00879 and
+  00599 (VHG-focused but the fermentation record is thin and the subject is strain construction);
+  00110 (the best nitrogen-supplementation arm in the pool, but wine yeasts on grape juice, not an
+  industrial fuel-ethanol process); 00699 (111.65 g/L from 250 g/L molasses in a 5 L fermenter at
+  95.53% conversion — a good fourth pick, just below the chassis titre).
+
+ceiling_summary: >-
+  The highest well-conditioned ethanol titre found anywhere in the 209-candidate pool is 158.1 +/- 1.70
+  g/L (20.0 +/- 0.22% v/v), by genome-shuffled hybrid H1 in 00715, from 150 mL of YP + 35% (w/v) glucose
+  in a waterlock-sealed 250 mL bottle, 30 degrees C, 150 rpm, inoculated at OD600 = 1.0 (~2.0 x 10^7
+  cells/mL), batch, terminated on a weight-loss stopping rule, at 0.49 +/- 0.00 g/g of sugar consumed
+  and an estimated 0.94 +/- 0.01 g/L/h normalised to day 7. The commercial reference in the same batch,
+  Ethanol Red, gave 149.7 +/- 2.94 g/L (19.0 +/- 0.40% v/v) at 0.49 +/- 0.01 g/g and 0.90 +/- 0.03
+  g/L/h. On a feedstock rather than a defined medium, the highest is BG-1 at 19.81% (v/v) (agent's
+  arithmetic ~156 g/L) in 00840, from 35% corn solids under SSF at 32 degrees C with urea, 96 h, with
+  Ethanol Red at 18.78% (v/v) (~148 g/L) in the same experiment — but that paper reports no yield
+  fraction, so the titre travels without a yield. The highest well-conditioned YIELD in the pool is a
+  different paper from the highest titre: 94.9 +/- 2.8% of theoretical, by Ethanol Red dry yeast at 2 g/L
+  on sugar beet thick juice wort of 250 g/kg extract supplemented with diammonium hydrogen phosphate at
+  0.3 g/L (00609, not shortlisted) — but that fermentation reached only 12.4 +/- 0.3% (v/v) (~98 g/L)
+  after 94 h, below the owner's chassis. Read together: the ceiling the programme is calibrated against
+  is roughly 150-158 g/L at 0.45-0.49 g/g (88-96% of the 0.511 g/g glucose theoretical) and 0.9-5.6
+  g/L/h depending entirely on whether productivity is computed to completion or across a recycle cycle.
+  All of these are batch or fed-batch with uncontrolled growth; none is the near-zero-growth chemostat
+  regime where yield approaches theoretical, and none should be compared with the ~78% anaerobic
+  chemostat wild-type figure.
+
+pool_assessment: >-
+  Yes, 20 is fillable, but not with 20 papers of the quality of the three above, and the budget should
+  not be spent on titre alone. A scripted completeness screen across all 209 stored texts — asking
+  whether each of titre, initial gravity, a theoretical-yield denominator, a g/L/h productivity, a
+  temperature, a fermentation duration, a nitrogen term and a process mode appears anywhere in the
+  document — put 11 documents at 8/8 and 39 at 7/8 or better. That is comfortably more than 20. The
+  screen is generous, though: it detects a field anywhere in the text, including in an introduction or
+  a reference, not attached to the measurement being reported, and two of the three shortlisted papers
+  score only 6-7 on it while actually carrying complete records. So the honest reading is that roughly
+  25-40 candidates carry most of the fields, and about 15-25 will survive a curator confirming that
+  the fields belong to the same measurement. Three cautions about what filling the remaining slots
+  would pull in. First, the pool skews lignocellulosic and xylose-fermenting rather than industrial
+  first-generation: of the 39 that score 7/8 or better, a large share are xylose, cellulosic-hydrolysate
+  or non-Saccharomyces papers, and at least twelve documents in the pool apply the 0.51 g/g figure to
+  xylose as the theoretical maximum. That value is right for xylose as it happens (3 xylose -> 5 ethanol
+  gives the same 0.51 g/g), but several of these papers apply a single 0.51 denominator to mixed
+  glucose-xylose hydrolysates and to SSF where the available sugar is itself an estimate, so the
+  denominators are not comparable across the set and each needs checking individually before any yield
+  fraction is admitted. Second, the unit hygiene in this literature is poor: % v/v and % w/v are used
+  interchangeably in abstracts of papers whose bodies use the other, and two of the three shortlisted
+  candidates contain exactly that error, so extraction should key on the body tables and not the
+  abstracts. Third, and most limiting for the slot's stated purpose, very few of these papers report
+  yield as a fraction of theoretical AND a volumetric productivity AND a titre for the same run; the
+  common failure is a paper with two of the three, and the commonest missing one is the yield fraction.
+  If the owner wants 20 records rather than 20 papers, the budget is easily filled; if the owner wants
+  20 papers each carrying a complete, internally consistent process record, the realistic number from
+  this pool is closer to 12-15, and reporting that shortfall is itself the finding the slots document
+  asks for.
+
+pool_notes_not_shortlisted:
+  - corpus_file: "00609.txt"
+    doi: "10.1186/1754-6834-6-158"
+    note: "Highest yield fraction in the pool, and Ethanol Red by name, but the titre is below the owner's chassis."
+    evidence:
+      - quote: |-
+          The highest ethanol yield (94.9 ± 2.8% of the theoretical yield) and sugars intake of 96.5 ± 2.9% were obtained after the fermentation of wort with an extract content of 250 g/kg supplemented with diammonium hydrogen phosphate (0.3 g/L of wort) and inoculated with 2 g of Ethanol Red dry yeast per L of wort.
+      - quote: |-
+          After 94 h of fermentation, ethanol concentration in the wort reached 12.4 ± 0.3% (v/v).
+  - corpus_file: "00602.txt"
+    doi: "10.1186/1754-6834-5-61"
+    note: "The cleanest pure-VHG record in the pool (glucose charged at 201/252/298 g/L, batch, ORP-controlled), but the variable of interest is a redox-potential intervention."
+    evidence:
+      - quote: |-
+          As high as 131.0 ± 1.8 g/L ethanol was produced at 72 h when ORP was controlled at −150 mV for the VHG fermentation with medium containing 298 ± 3.8 g/L glucose,
+  - corpus_file: "00699.txt"
+    doi: "10.1186/s12934-024-02401-5"
+    note: "Molasses at 250 g/L total fermentable sugars in a 5 L fermenter; a plausible fourth candidate, just below the chassis titre."
+    evidence:
+      - quote: |-
+          Additionally, S. cerevisiae NGTM-F1 was used with 250 g/L (TFS) sugarcane molasses to synthesize ethanol in a 5-L fermenter, giving a yield of 111.65 g/L, the conversion of sugar to alcohol reached 95.53%.
+  - corpus_file: "00043.txt"
+    doi: "10.1007/s00253-025-13446-w"
+    note: "145 g/L from 400 g/L corn syrup by SSF, but the engineered septuple-knockout strain is not an industrial reference, and the stated 41.1% sugar-to-ethanol conversion is a g/g figure (0.411), i.e. ~80% of the 0.511 theoretical — not a percentage of theoretical, which is an easy misreading to make."
+    evidence:
+      - quote: |-
+          In addition, S. cerevisiae GFADENA produced 145 g/L of ethanol by simultaneous saccharification and fermentation (SSF) using 400 g/L of corn syrup with a sugar-ethanol conversion rate of 41.1%.

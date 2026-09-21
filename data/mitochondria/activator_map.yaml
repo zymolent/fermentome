@@ -4,7 +4,14 @@
 # MITOCHONDRIAL_PROGRAM.md §2.1 calls this "the binding constraint" and §3 budgets it as ~10 loci
 # of phase-1b curation. Its own table was marked ⚠ throughout — background knowledge, never
 # checked. This file is that table checked against the stored corpus, and it CORRECTS §2.1 in
-# three places.
+# three places and EXTENDS it in two.
+#
+# COVERAGE. All 8 protein-coding loci of the S. cerevisiae mitochondrial genome, every one with an
+# activator quoted from a paper held here. v1 covered 6: §2.1's table simply stopped at ATP6.
+# ATP8 and VAR1 were not an oversight in §2.1 so much as a snapshot of the field —
+# doi:10.1091/mbc.e16-11-0775 opens by saying so: "Translational activators have been identified
+# for every mitochondrial gene product except Atp8p and Var1p". That paper closed ATP8 (Aep3, 2017)
+# and doi:10.1093/nar/gkaa424 closed VAR1 (Sov1, 2020). Both were already in this corpus, unread.
 #
 # WHY IT DECIDES CONSTRUCT DESIGN. Yeast mitochondrial mRNAs are not translated generically: each
 # needs activators that recognise its own 5′ UTR. So a heterologous ORF has to sit behind an
@@ -16,7 +23,7 @@
 # NOT found in the stored full texts — which is a statement about this corpus, not about the
 # biology. CONVENTIONS.md: never write high confidence from memory.
 
-version: 1
+version: 2
 zone: R
 
 loci:
@@ -29,9 +36,14 @@ loci:
     evidence: >-
       "translation of COX1, COX2, COX3 and CYTB mRNAs requires specific nuclear-encoded proteins:
       Pet309/Mss51/Mam33 for COX1" — doi:10.1093/nar/gkx127. Pet309's action via the COX1 5′-UTR
-      is demonstrated directly in doi:10.4161/rna.29780: "Mitochondrial synthesis of Cox1 ... is
-      controlled by Mss51 and Pet309, two mRNA-specific translational activators that act via the
-      COX1 mRNA 5′-UTR", with RNA coimmunoprecipitation showing Pet309 binds COX1 mRNA in vivo.
+      is demonstrated directly in doi:10.4161/rna.29780: "Mitochondrial synthesis of Cox1, the
+      largest subunit of the cytochrome c oxidase complex, is controlled by Mss51 and Pet309, two
+      mRNA-specific translational activators that act via the COX1 mRNA 5′-UTR", with RNA
+      coimmunoprecipitation showing Pet309 binds COX1 mRNA in vivo.
+      (DESPLICED 2026-09-21: v1 of this file wrote the same quote with " ... " standing in for
+      "the largest subunit of the cytochrome c oxidase complex,". An elided quote cannot be
+      re-resolved at an offset, so it is not evidence — the same rule that rejected an agent's
+      spliced quote this session, applied to this file's own.)
       CORRECTS §2.1, which lists only Pet309 and Mss51: Mam33 is a third.
     confidence: medium
 
@@ -85,11 +97,83 @@ loci:
     displaced_if_used: ATP6
     respiration_retained_if_used: false
     evidence: >-
-      Carried over from MITOCHONDRIAL_PROGRAM.md §2.1 and NOT found in the 1,308 stored full
-      texts. That is a statement about this corpus, not about the biology: the mapping may well
-      be correct and simply is not in a paper held here. Treated as unverified until a source in
-      hand says otherwise.
-    confidence: unverified
+      "This is supported by the finding that mutations in the ATP6 mRNA activator Atp22p prevent
+      translation of Atp6p but not Atp8p" — doi:10.1091/mbc.e16-11-0775. UPGRADED from
+      unverified on 2026-09-21: the previous note said the Atp22 mapping was carried over from
+      MITOCHONDRIAL_PROGRAM.md §2.1 and not found in the corpus. It was in the corpus — in the
+      ATP8 paper, which is not where a search for ATP6 would look. The sentence does double duty:
+      it names Atp22 as the ATP6 activator AND establishes that ATP6 and ATP8 are separately
+      activated despite sharing a transcript, which is what licenses ATP8 its own row below.
+    confidence: medium
+
+  - locus: ATP8
+    encodes: "ATP synthase subunit 8 (AAP1)"
+    activators: [Aep3]
+    displaced_if_used: ATP8
+    respiration_retained_if_used: false
+    rescue_available: nuclear_allotopic_copy
+    evidence: >-
+      "Yeast Aep3p, previously reported to stabilize mitochondrial ATP8 mRNA, also activates its
+      translation." and "Temperature-sensitive aep3 mutants are specifically defective in
+      translating ATP8 at the restrictive temperature." — doi:10.1091/mbc.e16-11-0775, a paper
+      whose entire subject is this mapping. Its own summary of the evidence: "The results of the
+      two approaches provide strong evidence that Aep3p is required specifically for translation
+      of ATP8." Translation rather than stability is distinguished experimentally, and the
+      discriminating test is itself the precedent this atlas wants: section heading "Aep3p is
+      required for expression of ARG8m at the ATP8 locus of mtDNA".
+    confidence: medium
+
+  - locus: VAR1
+    encodes: "mitoribosomal small-subunit protein Var1 (uS3m) — the only non-OXPHOS protein in
+      yeast mtDNA, and a SOLUBLE matrix protein"
+    activators: [Sov1]
+    displaced_if_used: VAR1
+    respiration_retained_if_used: false
+    rescue_available: nuclear_allotopic_copy
+    evidence: >-
+      "Here, we demonstrate that the protein Sov1 is an in bona fide VAR1 mRNA translational
+      activator and additionally interacts with newly synthesized Var1 polypeptide." —
+      doi:10.1093/nar/gkaa424, whose title is "The translational activator Sov1 coordinates
+      mitochondrial gene expression with mitoribosome biogenesis". The name records the function:
+      "The encoded polypeptide was renamed Sov1 for Synthesis of Var1 and proposed to promote
+      VAR1 mRNA translation". Sov1 was found in the first place by an ARG8ᵐ reporter under this
+      very leader — "to encode for a mitochondrial protein required for the expression of the
+      mitochondrial reporter gene ARG8m placed under the control of VAR1 5′-UTR" — so the VAR1
+      leader is a demonstrated driver of a heterologous soluble ORF, not an inference.
+    confidence: medium
+
+  # Not a gene. The eighth-and-a-half row, and the one that changes the design: an ORF can go into
+  # mtDNA WITHOUT taking a locus from anything.
+  - locus: intergenic_upstream_COX2
+    encodes: "nothing — a silent region, carried by the Fox lab's pPT24 plasmid"
+    activators: [Pet111]
+    utr_source: COX2
+    displaced_if_used: null
+    respiration_retained_if_used: true
+    evidence: >-
+      "This plasmid (pPT24) carries the sequence upstream of the COX2 locus, followed by the COX2
+      original sequence. A unique EcoRI site was engineered into the silent region upstream of the
+      COX2 locus, into which the reporter gene can be integrated." —
+      doi:10.1016/j.xpro.2022.101359, which also states the principle plainly: "Later, the Tom Fox
+      group developed a plasmid, pPT24, which allowed to express a recoded open reading frame in
+      mitochondria as additional gene", "in an otherwise silent region of the mtDNA". Independently
+      built and respiration-tested in doi:10.15698/mic2018.03.621: "To avoid the respiratory
+      deficiency associated with inactivation of mitochondrial genes, we engineered a new
+      mitochondrial genome that coded for sfGFP as an additional ninth open reading frame", after
+      which "expression of sfGFPm does not alter the assembly of respiratory complexes or the
+      general respiratory competence of the cells".
+      CORRECTS MITOCHONDRIAL_PROGRAM.md §2.1, which states that "inserting a gene costs you the
+      gene whose UTR you borrowed, unless the displaced gene is re-provided". True of the ARG8ᵐ
+      replacement route; NOT true here. The insert borrows COX2's leader and Pet111 without
+      touching the authentic COX2, which sits downstream on the same plasmid — and the authentic
+      COX2 doubles as the selection, because recombination into a cox2-62 recipient restores
+      respiration: "After mating and homologous recombination in mitochondria, the mtDNA regains
+      the functional COX2 sequence and the resulting strain is able to respire as scored by growth
+      on plates containing glycerol".
+      CAVEAT worth carrying: this leader is an OXPHOS leader, so by doi:10.1093/nar/gkac1229 it
+      directs a soluble product toward the inner membrane. Free of displacement cost, not free of
+      the targeting cost — see heterologous_orf_precedents.yaml, `leader_choice_matters`.
+    confidence: medium
 
 # WHAT THIS MAP DOES NOT YET ANSWER, and both are MITOCHONDRIAL_PROGRAM.md §5 questions:
 #
@@ -98,5 +182,16 @@ loci:
 #     production strain unless a respiration-deficient strain demonstrates a compelling and
 #     scalable process advantage". So every one of these is a conditional burden, not a free
 #     choice — which is exactly what metabolic/chassis.py now gates strategy E on.
-#   * Whether a soluble heterologous enzyme has ever been made from yeast mtDNA. §2.3 expects the
-#     answer to be thin, and "the size of the gap is the size of the risk". Not yet searched.
+#   * Whether a soluble heterologous enzyme has ever been made from yeast mtDNA. ANSWERED
+#     2026-09-21 — see data/mitochondria/heterologous_orf_precedents.yaml. Short version: yes,
+#     nanoluciferase, assayed catalytically, with respiration intact. §2.3 expected a thin answer
+#     and got a thicker one; the residual risk moved from "can the matrix fold a soluble
+#     heterologous protein" to "can it load a cofactor into one and oligomerise it", which no
+#     paper in this corpus addresses.
+#
+# AND ONE IT NOW ANSWERS DIFFERENTLY. Every locus above still costs respiration if used — but
+# using a locus is no longer the only option, so that is a cost you can decline. The
+# `intergenic_upstream_COX2` row is the cheap default, and taking a real locus is now a choice
+# that has to earn itself (VAR1's matrix-directed ribosomes being the one argument on the table
+# for doing so). metabolic/chassis.py gates strategy E on respiration; that gate should be
+# re-read against this row, because it was written when displacement looked unavoidable.

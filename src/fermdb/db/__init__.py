@@ -85,7 +85,7 @@ from typing import Final
 #:    `fermdb db migrate` applies it after taking a timestamped backup. Before v6 the only route
 #:    past a bump was to delete and rebuild, which stopped being reasonable once the same file
 #:    held 5,164 publications and 55 pending curation tasks.
-SCHEMA_VERSION: Final[int] = 8
+SCHEMA_VERSION: Final[int] = 9
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

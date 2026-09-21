@@ -202,6 +202,175 @@ def test_mtdna_routes_are_present_but_rank_below_the_routine_ones(routes: list) 
         assert latest < earliest_mtdna, f"{routine} must outrank every mtDNA route"
 
 
+# ------------------------------------------------------- the objective the ranking answers to
+
+
+def test_the_default_objective_reproduces_the_historical_order_exactly(routes: list) -> None:
+    """`objective` is additive. Adding it must not have silently re-ranked anything.
+
+    This is the guard on the whole change: `programme_fit` exists so that a future decision CAN
+    move strategy C above B, and until that decision is taken the ordering must be identical to
+    what it was before the parameter existed.
+    """
+    assert [r.id for r in rank(routes)] == [r.id for r in rank(routes, objective="easiest")]
+
+
+def test_programme_objective_changes_nothing_while_fit_is_unrecorded(routes: list) -> None:
+    """Seeded `None` everywhere, so the two objectives agree. That is intended, not a stub.
+
+    The mechanism ships inert: the owner supplies the values, because they encode design intent
+    and MITOCHONDRIAL_PROGRAM.md §4 is explicit that the atlas costs a technique rather than
+    deciding what the programme wants.
+    """
+    assert [r.id for r in rank(routes)] == [r.id for r in rank(routes, objective="programme")]
+
+
+def test_a_recorded_programme_fit_can_outrank_feasibility(routes: list) -> None:
+    """The finding this parameter was built for: confirming rho+ cleared strategy C's chassis gate
+    and the ranking did not move, because B beats C at the *third* key — feasibility, 0.80 against
+    0.60 — while the chassis gate is the fourth.
+
+    Feasibility is not wrong; it measures technique difficulty correctly. It simply cannot express
+    that this programme is trying to build a matrix pathway. With fit recorded, it can.
+    """
+    fit = {"C_mitochondrial_ehrlich": 1.0, "B_cytosolic_relocalization": 0.2}
+    easiest = rank(routes)
+    programme = rank(routes, objective="programme", programme_fit=fit)
+
+    def first(ordered: list, strategy: str) -> int:
+        return next(i for i, r in enumerate(ordered) if r.strategy == strategy)
+
+    assert first(easiest, "B_cytosolic_relocalization") < first(easiest, "C_mitochondrial_ehrlich")
+    assert first(programme, "C_mitochondrial_ehrlich") < first(
+        programme, "B_cytosolic_relocalization"
+    )
+
+
+def test_programme_fit_never_overrides_a_transport_gap(routes: list) -> None:
+    """Fit is consulted third, after gaps and cofactor risks — never first.
+
+    A missing carrier is a hard engineering problem and stays ahead of what the programme would
+    prefer, or the ranker would let intent overrule biology.
+    """
+    fit = dict.fromkeys(("A_native_split",), 1.0)
+    ordered = rank(routes, objective="programme", programme_fit=fit)
+    assert not ordered[0].transport_gaps
+    assert ordered[0].strategy != "A_native_split"
+
+
+def test_explain_names_the_objective_it_answered(routes: list) -> None:
+    """A reader who does not know which question was asked cannot read the answer, and `easiest`
+    being the default makes that misreading easy."""
+    best = rank(routes)[0]
+    assert "objective=easiest" in explain(best)
+    assert "objective=programme" in explain(best, objective="programme")
+    assert "programme_fit=unrecorded" in explain(best)
+
+
+def test_an_unknown_objective_is_refused_rather_than_guessed(routes: list) -> None:
+    with pytest.raises(ValueError, match="objective must be one of"):
+        rank(routes, objective="best")
+
+
+# ------------------------------------------- per-compartment redox demand and the mtDNA plan
+
+
+def test_the_published_yeast_route_wants_two_nadph_in_the_matrix(routes: list) -> None:
+    """The error the 2026-09-21 ⚠ audit found in ISOBUTANOL_PROGRAM.md's prose, caught in data.
+
+    The prose says the ADH step "typically takes NADH". The published yeast route is KivD +
+    **Adh6**, and Adh6 is NADPH-dependent — so run in the matrix it wants 2 NADPH there, not one
+    NADPH and one NADH. The parts catalog carried the right cofactor all along; nothing added
+    them up, so no route card could show it.
+    """
+    from fermdb.metabolic.routes import cofactor_demand
+
+    route = next(
+        r
+        for r in routes
+        if r.strategy == "C_mitochondrial_ehrlich"
+        and any(s.part.id == "adh6_native" for s in r.steps)
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+    )
+    demand = cofactor_demand(route.steps)
+    assert demand[("mitochondrial_matrix", "NADPH")] == 2
+    assert ("mitochondrial_matrix", "NADH") not in demand
+
+
+def test_an_nadh_preferring_kari_halves_the_matrix_nadph_draw(routes: list) -> None:
+    """Why the cofactor-switched part is in the catalog at all: it moves one of the two demands
+    off the pool DUET's architecture treats as thin."""
+    from fermdb.metabolic.routes import cofactor_demand
+
+    def demand_for(kari: str) -> dict:
+        route = next(
+            r
+            for r in routes
+            if r.strategy == "C_mitochondrial_ehrlich"
+            and any(s.part.id == kari for s in r.steps)
+            and any(s.part.id == "adh6_native" for s in r.steps)
+        )
+        return cofactor_demand(route.steps)
+
+    assert demand_for("ilv5_native")[("mitochondrial_matrix", "NADPH")] == 2
+    switched = demand_for("ilvc6e6_ecoli")
+    assert switched[("mitochondrial_matrix", "NADPH")] == 1
+    assert switched[("mitochondrial_matrix", "NADH")] == 1
+
+
+def test_a_non_redox_step_contributes_no_demand(routes: list) -> None:
+    """AHAS and DHAD are 'NA'. Counting them would inflate every route equally, which is worse
+    than useless — it would look like a measurement."""
+    from fermdb.metabolic.routes import cofactor_demand
+
+    route = routes[0]
+    assert sum(cofactor_demand(route.steps).values()) <= len(route.steps) - 2
+
+
+def test_strategy_e_names_its_locus_leader_and_displacement(routes: list) -> None:
+    """PLAN.md phase 3: strategy E routes must each name "its locus, leader, displaced gene and
+    recoding requirement". Before `mtdna_locus` the ranker could name only the recoding."""
+    from fermdb.config import Settings
+    from fermdb.metabolic.mtdna_loci import load_activator_map
+    from fermdb.metabolic.routes import insertion_plan
+
+    loci = load_activator_map(Settings.load())
+    route = next(r for r in routes if r.strategy == "E_mtdna_encoded")
+    plan = insertion_plan(route.steps, loci)
+
+    assert plan, "a route carrying genes in mtDNA must produce an insertion plan"
+    body = " ".join(plan)
+    assert "locus" in body and "leader" in body
+    assert "displaces" in body
+    assert "table 3" in body
+
+
+def test_the_plan_prefers_the_site_that_displaces_nothing(routes: list) -> None:
+    """There is exactly one such site and it is the whole reason §2.1's 'inserting costs you the
+    gene whose UTR you borrowed' is not true in general."""
+    from fermdb.config import Settings
+    from fermdb.metabolic.mtdna_loci import load_activator_map
+    from fermdb.metabolic.routes import insertion_plan
+
+    loci = load_activator_map(Settings.load())
+    route = next(r for r in routes if r.strategy == "E_mtdna_encoded")
+    plan = insertion_plan(route.steps, loci)
+    assert any("displaces nothing" in line for line in plan)
+    assert any("respiration kept" in line for line in plan)
+    # and it must still say what the alternative costs, or the reader cannot weigh it
+    assert any("would instead displace" in line for line in plan)
+
+
+def test_a_route_with_nothing_in_mtdna_has_no_insertion_plan(routes: list) -> None:
+    from fermdb.config import Settings
+    from fermdb.metabolic.mtdna_loci import load_activator_map
+    from fermdb.metabolic.routes import insertion_plan
+
+    loci = load_activator_map(Settings.load())
+    route = next(r for r in routes if r.strategy == "B_cytosolic_relocalization")
+    assert insertion_plan(route.steps, loci) == ()
+
+
 # ------------------------------------------------------------------------------------ storage
 
 

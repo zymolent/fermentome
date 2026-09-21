@@ -1,0 +1,848 @@
+# Allotopic expression attempts — mtDNA genes moved to the nucleus, recoded, and re-imported.
+#
+# MITOCHONDRIAL_PROGRAM.md §3 budgets this at ~20 and gives the reason in six words: "The
+# mirror-image problem; informative about recoding and import". Strategy E puts a nuclear gene
+# into mtDNA. Allotopic expression is the same experiment run backwards, and it is the only body
+# of work that measures the two things strategy E needs and cannot measure directly — how well
+# recoding works, and what actually limits import of a protein the matrix normally makes itself.
+#
+# THE HEADLINE, and it is a result the programme can act on. The corpus does not merely mention
+# the hydrophobicity hypothesis; it states it explicitly in four independent papers, and the
+# attempts it records line up with it almost without exception. Sorted by how hydrophobic the
+# relocated product is, the outcomes are monotone:
+#
+#     Var1      0 TM, soluble matrix    → full rescue, no sequence change, hydrophilic MTS
+#     bI4       soluble RNA maturase    → full rescue, MTS + recoding sufficient
+#     Atp8      1 TM, 48 codons         → full rescue, MTS + recoding sufficient
+#     Cox2      2 TM                    → partial only, and ONLY with hydrophobicity-lowering
+#                                          substitutions in TMS1; still import-limited
+#     Atp9      2 TM but a proteolipid  → total failure of the yeast gene; partial rescue only by
+#                                          substituting a less hydrophobic fungal orthologue
+#     cytochrome b  8 TM                → "entirely unsuccessful", in any organism, ever
+#
+# WHAT THAT MEANS FOR DUET, which is why this table was commissioned. ISOBUTANOL_PROGRAM.md makes
+# `import_efficiency_reported` mandatory because it is the trigger for escalating from strategy C
+# (nuclear genes + MTS) to strategy E (genes in mtDNA). This table says that trigger is unlikely
+# to fire for DUET. Every documented import failure here is a failure to drag a transmembrane
+# helix through TIM23. DUET's KDC and ADH are soluble matrix enzymes with no TM helix at all —
+# the Var1 case, not the Cox2 case. Var1 relocated with nothing but a COX4 presequence and a
+# codon change, and COX4 is specifically the MTS that FAILS for hydrophobic cargo. The mirror
+# image of that is: for a soluble enzyme, import is not the expected bottleneck, and the
+# import-ceiling condition that §1 of MITOCHONDRIAL_PROGRAM.md sets as the precondition for
+# strategy E is therefore unlikely to be met by this pathway's enzymes.
+#
+# That is an argument against needing strategy E at all, and it is worth stating plainly because
+# it points the opposite way from the rest of the mitochondrial programme's momentum.
+#
+# THE NUMBERS. Nobody in this corpus reports an import efficiency as a fraction of synthesised
+# precursor — the field does not measure it that way. What it reports instead is mature protein
+# inside mitochondria as a percentage of wild type, which is import × processing × stability, and
+# is the nearest usable proxy. Those numbers are in `import_proxy_reported` on each record. The
+# single most useful one: the original allotopic Cox2-W56R construct reaches 6% (low copy) to 12%
+# (high copy) of wild-type Cox2p. That is the cost of pulling one transmembrane helix through
+# TIM23 — an order of magnitude — and it is the number strategy C would be measured against.
+#
+# EVERY QUOTE BELOW was extracted from the stored full text by offset, then re-resolved through
+# fermdb.llm.validate.verify_span against the text load_source_text returns (exact, no
+# normalisation): 78 quotes, 78 passes, 0 failures. `evidence` is a LIST of separate verbatim
+# quotes on purpose. No quote in this file splices two passages; where two passages are needed
+# they are two list items.
+#
+# CONVENTIONS.md: no `confidence` is written anywhere in this file. A human sets it.
+
+version: 1
+zone: R
+question: "What does the reverse experiment — mtDNA genes moved to the nucleus — say about recoding and about import?"
+answer_in_one_line: >-
+  Recoding is routine and never the limiting step. Import is the limiting step, and it is limited
+  by transmembrane hydrophobicity specifically. Soluble cargo (Var1, bI4) relocates cleanly;
+  every partial or failed case in the corpus is a membrane protein stuck in or before TIM23.
+
+corpus_searched:
+  stored_full_texts: 1310
+  readable: 1309
+  documents_bearing_on_allotopic_relocation: 11
+  note: >-
+    Searched for allotopic / relocat* to the nucleus / nuclear version of / recoded version of /
+    mesohydrophobic / hydrophobicity, in every stored full text. Eleven documents carry signal.
+    Two of the eleven are reviews rather than primary reports and are marked as such on every
+    record that leans on them. One further document, doi:10.26508/lsa.202301965, uses the word
+    "allotopic" for the OPPOSITE direction and is excluded — see `scope_exclusions`.
+    doi:10.2323/jgam.2022.05.001 remains the one unreadable text in the store (AES-encrypted PDF);
+    its metadata carries no mitochondrial-genetics signal.
+
+# ============================================================ the hypothesis, stated by the field
+
+hydrophobicity_hypothesis:
+  status: stated_explicitly_in_four_papers_and_supported_by_the_attempts_recorded_here
+  the_claim: >-
+    That mtDNA retains the genes it retains because their products are too hydrophobic to be
+    imported from the cytosol, and therefore that relocation succeeds in inverse proportion to
+    the hydrophobicity of the product. Four papers in this corpus state it in so many words, and
+    two of them offer a quantitative form of it (mean hydrophobicity of a transmembrane helix;
+    "mesohydrophobicity" as a predictor of importability).
+  evidence:
+    - |-
+      Alternatively, genes may have been confined to mitochondria due to the difficulty of transporting their protein products into the organelle, an idea that stems from the enrichment of genes encoding hydrophobic proteins in organellar genomes .
+    - |-
+      The hydrophobic nature of the proteins encoded in this genome plays a central role in gene retention (; ; ).
+    - |-
+      The major impediment to allotopic expression is the highly hydrophobic nature of the mitochondrial-endoced polypeptides.
+    - |-
+      Several studies suggest that allotopic expression of most mitochondrial proteins is not feasible because of their high mesohydrophobicity, a parameter that can be used to predict the importability of hydrophobic peptides ().
+    - |-
+      One of the critical steps dictating the success of the allotopic expression approach is the protein import process into mitochondria. Hydrophobicity of the proteins has been considered to be the primary barrier.
+    - |-
+      It is important to note that the high hydrophobicity of the nascent polypeptides has been indicated to be one of the limiting constraints for successful mitochondrial import of allotopically expressed mitochondrial proteins. This can be overcome by reducing the hydrophobicity of the proteins which are to be allotopically expressed.
+  the_natural_experiment: >-
+    The strongest support is not from the engineering at all but from evolution: the few mtDNA
+    genes that went nuclear on their own did so with a hydrophobicity reduction attached.
+  evidence_natural:
+    - |-
+      Interestingly, in the few cases where these genes have transferred to the nucleus naturally, this was accompanied by a significant reduction in hydrophobicity.
+    - |-
+      Inner-membrane protein products of genes that naturally migrated to the nucleus tend to be less hydrophobic than their mitochondria-­encoded counterparts (; ; , ).
+  where_it_is_incomplete: >-
+    Two caveats a human reviewer should not let this table hide. (1) Hydrophobicity is necessary
+    but demonstrably not sufficient: Cox2-W56R is importable and still only partly functional,
+    and doi:10.1093/genetics/iyaf037 shows the residual limit sits in TMH2 and in assembly, not
+    in TMH1. (2) Hydrophobicity can be reduced too far — doi:10.1091/mbc.e17-09-0560 argues for a
+    window, not a gradient, because the helix must still be recognised as a helix by Oxa1.
+  evidence_caveats:
+    - |-
+      A delicate balance between a low hydrophobicity that allows the effective translocation of the first TMS through TIM23, and a high enough hydrophobicity to be recognized as a TMS by the membrane insertion machinery (Oxa1), and therefore to be introduced with the right topology into the inner mitochondrial membrane, is required.
+    - |-
+      Interestingly, we observed that several favourable mutations were concentrated in the second TMH, resulting in a significant decrease in hydrophobicity ( and ).
+
+# ================================================================== the relocation attempts
+
+relocation_attempts:
+
+  # ---------------------------------------------------------------- soluble cargo: it just works
+
+  - gene: VAR1
+    product: "Var1p (uS3m) — mitoribosomal small-subunit protein"
+    product_class: soluble matrix protein
+    transmembrane_segments: 0
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "COX4 presequence"
+    sequence_changes_required: none_reported
+    function_restored: full
+    readout: "complementation of a mitochondrial var1 mutant; respiratory growth; incorporation into the mtSSU"
+    verification_method: fractionation
+    import_proxy_reported: null
+    why_it_failed: not_applicable
+    publication: "doi:10.1093/nar/gkaa424, doi:10.1093/nar/gkx426"
+    evidence:
+      - |-
+        Additionally, the strain carries a mtDNA devoid of introns (I0) and the pRS316-VAR1u construct (), which allows for the allotopic expression of a fully functional Var1 protein fused to the Cox4 mitochondrial targeting sequence, hereinafter referred to as universal Var1 (Var1u).
+      - |-
+        the Δmss116/SUP intronless strain was transformed with a construct that successfully relocates a recoded version of the VAR1 gene to the nucleus as described previously ().
+      - |-
+        Similar to the other mtSSU proteins, Var1 accumulated in equal amounts in WT and sov1 null mutant mitochondria (Figure ), suggesting that Var1u is stable in the absence of Sov1. However, while in WT mitochondria all detected Var1 protein appeared to incorporate into the mtSSU, in the Δsov1/VAR1u strain, only a small portion of Var1u sedimented in the fractions corresponding to the mtSSU (Figure ), suggesting that Var1 protein assembly into the mitoribosome is impaired.
+      - |-
+        For example, the W56R mutant of the yeast cytochrome c oxidase could be allotopically expressed using an MTS derived from the S. cerevisiae—OXA1 gene or Neurospora crassa mitochondrial ATP synthase subunit 9 gene, both of which code for hydrophobic mitochondrial proteins, but not with an MTS derived from the COX4 gene, which codes for a hydrophilic protein, the yeast cytochrome c oxidase subunit 4.
+    why_it_matters: >-
+      THE record in this file for DUET's purposes. Var1 is the only soluble protein yeast mtDNA
+      encodes, and it relocates with nothing but a codon change and a presequence — and the
+      presequence is COX4's, which doi:10.1016/j.gendis.2019.08.001 records as the one that does
+      NOT work for hydrophobic cargo. Two independent labs use the relocated construct as a
+      routine reagent (doi:10.1093/nar/gkx426 uses it to uncouple an mss116 phenotype from loss of
+      Var1 translation), which is a stronger statement of reliability than any single rescue
+      experiment. Read with `activator_map.yaml` (locus VAR1, the only soluble mtDNA product) and
+      with `heterologous_orf_precedents.yaml` (`leader_choice_matters`, where Var1's mitoribosomes
+      are the matrix-directed ones): the same protein is the easy case in BOTH directions. A
+      soluble matrix protein moves out of mtDNA without adaptation, and a soluble matrix protein
+      is what the VAR1 leader is built to make. That symmetry is the file's main finding.
+    caveats: >-
+      Not free of cost, and two limits are recorded. Overexpressing the relocated gene raises
+      petite frequency, and a C-terminally HA-tagged version of the same construct is NOT
+      functional — the margin on a soluble matrix protein is real but not infinite, and a tag can
+      spend it.
+    evidence_caveats:
+      - |-
+        It has been previously reported that Var1u expression in a WT strain increases petite accumulation ().
+      - |-
+        However, the VAR1u-HA construct that was used for the study was not able to complement the respiratory deficient phenotype of a mitochondrial var1 mutant (), suggesting that the tagged Var1 protein is not functional and may be more prone to aggregation.
+
+  - gene: "bI4 (COB intron 4 ORF)"
+    product: "bI4 maturase — intron-encoded RNA maturase"
+    product_class: soluble (hydrophilic) protein
+    transmembrane_segments: 0
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "an MTS, source not specified in this corpus"
+    sequence_changes_required: none_reported
+    function_restored: full
+    readout: not_specified_in_this_corpus
+    verification_method: none_reported
+    import_proxy_reported: null
+    why_it_failed: not_applicable
+    publication: doi:10.1371/journal.pgen.1002876
+    source_type: "secondary — reported in the introduction of a primary paper, not demonstrated in it"
+    evidence:
+      - |-
+        This test has been carried out for five yeast proteins, two hydrophilic: bI4, an intron-encoded RNA maturase , and Var1p, a subunit of the mitochondrial ribosome , and three hydrophobic: the Atp8p subunit of mitochondrial ATP synthase with one transmembrane domain , the Cox2p subunit of respiratory complex IV (cytochrome c oxidase) which has two transmembrane segments , and the cytochrome b subunit of respiratory complex III, which is a highly hydrophobic protein with eight transmembrane segments .
+      - |-
+        In the cases of bI4, Var1p and Atp8p, adding a mitochondrial targeting sequence (MTS) and adjusting the genetic code were sufficient for functional allotopic expression of these proteins from nuclear DNA.
+    why_it_matters: >-
+      The second soluble case, and it matters only because it is a second one. Two soluble
+      products, two clean successes with nothing but MTS + recoding. The sentence quoted is also
+      the single most economical statement of this whole file's thesis: it sorts the five
+      pre-2012 yeast attempts into "two hydrophilic" and "three hydrophobic" before reporting a
+      single outcome, because in this field that sort predicts the outcome.
+
+  # ------------------------------------------------- one transmembrane helix: still works, cleanly
+
+  - gene: ATP8
+    product: "Atp8p (subunit 8 / Aap1) of ATP synthase"
+    product_class: inner-membrane protein
+    transmembrane_segments: 1
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    recoding_extent: "31 of 48 codons changed — one for the code, thirty for cytosolic codon bias"
+    targeting_sequence: "MTS from the Neurospora crassa ATP synthase subunit 9 precursor"
+    sequence_changes_required: none_reported
+    function_restored: full
+    readout: "restoration of respiratory growth on ethanol/glycerol; assembly into ATP synthase"
+    verification_method: activity_in_fraction
+    import_proxy_reported: null
+    why_it_failed: not_applicable
+    publication: "doi:10.1091/mbc.e16-11-0775, doi:10.1016/j.gendis.2019.08.001"
+    evidence:
+      - |-
+        As expected, absence of ATP8 in the arginine-independent clones precluded growth on respiratory carbon sources, which was rescued by nATP8ADH1, a nuclear version of ATP8 (; ) flanked by the ADH1 promoter and terminator in pMGL3 ().
+      - |-
+        The combination of allotopic ARG8m and nATP8ADH1 conferred both arginine prototrophy and respiratory competence on the arg8 null mutant ().
+      - |-
+        To ensure the mitochondrial import of allotopically expressed subunit 8 protein of the yeast mitochondrial ATP synthase, a sequence encoding an MTS derived from a precursor of subunit 9 of Neurospora crassa mitochondrial ATP synthase was fused to the N-terminal end of the subunit 8 gene.
+      - |-
+        In the nuclear version of the subunit 8 gene, as many as 31 out of 48 codons of the natural mitochondrial subunit 8 gene were changed.
+      - |-
+        Further experiments revealed that allotopic expression of the subunit 8 gene in yeast host cells lacking endogenous subunit 8 led to its successful assembly into functional ATP synthase complexes. This was demonstrated by the ability of the allotopically expressed subunit 8 protein to complement the ethanol-negative growth phenotype of the host cells.
+    why_it_matters: >-
+      The recoding datum, and it is larger than "adjust the stop codons". Thirty of the thirty-one
+      changed codons were for cytosolic codon BIAS, not for the code — one single codon actually
+      had to change to avoid mistranslation. The dominant cost of moving a gene between the two
+      translation systems is bias, not dictionary. Strategy E runs this in reverse and inherits
+      the same asymmetry: a table-3 recoding that only fixes the dictionary and ignores the
+      matrix's codon preferences is doing the small half of the job.
+      Note also the operational fact the 2017 paper turns on: nATP8's ability to rescue is
+      sensitive to promoter, terminator and copy number — the same construct rescues or fails to
+      rescue depending on whether it carries a proper 3' end. That is a nuclear-expression
+      artefact with no analogue inside mtDNA, and it is a reason allotopic numbers understate
+      what import can do.
+    evidence_expression_sensitivity:
+      - |-
+        In an attempt to search for additional factors that affect ATP8, we took advantage of the ability of allotopically expressed ATP8 (nATP8) to complement and restore respiratory growth of atp8 mutants (; ; ).
+      - |-
+        The genetic screen used in this study to isolate mutants in nuclear gene products required specifically for expression of mitochondrial ATP8 was based on the ability of nATP8 to complement atp8 mutants (; ).
+      - |-
+        In other studies, tandem duplication of MTS was found to improve the mitochondrial import efficiency of allotopically expressed subunit 8 of yeast mitochondrial ATP synthase.
+      - |-
+        It has been previously shown that complementation of mutants in the mitochondrial translation factors Pet111 and Aep3 by allotopic expression of COX2 and ATP8 respectively depends on a high level of expression achieved by the use of multicopy vectors ().
+
+  # ------------------------------ two transmembrane helices: partial, and the limit is measurable
+
+  - gene: COX2
+    construct: cCox2W56R
+    product: "Cox2p (cytochrome c oxidase subunit 2)"
+    product_class: inner-membrane protein, Nout-Cout
+    transmembrane_segments: 2
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "Oxa1 MTS (residues 1-47) followed by the natural 15-residue Cox2 leader peptide"
+    sequence_changes_required: "W56R in TMS1 — found by massive random mutagenesis, not by design"
+    function_restored: partial
+    readout: "respiratory growth on ethanol/glycerol, slower than wild type; CcO in-gel activity"
+    verification_method: fractionation
+    import_proxy_reported: "CcO ~40% below wild type; the majority of cellular Cox2 signal is unprocessed precursor"
+    why_it_failed: >-
+      It did not fail, it plateaued — and the paper pins the plateau on import rather than on the
+      mutation. The discriminating experiment is the one worth copying: they put W56R into the
+      MITOCHONDRIAL gene and it behaved as a silent mutation, which rules out the substitution
+      itself as the cause and leaves translocation of TMS1 through TIM23 as the limiting step.
+      The precursor is at the mitochondria but not inside them.
+    publication: doi:10.1091/mbc.e17-09-0560
+    evidence:
+      - |-
+        Several unsuccessful efforts have been made to restore respiratory growth of Δcox2 mutants by expressing a recoded mitochondrial COX2 gene from the nucleus after adding a sequence encoding a mitochondrial targeting signal (MTS) to the construct.
+      - |-
+        A strategy involving massive random mutagenesis led to the identification of the point mutation W56R, which allows a cytosol-synthesized yeast Cox2 precursor (cCox2W56R) to complement a Δcox2 strain.
+      - |-
+        The Δcox2 mutant was transformed with a plasmid encoding Cox2 with the W56R mutation preceded by the MTS of Oxa1 (amino acids 1–47) and the natural 15–amino acid leader peptide of Cox2 (cCox2W56R) ().
+      - |-
+        Moreover, the strain carrying the allotopically expressed cCox2W56R subunit contains ∼40% less CcO than the wild-type strain, as judged by in-gel activity of the enzyme and spectroscopic quantitation of cytochromes ().
+      - |-
+        The point mutation W56R, located in the first transmembrane segment of the Cox2 protein, diminishes the mean hydrophobicity of the alpha helix, thus allowing the import of the precursor into mitochondria.
+      - |-
+        In contrast, relatively low levels of the mature cCox2W56R subunit were observed in the Δcox2+cCox2W56R transformant, and the majority of the Cox2 signal is observed as a high–molecular weight band, which must correspond to the precursor form of the protein, that is, the form still carrying the MTS (A).
+      - |-
+        Surprisingly, that was also the case for the majority of the allotopically expressed cCox2W56R precursor, indicating that although this unprocessed form is mainly localized to mitochondria, it is not available for processing by the matrix proteases.
+      - |-
+        We thus suggest that the allotopic expression of cCox2W56R is limited not because the W56R mutation affects the assembly of cCox2W56R into CcO, nor because the substitution has a detrimental effect on CcO activity or stability, but because the translocation of the first TMS (most probably through TIM23) is a process that occurs inefficiently and at a low rate.
+    why_it_matters: >-
+      This is the cleanest "why it failed" in the corpus, and the reason is mechanical and
+      specific: a helix that is hydrophobic enough to be a helix is too hydrophobic to be pulled
+      through TIM23. There is no version of that mechanism that applies to a soluble enzyme. The
+      same paper also runs the competition experiment nobody else ran — co-expressing the
+      mitochondrial and the allotopic Cox2 in one cell — and the mitochondrial route wins the
+      assembly competition outright. For strategy C vs E that is a genuine point in E's favour,
+      and it is the only one in this file: what mitochondria make internally, they use
+      preferentially.
+    evidence_competition:
+      - |-
+        In this work, when both Cox2 protein versions were coexpressed, the final steady state levels of Cox2 in the CcO populations were mostly of mitochondrial origin and only a fraction of cytosolic origin.
+
+  - gene: COX2
+    construct: "nCOX2W56R, chromosomally integrated"
+    product: "Cox2p (cytochrome c oxidase subunit 2)"
+    product_class: inner-membrane protein, Nout-Cout
+    transmembrane_segments: 2
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "MTS followed by the natural 15-residue Cox2 leader peptide"
+    sequence_changes_required: "one of W56R, W56K, W56Q, or the double V49Q/L51G — all in TMS1"
+    function_restored: partial
+    readout: "respiratory growth on non-fermentable carbon sources; mature Cox2W56R in mitochondria"
+    verification_method: fractionation
+    import_proxy_reported: "lower CcO steady-state levels and reduced oxygen uptake vs wild type; not quantified in this paper"
+    why_it_failed: "same plateau, same attribution — a limiting step in TIM23 translocation and sorting"
+    publication: doi:10.1093/g3journal/jkae295
+    evidence:
+      - |-
+        To be internalized into mitochondria, the allotopically produced Cox2 precursor must exhibit some characteristics: a MTS followed by the natural leader peptide of the yeast mitochondrial Cox2 precursor, and the presence of amino acid substitutions in TMS1, which can be either W56R, W56K, W56Q, or the double V49Q/L51G mutation ().
+      - |-
+        Although allotopic production of a yeast Cox2 subunit supports respiratory growth, strains expressing COX2W56R exhibit lower steady-state levels of CcO and diminished rates of oxygen uptake when compared with wild-type yeast ().
+      - |-
+        Thus, the inability of allotopically produced Cox2W56R protein to restore full CcO function was attributed to a limiting step during the translocation and sorting of the Cox2W56R precursor by TIM23 ().
+      - |-
+        We identified 3 genes whose overexpression facilitates the internalization of the Cox2W56R subunit into mitochondria, namely: TYE7, RAS2, and COX12.
+      - |-
+        Many reports of allotopic expression of several mitochondrial genes from diverse biological systems have been put forward, but few of these claims have been confirmed biochemically ().
+    why_it_matters: >-
+      Two things. First, the substitution set: FOUR independent ways to lower TMS1 hydrophobicity
+      all work, which is much stronger evidence for the hydrophobicity mechanism than one lucky
+      mutant would be. Second, an unbiased multicopy-suppressor screen over the whole genome
+      found exactly three enhancers, and the hits are a transcription factor, a GTPase and a
+      non-core CcO subunit — nothing in the import machinery itself. Overexpressing your way past
+      an import ceiling is, on this evidence, not very effective.
+      Carry forward the warning in the last quote too: this group, who work on allotopic Cox2,
+      say most published allotopic successes have never been confirmed biochemically. Treat
+      "rescue reported" as weaker than "protein shown assembled" throughout this file.
+
+  - gene: COX2
+    construct: "COX2-W56R plus TMH2 substitutions (L93S, I95K, I102K; IMS I190V), promoter/MTS/copy-number optimised"
+    product: "Cox2p (cytochrome c oxidase subunit 2)"
+    product_class: inner-membrane protein, Nout-Cout
+    transmembrane_segments: 2
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "OXA1 MTS (one or two tandem copies); a screen of PSD1, MDL2, COX6, COX11, QCR2 MTSs found nothing better"
+    sequence_changes_required: "W56R in TMH1 plus a new set in TMH2, all lowering hydrophobicity"
+    function_restored: partial_near_full
+    readout: "respiratory growth (delayed, recovered by 33 h); OCR and ATP synthesis restored in isolated mitochondria; CN-PAGE supercomplexes intact"
+    verification_method: fractionation
+    import_proxy_reported: "mature Cox2p 6% of WT (low copy) / 12% (high copy) for the original construct; 85% of WT for the optimised one; complex IV specific activity 70% of WT"
+    why_it_failed: >-
+      Partially solved rather than failed, and the diagnosis is the useful part: the residual
+      block is the SECOND transmembrane helix, not the first. Lowering TMH2 hydrophobicity is
+      proposed to push the precursor onto the conservative-sorting route instead of stop-transfer,
+      so the protein reaches the matrix and is then inserted by Oxa1 the way a mitochondrially
+      made Cox2 would be. Expression-level tuning — promoter, copy number, MTS identity — gave
+      only moderate gains; protein sequence was what mattered.
+    publication: doi:10.1093/genetics/iyaf037
+    evidence:
+      - |-
+        Western blot analysis confirmed the absence of Cox2p in our Δcox2::ARG8m deletion strain, and we saw a twice higher amount of mature Cox2p in high-copy conditions compared with low-copy conditions (12% vs 6%, ).
+      - |-
+        However, our results demonstrated that Cox2-W56R protein is still poorly adapted to allotopic expression as: (1) only low levels of mature Cox2-W56R allotopic protein are detected and (2) a large fraction of the unprocessed form is accumulated and might impose a stress on cells.
+      - |-
+        When we used pADH1 and pJEN1, the OCR increased by 40% and the abundance of the mature Cox2-W56Rp was markedly increased by around 4-fold in comparison to the condition using pACT1.
+      - |-
+        The last step of this optimization focused on testing different MTSs, but none of the candidate MTSs yielded a better phenotype than the OXA1 MTS.
+      - |-
+        Interestingly, we observed that several favourable mutations were concentrated in the second TMH, resulting in a significant decrease in hydrophobicity ( and ).
+      - |-
+        We observed that fine-tuning of these expression parameters afforded only a moderate effect on COX2-W56R allotopic expression. Instead, engineering the protein sequence improved the level of mature Cox2p and cytochrome c oxidase accumulation (up to 70% of the WT level, , ) and decreased the cytoplasmic accumulation of non-matured form ().
+      - |-
+        When we measured the specific activity of the Complex IV (), we noticed that it was restored to 70% of the WT level and >2-fold and 3-fold higher than in conditions expressing the original construct on a high- and low-copy vector, respectively.
+      - |-
+        Interestingly, when we measured the Cox2p intramitochondrial level, it was restored to a near-WT level (85% of the WT level, ) while the Cox1p abundance was about 70% of the WT level.
+    why_it_matters: >-
+      The only real import numbers in the corpus, and they are the ones ISOBUTANOL_PROGRAM.md
+      wants. 6-12% of wild-type mature protein is what one transmembrane helix costs at the TIM23
+      step; 85% is what it costs after the helices have been engineered. Two consequences.
+      (a) If strategy C were ever import-limited for a MEMBRANE cargo, this is the size of the
+      ceiling — roughly tenfold — and it is the number to compare a measured strategy-C
+      localization against before escalating to E.
+      (b) The lever that worked was protein engineering, not expression engineering. Promoter and
+      copy number bought 40% more OCR; changing two residues bought seven-fold more mature
+      protein. If a DUET strategy-C construct ever does come back import-limited, this says to
+      screen enzyme variants, not promoters — which is the same conclusion
+      `heterologous_orf_precedents.yaml` reached from the opposite direction with superfolder GFP.
+
+  # ---------------------------------------------------------------------- the outright failures
+
+  - gene: ATP9
+    construct: yAtp9-Nuc
+    product: "Atp9p (subunit 9/c, the proteolipid of the ATP synthase c-ring)"
+    product_class: "inner-membrane proteolipid — extractable into organic solvents"
+    transmembrane_segments: 2
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "MTS of the Podospora anserina nuclear PaAtp9-7 subunit 9 precursor"
+    sequence_changes_required: "none attempted in this construct — that is the point of it"
+    function_restored: none
+    readout: "no growth on respiratory substrates after >20 days"
+    verification_method: fractionation
+    import_proxy_reported: "only the unprocessed precursor detected, in very small amounts, exclusively in mitochondria"
+    why_it_failed: >-
+      Targeted correctly, imported incorrectly, and then destroyed. The precursor reaches
+      mitochondria but cannot cross the inner membrane; it sits in the intermembrane space and is
+      degraded by the i-AAA protease (Yme1). The proof is a deletion: in a yme1 null the
+      unprocessed protein accumulates to much higher levels while the mature form stays absent,
+      which separates "not imported" from "not made". Note this contradicts an earlier in vitro
+      result showing yeast Atp9p fused to an MTS could be imported and processed by isolated
+      mitochondria — in vitro import does not predict in vivo function.
+    publication: doi:10.1371/journal.pgen.1002876
+    evidence:
+      - |-
+        Nuclear Versions of the Yeast Mitochondrial ATP9 Gene Fail to Rescue Δatp9 Yeast
+      - |-
+        In order to express the yeast ATP9 gene from nuclear DNA, we synthesized a version codon-optimized for nuclear expression in yeast and fused to a mitochondrial targeting sequence (MTS) from the subunit 9 precursor encoded by the nuclear gene PaAtp9-7 in P. anserina (named yAtp9-Nuc, and ).
+      - |-
+        Nonetheless, upon transformation with yAtp9-Nuc, Δatp9 yeast did not grow on respiratory substrates even after more than 20 days (). Using antibodies against yeast Atp9p, only a protein with the size of the unprocessed yAtp9-Nuc was detected in very small amounts and exclusively in mitochondria (). This indicates that yAtp9-Nuc is targeted to mitochondria, but cannot cross the mitochondrial inner membrane.
+      - |-
+        Using antibodies against yeast Atp9p, only a protein with the size of the unprocessed yAtp9-Nuc was detected in very small amounts and exclusively in mitochondria ().
+      - |-
+        We confirmed the i-AAA-mediated degradation of yAtp9-Nuc by expressing the latter protein in a Δyme1 strain. In this strain, the unprocessed protein was far more abundant, while the mature form remained almost absent. These observations verify the defective in vivo transport of yAtp9-Nuc across the inner membrane as well as its rapid degradation in the intermembrane space ().
+    why_it_matters: >-
+      The mechanism of failure is IMS proteolysis of a protein that stalled at the inner membrane.
+      That failure mode requires a transmembrane segment to stall on. It is also the sharpest
+      warning in this file about evidence standards: an MTS that demonstrably works (the same MTS
+      fully rescues a Δatp8 strain) plus correct mitochondrial localisation plus a detectable band
+      still add up to zero function. "Detected the protein" and "restored respiration" are not
+      the same claim, and here they are separated by everything.
+
+  - gene: ATP9
+    construct: "PaAtp9-5 and PaAtp9-7 — naturally nuclear orthologues from Podospora anserina"
+    product: "subunit 9 of ATP synthase, P. anserina versions (70% identity to yeast Atp9p)"
+    product_class: inner-membrane proteolipid
+    transmembrane_segments: 2
+    host: S. cerevisiae
+    recoded_to_table_1: "not applicable — these genes are already nuclear; codon-optimised for yeast"
+    targeting_sequence: "the orthologue's own native MTS"
+    sequence_changes_required: "the whole protein was substituted — this is orthologue swapping, not point mutation"
+    function_restored: partial
+    readout: "respiratory growth restored but below wild type; oxygen consumption, ATP synthesis, BN-PAGE"
+    verification_method: activity_in_fraction
+    import_proxy_reported: "oxygen consumption 80% (PaAtp9-5) and 40% (PaAtp9-7) of WT; ATP synthesis 50% and 25%; assembled ATP synthase 30-40%"
+    why_it_failed: >-
+      Partial, and the residue is assembly rather than import: catalytic efficiency per electron
+      was wild-type-like, so what got in worked, but not enough got in and assembled. The paper's
+      own explanation is that the native assembly factors expect subunit 9 to arrive from inside,
+      and a protein "coming from an unexpected direction" is more exposed to proteases before it
+      is incorporated. There is a second, cellular cost: the strains grow as aberrant pseudohyphae
+      and upregulate the heat-shock chaperone SSA3, i.e. the cytosol registers the new hydrophobic
+      protein as a folding problem.
+    publication: doi:10.1371/journal.pgen.1002876
+    evidence:
+      - |-
+        Upon transformation with each of these plasmids (pAM17 (PaAtp9-7, CEN), pAM20 (PaAtp9-7, 2 µ), pAM16 (PaAtp9-5, CEN) and pAM19 (PaAtp9-5, 2 µ)), the Δatp9 strain regained respiratory capacity, although not to the extent of the WT (). The PaAtp9-5 gene enabled better growth than PaAtp9-7, and for both genes, the multicopy plasmid was more effective than the centromeric one.
+      - |-
+        The oxygen consumption rates in AMY10 and AMY11 mitochondria (at state 3 with NADH as an electron donor) were respectively estimated at 80% and 40% of the WT rate, and the rates of ATP synthesis at 50% and 25%.
+      - |-
+        Remarkably, despite only 70% sequence identity between these proteins and yeast Atp9p, the production of functional ATP synthase was significantly restored (30–40%) in Δatp9 yeast and the ‘hybrid’ enzymes displayed high catalytic efficiency.
+      - |-
+        For example, the modified yeast strains displayed aberrant, pseudohyphal cell morphology when grown in glycerol and ethanol medium (shown for AMY10, ).
+      - |-
+        We constructed HA-tagged version of these proteins, but they failed to complement Δatp9 yeast.
+    why_it_matters: >-
+      Two transferable lessons. First, the route that worked was not "fix the yeast gene" but
+      "borrow a version of the protein that evolution already adapted to the cytosolic route" —
+      a strategy with an obvious mirror image for DUET, which should prefer enzyme orthologues
+      from organisms whose homologue already lives where you want yours to live. Second, an
+      HA tag on either P. anserina protein abolished complementation, which is the second
+      independent tag-kills-function observation in this file (see VAR1u-HA). Any DUET construct
+      that carries a tag for detection is not the construct whose function was measured.
+
+  - gene: ATP9
+    construct: "Atp9-Hyb — P. anserina MTS and TMH1 fused to the yeast loop and TMH2"
+    product: "chimeric subunit 9"
+    product_class: inner-membrane proteolipid
+    transmembrane_segments: 2
+    host: S. cerevisiae
+    recoded_to_table_1: true
+    targeting_sequence: "PaAtp9-7 MTS"
+    sequence_changes_required: "TMH1 replaced wholesale with a less hydrophobic one"
+    function_restored: trace
+    readout: "extremely slow growth on glycerol; processed (mature) hybrid protein detectable in mitochondria"
+    verification_method: fractionation
+    import_proxy_reported: "qualitative — processed protein present where the all-yeast construct gave only traces of unprocessed precursor"
+    why_it_failed: >-
+      It did not fully succeed, and it was not meant to: this is the controlled test of the
+      hypothesis, not a therapy. Swapping ONE transmembrane helix for a less hydrophobic one
+      converted an undetectable, unprocessed, IMS-degraded protein into a processed matrix-side
+      one. Growth was still nearly nil, so hydrophobicity of TMH1 is the import barrier but not
+      the whole barrier.
+    publication: doi:10.1371/journal.pgen.1002876
+    evidence:
+      - |-
+        Although Δatp9 yeast expressing Atp9-Hyb grew extremely slowly on glycerol (not shown), some processed hybrid protein was detected in mitochondria () whereas, as shown above (), only trace amounts of unprocessed protein were detected in Δatp9 yeast expressing a nuclear version of the endogenous yeast ATP9 gene.
+      - |-
+        Taken together, these data indicate that the high hydrophobicity of the first transmembrane segment of yeast Atp9p prevents its translocation across the mitochondrial membranes from the cytosol.
+      - |-
+        This study substantiates the role of protein structure in mitochondrial gene transfer: expression of chimeric constructs reveals that the P. anserina proteins can be correctly imported into mitochondria due to reduced hydrophobicity of the first transmembrane segment.
+    why_it_matters: >-
+      This is the experiment that turns the hydrophobicity story from a correlation into a
+      manipulation. Everything else in this file is "hydrophobic things fail and hydrophilic
+      things succeed"; this is "make one helix less hydrophobic and the same protein starts
+      crossing the membrane". It is the strongest single piece of evidence in the corpus that the
+      barrier to relocation is the membrane-spanning segment itself. A soluble enzyme has none.
+
+  - gene: COB
+    product: "cytochrome b, subunit of respiratory complex III"
+    product_class: inner-membrane protein, the most hydrophobic mtDNA product in yeast
+    transmembrane_segments: 8
+    host: S. cerevisiae
+    recoded_to_table_1: attempted
+    targeting_sequence: not_specified_in_this_corpus
+    sequence_changes_required: unknown
+    function_restored: none
+    readout: not_specified_in_this_corpus
+    verification_method: none_reported
+    import_proxy_reported: null
+    why_it_failed: >-
+      NOT EXPLAINED ANYWHERE IN THIS CORPUS. The only statement available is that attempts have
+      been "entirely unsuccessful", with no mechanism, no intermediate phenotype and no published
+      post-mortem — and the same sentence notes that cytochrome b is one of only two genes present
+      in every mitochondrial genome on Earth. Absence of an explanation is the finding: this is
+      the case that everyone cites as the limit and nobody has dissected.
+    publication: doi:10.1371/journal.pgen.1002876
+    source_type: "secondary — a statement about the prior literature, not an experiment in this paper"
+    evidence:
+      - |-
+        The relocation of COX2 required a minimal change to the structure of the protein: a single tryptophan to arginine substitution within a transmembrane segment. Conversely, attempts to relocate the cytochrome b gene have been entirely unsuccessful.
+      - |-
+        This test has been carried out for five yeast proteins, two hydrophilic: bI4, an intron-encoded RNA maturase , and Var1p, a subunit of the mitochondrial ribosome , and three hydrophobic: the Atp8p subunit of mitochondrial ATP synthase with one transmembrane domain , the Cox2p subunit of respiratory complex IV (cytochrome c oxidase) which has two transmembrane segments , and the cytochrome b subunit of respiratory complex III, which is a highly hydrophobic protein with eight transmembrane segments .
+    why_it_matters: >-
+      The top of the ladder, and the reason the ladder is believable. Eight transmembrane helices,
+      universally retained in mtDNA, never relocated in any organism. Whatever the mechanism, it
+      scales with membrane-spanning segments — which is the axis DUET's enzymes score zero on.
+
+  - gene: mt-Nd6
+    construct: C8Nd6HA
+    product: "ND6, subunit of respiratory complex I"
+    product_class: inner-membrane protein
+    transmembrane_segments: "multiple (not stated in this corpus)"
+    host: "mouse cells (ND6dKO line)"
+    recoded_to_table_1: true
+    targeting_sequence: "N-terminal MTS of cytochrome c oxidase subunit VIII (C8), plus an HA epitope"
+    sequence_changes_required: none_attempted
+    function_restored: none
+    readout: "complex I activity and assembly APPEARED restored — and the appearance was the artefact"
+    verification_method: protease_protection
+    import_proxy_reported: "zero — the protein was shown not to be internalised at all"
+    why_it_failed: >-
+      The protein was never imported. It co-localised with mitochondria by microscopy, complex I
+      activity and assembly came back, and all of that was wrong: trypsin reached the polypeptide
+      on intact mitochondria, and the rescued clones turned out to be genetic revertants of the
+      mt-Nd6 mutation rather than complemented cells. The failure mode is not biochemical, it is
+      experimental — a selection that rewards any route to respiration will find the other route.
+    publication: doi:10.1093/nar/gkq769
+    evidence:
+      - |-
+        We recoded mitochondrial mt-Nd6 to the universal genetic code, and added the N-terminal mitochondrial-targeting sequence of cytochrome c oxidase VIII (C8) and the HA epitope (C8Nd6HA).
+      - |-
+        However, careful examination of transfected cells showed that the allotopically-expressed protein was not internalized in mitochondria and that the selected clones were in fact revertants for the mt-Nd6 mutation.
+      - |-
+        However, although allotopic expression has been successfully demonstrated in yeast (), results obtained in human and mouse cells are unclear.
+    why_it_matters: >-
+      The methodological warning the whole programme should adopt, and it cost this field a
+      decade. Co-localisation is not import; protease protection is. Phenotypic rescue under
+      selection is not complementation unless the locus is sequenced. ISOBUTANOL_PROGRAM.md's
+      `verification_method` field exists for exactly this failure, and this record is the reason
+      'microscopy' should rank below 'protease_protection' rather than beside it.
+
+  - gene: "MT-ATP6 and MT-ND4"
+    product: "ATP synthase subunit 6; ND4 of complex I"
+    product_class: inner-membrane proteins
+    transmembrane_segments: "multiple"
+    host: "human and mouse cells"
+    recoded_to_table_1: true
+    targeting_sequence: "various; ATPase6 work used mRNA-localisation signals from COX10 or SOD2 (MTS + 3'UTR)"
+    sequence_changes_required: none_reported
+    function_restored: contested
+    readout: "complex V integration; complex I activity — reported positive by one group and negative by another for BOTH genes"
+    verification_method: none_reported
+    import_proxy_reported: null
+    why_it_failed: >-
+      Unresolved rather than failed. For ATPase6 and for ND4 alike, a positive report was followed
+      by a negative one from a different group using the same model. The one strategy that is
+      reported to have worked for the very hydrophobic subunit 6 was not protein engineering at
+      all but mRNA engineering: forcing the transcript to the mitochondrial surface so translation
+      and import are co-localised.
+    publication: "doi:10.1093/nar/gkq769, doi:10.1016/j.gendis.2019.08.001"
+    source_type: "secondary — both are reviews of primary work not itself in this corpus"
+    evidence:
+      - |-
+        In 2002, Schon and co-workers reported the successful allotopic expression of human and C. reinhardtii ATPase6 subunit in human cells (,). However, using the same model, Holt and co-workers found that C. reinhardtii ATPase6 protein was not integrated into mature complex V (). Similar findings were obtained with ND4, with Guy and colleagues reporting positive results (), followed one year later by negative results from Moraes and
+      - |-
+        By forcing its mRNA localization to the mitochondrial surface, the allotopically expressed subunit 6 gene lead to a long-lasting and complete rescue of mitochondrial dysfunction in human fibroblast cells carrying a mutation in the mitochondrial ATP synthase subunit 6 gene.
+      - |-
+        Substantial progress has been recently achieved, and the development of this technique for therapy of the mitochondrial disease Leber's hereditary optic neuropathy (LHON) has entered phase III clinical trials.
+    why_it_matters: >-
+      Carried for one reason: mRNA localisation is a lever this programme has not considered, and
+      it is the only reported way past the hydrophobicity barrier that does not require changing
+      the protein. If a DUET strategy-C enzyme ever did come back import-limited, appending a
+      mitochondrially-localised 3'UTR is cheaper than re-engineering the enzyme and much cheaper
+      than strategy E. Note the standard of evidence is low — these are review statements about
+      contested primary work, and doi:10.1093/g3journal/jkae295 says plainly that few such claims
+      have been confirmed biochemically.
+
+  - gene: "MT-ATP8 + MT-ATP6, co-expressed"
+    product: "human ATP synthase subunits 8 and 6"
+    product_class: inner-membrane proteins
+    transmembrane_segments: "1 (subunit 8) and multiple (subunit 6)"
+    host: "human transmitochondrial cybrid cell line"
+    recoded_to_table_1: true
+    targeting_sequence: "MTS of ATP5G1"
+    sequence_changes_required: none_reported
+    function_restored: reported_full
+    readout: "rescue of the disease phenotype of a G8529A nonsense mutation; assembly of both subunits into ATP synthase"
+    verification_method: none_reported
+    import_proxy_reported: null
+    why_it_failed: not_applicable
+    publication: doi:10.1016/j.gendis.2019.08.001
+    source_type: "secondary — a review's account of primary work not in this corpus"
+    evidence:
+      - |-
+        This stable nuclear expression of both subunits 8 and 6 successfully rescued a disease borne phenotype arising from a nonsense G8529A point mutation located in the overlap region between the subunit 8 and subunit 6 genes in the human mitochondrial genome.
+    why_it_matters: >-
+      The only TWO-GENE allotopic rescue in the corpus, and therefore the only evidence that a
+      relocated pair can be co-expressed and co-assembled. DUET needs two enzymes in the matrix,
+      so a two-gene precedent is worth having even at this evidence standard. It is a review
+      statement, not a paper read here; treat accordingly.
+
+  - gene: "COX2 (Glycine max), used as a model for relocation"
+    product: "soybean Cox2"
+    product_class: inner-membrane protein
+    transmembrane_segments: 2
+    host: "not specified in this corpus"
+    recoded_to_table_1: "not applicable — plant mitochondria and the nucleus share the universal code"
+    targeting_sequence: not_specified_in_this_corpus
+    sequence_changes_required: "L169Q and L171G in the first transmembrane region, chosen from a hydrophobicity profile"
+    function_restored: "import restored; function not stated in this corpus"
+    readout: "mitochondrial import"
+    verification_method: none_reported
+    import_proxy_reported: null
+    why_it_failed: not_applicable
+    publication: doi:10.1016/j.gendis.2019.08.001
+    source_type: "secondary — a review's account of Daley et al."
+    evidence:
+      - |-
+        This strategy was successfully applied by Daley et al for the allotopic expression of subunit 2 of cytochrome c oxidase (Cox2) of soybean in which they altered two amino acid residues L169Q and L171G in the first transmembrane region of the protein.
+      - |-
+        Similarly, the high hydrophobicity of subunit 9 of the yeast mitochondrial ATP synthase has been indicated to hamper its allotopic expression because the protein cannot cross the mitochondrial inner membrane and is therefore proteolytically degraded in the mitochondrial intermembrane space. These obstacles were successfully overcome by reducing the hydrophobicity of the subunit 9 protein.
+    why_it_matters: >-
+      The hydrophobicity hypothesis used PROSPECTIVELY, which is rare: the region to mutate was
+      picked from a hydropathy plot before the experiment, and two residues were enough. That is
+      the version of the hypothesis with predictive content, and it is the reason this file treats
+      it as a mechanism rather than a story.
+
+  - gene: "COX2 (human MT-CO2)"
+    construct: "yeast codon-optimised human MT-CO2"
+    product: "human cytochrome c oxidase subunit 2"
+    product_class: inner-membrane protein
+    transmembrane_segments: 2
+    host: "S. cerevisiae Δcox2::ARG8m"
+    recoded_to_table_1: true
+    targeting_sequence: "OXA1 MTS (the best of the screened set)"
+    sequence_changes_required: "the human sequence already carries the hydrophilic equivalents of the beneficial yeast residues"
+    function_restored: none
+    readout: "no significant restoration of respiratory metabolism"
+    verification_method: none_reported
+    import_proxy_reported: null
+    why_it_failed: >-
+      Proposed, not demonstrated: the authors attribute it to a mismatch of chaperones and/or
+      assembly factors between the two organisms, and say so hedged. This is a failure with a
+      guess attached rather than a mechanism, and it is recorded as such.
+    publication: doi:10.1093/genetics/iyaf037
+    evidence:
+      - |-
+        We explored the benefit of these mutations by allotopically expressing a yeast codon-optimized version of the human MT-CO2 gene in our Δcox2::ARG8m deletion mutant ( and ). However, none of the tested conditions lead to a significant restoration of the respiratory metabolism of the yeast mutant strain, probably due to the interplay of different chaperones and/or assembly factors between both organisms ().
+    why_it_matters: >-
+      A genuinely informative negative. The human protein's transmembrane helices already have the
+      low-hydrophobicity residues that had to be engineered into the yeast one — so on the
+      hydrophobicity hypothesis alone it should have worked, and it did not. Whatever else
+      allotopic expression needs, host-specific assembly machinery is part of it. For DUET this
+      is the reminder that clearing the import barrier does not clear the assembly barrier, which
+      is the same gap `heterologous_orf_precedents.yaml` flags as `open_gaps` for oligomeric
+      enzymes.
+
+  - gene: "nad1, nad2, nad4, nad5 (Bambusa oldhamii / Phyllostachys edulis)"
+    product: "bamboo complex I subunits Nad1, Nad2, Nad4, Nad5"
+    product_class: inner-membrane proteins
+    transmembrane_segments: "multiple"
+    host: S. cerevisiae
+    recoded_to_table_1: "not applicable — plant mitochondria use the universal code; edited cDNA was cloned"
+    targeting_sequence: "MT peptide of the S. cerevisiae ATPase delta subunit"
+    sequence_changes_required: none
+    function_restored: not_tested
+    readout: "fluorescence microscopy of MT-Nad-EGFP fusions; growth phenotypes under K+, Na+, H+ load"
+    verification_method: microscopy
+    import_proxy_reported: null
+    why_it_failed: >-
+      Not a rescue experiment and cannot be one — S. cerevisiae has no complex I for these
+      subunits to join, so no functional complementation was available to test. What the paper
+      does establish is the negative control that matters: without the MT peptide the Nad1-EGFP
+      fusion did not reach mitochondria at all.
+    publication: doi:10.3390/ijms23074054
+    evidence:
+      - |-
+        In order to direct the bamboo Nad1, Nad2, Nad4, and Nad5 subunits to yeast mitochondria, an MT peptide (encoded by nuclear mt gene) of the ATPase δ subunit from S. cerevisiae [] was employed to fuse at the 5′-terminal of the nad1, nad2, nad4, and nad5 genes.
+      - |-
+        Mitochondrial localizations of the MT-Nad1-EGFP, MT-Nad2-EGFP, MT-Nad4-EGFP, and MT-Nad5-EGFP fusion proteins were confirmed by fluorescence microscopy.
+      - |-
+        In this study, in the absence of the MT peptide, the import of Nad1-EGFP into yeast mitochondria failed because the green fluorescence mistily appeared over the whole cell ().
+    why_it_matters: >-
+      Included deliberately as the weakest record in the file, to mark the line. Four
+      multi-transmembrane mtDNA-encoded proteins were targeted to yeast mitochondria and detected
+      there by fluorescence — and that is the entire result. No processing, no assembly, no
+      function. Under this file's own standard (and doi:10.1093/nar/gkq769's), microscopy
+      co-localisation of a GFP fusion is the evidence class that produced the field's most famous
+      false positive. It counts as an attempt; it does not count as an import success.
+
+# ======================================================================== what is NOT in here
+
+scope_exclusions:
+
+  - item: "doi:10.26508/lsa.202301965 — 'Allotopic expression of COX6'"
+    reason: >-
+      Wrong direction. Despite the title, this is a NUCLEAR gene moved INTO mtDNA — the strategy-E
+      direction, not the mirror image. The word "allotopic" is used in this literature for
+      relocation in either direction and the title is not a reliable filter. It belongs with
+      `heterologous_orf_precedents.yaml`, not here, and the same paper reports that the Rieske
+      FeS protein (Rip1) was previously transferred to mtDNA — another strategy-E precedent that
+      file may not yet hold.
+    evidence:
+      - |-
+        Relocation of COX6 from nuclear to the mitochondrial genome helps unveil the role of Atco (Atp9–Cox6 complex) in coupling the biogenesis of cytochrome oxidase and ATP synthase in yeast mitochondria.
+
+  - item: "yeast NDI1 expressed in mouse cells (doi:10.1093/nar/gkq769)"
+    reason: >-
+      Used in that paper as a hydrophilic positive control for the import route, and it works —
+      but NDI1 is a NUCLEAR gene in S. cerevisiae, so moving it to a mouse nucleus is not a
+      relocation out of mtDNA. The paper's own wording calls it "mitochondrial-encoded", which
+      appears to be an error in the source. Not recorded as a relocation attempt; flagged here so
+      the next reader does not re-find it and count it.
+
+# ============================================================== the answer §3 actually asked for
+
+consequences_for_the_programme:
+
+  recoding:
+    finding: >-
+      Recoding is not a risk. Across every record above, moving a gene between translation table 3
+      and table 1 is a solved, commoditised step, and in the one case where the work was counted
+      (ATP8) only ONE of thirty-one changed codons was required by the code itself — the other
+      thirty were codon-bias optimisation. Not a single failure in this file is attributed to
+      recoding. Every failure is attributed to import, to assembly, or to experimental artefact.
+    consequence_for_strategy_E: >-
+      MITOCHONDRIAL_PROGRAM.md treats table-3 recoding as a design constraint. On this evidence it
+      is a design chore. The real lesson is the inverse one: the thirty bias codons say a strategy-E
+      ORF recoded only for the dictionary is half-done, and should also be optimised for the
+      matrix's own codon preferences.
+
+  import:
+    finding: >-
+      Import is THE constraint, and it is specifically a transmembrane-helix constraint. Every
+      partial and every failed case above is a membrane protein whose helix will not pass TIM23;
+      the proposed mechanisms (IMS degradation by i-AAA, stop-transfer instead of conservative
+      sorting, stalled precursor with the MTS held by PAM/Hsp70) all require a helix to stall on.
+      Both soluble products in the corpus relocated to full function with no sequence change at
+      all, one of them using the presequence that explicitly fails for hydrophobic cargo.
+    consequence_for_strategy_C: >-
+      DUET's KDC and ADH are soluble matrix enzymes. The mirror-image argument therefore predicts
+      that strategy C should NOT be import-limited for them, and the import ceiling that
+      MITOCHONDRIAL_PROGRAM.md §1 names as the precondition for escalating to strategy E is
+      unlikely to be reached. This is evidence AGAINST needing strategy E, and it is the first
+      such evidence the programme has. It is a prediction, not a measurement: it should be tested
+      by the strategy-C instrumentation ISOBUTANOL_PROGRAM.md already mandates, not assumed.
+    numbers_to_compare_against:
+      - "6% of wild-type mature protein — allotopic Cox2-W56R, low-copy (doi:10.1093/genetics/iyaf037)"
+      - "12% of wild-type mature protein — the same construct, high-copy"
+      - "85% of wild-type mature protein — after TMH2 engineering; complex IV to 70%"
+      - "30-40% of wild-type assembled ATP synthase — relocated ATP9 via a fungal orthologue (doi:10.1371/journal.pgen.1002876)"
+      - "~40% below wild-type CcO — allotopic Cox2-W56R by in-gel activity (doi:10.1091/mbc.e17-09-0560)"
+    caveat_on_those_numbers: >-
+      None of these is an import efficiency in the schema's sense (imported / synthesised, 0-1).
+      They are mature-protein-inside-mitochondria as a fraction of wild type, which convolves
+      import with processing, assembly and turnover. `import_efficiency_reported` should be left
+      NULL for every one of these records; the numbers belong in a text field. No paper in this
+      corpus reports a true import fraction for an allotopically expressed protein.
+
+  what_mitochondrial_synthesis_still_wins:
+    finding: >-
+      One result in this file favours strategy E honestly and it should not be buried. When the
+      mitochondrially made and the allotopically imported Cox2 were expressed in the same cell,
+      the assembled enzyme was built overwhelmingly from the mitochondrially made copy. Internal
+      synthesis beats import in direct competition, for a protein whose assembly factors expect
+      it from inside.
+    consequence: >-
+      This is an argument for E that survives everything above — but only for cargo whose assembly
+      machinery is co-evolved with mitochondrial synthesis, which is exactly what an OXPHOS subunit
+      is and exactly what a heterologous decarboxylase is not. DUET's enzymes have no
+      mitochondrial assembly factors to disappoint.
+
+# ========================================================================== what remains open
+
+open_gaps:
+  - gap: "a true import efficiency for any allotopically expressed protein"
+    status: never_reported_in_this_corpus
+    note: >-
+      The field reports steady-state mature protein, not imported fraction. If the programme wants
+      `import_efficiency_reported` populated for anything, it will have to be measured in-house;
+      no literature value exists here to seed it.
+  - gap: "why cytochrome b has never been relocated"
+    status: unexplained
+    note: >-
+      The universal failure case has no published mechanism in this corpus — only the observation
+      that it has never worked and that the protein has eight transmembrane segments.
+  - gap: "allotopic expression of a soluble ENZYME with a cofactor or an oligomeric state"
+    status: never_attempted
+    note: >-
+      Var1 is soluble but is a structural ribosomal protein; bI4 is a maturase. Neither requires a
+      diffusible cofactor to be loaded nor a homo-oligomer to be assembled after import. This is
+      the SAME gap `heterologous_orf_precedents.yaml` records from the mtDNA side, and the fact
+      that it is open in both directions is itself worth noting: nothing in the mitochondrial
+      corpus, either direction, speaks to TPP loading or tetramer assembly in the matrix.
+  - gap: "stability of a relocated construct over generations"
+    status: open
+    note: >-
+      Only touched once, and negatively: overexpression of relocated VAR1 raises petite frequency.
+      Not pursued here; it is a separate line of the §3 corpus table.
+
+# =============================================================================== provenance
+#
+# Method. All 1,309 readable stored full texts were searched by regex for allotopic / relocation
+# to the nucleus / nuclear version / recoded version / hydrophobicity / mesohydrophobicity /
+# import efficiency. Eleven documents bear on the question and every one of them was read. Quotes
+# were then extracted from the cached text BY OFFSET rather than retyped, and each was
+# re-resolved through fermdb.llm.validate.verify_span against the text load_source_text returns —
+# exact match, no normalisation, single unique occurrence. 78 quotes, 78 passes, 0 failures.
+#
+# Two things a reviewer should check before this file is promoted out of drafts/:
+#
+#   1. SECONDARY SOURCES. Five records rest on review statements rather than on experiments read
+#      here: bI4, cytochrome b, MT-ATP6/MT-ND4, MT-ATP8+MT-ATP6, and soybean COX2. Each carries
+#      `source_type: secondary`. The primary papers are not in this corpus. The cytochrome b
+#      record in particular is a single clause in another paper's introduction, and it is doing a
+#      lot of work in the hydrophobicity ladder at the top of this file.
+#   2. THE LADDER IS ORDINAL, NOT MEASURED. No paper here reports a hydrophobicity SCORE against
+#      an outcome. The ordering (0 TM → 1 → 2 → 8) is read off the protein biology, and the two
+#      quantitative handles the field uses — mean helix hydrophobicity and "mesohydrophobicity" —
+#      are named in this corpus but their values are not. The correlation is strong and stated by
+#      four independent papers; it is not a regression, and it should not be written up as one.

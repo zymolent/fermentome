@@ -1,0 +1,294 @@
+# Adversarial stress-test of the six negative controls in data/benchmarks/known_positives.yaml
+#
+# Method. For each control I tried to REFUTE it, not to confirm it. Two evidence sources:
+#   (a) the 1,309-document local full-text corpus, searched with scratchpad/search.py (regex,
+#       case-insensitive, --require for co-occurrence windows, plus one whole-corpus
+#       document-level co-occurrence scan written for BM-NEG-003);
+#   (b) for BM-NEG-003 and BM-NEG-004, a live PubMed search via the bio-research pubmed MCP
+#       server, run 2026-09-21, because the source_hint for BM-NEG-003 requires a recorded,
+#       auditable database search and a corpus cannot settle a claim about the whole literature.
+#       PubMed query strings, the date, and the returned PMID counts are recorded verbatim below.
+#       (Source attribution: article metadata retrieved from PubMed.)
+#
+# Google Scholar was NOT searched: no Scholar tool is available in this session. BM-NEG-003's
+# source_hint asks for it. That half of the recorded search is still outstanding.
+#
+# No confidence value is stated anywhere in this file and nothing here is marked verified.
+# Quotes, where given, are verbatim from the corpus file named. Text attributed to PubMed is
+# abstract text from the PubMed record, not corpus text, and is labelled as such.
+
+- id: BM-NEG-001
+  verdict: holds
+  searches_run:
+    - "recod\\w+|codon[- ]optimi\\w+|re-?engineer\\w+ codons  --require  targeting sequence|mitochondrial targeting|presequence|matrix targeting|MTS|import into mitochondria"
+    - "(must|need|needs|has|have|required?s?) to be recoded|recoded (in order )?to (be )?(target|import|localiz)"
+    - "translation table|UGA[^.]{0,40}(tryptophan|Trp)|CUN[^.]{0,40}(threonine|Thr)|mitochondrial codon usage"
+    - "recod\\w+|mitochondrial (genetic )?code|codon usage of (the )?mitochond"
+    - "cytosolic ribosom|cytoplasmic ribosom|synthesi[sz]ed (in|on) the cytosol|post-?translational(ly)? import"
+    - "nucleus-encoded[^.]{0,120}synthesi[sz]ed in the cytosol|encoded in the nucleus, synthesized in the cytosol"
+    - "(inserted|integrated|introduced|incorporat\\w+|encoded|expressed|placed|cloned) (in)?to (the )?mitochondrial (genome|DNA|chromosome)|(in|into) (the )?mtDNA"
+  documents_inspected: 14
+  note: >-
+    Not one document in the corpus asserts that a nuclear-encoded, MTS-targeted protein requires
+    codon recoding. Every recoding statement I found is about crossing a genome boundary, and in
+    both directions it is the DESTINATION GENOME that sets the requirement, exactly as the control
+    says. Going mtDNA -> nucleus (allotopic expression), 00320.txt describes nATP8 as "ATP8 recoded
+    for expression on cytoplasmic ribosomes"; 00848.txt describes VAR1U as "a mitochondrial
+    DNA-encoded VAR1 gene recoded for cytosolic translation and fused to the COX4 mitochondrial
+    targeting sequence [MTS]". Going nucleus -> mtDNA, 00969.txt recodes COX6 because "in yeast
+    mitochondria, the CUN codon family codes for threonine", and 00154.txt states flatly that "To
+    express the reporter gene from mitochondrial DNA, its nucleotide sequence has to be recoded to
+    match mitochondrial codon usage." Plain MTS targeting with no recoding is described
+    mechanistically in 00360.txt (nucleus-encoded CcO subunits "are synthesized in the cytosol as
+    precursors that usually carry a mitochondrial targeting sequence (MTS), imported into
+    mitochondria, proteolytically matured") and 00117.txt. The search was broad for this control and
+    found the mechanism stated positively and the confusion stated nowhere.
+    TRAP THE CURATOR SHOULD KNOW ABOUT: the corpus is full of "codon-optimized" isobutanol-pathway
+    genes that have nothing to do with translation table 3 - 00765.txt expresses "codon-optimized,
+    N-terminally shortened versions of Ilv2 (Ilv2Delta54), Ilv5 (Ilv5Delta48) and Ilv3 (Ilv3Delta19),
+    lacking the mitochondrial targeting sequences", i.e. codon optimization for expression level in
+    a strain where the MTS was REMOVED. A pipeline keying on "codon" + "mitochondrial targeting" in
+    the same sentence will manufacture precisely the error this control guards against. That is the
+    single most likely path to a false positive here, and it is a text-matching artefact, not biology.
+    Caveat on scope: the control is a cell-biology fact, and its source_hint rightly says to confirm
+    it from a textbook. A corpus search can show the claim is nowhere contradicted and is repeatedly
+    presupposed; it cannot substitute for the textbook citation the control still needs.
+
+- id: BM-NEG-002
+  verdict: holds
+  searches_run:
+    - "\\b(ALG9|TAF10|UBC6|TFC1)\\b"
+    - "\\b(ALG9|TAF10|UBC6|TFC1)\\b  --require  isobutanol"
+    - "\\b(ALG9|TAF10|UBC6|TFC1)\\b  --require  fusel|higher alcohol|butanol|flux|titer|yield of"
+    - "reference gene|housekeeping gene|normali[sz]ation gene|internal control gene  --require  isobutanol"
+  documents_inspected: 9
+  note: >-
+    The bare gene regex matches 27 corpus documents. Adding --require isobutanol to the same window
+    drops it to ZERO documents: in the whole corpus there is not one passage in which any of ALG9,
+    TAF10, UBC6 or TFC1 appears near the word isobutanol. Restricting instead to flux/titer/yield/
+    fusel language leaves three documents, and I opened all three. In every one the four genes appear
+    only as qPCR normalizers, never as an intervention, a bottleneck, or a measured effect: 00894.txt
+    normalizes "with ALG9, TAF10, UBC6 and TFC1 as the reference gene"; 01016.txt uses ACT1 and TAF10
+    as RT-PCR positive controls; 00844.txt selects ACT1 and UBC6 from six candidates. Two incidental
+    UBC6 hits elsewhere (01208.txt, 01300.txt) are a ubc6 deletion strain in a ubiquitin-ligase study
+    and UBC6 used for qPCR normalization - neither touches higher-alcohol metabolism.
+    TRAP: 00844.txt is the sharpest co-occurrence risk in the corpus and the curator should look at
+    it. It tabulates all four control genes together, each cited to Teste et al., in a wine-
+    fermentation paper whose introduction names isobutanol among the higher alcohols it measures
+    ("Typical representatives of this group include 2-methylpropanol (isobutanol) ..."). Document-
+    level co-occurrence would join these four genes to isobutanol through that paper; window-level
+    co-occurrence does not. If the atlas returns an association for BM-NEG-002, 00844.txt is almost
+    certainly where it came from, and the recovery rate on the positives should be discounted.
+    Incidentally this document also partially corroborates the control's own source_hint: it cites
+    Teste et al. as the primer source for ALG9, TAF10, TFC1 and UBC6. It does not confirm the second
+    half of the hint - that each of the four is condition-insensitive under fermentative conditions -
+    and I found nothing in the corpus that does. That check is still owed.
+
+- id: BM-NEG-003
+  verdict: holds
+  searches_run:
+    - "mitochondrial genome|mtDNA|mitochondrial DNA  --require  isobutanol"
+    - "\\b(kivD|KivD|kdcA|2-keto ?acid decarboxylase|ketoisovalerate decarboxylase|ILV2|ILV3|ILV5|ALS|acetolactate synthase|ADH6|ADH7|alcohol dehydrogenase|ARO10|adhA)\\b  --require  mitochondrial genome|mtDNA|mitochondrial DNA|mitochondrial-encoded|mitochondrially encoded|biolistic"
+    - "(metabolic engineering|biofuel|biosynthetic pathway|pathway enzyme|higher alcohol|butanol)[^.]{0,120}mitochondrial genome|mitochondrial genome[^.]{0,120}(metabolic engineering|biofuel|biosynthetic pathway|higher alcohol|butanol)"
+    - "biolistic|heteroplasm|synthetic mitochondrial genome|mitochondrial genome engineering  --require  isobutanol|butanol|fusel|higher alcohol"
+    - "mitochondrial genome[^.]{0,100}(chassis|synthetic biology|engineer\\w+ for production|bioproduc)|(chassis|synthetic biology)[^.]{0,100}mitochondrial genome"
+    - "heterologous (gene|protein|ORF|enzyme|open reading frame)|foreign (gene|DNA|ORF|protein)|exogenous (gene|ORF)|non-native (gene|enzyme|protein)  --require  mitochondrial genome|mtDNA|mitochondrial DNA|mitochondrially|mito-genome"
+    - "biolistic|microprojectile|particle bombardment|mitochondrial transformation|transformation of (yeast )?mitochondria"
+    - "biolistic|particle bombardment  --require  decarboxylase|dehydrogenase|synthase|reductoisomerase|dehydratase|metabolic pathway"
+    - "mitochondrial transformation|transformation of mitochondria|transform(ed|ing) the mitochondrial genome"
+    - "(express\\w+|encod\\w+) (from|by|in|within) the mitochondrial (genome|DNA)|mitochondrially[- ]encoded (reporter|marker|GFP|luciferase|enzyme)|mtDNA[- ]encoded (reporter|GFP|luciferase)"
+    - "(inserted|integrated|introduced|incorporat\\w+|encoded|expressed|placed|cloned) (in)?to (the )?mitochondrial (genome|DNA|chromosome)|(in|into) (the )?mtDNA"
+    - "recod\\w+|mitochondrial (genetic )?code|codon usage of (the )?mitochond"
+    - "COX2|COX3|ATP6|ARG8m|ARG8"
+    - "rho0|rho-zero|rho zero|\\u03c10|\\uf0720|\\brho\\u2070"
+    - "[\\uf072\\u03c1]0|rho0|rho-?zero  --require  isobutanol|butanol|fusel   (private-use-glyph trap check)"
+    - "mitochondri\\w+[^.]{0,80}(isobutanol|kivd|KDC|2-keto acid decarboxylase)[^.]{0,80}  --require  isobutanol"
+    - "WHOLE-CORPUS DOCUMENT-LEVEL SCAN (python, all 1309 files): A = isobutanol|kivd|2-keto ?acid decarboxylase|ketoisovalerate decarboxylase|fusel alcohol|higher alcohol|branched-chain (higher )?alcohol|ADH6|ARO10|ILV2|ILV3|ILV5 ; B = biolistic|mitochondrial transformation|recoded|mtDNA|mitochondrial genome|mitochondrial DNA|rho0|\\u03c10|\\uf0720|heteroplasm|pPT24|ARG8m ; report every document with >=3 hits of BOTH"
+    - "PUBMED 2026-09-21: isobutanol AND (mitochondrial genome OR mtDNA OR \"mitochondrial DNA\")  -> 5 records"
+    - "PUBMED 2026-09-21: (isobutanol OR \"branched-chain higher alcohol\") AND (biolistic OR \"rho zero\" OR \"rho-zero\" OR heteroplasmy OR \"mitochondrial transformation\")  -> 0 records"
+    - "PUBMED 2026-09-21: (\"mitochondrial genome\" OR mtDNA) AND (Saccharomyces OR yeast) AND (\"metabolic engineering\" OR biofuel OR \"pathway enzyme\" OR decarboxylase)  -> 55 records, top 20 by relevance reviewed"
+    - "PUBMED 2026-09-21: (\"mitochondrial genome\"[Title] OR mtDNA[Title] OR mitochondria[Title]) AND (yeast OR Saccharomyces) AND (isobutanol OR \"higher alcohol\" OR \"fusel alcohol\" OR \"branched-chain alcohol\" OR biofuel)  -> 3 records, all 3 read"
+    - "PUBMED 2026-09-21: yeast mitochondrial genome recoded heterologous gene expression biolistic transformation reporter  -> 0 records"
+  documents_inspected: 34
+  note: >-
+    I tried hard to break this one and could not. Three independent lines all converge.
+    (1) Window co-occurrence. Searching mtDNA/mitochondrial-genome terms with --require isobutanol
+    returns exactly ONE corpus document, 00603.txt, and its only mtDNA sentence is about the petite
+    phenotype of ilv5 mutants ("Ilv5 seems to be involved in the maintenance of wild-type
+    mitochondrial DNA") - a nuclear gene affecting mtDNA stability, not a gene placed in mtDNA.
+    (2) Document-level scan. Across all 1,309 files, only four documents carry >=3 hits of BOTH an
+    isobutanol-pathway vocabulary and an mtDNA-engineering vocabulary, and all four are false joins:
+    00639 (Rhizophagus mito/nuclear exchange), 01208 (Ubc1/Ubc4 and Hap4 turnover), 00331 (a genetic-
+    instability review), 00901 (rho0 fitness, where the ILV/ARO hits are transcriptome gene lists).
+    There is no document in this corpus that does both things.
+    (3) The mtDNA-engineering literature that IS here shows what the payloads actually are, and they
+    are all reporters or OXPHOS subunits: nanoluciferase (00154), split-GFP (00070), the monitoring
+    system in 00945, ARG8m as a marker, allotopic/mtDNA-relocated COX2, COX6, ATP8 and ATP9 (00323,
+    00370, 00860, 00969, 00320, 00360). Not one metabolic or biofuel enzyme. 00154 is explicit that
+    the method is for reporters and that any payload must first be recoded and delivered biolistically
+    into a COX2-deleted mtDNA recipient - the cost structure the control says the atlas must surface
+    as a never_attempted gap. I reached this independently of the prior session and it matches.
+    (4) Recorded live PubMed search, 2026-09-21, strings above. The isobutanol x mtDNA query returns
+    five records and I read all five metadata: an industrial isobutanol strain whose only mitochondrial
+    content is BAT1 (10.1016/j.btre.2026.e00959), an alcohol-tolerance regulatory-network study
+    (10.1021/acssynbio.0c00253), an ILV5 brewing strain (10.1002/yea.2922), and two papers in which
+    mtDNA is merely a strain-TYPING marker for cider and wine isolates (10.1016/j.fm.2008.03.004,
+    10.1023/a:1001773916407). The biolistic/rho-zero/heteroplasmy query returns zero. The title-
+    restricted query returns three, all of which are compartment targeting or organelle-genome CLONING
+    in a different organism: Avalos et al. (10.1038/nbt.2509), the Bat1/Ilv1 deletion study
+    (10.1016/j.biortech.2018.07.150), and diatom mitochondrial-genome cloning in yeast as a host
+    (10.3390/biology9110358 - a yeast-mediated cloning vessel for an ALGAL mitochondrial genome, not
+    expression of anything from yeast mtDNA).
+    Closest thing in the corpus to what the control forbids, and why it is not a counterexample:
+    heterologous metabolic enzymes HAVE been expressed from an organelle genome - but a plastid one,
+    in plants and diatoms (00459, lettuce transplastomic lines expressing mannanase and glucanases;
+    00706, friedelin in Phaeodactylum). Different organelle, different kingdom, no bearing on yeast
+    mtDNA. A near-miss worth naming because it makes the mtDNA gap look more crossable than it is:
+    01023 uses a Pichia mtDNA-derived autonomously replicating sequence to drive recombinant protein
+    production - the DNA is mtDNA-derived, the expression is nuclear/episomal, not mitochondrial.
+    HONEST LIMIT OF THIS RESULT: the statement is a claim about the entire published literature.
+    A 1,309-paper corpus can only ever give weak evidence for it. The PubMed searches above are what
+    make this auditable, and they are recorded with date and exact strings so they can be re-run.
+    They are still incomplete against the source_hint: Google Scholar was not searched (no tool),
+    preprint servers were not searched, and PubMed indexing lags. Re-run before publication.
+
+- id: BM-NEG-004
+  verdict: holds
+  searches_run:
+    - "(2-?keto-?isovalerate|\\u03b1-?ketoisovalerate|alpha-ketoisovalerate|KIV|2-oxoisovalerate|ketoisovalerate)[^.]{0,120}(transport|carrier|export|import|shuttl|efflux|translocase|permease)|(transport|carrier|export|shuttl)[^.]{0,120}(ketoisovalerate|KIV)"
+    - "\\b(OAC1|ODC1|ODC2|DIC1|CTP1|SFC1|YMC1|YMC2|YIA6|YEA6|LEU5|PIC2|MRS3|MRS4|AGC1|MPC1|MPC2|MPC3|BAT1|BAT2|YHM2|CRC1|ANT1|FLX1|ORT1|ARG11|TPC1|RIM2|MTM1|PET8|SAM5|MME1|OGC|UCP\\d?)\\b  --require  ketoisovalerate|KIV|branched-chain (keto|2-oxo)"
+    - "(remain|are|is|has|have)[^.]{0,40}(unidentified|not been identified|unknown|uncharacteri)[^.]{0,80}(transport|carrier)|((transport|carrier)[^.]{0,60}(remain|is|are)[^.]{0,30}(unidentified|unknown))  --require  KIV|ketoisovalerate|branched"
+    - "OAC1|Oac1p|oxaloacetate carrier"
+    - "\\bJen1\\b|\\bJEN1\\b"
+    - "PUBMED 2026-09-21: (\"2-ketoisovalerate\" OR \"alpha-ketoisovalerate\" OR \"2-oxoisovalerate\") AND (transporter OR carrier OR \"mitochondrial carrier\") AND (yeast OR Saccharomyces)  -> 8 records, all 8 metadata read"
+  documents_inspected: 18
+  note: >-
+    No corpus document names a gene as the mitochondrial inner-membrane 2-ketoisovalerate carrier.
+    The corpus states the opposite outright - 00145.txt: "However, mitochondrial transport proteins
+    involving alpha-KIV and valine remain unidentified [,], significantly limiting the use of
+    compartmentalization strategies in constructing efficient cell factories []." Where the corpus
+    does invoke KIV transport it is deliberately anonymous: 00767.txt says "the high activity of the
+    mitochondrial alpha-KIV carrier" with no gene attached; 00597.txt lists "transportation of
+    2-ketoisovalerate or valine from mitochondria to cytosol" as an unresolved bottleneck; 00190.txt
+    speaks of "the bottleneck of exporting alpha-KIV to the cytoplasm". Every NAMED mitochondrial
+    carrier in the corpus is attached to a different substrate: OAC1 to alpha-isopropylmalate
+    (00145, 00814, 01069), MPC1/2/3 to pyruvate. So on corpus evidence the gap is real and unfilled.
+    BUT THE LIVE SEARCH FOUND TWO NEAR-MISSES THAT THE CORPUS DOES NOT CONTAIN, and the curator needs
+    both, because either could tempt someone into filling the gap. Neither is in the corpus manifest.
+    NEAR-MISS 1 - right membrane, no gene. Nalecz et al. 1991, doi:10.1016/0167-4838(91)90028-x,
+    purified and reconstituted the yeast mitochondrial pyruvate (monocarboxylate) carrier and report
+    (PubMed abstract text, NOT corpus text): "Among other substrates of the yeast carrier, all
+    transported with similar affinity and identical maximal velocity against acetoacetate, we
+    identified 2-oxoisocaproate, 2-oxoisovalerate and 2-oxo-3-methylvalerate." 2-oxoisovalerate IS
+    2-ketoisovalerate, and this is the mitochondrial inner membrane. This DEMONSTRATES the transport
+    activity in proteoliposomes. It does NOT establish a gene: the paper predates the identification
+    of MPC1/MPC2/MPC3 by two decades and characterises only "two polypeptides of apparent molecular
+    mass 26 and 50 kDa". Assigning MPC1/2/3 as the KIV carrier on the strength of it would be an
+    inference by the curator, not a finding in the literature. The control survives on the "specific
+    gene has been established" clause - but only on that clause, and it is a narrow margin.
+    NEAR-MISS 2 - named gene, wrong membrane. Generoso et al. 2017, doi:10.1093/femsyr/fox029:
+    "The lactate transporter Jen1 turned out to transport the intermediate 2-ketoisovalerate, but not
+    DIV." JEN1 is a plasma-membrane permease, so it fails the membrane=mitochondrial_inner term of the
+    query_shape. An atlas that drops the membrane qualifier will return JEN1 and be wrong. This is the
+    most likely false-positive route for this control.
+    Also recorded, and pointing the same way as the control: Marobbio et al. 2008,
+    doi:10.1074/jbc.M804637200, shows Oac1p carries alpha-IPM and states "leucine,
+    alpha-ketoisovalerate, valine, and isoleucine neither inhibited nor were transported by Oac1p" -
+    an explicit negative for the most obvious candidate gene. Two further records report the ABSENCE
+    of such a transporter in related yeasts (P. pastoris, doi:10.1111/febs.14180, "excess
+    alpha-ketoisovalerate in the medium is not transported into the cytoplasm indicating that
+    P. pastoris lacks a suitable transporter"; K. lactis, doi:10.1007/s10858-013-9789-8, "the lack of
+    transporters for alpha-ketoisovalerate in the mitochondrial membrane").
+    If a candidate is recorded under knowledge_gap.candidates as BM-PATH-008 allows, the 1991 paper
+    is the strongest thing to attach, with its lack of gene assignment stated in the same breath.
+    COVERAGE FINDING: the two closest near-misses and the decisive Oac1p negative are ALL absent from
+    the 1,309-document corpus. For this control the corpus is not just weak evidence, it is missing
+    the papers that matter. This control cannot be curated from the corpus alone.
+
+- id: BM-NEG-005
+  verdict: holds
+  searches_run:
+    - "leucine[^.]{0,120}isobutanol"
+    - "leucine[- ]derived[^.]{0,60}isobutanol"
+    - "isobutanol[^.]{0,80}from leucine"
+    - "leucine[^.]{0,60}precursor[^.]{0,60}isobutanol|isobutanol[^.]{0,60}precursor[^.]{0,60}leucine"
+    - "isobutanol[^.]{0,40}(is |was )?(a )?(catabolic )?product of[^.]{0,40}leucine"
+    - "(ketoisocaproate|keto-isocaproate|KIC)[^.]{0,100}isobutanol"
+    - "(LEU1|LEU2|LEU4|LEU9|leucine biosynthe[^.]{0,40})[^.]{0,60}(produc|synthes)[^.]{0,40}isobutanol"
+    - "valine[^.]{0,40}isobutanol[^.]{0,80}leucine[^.]{0,40}isoamyl"
+  documents_inspected: 12
+  note: >-
+    Fifteen documents put leucine within 120 characters of isobutanol and I checked the mapping in
+    each. Every single one assigns valine -> isobutanol and leucine -> isoamyl alcohol, or treats
+    leucine biosynthesis as a COMPETING drain on the KIV pool rather than as a source. The cleanest
+    statement is 00470.txt: "valine [Val] degradation products to form isobutanol, leucine [Leu] into
+    isoamyl alcohol, and isoleucine [Ile] into active amyl alcohol" - which is exactly the
+    Hazelwood-style correspondence table the source_hint asks for, though Hazelwood et al. 2008 itself
+    is not in the corpus, so the hint's named reference is still unconfirmed. 00669.txt gives the same
+    mapping in respectively-form, and 01115.txt derives isobutanol from alpha-ketoisovalerate and
+    isoamyl alcohol from alpha-ketoisocaproate. The competing-pathway framing is everywhere: 00569,
+    00765 and 00336 all DELETE leucine-pathway genes (LEU2, LEU4, LEU9) to RAISE isobutanol, which is
+    the strongest possible refutation of a leucine->isobutanol route. 01069.txt is the mirror image -
+    it treats isobutanol as the byproduct to suppress when making leucine-derived 3-methyl-1-butanol.
+    No corpus document routes leucine to isobutanol.
+    TRAP: two documents state the correct mapping in a parallel "A and B from X and Y" construction
+    that a naive extractor will invert. 00015.txt reads verbatim:
+    "Isoamyl alcohol and isobutanol were derived from leucine and valine (Swiegers et al., ), while 2‐phenylethanol was derived from the phenylalanine (Ets"
+    Read pairwise this is correct (isoamyl<-leucine, isobutanol<-valine); read as adjacency it yields
+    "isobutanol ... from leucine". 00669.txt has the same shape with an explicit "respectively" to
+    disambiguate. If the atlas ever returns a leucine->isobutanol route, 00015.txt is where to look.
+    Scope note: this is a biochemical-fact control, not a literature-survey control, so the corpus is
+    an appropriate place to test it and the test was clean.
+
+- id: BM-NEG-006
+  verdict: uncertain
+  searches_run:
+    - "kivd|kivD|KivD|alsS|ilvC|ilvD|adhA  --require  Saccharomyces|yeast  (titles-only)"
+    - "(demonstrated|shown|established) in (E\\.? ?coli|Escherichia coli)[^.]{0,120}(yeast|S\\.? cerevisiae)|(did not|failed to|no activity)[^.]{0,80}(in yeast|in S\\.? cerevisiae)[^.]{0,80}(E\\.? ?coli|Escherichia)"
+    - "(adhA|AdhA)[^.]{0,120}(yeast|cerevisiae)"
+  documents_inspected: 3
+  # No counterexample block: "uncertain" here is about TESTABILITY, not about evidence found
+  # against the claim. No corpus document could constitute a counterexample to this control.
+  note: >-
+    THIS CORPUS STRUCTURALLY CANNOT TEST THIS CONTROL, and I want that stated plainly rather than
+    dressed up as a pass. BM-NEG-006 is not a claim about the literature at all. Its own source_hint
+    says so: "No external source needed: this is a check on the atlas's own join behaviour, verifiable
+    against the parts catalog once BM-COF-004 is curated." What it forbids is the atlas emitting a
+    part as yeast-demonstrated when the part's only expression_record has host=E. coli. No paper can
+    be evidence for or against that; only the atlas's own query output can. Marking this "holds" on
+    the strength of a corpus search would be the same category error the control exists to catch.
+    I ran the searches above anyway, to see whether the corpus at least contains the raw material for
+    a bad join, and it does. The corpus holds both sides: 00189.txt is Atsumi/Hanai/Liao 2008,
+    the E. coli non-fermentative branched-chain alcohol paper that is the origin of the alsS/ilvC/
+    ilvD/kivd/adhA part set, and 11 documents mention those part names in a yeast context. Crucially
+    the yeast papers do not naively import the E. coli result - 00141.txt reports using a specific
+    engineered variant, "adhA29C8 from Lactobacillus lactis", codon-optimized and re-tested in
+    CEN.PK113-5D, i.e. a fresh yeast expression record rather than a transplanted one. So the corpus
+    models the correct behaviour; it just cannot certify that the atlas reproduces it.
+    WHAT TO DO INSTEAD: curate BM-COF-004 first, then run the part ranking for host=S. cerevisiae
+    directly against the parts catalog and confirm that every part whose only expression_record is
+    host=E. coli comes back flagged untested-in-target-host rather than ranked as demonstrated.
+    That is a unit test over the atlas's join, and it should live next to the join, not here.
+    One thing to watch when BM-COF-004 is curated: adhA is exactly the part where host matters,
+    because the yeast literature uses engineered variants of it. If the catalog stores the E. coli
+    parent and the yeast variant under one part id, the join will look correct while being wrong.
+
+# ---------------------------------------------------------------------------------------------
+# Tally: 5 holds, 0 refuted, 1 uncertain (BM-NEG-006, untestable from a corpus by construction).
+#
+# Corpus-testable vs not:
+#   BM-NEG-001  partly - mechanism is presupposed throughout; still wants its textbook citation
+#   BM-NEG-002  yes    - clean, and the corpus also supplies the trap document (00844)
+#   BM-NEG-003  weakly - claim about the whole literature; the recorded PubMed search carries it
+#   BM-NEG-004  NO     - the three decisive papers are all outside the corpus; needs live search
+#   BM-NEG-005  yes    - biochemical fact, tested cleanly
+#   BM-NEG-006  NO     - a claim about the atlas's join, not about the literature
+#
+# Outstanding for the curator:
+#   - BM-NEG-003: Google Scholar and preprint servers were not searched (no tool in session).
+#   - BM-NEG-002: nobody has yet confirmed all four reference genes are condition-insensitive
+#     under fermentative conditions, which the control's own source_hint requires.
+#   - BM-NEG-004: decide whether the 1991 reconstituted-carrier result belongs in
+#     knowledge_gap.candidates, and make sure JEN1 cannot leak past the membrane qualifier.
+#   - BM-NEG-005: Hazelwood et al. 2008 is not in the corpus; the mapping was confirmed from
+#     00470.txt instead.
