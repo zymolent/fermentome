@@ -47,6 +47,18 @@
 #   * The Mae1 contradiction is VISIBLE WITHIN A SINGLE CANDIDATE: in candidate 3, MAE1
 #     overexpression cut 3-HP titer from 3.42 to 2.56 g/L, and an NADP+-preferring MaeA* mutant
 #     also lost ground. Whatever the second corpus paper reports, this one is negative on Mae1.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 12 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   12 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 slot:
   number: 6
@@ -72,7 +84,6 @@ candidates:
       high biomass yield on ethanol of the yeast Cyberlindnera jadinii.
     year: 2026
     journal: Applied and environmental microbiology
-    corpus_file: 00468.txt
     strains:
       - Cyberlindnera jadinii CBS 621
       - Ogataea parapolymorpha CBS 11895 (wild type)
@@ -129,7 +140,6 @@ candidates:
       and energy generation during diauxic shift.
     year: 2020
     journal: Proceedings of the National Academy of Sciences of the United States of America
-    corpus_file: 00279.txt
     strains:
       - Saccharomyces cerevisiae CEN.PK113-7D
       - CEN.PK113-7D MitoLoc (pMitoLoc integrated; preSU9-GFP and preCOX4-mCherry)
@@ -179,7 +189,6 @@ candidates:
     title: Engineering yeast mitochondrial metabolism for 3-hydroxypropionate production.
     year: 2023
     journal: Biotechnology for biofuels and bioproducts
-    corpus_file: 00803.txt
     strains:
       - Saccharomyces cerevisiae CEN.PK 113-5D (background)
       - >-
@@ -253,7 +262,6 @@ not_shortlisted_but_notable:
   - doi: 10.1186/1471-2091-7-3
     pmid: '16433924'
     year: 2006
-    corpus_file: 00540.txt
     title: Loss of NAD(H) from swollen yeast mitochondria.
     note: >-
       The strongest near-miss, and the owner should know it exists. Isolated S. cerevisiae
@@ -270,7 +278,6 @@ not_shortlisted_but_notable:
   - doi: 10.1186/1471-2164-9-170
     pmid: '18412983'
     year: 2008
-    corpus_file: 00549.txt
     title: >-
       Multiway real-time PCR gene expression profiling in yeast Saccharomyces cerevisiae reveals
       altered transcriptional response of ADH-genes to glucose stimuli.
@@ -289,7 +296,6 @@ not_shortlisted_but_notable:
   - doi: 10.1371/journal.pone.0346295
     pmid: '41926382'
     year: 2026
-    corpus_file: 00922.txt
     title: Mitochondrial NAD kinase Pos5 is required for CoQ biosynthesis in yeasts.
     note: >-
       The only pool paper whose subject IS Pos5. A pos5 deletant produces 0.2-fold of wild-type
@@ -305,7 +311,6 @@ not_shortlisted_but_notable:
   - doi: 10.1016/j.mec.2024.e00245
     pmid: '39072283'
     year: 2024
-    corpus_file: 00124.txt
     title: >-
       A comparative analysis of NADPH supply strategies in Saccharomyces cerevisiae - production of
       d-xylitol from d-xylose as a case study.
@@ -320,7 +325,6 @@ not_shortlisted_but_notable:
   - doi: 10.1371/journal.pone.0333299
     pmid: '41021567'
     year: 2025
-    corpus_file: 00920.txt
     title: >-
       Evaluating the effects of synthetic POM cycles and NAD+ kinase expression on fatty alcohol
       production in Saccharomyces cerevisiae.
@@ -332,7 +336,6 @@ not_shortlisted_but_notable:
   - doi: 10.1016/j.xpro.2020.100160
     pmid: '33377054'
     year: 2020
-    corpus_file: 00153.txt
     title: Live-Cell Imaging of Mitochondrial Redox State in Yeast Cells.
     note: >-
       The pool's only compartment-resolved LIVE-CELL redox method — mitochondria-targeted roGFP
@@ -346,7 +349,6 @@ not_shortlisted_but_notable:
   - doi: 10.1093/femsyr/foae037
     pmid: '39656626'
     year: 2024
-    corpus_file: 00338.txt
     title: >-
       Specific growth rates and growth stoichiometries of Saccharomycotina yeasts on ethanol as
       sole carbon and energy substrate.
@@ -360,7 +362,6 @@ not_shortlisted_but_notable:
   - doi: 10.3389/fmicb.2018.01460
     pmid: '30018610'
     year: 2018
-    corpus_file: 01032.txt
     title: GPD1 and ADH3 Natural Variants Underlie Glycerol Yield Differences in Wine Fermentation.
     note: >-
       Reciprocal hemizygosity across four S. cerevisiae lineages (Wine/European, Sake, North
@@ -374,7 +375,6 @@ not_shortlisted_but_notable:
   - doi: 10.1093/femsyr/foac007
     pmid: '35137036'
     year: 2022
-    corpus_file: 00334.txt
     title: >-
       Respiratory reoxidation of NADH is a key contributor to high oxygen requirements of
       oxygen-limited cultures of Ogataea parapolymorpha.

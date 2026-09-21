@@ -225,8 +225,10 @@ def test_evidence_that_cites_nothing_at_all_is_refused(atlas: sqlite3.Connection
     assert "J.5" in _why(plan)
 
 
-def test_a_measurement_now_has_a_publication_column_of_its_own(atlas: sqlite3.Connection) -> None:
-    """The asymmetry this file used to record is gone at the schema layer (v12).
+def test_a_measurement_carries_its_own_publication_and_from_measurement_reads_it(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The asymmetry this file used to record is gone, at both layers.
 
     What it used to say: `measurement` had no publication column, so promotion's
     "promoted from curation task ... on doi:10.1186/..." prose was the only record of the paper,
@@ -237,10 +239,11 @@ def test_a_measurement_now_has_a_publication_column_of_its_own(atlas: sqlite3.Co
     already in the atlas were backfilled from `curation_task`, which is where promotion had the
     value all along.
 
-    So the hop is now a join, and this test walks it. What is *not* yet wired is the consumer:
-    `from_measurement` still leaves `publication_id` None and the plan still asks a curator for it,
-    the way `from_modification` has never had to. That is a change to `assertions.py` and belongs
-    to whoever owns this module; it is asserted here so the remaining half cannot be forgotten.
+    Schema v12 was half of it and this test used to assert the other half was still missing:
+    `from_measurement` left `publication_id` None, so the plan asked a curator for something the
+    row already knew. It now reads the column, `from_measurement` and `from_modification` behave
+    the same way, and the two assertions below are the ones that flipped when it was wired --
+    the plan no longer names J.5, and it no longer needs `publication_id` passed to stop.
     """
     columns = {row["name"] for row in atlas.execute("PRAGMA table_info(measurement)")}
     assert "publication_id" in columns
@@ -260,14 +263,15 @@ def test_a_measurement_now_has_a_publication_column_of_its_own(atlas: sqlite3.Co
         direction="increases",
         control_strain_id="YAA:STRAIN:ctrl",
     )
-    assert request.evidence[0].publication_id is None, (
-        "from_measurement does not read the new column yet; when it does, this assertion and the "
-        "one below flip and the Requirement text in assertions.py needs updating with them"
+    assert request.evidence[0].publication_id == PUB_A, (
+        "the paper comes off `measurement.publication_id`, not out of the `evidence` prose and "
+        "not from the curator -- the `evidence` sentence in this fixture deliberately says "
+        "'paper-a' rather than the id, so anything holding the id read the column"
     )
-    assert "J.5" in _why(A.plan_assertion(atlas, request))
+    assert "J.5" not in _why(A.plan_assertion(atlas, request))
+    assert A.plan_assertion(atlas, request).ready
 
-    # Supplied explicitly, the plan is satisfied -- which is what wiring the column up will do
-    # without asking.
+    # An explicit argument still wins, which is what a row whose own column is NULL needs.
     supplied = A.from_measurement(
         atlas,
         "YAA:MEAS:a",
@@ -276,9 +280,58 @@ def test_a_measurement_now_has_a_publication_column_of_its_own(atlas: sqlite3.Co
         independent_group="lab-atsumi",
         direction="increases",
         control_strain_id="YAA:STRAIN:ctrl",
-        publication_id=PUB_A,
+        publication_id=PUB_B,
     )
-    assert "J.5" not in _why(A.plan_assertion(atlas, supplied))
+    assert supplied.evidence[0].publication_id == PUB_B
+
+
+def test_a_measurement_with_no_publication_of_its_own_still_asks_for_one(
+    atlas: sqlite3.Connection,
+) -> None:
+    """NULL means "there is no paper", and the requirement is then real rather than invented.
+
+    `measurement.publication_id` is nullable because a number read out of a deposited dataset
+    rather than out of a paper is a legitimate row. Reading the column must therefore not turn
+    into assuming it: when it is NULL nothing closed a J.5 arm, and the plan says so by name.
+    """
+    atlas.execute("UPDATE measurement SET publication_id = NULL WHERE id = 'YAA:MEAS:a'")
+    request = A.from_measurement(
+        atlas,
+        "YAA:MEAS:a",
+        predicate="affects_production_of",
+        evidence_type="direct_perturbation",
+        independent_group="lab-atsumi",
+        direction="increases",
+        control_strain_id="YAA:STRAIN:ctrl",
+    )
+    assert request.evidence[0].publication_id is None
+    plan = A.plan_assertion(atlas, request)
+    assert not plan.ready
+    assert "J.5" in _why(plan)
+
+
+def test_a_bottleneck_carries_its_own_publication_and_from_bottleneck_reads_it(
+    atlas: sqlite3.Connection,
+) -> None:
+    """`bottleneck.publication_id` is the same v12 column and the same wiring.
+
+    It was added for the same reason and left unread for the same reason, and it is checked here
+    separately because `from_bottleneck` reaches a different row: the two consumers could easily
+    have been fixed one at a time.
+    """
+    request = A.from_bottleneck(
+        atlas,
+        "YAA:BNK:pyruvate",
+        predicate="is_bottleneck_for",
+        evidence_type="literature_assertion",
+        object_type="product",
+        object_id="YAA:PRODUCT:isobutanol",
+        subject_type="reaction",
+        subject_id="YAA:RXN:ahas",
+        span_id="YAA:SPAN:a",
+    )
+    assert request.evidence[0].publication_id == PUB_A
+    assert "J.5" not in _why(A.plan_assertion(atlas, request))
 
 
 def test_a_direct_perturbation_without_a_stated_control_is_refused(

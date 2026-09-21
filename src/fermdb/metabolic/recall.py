@@ -31,14 +31,24 @@ THREE NUMBERS, NEVER ONE. ``recall`` is over the configurations that *can* be ju
 ``partial`` says what recall would be if a configuration naming three of five enzymes counted.
 Reporting only the first would be the same inflation by a different route.
 
-TWO KINDS OF MATCH, COUNTED APART. A role resolves either by an exact gene symbol or — under the
-owner's ruling of 2026-09-22 — by a role name qualified with a source organism ("2-ketoacid
-decarboxylase (KDC) from Lactococcus lactis"), and then only where the catalog holds exactly one
-part for that ``(step_role, source_organism)`` pair. The second is a weaker identification, so it
-is never allowed to disappear into the total: every verdict names the roles it resolved that way
-and :class:`RecallReport` counts the two kinds separately. A bare role name with no organism stays
-refused, for the reason it always was — it is a wildcard, and a wildcard returns 100% on a record
-that said nothing.
+THREE KINDS OF MATCH, COUNTED APART. A role resolves in one of three ways, and they are not the
+same identification:
+
+* by an **exact gene symbol** — token equality against ``part.genes`` plus :data:`ENZYME_ALIASES`;
+* by a **gene symbol narrowed with a variant designation** — ``ilvC6E6``, ``ilvC P2D1-A1`` — under
+  the owner's second ruling of 2026-09-22, and then only where exactly one catalog part carries
+  that symbol *and* that designation;
+* by a **role name qualified with a source organism** — "2-ketoacid decarboxylase (KDC) from
+  Lactococcus lactis" — under the owner's first ruling of 2026-09-22, and then only where the
+  catalog holds exactly one part for that ``(step_role, source_organism)`` pair.
+
+The three are never allowed to disappear into one total: every verdict names the roles it resolved
+each way and :class:`RecallReport` counts them apart, so a reader of a recall figure can see how
+much of it rests on which. The two rulings have **the same shape — a qualified name identifies, a
+bare one does not**. A bare role name with no organism stays refused because it is a wildcard, and
+a wildcard returns 100% on a record that said nothing. A bare ``ilvC`` with no variant stays
+ambiguous and is never narrowed, because four KARI parts carry that symbol and differ by exactly
+the NADPH/NADH question the programme turns on: picking one would be picking a cofactor.
 
 The rule itself is :data:`MATCHING_RULE` — a list of clauses, in the order they are applied,
 printed by ``fermdb atlas recall --rule``. It is data rather than prose in a docstring so that
@@ -50,7 +60,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Final
 
@@ -60,20 +70,24 @@ from .routes import STEP_ORDER, STRATEGY_PLANS, Route
 __all__ = [
     "BY_GENE_SYMBOL",
     "BY_SOURCE_ORGANISM",
+    "BY_VARIANT_DESIGNATION",
     "ENZYME_ALIASES",
     "MATCHING_RULE",
     "AmbiguousSource",
+    "AmbiguousVariant",
     "Configuration",
     "ConfigurationVerdict",
     "RecallReport",
     "RoleResolution",
     "RuleClause",
     "classify",
+    "designation_index",
     "describe_report",
     "enzyme_entries",
     "gene_index",
     "load_configurations",
     "recall_report",
+    "reported_designations",
     "resolve_roles",
     "source_organism_of",
 ]
@@ -139,18 +153,23 @@ MATCHING_RULE: Final[tuple[RuleClause, ...]] = (
         "matched",
         "All five step roles resolved to at least one catalog part, and some enumerated route of "
         "the same strategy uses, at every role, one of that role's resolved parts. A role resolves "
-        "in one of TWO ways, and they are not the same strength of evidence: (a) by EXACT "
-        "gene-symbol token equality (case-folded) against part.genes, plus the curated "
-        "ENZYME_ALIASES table — never substring, never fuzzy; or (b) by a role name QUALIFIED WITH "
-        "A SOURCE ORGANISM ('2-ketoacid decarboxylase (KDC) from Lactococcus lactis'), under the "
-        "owner's ruling of 2026-09-22, and only where the catalog holds exactly one part for that "
-        "(step_role, source_organism) pair — see source_organism_ambiguous for the safeguard and "
-        "for why a role name WITHOUT an organism is still refused. Every verdict says which kind "
-        "it used, and the report counts the two separately, so a reader of a recall figure can see "
-        "how much of it rests on the weaker identification rather than having to assume. A role "
-        "that resolved to more than one part is reported as ambiguous beside the match, because "
-        "ilvC and ilvC6E6 share a gene symbol and differ by exactly the NADPH/NADH question the "
-        "atlas is for.",
+        "in one of THREE ways, and they are not the same identification: (a) by EXACT gene-symbol "
+        "token equality (case-folded) against part.genes, plus the curated ENZYME_ALIASES table — "
+        "never substring, never fuzzy; or (b) by a gene symbol NARROWED WITH A VARIANT DESIGNATION "
+        "('ilvC6E6', 'ilvC P2D1-A1'), under the owner's second ruling of 2026-09-22, and only "
+        "where exactly one part carries that symbol AND that designation — see "
+        "variant_designation_ambiguous for the safeguard and for why a BARE ilvC is still not "
+        "narrowed; or (c) by a role name QUALIFIED WITH A SOURCE ORGANISM ('2-ketoacid "
+        "decarboxylase (KDC) from Lactococcus lactis'), under the owner's first ruling of the same "
+        "day, and only where the catalog holds exactly one part for that (step_role, "
+        "source_organism) pair — see source_organism_ambiguous for that safeguard and for why a "
+        "role name WITHOUT an organism is still refused. The two rulings have the same shape: A "
+        "QUALIFIED NAME IDENTIFIES, A BARE ONE DOES NOT. Every verdict says which kinds it used, "
+        "and the report counts all three separately, so a reader of a recall figure can see how "
+        "much of it rests on which rather than having to assume. A role that still resolved to "
+        "more than one part is reported as ambiguous beside the match, because a bare ilvC is "
+        "carried by four KARI parts that differ by exactly the NADPH/NADH question the atlas is "
+        "for.",
     ),
     RuleClause(
         "catalog_gap",
@@ -188,6 +207,32 @@ MATCHING_RULE: Final[tuple[RuleClause, ...]] = (
         "below rather than being guessed at.",
     ),
     RuleClause(
+        "variant_designation_ambiguous",
+        "not_evaluable",
+        "A role is unfilled because the record named a gene symbol PLUS a variant designation "
+        "('ilvC6E6', 'ilvC P2D1-A1') and MORE THAN ONE catalog part carries that symbol and that "
+        "designation. The owner ruled on 2026-09-22 that a variant designation IS the "
+        "identification — 6E6 and P2D1-A1 are what the papers use, and ilvC6E6 names a specific "
+        "engineered protein the way ilvC does not — but, exactly as for a source organism, only "
+        "for as long as the catalog can name one part for it. Where two or more can, the harness "
+        "REFUSES and names them rather than picking. This is the SAME SHAPE as the role+organism "
+        "ruling: a qualified name identifies, a bare one does not, and uniqueness is the price of "
+        "both. Uniqueness is recomputed on every run from the parts passed in, so curating a "
+        "second ilvC 6E6 tomorrow turns today's resolved match into this clause by itself. WHY "
+        "THE REFUSAL IS HARSHER THAN A BARE ilvC, which looks backwards until you read what the "
+        "record claimed: a bare ilvC claims nothing about the cofactor, so reporting it as "
+        "'matched, ambiguous at KARI' concedes exactly what the record conceded. A record that "
+        "wrote 6E6 DID name the cofactor, and falling back to an ambiguous match would average "
+        "over the one property it was naming — NADPH against NADH, which is the distinction this "
+        "whole programme turns on. WHY A BARE ilvC IS STILL NOT NARROWED, which this clause does "
+        "not erode: four KARI parts carry ilvC (ilvc_ecoli, ilvc_nadh_variant, ilvc6e6_ecoli, "
+        "ilvc_p2d1a1_ecoli) and they differ by the NADPH/NADH question and almost nothing else, "
+        "so the symbol alone identifies nothing and resolving it would SILENTLY PICK A COFACTOR — "
+        "the one property the atlas exists to reason about. It stays ambiguous, reported and "
+        "never narrowed. A designation the parser cannot confidently read, and a designation that "
+        "matches NO part, both leave the role ambiguous rather than guessing.",
+    ),
+    RuleClause(
         "under_specified",
         "not_evaluable",
         "A role is unfilled and every enzyme entry was recognised — the record simply does not "
@@ -219,12 +264,17 @@ ENZYME_ALIASES: Final[Mapping[str, str]] = {
     # proposals in this atlas carry both "LlAdhA RE1" and plain "LlAdhA".
     "lladha": "adhA",
     "llkivd": "kivD",
-    # Named engineered KARI variants. They alias to the GENE symbol, not to a part id, so the
-    # role resolves to all four ilvC parts and is reported ambiguous. Saying that the paper's
-    # "ilvC6E6" is the catalog's `ilvc6e6_ecoli` rather than plain `ilvc_ecoli` is a curation
-    # claim about cofactor specificity, and the harness must not make it silently.
+    # Named engineered KARI variants, written with the designation GLUED to the symbol. They
+    # alias to the GENE symbol and never to a part id — an alias that named a part would be the
+    # cofactor claim made in a lookup table. What the alias buys, since the owner's second ruling
+    # of 2026-09-22, is that the glue can be split on a boundary a CURATOR asserted: the target
+    # symbol is a prefix of the key, so the remainder is the designation and
+    # `variant_designation_ambiguous` decides whether it identifies a part. `ilvcp2d1` still
+    # narrows nothing — no part carries the designation `P2D1` — and stays ambiguous, which is the
+    # conservative half working.
     "ilvc6e6": "ilvC",
     "ilvcp2d1": "ilvC",
+    "ilvcp2d1a1": "ilvC",
     # The valine-insensitive ILV6, as two point mutations written onto the symbol.
     "ilv6v90d": "ILV6",
     "ilv6v90dl91f": "ILV6",
@@ -248,6 +298,7 @@ _ROLE_BY_TOKEN: Final[Mapping[str, str]] = {role.casefold(): role for role in ST
 #: and a figure that pooled them would hide exactly what the owner's 2026-09-22 ruling exposed.
 BY_GENE_SYMBOL: Final[str] = "gene_symbol"
 BY_SOURCE_ORGANISM: Final[str] = "source_organism"
+BY_VARIANT_DESIGNATION: Final[str] = "variant_designation"
 
 #: Tokens that name a GROUP of steps rather than an enzyme. The same category as a bare role
 #: name: the paper said which steps, not which proteins.
@@ -353,6 +404,151 @@ def _sole_step_role(tokens: Sequence[str]) -> str | None:
         return None
     roles = {_ROLE_BY_TOKEN[token] for token in tokens if token in _ROLE_BY_TOKEN}
     return roles.pop() if len(roles) == 1 else None
+
+
+# ------------------------------------------------------- 'GENE SYMBOL + VARIANT DESIGNATION'
+#
+# The owner's second 2026-09-22 ruling, deliberately the same shape as the first: a variant
+# designation attached to a gene symbol IS the identification — `6E6` and `P2D1-A1` are what the
+# papers use — and it resolves only where exactly one catalog part carries that symbol and that
+# designation. A BARE `ilvC` is not narrowed and never will be here.
+#
+# This is the one place in the module where a token is split rather than compared whole, which is
+# the "substring match wearing a hat" the rest of the file refuses. Four things keep it honest:
+#
+# 1. NARROWING ONLY. A designation can only remove candidates from a role a GENE SYMBOL already
+#    filled. It can never fill an empty role, never reach a part the symbol did not reach, and
+#    never turn an unrecognised entry into a recognised one. So the worst a misread designation
+#    can do is refuse a match that would otherwise have been reported ambiguous — a move in the
+#    pessimistic direction, which is the direction this module is allowed to be wrong in.
+# 2. THE SPLIT POINT IS CURATED, NOT GUESSED. A glued token (`ilvC6E6`) is split only where it is
+#    an ENZYME_ALIASES key whose target symbol is a prefix of it — i.e. where a curator has
+#    already written down that this spelling is that gene. An unknown glued spelling stays
+#    unrecognised, exactly as before.
+# 3. THE CATALOG SIDE IS DECLARED. A part carries a designation only if it declares `variant_of`,
+#    which is the catalog saying "this is a variant of that"; the designation is then read from
+#    the part id. A variant part whose id does not spell its designation carries none and cannot
+#    be reached by this clause — refused, not guessed.
+# 4. SHAPE. A designation must mix letters and digits. That is what `6E6`, `P2D1A1` and `V90D`
+#    look like and what `nadh`, `native`, `ecoli` and `variant` do not, so the descriptive words
+#    in part ids are not mistaken for designations. A token that is itself a catalog gene symbol
+#    is never a designation.
+
+#: The longest thing we will read as a designation. `P2D1A1` is 6; the bound is here so a run of
+#: tokens cannot be concatenated into something no paper wrote.
+_DESIGNATION_MAX: Final[int] = 16
+
+_HAS_DIGIT = re.compile(r"[0-9]")
+_HAS_LETTER = re.compile(r"[A-Za-z]")
+
+#: Tokens for the designation scan. Unlike :data:`_TOKEN` these may BEGIN with a digit, because
+#: papers write `ilvC 6E6` and `6E6` is the whole of the designation. `_TOKEN` keeps its
+#: letter-first shape, because it feeds gene-symbol lookup and no gene symbol starts with a digit.
+#:
+#: Scanning with it IS the normalisation: separators fall between the runs and the runs are
+#: case-folded and concatenated, so `P2D1-A1`, `P2D1A1` and `p2d1 a1` all reach the one key
+#: `p2d1a1`. The difference between those spellings is typography, not identity.
+_ALNUM_RUN = re.compile(r"[A-Za-z0-9]+")
+
+
+def _is_designation(key: str, known_genes: Collection[str]) -> bool:
+    """Is this normalised token something we can confidently read as a variant designation?
+
+    Conservative on purpose: a token that fails here leaves the match AMBIGUOUS rather than being
+    guessed at. It must mix letters and digits — which `6E6`, `P2D1A1` and `V90D` do and `nadh`,
+    `native`, `ecoli` and `variant` do not — and it must not itself be a gene symbol the catalog
+    carries, or `ilv2_ilv6_native` would read its second gene as a designation of its first.
+    """
+    if not 2 <= len(key) <= _DESIGNATION_MAX or key in known_genes:
+        return False
+    return bool(_HAS_DIGIT.search(key)) and bool(_HAS_LETTER.search(key))
+
+
+def _designations_of(part: Part, known_genes: Collection[str]) -> frozenset[str]:
+    """The variant designation(s) a catalog part carries, read from its id.
+
+    ONLY for a part that declares ``variant_of``. That field is the catalog asserting that this
+    part is a variant of another one — which is exactly what D3 said a curator would have to add
+    before the harness could key on anything — and without it no designation is read at all, so
+    no ordinary part can acquire one by an accident of naming.
+
+    The id is read segment by segment: a segment that begins with one of the part's own gene
+    symbols yields either its own remainder (``ilvc6e6`` -> ``6e6``) or, when the segment IS the
+    symbol, the next segment (``ilvc_p2d1a1_ecoli`` -> ``p2d1a1``). Either way the candidate must
+    pass :func:`_is_designation`, which is why ``ilvc_nadh_variant`` carries none: ``nadh`` is a
+    word about the cofactor, not a designation a paper would cite.
+    """
+    if part.variant_of is None:
+        return frozenset()
+    segments = [segment for segment in part.id.casefold().split("_") if segment]
+    genes = sorted({gene.casefold() for gene in part.genes}, key=len, reverse=True)
+    found: set[str] = set()
+    for index, segment in enumerate(segments):
+        for gene in genes:
+            if not segment.startswith(gene):
+                continue
+            remainder = segment[len(gene) :]
+            candidate = remainder if remainder else (segments + [""])[index + 1]
+            if _is_designation(candidate, known_genes):
+                found.add(candidate)
+            break
+    return frozenset(found)
+
+
+def designation_index(parts: Sequence[Part]) -> dict[str, frozenset[str]]:
+    """``part id -> the variant designation keys it carries``, over the whole catalog.
+
+    Recomputed from the parts passed in, never cached, for the same reason the organism clause's
+    uniqueness is: it is a fact about the catalog as it is now, and a resolution that outlived the
+    fact that made it safe is the failure mode both rulings were careful to avoid.
+    """
+    known = set(gene_index(parts))
+    return {part.id: _designations_of(part, known) for part in parts}
+
+
+def reported_designations(entry: str, known_genes: Collection[str]) -> dict[str, str]:
+    """``designation key -> the text the entry wrote it as``, for one enzyme entry.
+
+    Two shapes, and no third:
+
+    * **detached** — ``'ilvC 6E6'``, ``'ilvC-6E6'``, ``'IlvC^6E6'``, ``'Ec_ilvC(P2D1-A1)'``. The
+      designation is the run of tokens IMMEDIATELY FOLLOWING a token that resolved to a gene
+      symbol. A run is offered whole and prefix by prefix, so ``P2D1`` then ``A1`` yields both
+      ``p2d1`` and ``p2d1a1`` and the catalog decides which it knows;
+    * **glued** — ``'ilvC6E6'``. Split only at a boundary :data:`ENZYME_ALIASES` already asserts:
+      the key's target gene symbol must be a case-folded prefix of the key. An unknown glued
+      spelling is not split, is not recognised, and is reported as it always was.
+
+    Adjacency is required in both shapes. A designation floating elsewhere in the entry is not
+    read, because "a token that looks like a designation somewhere in this text" is the loose rule
+    this module exists to avoid.
+    """
+    matches = list(_ALNUM_RUN.finditer(entry))
+    tokens = [m.group(0) for m in matches]
+    keys = [token.casefold() for token in tokens]
+    found: dict[str, str] = {}
+
+    for index, key in enumerate(keys):
+        gene = ENZYME_ALIASES.get(key, key).casefold()
+        if gene not in known_genes:
+            continue
+        if key != gene and key.startswith(gene):
+            # Glued, on a boundary a curator wrote down.
+            remainder = key[len(gene) :]
+            if _is_designation(remainder, known_genes):
+                found.setdefault(remainder, tokens[index][len(gene) :])
+        run = ""
+        for following in range(index + 1, len(keys)):
+            candidate = keys[following]
+            if candidate in known_genes or candidate in ENZYME_ALIASES:
+                break
+            if not _is_designation(candidate, known_genes):
+                break
+            run += candidate
+            if len(run) > _DESIGNATION_MAX:
+                break
+            found.setdefault(run, entry[matches[index + 1].start() : matches[following].end()])
+    return found
 
 
 # ------------------------------------------------------------------------------- the records
@@ -487,6 +683,32 @@ class AmbiguousSource:
 
 
 @dataclass(frozen=True)
+class AmbiguousVariant:
+    """A 'GENE + DESIGNATION' the catalog cannot narrow to one part.
+
+    A refusal, not a pick — and, unlike a bare symbol's ambiguity, not a match either. The record
+    named the variant, which is to say it named the cofactor; averaging over it would discard the
+    one property the designation was carrying.
+    """
+
+    role: str
+    #: The enzyme entry verbatim, so the refusal quotes the record rather than paraphrasing it.
+    entry: str
+    #: The designation as the record wrote it ('6E6', 'P2D1-A1').
+    designation: str
+    #: The parts carrying that symbol AND that designation — all of them, named.
+    part_ids: tuple[str, ...]
+
+    def describe(self) -> str:
+        return (
+            f"{self.entry!r} identifies {self.role} by the variant designation "
+            f"{self.designation!r}, and {len(self.part_ids)} catalog parts carry that symbol and "
+            f"that designation ({', '.join(self.part_ids)}) — picking one would be picking a "
+            f"cofactor"
+        )
+
+
+@dataclass(frozen=True)
 class Resolution:
     """The configuration's enzyme set, mapped onto the enumerator's coordinates."""
 
@@ -497,6 +719,8 @@ class Resolution:
     unrecognised: tuple[str, ...]
     #: Entries naming a role AND an organism that the catalog cannot narrow to one part.
     ambiguous_sources: tuple[AmbiguousSource, ...] = ()
+    #: Entries naming a gene AND a variant designation that the catalog cannot narrow to one part.
+    ambiguous_variants: tuple[AmbiguousVariant, ...] = ()
 
     @property
     def unfilled_roles(self) -> tuple[str, ...]:
@@ -511,6 +735,11 @@ class Resolution:
         """Roles whose enzyme was identified by role-plus-organism rather than by a gene symbol."""
         return tuple(r.role for r in self.roles if BY_SOURCE_ORGANISM in r.resolved_by)
 
+    @property
+    def variant_resolved_roles(self) -> tuple[str, ...]:
+        """Roles whose part was pinned by a variant designation narrowing a shared gene symbol."""
+        return tuple(r.role for r in self.roles if BY_VARIANT_DESIGNATION in r.resolved_by)
+
 
 def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
     """Map the paper's enzyme names onto step roles and part ids.
@@ -518,6 +747,13 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
     EXACT token equality, case-folded, against ``part.genes`` and :data:`ENZYME_ALIASES`. Never a
     substring test: 'ADH7' must not resolve to ADH1 because one contains 'ADH', and 'LlAdhA' is
     an alias precisely so that the general case stays strict.
+
+    A role a gene symbol filled with MORE THAN ONE part is then NARROWED, where the same entry
+    carries a variant designation ('ilvC6E6', 'ilvC P2D1-A1') that exactly one of those parts
+    carries — the owner's second 2026-09-22 ruling, flagged :data:`BY_VARIANT_DESIGNATION`. Two or
+    more parts carrying the designation is a refusal recorded in ``ambiguous_variants``, and the
+    role is left UNFILLED rather than falling back to the ambiguous symbol. A bare symbol, or a
+    designation no part carries, narrows nothing and stays ambiguous.
 
     An entry no gene symbol recognises gets a SECOND chance, added under the owner's 2026-09-22
     ruling: if it names exactly one step role and one source organism ('... (KDC) from Lactococcus
@@ -528,6 +764,7 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
     """
     by_gene = gene_index(parts)
     role_of = {part.id: part.step_role for part in parts}
+    designations = designation_index(parts)
 
     found: dict[str, set[str]] = {role: set() for role in STEP_ORDER}
     entries_for: dict[str, set[str]] = {role: set() for role in STEP_ORDER}
@@ -535,11 +772,15 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
     role_named_only: list[str] = []
     unrecognised: list[str] = []
     ambiguous_sources: list[AmbiguousSource] = []
+    ambiguous_variants: list[AmbiguousVariant] = []
 
     for entry in entries:
         tokens = [token.casefold() for token in _TOKEN.findall(entry)]
         recognised = False
         names_a_role = any(token in _ROLE_TOKENS or token in _ROLE_SYNONYMS for token in tokens)
+        # Collected per ENTRY, not per configuration: a designation may only narrow the role the
+        # same entry filled. A '6E6' in one entry has nothing to say about another entry's gene.
+        by_symbol: dict[str, set[str]] = {}
         for token in tokens:
             gene = ENZYME_ALIASES.get(token, token).casefold()
             part_ids = by_gene.get(gene)
@@ -550,10 +791,26 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
             for part_id in part_ids:
                 role = role_of[part_id]
                 if role in found:
-                    found[role].add(part_id)
-                    entries_for[role].add(entry)
-                    resolved_by[role].add(BY_GENE_SYMBOL)
+                    by_symbol.setdefault(role, set()).add(part_id)
         if recognised:
+            reported = reported_designations(entry, by_gene)
+            for role, part_ids in by_symbol.items():
+                narrowed, designation, colliding = _narrow_by_designation(
+                    part_ids, reported, designations
+                )
+                if colliding:
+                    # THE SAFEGUARD, in the same shape as the organism clause's: a named refusal
+                    # that says which parts collided, and leaves the role unfilled rather than
+                    # quietly reverting to an ambiguous match over the cofactor the record named.
+                    ambiguous_variants.append(
+                        AmbiguousVariant(role, entry, designation or "", colliding)
+                    )
+                    continue
+                found[role] |= narrowed
+                entries_for[role].add(entry)
+                resolved_by[role].add(BY_GENE_SYMBOL)
+                if designation is not None:
+                    resolved_by[role].add(BY_VARIANT_DESIGNATION)
             continue
 
         if names_a_role:
@@ -597,7 +854,43 @@ def resolve_roles(entries: Sequence[str], parts: Sequence[Part]) -> Resolution:
         role_named_only=tuple(role_named_only),
         unrecognised=tuple(unrecognised),
         ambiguous_sources=tuple(ambiguous_sources),
+        ambiguous_variants=tuple(ambiguous_variants),
     )
+
+
+def _narrow_by_designation(
+    part_ids: Collection[str],
+    reported: Mapping[str, str],
+    designations: Mapping[str, frozenset[str]],
+) -> tuple[frozenset[str], str | None, tuple[str, ...]]:
+    """``(parts to keep, the designation that narrowed them, the parts that collided)``.
+
+    NARROWING ONLY, and that containment is the whole of why splitting a token is allowed here at
+    all: this function is handed the parts a GENE SYMBOL already resolved to and can only return
+    a subset of them. It cannot reach a part the symbol did not reach and cannot fill an empty
+    role, so a misread designation can at worst refuse a match — never manufacture one.
+
+    Three outcomes. Exactly one part carries a reported designation: narrow to it. Two or more do:
+    refuse, and hand back both so the verdict can name them. None do — including the case where
+    the record named no designation at all, which is the bare ``ilvC`` the ruling deliberately
+    leaves alone: keep every candidate and stay ambiguous.
+    """
+    keep = frozenset(part_ids)
+    if len(keep) < 2 or not reported:
+        return keep, None, ()
+    hits: set[str] = set()
+    matched_keys: list[str] = []
+    for key in sorted(reported):
+        carrying = {part_id for part_id in keep if key in designations.get(part_id, frozenset())}
+        if carrying:
+            matched_keys.append(key)
+            hits |= carrying
+    if not hits:
+        return keep, None, ()
+    written_as = reported[matched_keys[0]]
+    if len(hits) > 1:
+        return keep, written_as, tuple(sorted(hits))
+    return frozenset(hits), written_as, ()
 
 
 def _parts_from(parts: Sequence[Part], role: str, organism: str) -> list[str]:
@@ -649,6 +942,16 @@ class ConfigurationVerdict:
         `detail`, so a caller counting matches can count the two kinds apart.
         """
         return () if self.resolution is None else self.resolution.organism_resolved_roles
+
+    @property
+    def variant_resolved_roles(self) -> tuple[str, ...]:
+        """Roles this verdict pinned by a variant designation narrowing a shared gene symbol.
+
+        Exposed as data for the same reason as the organism kind: a reader of a recall figure has
+        to be able to see how much of it rests on variant resolution, and a caller counting
+        matches has to be able to count the kinds apart without parsing `detail`.
+        """
+        return () if self.resolution is None else self.resolution.variant_resolved_roles
 
     @property
     def partial(self) -> bool:
@@ -732,6 +1035,15 @@ def classify(
                 f"ambiguous at {', '.join(ambiguous)} (the gene symbol does not distinguish the "
                 f"variants)"
             )
+        by_variant = resolution.variant_resolved_roles
+        if by_variant:
+            # The match kind, beside the match. A KARI pinned to one of four ilvC parts is a
+            # statement about the cofactor, and the reader is entitled to see that it was the
+            # designation and not the symbol that made it.
+            notes.append(
+                f"resolved BY VARIANT DESIGNATION at {', '.join(by_variant)} — a gene symbol "
+                f"narrowed by a named variant, uniquely in the catalog"
+            )
         by_organism = resolution.organism_resolved_roles
         if by_organism:
             # The match kind, beside the match and not in a footnote. A reader of 100% has to be
@@ -773,6 +1085,19 @@ def classify(
             ),
         )
 
+    blocking_variants = tuple(a for a in resolution.ambiguous_variants if a.role in unfilled)
+    if blocking_variants:
+        return ConfigurationVerdict(
+            configuration,
+            "variant_designation_ambiguous",
+            resolution,
+            route_ids,
+            detail=(
+                f"unfilled: {', '.join(unfilled)}; "
+                + "; ".join(a.describe() for a in blocking_variants)
+            ),
+        )
+
     return ConfigurationVerdict(
         configuration,
         "under_specified",
@@ -789,6 +1114,12 @@ def classify(
                 "; also, a source organism the catalog cannot narrow: "
                 + "; ".join(a.describe() for a in resolution.ambiguous_sources)
                 if resolution.ambiguous_sources
+                else ""
+            )
+            + (
+                "; also, a variant designation the catalog cannot narrow: "
+                + "; ".join(a.describe() for a in resolution.ambiguous_variants)
+                if resolution.ambiguous_variants
                 else ""
             )
         ),
@@ -832,9 +1163,30 @@ class RecallReport:
         return tuple(v for v in self.matched if v.organism_resolved_roles)
 
     @property
+    def matched_by_variant_designation(self) -> tuple[ConfigurationVerdict, ...]:
+        """Matches resting, at one or more roles, on a variant designation narrowing a symbol.
+
+        A different kind from a bare gene symbol rather than a weaker one — it is the NARROWER
+        identification, and it is the only one that can say which of four ilvC parts a build used.
+        Counted apart all the same: a figure that rests on reading `6E6` out of a part id is
+        resting on something a reader should be told about, and the three counts together are
+        what let anyone see what a recall figure is made of.
+        """
+        return tuple(v for v in self.matched if v.variant_resolved_roles)
+
+    @property
     def matched_by_gene_symbol(self) -> tuple[ConfigurationVerdict, ...]:
-        """Matches in which every role was pinned by a gene symbol. The stronger kind."""
-        return tuple(v for v in self.matched if not v.organism_resolved_roles)
+        """Matches in which every role was pinned by a gene symbol ALONE — nothing qualified it.
+
+        The complement of the other two, which is why it is defined by their absence: those two
+        can overlap (one configuration may name an organism at one role and a variant at another)
+        and a reader adding three overlapping counts would get a number larger than the total.
+        """
+        return tuple(
+            v
+            for v in self.matched
+            if not v.organism_resolved_roles and not v.variant_resolved_roles
+        )
 
     @property
     def evaluable(self) -> int:
@@ -913,8 +1265,10 @@ def describe_report(report: RecallReport) -> tuple[str, ...]:
         # "none of it rests on that" from "nobody said".
         lines.append(
             f"  of which  {len(report.matched_by_gene_symbol):>14}   "
-            f"matched by gene symbol, and {len(report.matched_by_source_organism)} by a role name "
-            f"plus a source organism (weaker — see `--rule`)"
+            f"matched by gene symbol alone, "
+            f"{len(report.matched_by_variant_designation)} by a variant designation, and "
+            f"{len(report.matched_by_source_organism)} by a role name plus a source organism "
+            f"(the last two are qualified names, not bare ones — see `--rule`)"
         )
     if not report.verdicts:
         lines += [

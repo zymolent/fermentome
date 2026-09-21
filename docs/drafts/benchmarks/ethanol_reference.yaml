@@ -5,11 +5,22 @@
 # Every `quote` is copied character-for-character out of the named corpus file, including the
 # empty-bracket artefacts ("[]", "[, ]", "()") left by reference stripping during text
 # extraction, and including hard line breaks. Do not normalise them before comparing.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 4 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   4 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - id: BM-ETH-001
   verdict: partially_supported
   publication: "doi:10.1093/femsyr/foag024"
-  corpus_file: "00348.txt"
   corpus_title: "Overexpression of the MAPK transcription factor gene MSS11 enhances ethanol biosynthesis in Saccharomyces cerevisiae via coordinated metabolic and stress-response reprogramming."
   quote: |-
     Notably, while the theoretical maximum mass yield of ethanol from glucose in S. cerevisiae is 0.511 g/g (based on EMP pathway stoichiometry), the experimentally achieved yields remain below this thermodynamic limit due to metabolic constraints and cellular maintenance requirements.
@@ -26,7 +37,6 @@
 - id: BM-ETH-002
   verdict: partially_supported
   publication: "doi:10.1186/s12934-015-0232-6"
-  corpus_file: "00661.txt"
   corpus_title: "Isobutanol production from cellobionic acid in Escherichia coli."
   quote: |-
     Glucose
@@ -47,7 +57,6 @@
 - id: BM-ETH-003
   verdict: partially_supported
   publication: "doi:10.1186/s13068-017-1001-z"
-  corpus_file: "00747.txt"
   corpus_title: "Optimizing anaerobic growth rate and fermentation kinetics in Saccharomyces cerevisiae strains expressing Calvin-cycle enzymes for improved ethanol yield."
   quote: |-
     For example, sugar-cane-based bioethanol production in Brazil often approaches 92% of the theoretical maximum of 0.51 g ghexose−1 []. Since the feedstock is the largest cost contributor in first-generation industrial ethanol production [], even modest improvements in ethanol yield can significantly improve process economics.
@@ -66,7 +75,6 @@
 - id: BM-ETH-004
   verdict: supported
   publication: "doi:10.1186/1475-2859-12-83"
-  corpus_file: "00572.txt"
   corpus_title: "Impact of oleic acid as co-substrate of glucose on 'short' and 'long-term' Crabtree effect in Saccharomyces cerevisiae."
   quote: |-
     The onset of the transition from respiratory to oxido-reductive metabolism, corresponding to the Dc, was characterized by the increase in the ethanol production and the decrease in the biomass yield (Yx/s). This happened at 0.24 h-1 on sole glucose (Figure A) but the presence of oleic acid in the fermentation broth led to an 8% increase at 0.26 h-1 (Figure B).

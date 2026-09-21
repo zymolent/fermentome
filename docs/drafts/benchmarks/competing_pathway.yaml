@@ -2,11 +2,22 @@
 # Source: local corpus of 1,309 stored full texts. Quotes are verbatim, including line breaks,
 # soft hyphens and the empty brackets left where the extractor dropped citation markers.
 # No confidence value is stated here and nothing is marked verified - that is a curator's act.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 6 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   6 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - id: BM-CMP-001
   verdict: supported
   publication: "doi:10.1093/femsyr/foaf014"
-  corpus_file: "00341.txt"
   quote: |-
     Pdc1, Pdc5, and Pdc6 are three isoenzymes. Pdc1 plays a major role and has a very high expression level. Pdc5 is only active when there is no Pdc1 protein expression, because its promoter is inhibited by Pdc1 protein (Eberhardt et al. ). Pdc2 is not a direct PDC gene, but a transcription factor (Iosue et al. ). It regulates the expression of Pdc1 and Pdc5, and is important for their functions (Mojzita and Hohmann , Nosaka et al. ). With a nonfermentable carbon source, Pdc6 is activated under sulfur limitation. When glucose is the carbon source, PDC6 cannot be transcribed (Boer et al. ).
   evidence_kind: review_statement
@@ -22,7 +33,6 @@
 - id: BM-CMP-002
   verdict: partially_supported
   publication: "doi:10.1186/s13068-019-1486-8"
-  corpus_file: "00765.txt"
   quote: |-
     Compared to the wt strain CEN.PK113-7D (13 g/L), JWY0 (13.8 g/L) and JWY04 (13.4 g/L), single deletion strains JWY14 (∆pdc1) and JWY15 (∆pdc5) showed only minor effects in ethanol production, resulting in ethanol titers of 12.6 g/L and 12.3 g/L, respectively, whereas the pdc1/5 double deletion strain JWY13 showed an ethanol titer of only 0.01 g/L (Fig. c).
   evidence_kind: own_result
@@ -38,7 +48,6 @@
 - id: BM-CMP-003
   verdict: supported
   publication: "doi:10.1016/j.synbio.2021.12.010"
-  corpus_file: "00140.txt"
   quote: |-
     In contrast, due to the essential role of glycerol formation in NADH redox-cofactor balancing in non-respiratory cultures, double deletion of GPD1 and GPD2 prevents anaerobic growth [,].
   evidence_kind: review_statement
@@ -54,7 +63,6 @@
 - id: BM-CMP-004
   verdict: partially_supported
   publication: "doi:10.1186/s13068-019-1560-2"
-  corpus_file: "00767.txt"
   quote: |-
     We also explored the effect of deleting the mitochondrial branched-chain amino acid transaminase encoded by BAT1, which converts the α-KIV precursor to valine exclusively in mitochondria (Fig. a). We found that deleting BAT1 in YZy165 results in a strain (YZy173, Table ) that produces 358 ± 13 mg/L isobutanol (from 15% xylose in 72 h high cell-density fermentations), which is a substantial improvement relative to deletions of PHO13 (YZy178) or ALD6 (YZy183) alone, and 2.5-times higher than the isobutanol produced by the parental YZy165 strain (Fig. a).
   evidence_kind: own_result
@@ -71,7 +79,6 @@
 - id: BM-CMP-005
   verdict: supported
   publication: "doi:10.1186/s13068-019-1486-8"
-  corpus_file: "00765.txt"
   quote: |-
     Further suppression of leucine biosynthesis by deletion of LEU4/9 (strain JWY02) had an additional large effect on isobutanol levels and resulted in a titer of 0.50 g/L (12.31 mg/g glucose). Further blocking of pantothenate biosynthesis by deletion of ECM31 (strain JWY03) had no statistically significant effect on isobutanol production (0.52 g/L, 12.69 mg/g glucose).
   evidence_kind: own_result
@@ -87,7 +94,6 @@
 - id: BM-CMP-006
   verdict: supported
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   quote: |-
     Isopentanol and 2-­methyl-­1-­butanol titers also increased in strains 
     containing mitochondrial isobutanol pathways. These increased titers 

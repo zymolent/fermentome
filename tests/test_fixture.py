@@ -61,6 +61,9 @@ EXPECTED_COUNTS: dict[str, int] = {
     "evidence_item": 4,
     "conflict": 1,
     "conflict_member": 2,
+    # One per assertion. PLAN.md J.5's third arm: an assertion that resolves to a paper but to no
+    # curator is the failure L.5 exists to prevent, so the count is tied to `assertion` above.
+    "curation_event": 4,
 }
 
 

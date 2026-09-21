@@ -306,12 +306,33 @@ def test_a_field_the_source_does_not_support_is_left_unknown() -> None:
     """The obligation that comes with citing a source: the citation must not leak into the fields
     the source is silent about.
 
-    10.1016/j.cels.2019.10.006 says which step Adh7 runs and where, and says nothing at all about
-    which cofactor it uses. 'NADPH' from background knowledge would look exactly as trustworthy as
-    the quoted fields beside it. 'unknown' is also the value the enumerator handles correctly: it
-    is skipped by both the cofactor gate and the per-compartment demand tally, so the part cannot
-    contribute a redox demand nobody has checked.
+    CHANGED 2026-09-22 — `adh7_native.cofactor_preference` IS NO LONGER 'unknown', AND THE RULE
+    THAT PUT IT THERE IS UNCHANGED. This test used to assert `cofactor_preference == "unknown"`
+    alongside `oxygen_sensitivity == "unknown"`, on the reasoning that 10.1016/j.cels.2019.10.006
+    -- the paper the entry was written from -- says which step Adh7 runs and where and says nothing
+    at all about which cofactor it uses, so writing 'NADPH' from background knowledge would have
+    looked exactly as trustworthy as the quoted fields beside it.
+
+    That reasoning still holds and the cels paper is still silent. What changed is that the field
+    was grounded in a DIFFERENT paper (owner-approved, 2026-09-22): `doi:10.1128/aem.00362-26`
+    states "Adh6 and Adh7 are NADP+-dependent enzymes with very low activities towards ethanol",
+    which is a source, not a memory. So the assertion moves from "this field is unknown" to the
+    property that was always the point -- **a field is filled from a source or it is left
+    'unknown', and a field filled from a source other than the entry's principal one says so.**
+
+    `oxygen_sensitivity` is the control and is deliberately still asserted `unknown`: neither paper
+    states it, and consulting the AEM paper for the cofactor did not license reading the rest of
+    the entry out of it.
     """
     adh7 = {p.id: p for p in C.load_parts(_settings())}["adh7_native"]
-    assert adh7.cofactor_preference == "unknown"
+
+    # Filled -- and only because a second paper says so, which the entry must name.
+    assert adh7.cofactor_preference == "NADPH"
+    assert "10.1128/aem.00362-26" in adh7.evidence
+    assert "10.1016/j.cels.2019.10.006" in adh7.evidence
+    # ...and it must be explicit that the cofactor is NOT the principal source's claim, or a reader
+    # takes the whole entry on the cels paper's authority. This is the cross-source label itself.
+    assert "NOT FROM THE PRINCIPAL SOURCE" in adh7.evidence
+
+    # Still silent, still unknown. The rule did not relax; one field found a source and one did not.
     assert adh7.oxygen_sensitivity == "unknown"

@@ -474,24 +474,33 @@ def test_the_cli_is_wired_so_ci_can_gate_on_it() -> None:
     assert plain.allow_empty is False
 
 
-def test_the_phase_zero_fixture_does_not_yet_resolve_a_complete_chain() -> None:
+def test_the_phase_zero_fixture_resolves_a_complete_chain() -> None:
     """What the walk finds against `tests/fixtures/mini_atlas/`, pinned exactly.
 
-    PLAN.md Q's phase-0 acceptance says *"an assertion resolves a complete J.5 chain"* and the
-    fixture is what it was checked against. It does not -- and this test records precisely why
-    rather than letting a `continue-on-error` CI step be the only place it is visible:
+    **What changed.** This test used to be called
+    `test_the_phase_zero_fixture_does_not_yet_resolve_a_complete_chain` and pinned the opposite
+    result -- 4 assertions walked, 0 closed, `{"no_curation_event": 4,
+    "evidence_cites_nothing": 1}` -- written so that it would fail the day the fixture was fixed.
+    That day is this one, and the old name now states a falsehood, so the assertions and the name
+    both move to the new contract. Two things were wrong and both are repaired:
 
-    * **all four** assertions break on `no_curation_event`. The fixture has no
-      `curation_event.yaml` and could not load one: `curation_event` is absent from `TABLE_ORDER`
-      in `src/fermdb/db/fixture.py`, so the file would be ignored. Fixing it is a one-line change
-      to that tuple plus a new fixture file, in a module this change does not own.
-    * `YAA:ASSERT:fx-l5` additionally breaks on `evidence_cites_nothing`: `YAA:EV:fx-l5` is an
-      `ai_inference` carrying a model, a version and a prompt version and **no source at all** --
-      no publication, no extraction, no processing run. It is storable (`evidence_item`'s
-      per-type CHECK does not require one for that type) and it resolves to nothing.
+    * `curation_event` was absent from `TABLE_ORDER` in `src/fermdb/db/fixture.py`, so no
+      `curation_event.yaml` could ever have loaded and all four assertions resolved to nobody.
+      The table is now last in that tuple (it declares no foreign key -- `target_id` is
+      polymorphic -- so "after everything it can reference" is the end of the list), and
+      `curation_event.yaml` carries one event per assertion with a named curator, a timestamp and
+      a rationale.
+    * `YAA:EV:fx-l5` was an `ai_inference` naming a model, a version and a prompt version and no
+      source at all: storable, because `evidence_item`'s per-type CHECK asks an `ai_inference` for
+      no citation, and resolving to nothing. It now names the publication the model was shown.
+      The alternative -- keeping it broken as the fixture's worked example of a chain that does
+      not close -- was rejected: the worked examples of every break kind are the tests above this
+      one, each built by damaging exactly one hop of a chain that closes, which is strictly more
+      informative than one permanently red row; and a fixture carrying a known break cannot be
+      the CI gate, which is what `.github/workflows/ci.yml` now makes it.
 
-    When either is fixed this test fails, which is the point: it is the reminder, and updating it
-    is how the fix gets recorded.
+    PLAN.md Q's phase-0 acceptance -- *"an assertion resolves a complete J.5 chain"* -- holds for
+    the first time, and here holds in its stronger form: **every** assertion in the fixture does.
     """
     from pathlib import Path
 
@@ -501,31 +510,75 @@ def test_the_phase_zero_fixture_does_not_yet_resolve_a_complete_chain() -> None:
     try:
         load_fixture(conn, Path(__file__).resolve().parents[0] / "fixtures" / "mini_atlas")
         walk = T.walk_assertions(conn)
+        rationales = {
+            row["target_id"]: row["rationale"]
+            for row in conn.execute(
+                "SELECT target_id, rationale FROM curation_event WHERE target_type = 'assertion'"
+            )
+        }
     finally:
         conn.close()
 
     assert walk.n_walked == 4
+    assert walk.n_closed == 4
+    assert not walk.broken, walk.breaks_by_kind()
     assert not walk.is_vacuous
-    assert walk.breaks_by_kind() == {"no_curation_event": 4, "evidence_cites_nothing": 1}
+    assert walk.breaks_by_kind() == {}
+    assert T.exit_code(walk) == T.EXIT_OK
 
-    # The one assertion whose source arm does close: fx-l1 reaches its paper through the evidence.
+    for chain in walk.chains:
+        # Every one closes a source arm ...
+        assert chain.closes
+        assert all(item.arms for item in chain.evidence)
+        # ... and J.5's third arm resolves to a name, a date and a reason, not just to a row.
+        ((_, curator, at),) = chain.curation
+        assert curator.strip()
+        assert at.startswith("2026-09-19")
+        assert rationales[chain.assertion_id].strip()
+
+    # The two that were broken, named: fx-l1 was only ever missing its curator, fx-l5 was missing
+    # both its curator and any source whatsoever.
     l1 = next(c for c in walk.chains if c.assertion_id == "YAA:ASSERT:fx-l1")
     assert l1.evidence[0].arms == ("literature",)
-    assert [b.kind for b in l1.all_breaks] == ["no_curation_event"]
 
-    assert T.exit_code(walk) == T.EXIT_BROKEN
+    l5 = next(c for c in walk.chains if c.assertion_id == "YAA:ASSERT:fx-l5")
+    (item,) = l5.evidence
+    assert item.evidence_type == "ai_inference"
+    assert item.arms == ("literature",)
+    assert "publication doi:10.9999/fixture-a" in item.hops
+    # Proposed by the model, not accepted by a human: the event records the act that happened.
+    assert l5.curation[0][1] == "fixture-fake-model@v0 (synthetic)"
 
 
-def test_the_ci_workflow_actually_runs_the_walk() -> None:
-    """The check J.5 specifies has to *run in CI*, which is half of what it asks for.
+def test_the_ci_workflow_gates_on_the_fixture_walk() -> None:
+    """The check J.5 specifies has to *run in CI*, and has to be able to go red.
 
     Asserted against the workflow file rather than assumed: a walk nothing invokes is a module,
-    not a gate, and this is the test that fails if someone drops the step.
+    not a gate, and a gate that cannot fail is a green tick asserting nothing. The workflow used
+    to gate on an empty temp atlas with `--allow-empty` -- vacuous by construction -- while the
+    fixture walk ran under `continue-on-error`. Now the fixture walk is the gate, so this test
+    fails if someone drops the step or makes it non-gating again.
     """
     from pathlib import Path
+
+    import yaml
 
     workflow = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "ci.yml"
     text = workflow.read_text(encoding="utf-8")
     assert "query traceability" in text
-    # The vacuous exemption must stay visible in the file rather than hide in the code.
+    # The vacuous exemption must stay visible in the file rather than hide in the code -- and it
+    # is now attached to the step that *asserts* an empty atlas exits 3, not to the gate.
     assert "--allow-empty" in text
+    assert "EXIT_VACUOUS=3" in text
+
+    # Parsed, not grepped: `continue-on-error` is the key that would make the gate toothless, and
+    # a substring search for it hits the comment explaining why it was removed.
+    steps = yaml.safe_load(text)["jobs"]["test"]["steps"]
+    walking = [step for step in steps if "query traceability" in step.get("run", "")]
+    assert len(walking) == 2, [step.get("name") for step in steps]
+    assert not any(step.get("continue-on-error") for step in walking)
+
+    # The gate is the one that loads the fixture, and it carries no `--allow-empty`: four closed
+    # chains cannot be vacuous, so an emptied fixture must exit 3 and go red.
+    (gate,) = [step for step in walking if "mini_atlas" in step["run"]]
+    assert "--allow-empty" not in gate["run"]

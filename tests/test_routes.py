@@ -382,7 +382,9 @@ def test_the_balance_is_summed_per_compartment_and_never_across_them(routes: lis
     assert cytosolic.redox_balance.net != native.redox_balance.net
 
 
-def test_a_missing_stoichiometry_is_unknown_and_never_balanced(parts: tuple, routes: list) -> None:
+def test_a_missing_stoichiometry_is_unknown_and_never_balanced(
+    parts: tuple, routes: list, pathway
+) -> None:  # noqa: ANN001 - a CuratedPathway
     """The distinction the hard rule turns on. Where the reaction/cofactor data does not say what
     a step does to the redox pools, the answer is `unknown` — a state of its own, reported as
     such, and never quietly rounded to `balanced`.
@@ -390,9 +392,21 @@ def test_a_missing_stoichiometry_is_unknown_and_never_balanced(parts: tuple, rou
     Two ways to get there, both real:
 
     * no curated pathway supplied at all, which is what `enumerate_routes(parts)` does; and
-    * a part whose `cofactor_preference` is the literal 'unknown'. `adh7_native` is exactly that:
-      it was read out of a paper that does not state the cofactor, and the catalog left it unknown
-      rather than filling it in from background knowledge.
+    * a part whose `cofactor_preference` is the literal 'unknown'.
+
+    CHANGED 2026-09-22 — THE CATALOG NO LONGER CARRIES A PART OF THE SECOND KIND, so this test now
+    BUILDS one rather than finding one. `adh7_native` used to be it: read out of a paper that does
+    not state the cofactor, and left `unknown` rather than filled in from background knowledge. Its
+    `cofactor_preference` is now `NADPH`, grounded in `doi:10.1128/aem.00362-26` -- a source, not a
+    memory -- so the catalog's last `unknown` cofactor is gone and the 1,600 routes that carried
+    that part are now evaluated.
+
+    The old assertions sat behind `if undeclared:` and so would have passed VACUOUSLY from today
+    onwards, silently testing nothing. That is the worse failure of the two available here, so the
+    branch is replaced by a substituted part: the contract "a part that declines to name its pool
+    makes its route unevaluable, and unevaluable is never rounded to balanced" is permanent, even
+    though no catalog entry exercises it right now. The first assertion below pins that absence
+    explicitly, so the day a part comes back `unknown` this test says so rather than drifting.
     """
     unchecked = enumerate_routes(parts, strategies=["A_native_split"])
     assert all(r.redox_balance.status == "unknown" for r in unchecked)
@@ -400,17 +414,32 @@ def test_a_missing_stoichiometry_is_unknown_and_never_balanced(parts: tuple, rou
     assert all("never be read as 'balanced'" in r.redox_balance.unknowns[0] for r in unchecked)
     assert all(r.balance_status == "not_evaluated" for r in unchecked)
 
-    undeclared = [
-        r for r in routes if any(s.part.cofactor_preference == "unknown" for s in r.steps)
-    ]
-    if undeclared:  # only while the catalog carries such a part; it carries adh7_native today
-        route = undeclared[0]
-        assert route.redox_balance.status == "unknown"
-        assert route.redox_balance.unknowns
-        assert "cofactor_preference" in route.redox_balance.unknowns[0]
-        # and the part that IS known is still reported, rather than the whole route going dark
-        assert route.redox_balance.imbalances
-        assert route.viable, "an unevaluated balance is not a reason to drop a route either"
+    # The catalog has no undeclared pool today. Stated as an assertion, not assumed.
+    assert not [r for r in routes if any(s.part.cofactor_preference == "unknown" for s in r.steps)]
+
+    # ...so the contract is exercised on a part built to have one. Take a live route and blank the
+    # ADH step's declared pool; everything else about the route is untouched.
+    route = next(
+        r
+        for r in routes
+        if r.strategy == "A_native_split"
+        and not r.cofactor_cycle
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+        and any(s.part.id == "adh1_native" for s in r.steps)
+    )
+    blanked = tuple(
+        replace(step, part=replace(step.part, cofactor_preference="unknown"))
+        if step.step_role == "ADH"
+        else step
+        for step in route.steps
+    )
+    verdict = redox_balance(blanked, pathway)
+    assert verdict.status == "unknown"
+    assert verdict.unknowns
+    assert "cofactor_preference" in verdict.unknowns[0]
+    # and the step that IS known is still reported, rather than the whole route going dark
+    assert verdict.imbalances == ("NADPH short by 1 in mitochondrial_matrix",)
+    assert verdict.db_status == "not_evaluated"
 
 
 def test_every_route_carries_one_of_exactly_three_verdicts(routes: list) -> None:
@@ -577,7 +606,7 @@ def test_a_cofactor_cycle_step_takes_its_compartment_and_genome_from_its_own_par
     too — and that is not a bug, it is what makes the matrix bucket it opens visible.
 
     The literature agrees that a relocalized Pos5 is a different construct rather than the same
-    one moved: the corpus calls it `cPOS5` and `pos5D17`, expressed without the targeting
+    one moved: the corpus calls it `cPOS5` and `pos5Δ17`, expressed without the targeting
     sequence. If the atlas wants it, it is a second part.
 
     The encoding genome comes from the part for the same reason, and the consequence is the one
@@ -907,10 +936,25 @@ def test_the_redox_flag_does_not_reorder_the_ranking(parts: tuple, routes: list,
         ]
 
 
-def test_explain_prints_the_redox_flag_and_names_the_imbalance(routes: list) -> None:
+def test_explain_prints_the_redox_flag_and_names_the_imbalance(parts: tuple, routes: list) -> None:
     """Clause C4 says every rank is explainable term by term, and the flag is printed even though
     it is not a rank term — a stated property of the route rather than a hidden reason for its
-    position. It must print the NAME, not just the verdict."""
+    position. It must print the NAME, not just the verdict.
+
+    CHANGED 2026-09-22 — THE LIVE CATALOG NO LONGER PRODUCES AN `unknown` ROUTE, so the second half
+    of this test now builds one instead of picking one out of `routes`. It used to read
+    `next(r for r in routes if r.redox_balance.status == "unknown")` and that worked only because
+    `adh7_native.cofactor_preference` was the literal 'unknown', which made all 1,600 routes
+    carrying that part unevaluable. The field is now grounded in `doi:10.1128/aem.00362-26` and
+    every one of the 6,400 enumerated routes has a computed verdict, so the old line raises
+    StopIteration on a catalog that got BETTER.
+
+    The assertion is kept rather than dropped, because what it pins is a property of `explain` and
+    not a property of the catalog: `explain` must print `redox=unknown` when a route's balance was
+    not evaluated. Enumerating with no curated pathway is the other, permanent way to reach that
+    state — `enumerate_routes(parts)` — so the contract is tested against a route that is
+    guaranteed to be `unknown` for a structural reason instead of one that happened to be.
+    """
     flagged = next(
         r
         for r in routes
@@ -922,7 +966,11 @@ def test_explain_prints_the_redox_flag_and_names_the_imbalance(routes: list) -> 
     assert "redox=unbalanced" in reason
     assert "NADPH short by 2 in mitochondrial_matrix" in reason
 
-    unknown = next(r for r in routes if r.redox_balance.status == "unknown")
+    # No route in the live catalog is `unknown` any more, and that is the point of the change.
+    assert not [r for r in routes if r.redox_balance.status == "unknown"]
+
+    unknown = enumerate_routes(parts, strategies=["A_native_split"])[0]
+    assert unknown.redox_balance.status == "unknown"
     assert "redox=unknown" in explain(unknown)
 
     # and on an excluded route too: a reader asking why it was dropped is exactly the reader who

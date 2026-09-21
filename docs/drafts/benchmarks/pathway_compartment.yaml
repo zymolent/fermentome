@@ -10,11 +10,22 @@
 # Tally: supported 7 / partially_supported 3 / contradicted 1 / not_in_corpus 0
 # Curator's attention is most needed on BM-PATH-007 (contradicted), BM-PATH-003 (cluster type
 # disputed inside the corpus) and BM-PATH-006 (statement is malformed as written).
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 30 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   30 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - id: BM-PATH-001
   verdict: supported
   publication: "doi:10.1016/j.btre.2026.e00959"
-  corpus_file: "00080.txt"
   quote: |-
     In the natural process, pyruvates are subsequent to transport into the mitochondria, two pyruvate molecules are condensed into one molecule of acetolactate by acetohydroxyacid synthase [AHAS (Ilv2/Ilv6), with the catalytic subunit Ilv2 (encoded by the ILV2 gene) and the regulatory subunit Ilv6 (encoded by the ILV6 gene)].
   quote_supports: >-
@@ -36,7 +47,6 @@
     curator wanting the L2 evidence code will have to go outside this corpus.
   secondary_quotes:
     - publication: "doi:10.1038/s41598-019-40631-5"
-      corpus_file: "00223.txt"
       quote: |-
         and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
       why: >-
@@ -46,7 +56,6 @@
 - id: BM-PATH-002
   verdict: supported
   publication: "doi:10.1016/j.meteno.2016.01.002"
-  corpus_file: "00126.txt"
   quote: |-
     the set of native S. cerevisiae reactions that forms the basis for previous academic studies is not in itself redox balanced due to the use of an NADPH-dependent acetohydroxyacid reductoisomerase (AHAR, encoded by ILV5) to catalyse the conversion of acetolactate to 2,3-dihydroxyisovalerate.
   quote_supports: >-
@@ -67,14 +76,12 @@
     of the KARI step.
   secondary_quotes:
     - publication: "doi:10.1038/s41598-019-40631-5"
-      corpus_file: "00223.txt"
       quote: |-
         and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
       why: >-
         Gives the matrix-level compartment for Ilv2, Ilv5 and Ilv3 together; used by BM-PATH-001, -002
         and -003.
     - publication: "doi:10.1186/1754-6834-5-65"
-      corpus_file: "00603.txt"
       quote: |-
         For ilv5 mutants a petite phenotype is described as Ilv5 seems to be involved in the maintenance of wild-type mitochondrial DNA []. However, we could not find any indications for the occurrence of a petite phenotype in our ilv5 mutant strains.
       why: >-
@@ -84,7 +91,6 @@
 - id: BM-PATH-003
   verdict: partially_supported
   publication: "doi:10.1016/j.meteno.2016.01.002"
-  corpus_file: "00126.txt"
   quote: |-
     Prokaryotic and eukaryotic dihydroxyacid dehydratases contain iron–sulphur (4Fe–4S) clusters and require iron–sulphur cluster biogenesis and assembly mechanisms for in vivo activity (, , , ). In S. cerevisiae, iron–sulphur cluster biogenesis and assembly into mature proteins occurs predominantly in the mitochondrial matrix (), the location of the native yeast dihydroxyacid dehydratase Ilv3.
   quote_supports: >-
@@ -108,21 +114,18 @@
     a general contrast between the two cluster types.
   secondary_quotes:
     - publication: "doi:10.1038/s41598-019-40631-5"
-      corpus_file: "00223.txt"
       quote: |-
         and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
       why: >-
         Gives the matrix-level compartment for Ilv2, Ilv5 and Ilv3 together; used by BM-PATH-001, -002
         and -003.
     - publication: "doi:10.1016/j.synbio.2022.02.007"
-      corpus_file: "00141.txt"
       quote: |-
         The first half of the pathway converts pyruvate to α-ketoisovalerate (KIV) by mitochondria-localized ILV enzymes: acetolactate synthase (ALS, encoded by ILV2), a NADPH-dependent ketol-acid reductoisomerase (KARI, encoded by ILV5), and a 2Fe–2S cluster-requiring dihydroxyacid dehydratase (DHAD, encoded by ILV3).
       why: >-
         Assigns a 2Fe-2S cluster to yeast ILV3 specifically - directly at odds with the [4Fe-4S] clause
         of BM-PATH-003.
     - publication: "doi:10.1002/chem.202203140"
-      corpus_file: "00007.txt"
       quote: |-
         They all contain Fe−S clusters in their active sites of the type [2Fe−2S][, , ] or [4Fe−4S],[, , ] with the latter being more sensitive to oxygen than the former. A divalent metal ion (generally a Mg2+) is also essential for the catalytic activity of these enzymes.[, , ] Only a few crystal structures of ilvD/EDD dehydratases have been reported, all with a [2Fe−2S] cluster.
       why: >-
@@ -130,7 +133,6 @@
         solved structure is 2Fe-2S. Also the only corpus statement bearing on oxygen lability, and it is
         about the family, not yeast Ilv3.
     - publication: "doi:10.1080/21655979.2021.1978189"
-      corpus_file: "00289.txt"
       quote: |-
         2,3-dihydroxyisovalerate is then dehydrated to form 2 ketoisovalerate which is catalyzed by dihydroxyacid dehydratase.
       why: >-
@@ -139,7 +141,6 @@
 - id: BM-PATH-004
   verdict: supported
   publication: "doi:10.1016/j.btre.2026.e00959"
-  corpus_file: "00080.txt"
   quote: |-
     KIV, the key intermediate, is either transformed into valine in mitochondria by branched-chain amino acid aminotransferase (BCAT): Bat1 (encoded by the BAT1 gene) or translocated into the cytosol. KIV is also synthesized in cytosol by the Ehrlich degradation of the amino acid valine (Val), commencing with a transamination conversion of Val to KIV mediated by cytosolic BCAT: Bat2, which is encoded by the BAT2 gene. KIV undergoes further decarboxylation to form isobutyraldehyde via α-keto acid decarboxylases (KDCs).
   quote_supports: >-
@@ -160,7 +161,6 @@
     the corpus and cannot be confirmed from it.
   secondary_quotes:
     - publication: "doi:10.1038/s41467-021-27852-x"
-      corpus_file: "00198.txt"
       quote: |-
         Next, α-KIV is acetylated in either mitochondria or the cytosol by α-isopropylmalate (α-IPM) synthases (encoded by LEU4 and LEU9) to produce α-IPM.
       why: >-
@@ -170,7 +170,6 @@
 - id: BM-PATH-005
   verdict: supported
   publication: "doi:10.1080/21655979.2021.1978189"
-  corpus_file: "00289.txt"
   quote: |-
     The proceeding reaction of Ehrlich pathway for isobutanol occurs in cytosol. BAT 2 present in cytosol by its transaminase activity convert valine to 2 ketoisovalerate (KIV). 2-ketoisovalerate in cytosol gets converted to isobutyraldehyde by pyruvate decarboxylase. Genes responsible for this conversion include PDC1, PDC5, PDC6, ARO10, THI3.
   quote_supports: >-
@@ -193,7 +192,6 @@
 - id: BM-PATH-006
   verdict: partially_supported
   publication: "doi:10.1016/j.synbio.2022.02.007"
-  corpus_file: "00141.txt"
   quote: |-
     The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5) (a).
   quote_supports: >-
@@ -216,11 +214,9 @@
     also means no single source will satisfy this entry.
   secondary_quotes:
     - publication: "doi:10.1186/1475-2859-12-119"
-      corpus_file: "00569.txt"
       quote: |-
         have been developed following a bacterial strategy by construction of the Ehrlich pathway in the cytosol through expression of the kivd gene from Lactococcus lactis and ADH6 gene from S. cerevisiae[].
     - publication: "doi:10.1080/21655979.2021.1978189"
-      corpus_file: "00289.txt"
       quote: |-
         Formed isobutyraldehyde is reduced to isobutanol by alcohol dehydrogenase enzyme which require NADPH as cofactor [].
       why: >-
@@ -230,7 +226,6 @@
 - id: BM-PATH-007
   verdict: contradicted
   publication: "doi:10.1038/s41598-019-40631-5"
-  corpus_file: "00223.txt"
   quote: |-
     In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex, and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix. The mitochondrial 2-KIV is then exported to the cytosol, and finally converted to isobutanol through Ehrlich pathway, involving endogenous KDCs and ADHs.
   quote_supports: >-
@@ -253,14 +248,12 @@
     as a failure, which is the opposite of what PLAN.md S.5 wants this benchmark to measure.
   secondary_quotes:
     - publication: "doi:10.1080/21655979.2021.1978189"
-      corpus_file: "00289.txt"
       quote: |-
         Pyruvate produced through glycolysis are transferred into the mitochondria through the mitochondrial pyruvate complex [].
 
 - id: BM-PATH-008
   verdict: supported
   publication: "doi:10.1016/j.synbio.2024.12.010"
-  corpus_file: "00145.txt"
   quote: |-
     However, mitochondrial transport proteins involving α-KIV and valine remain unidentified [,], significantly limiting the use of compartmentalization strategies in constructing efficient cell factories [].
   quote_supports: >-
@@ -283,11 +276,9 @@
     discharged from these 1,309 texts.
   secondary_quotes:
     - publication: "doi:10.1016/j.btre.2026.e00959"
-      corpus_file: "00080.txt"
       quote: |-
         KIV, the key intermediate, follows the isobutanol production route by being transported into the cytosol using the unidentified mitochondrial KIV carrier (KIVC), where it is further converted to isobutanol by KDCs and ADHs, respectively. This isobutanol production route, which requires the transport of KIV via KIVC, was designated the KIVC-dependent pathway.
     - publication: "doi:10.1186/1754-6834-5-65"
-      corpus_file: "00603.txt"
       quote: |-
         As transport of KIV across the mitochondrial membrane is known [] this indicates that DIV can be efficiently exported out of mitochondria.
       why: >-
@@ -297,7 +288,6 @@
 - id: BM-PATH-009
   verdict: supported
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   quote: |-
     Compartmentalization of the 
     Ehrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in 
@@ -326,7 +316,6 @@
     - do not record 260% as a fold-change between arms.
   secondary_quotes:
     - publication: "doi:10.1038/nbt.2509"
-      corpus_file: "00190.txt"
       quote: |-
         We 
         detected all enzymes fused to the CoxIV mitochondrial localization 
@@ -336,7 +325,6 @@
 - id: BM-PATH-010
   verdict: supported
   publication: "doi:10.1186/1754-6834-5-65"
-  corpus_file: "00603.txt"
   quote: |-
     Isobutanol production could be improved by re-locating the valine biosynthesis enzymes Ilv2, Ilv5 and Ilv3 from the mitochondrial matrix into the cytosol. To prevent the import of the three enzymes into yeast mitochondria, N-terminally shortened Ilv2, Ilv5 and Ilv3 versions were constructed lacking their mitochondrial targeting sequences.
   quote_supports: >-
@@ -360,15 +348,12 @@
     Fe-S biology.
   secondary_quotes:
     - publication: "doi:10.1016/j.synbio.2022.02.007"
-      corpus_file: "00141.txt"
       quote: |-
         Functional genomic analyses suggested that the poor performances of the cytosolic pathway strains were in part due to a shortage in cytosolic Fe–S clusters, which are required cofactors for the dihydroxyacid dehydratase enzyme.
     - publication: "doi:10.1016/j.meteno.2016.01.002"
-      corpus_file: "00126.txt"
       quote: |-
         Iron–sulphur cluster assembly can also occur in the yeast cytosol (, , ), but has a much lower capacity than the mitochondrial system (, ).
     - publication: "doi:10.1186/1754-6834-5-65"
-      corpus_file: "00603.txt"
       quote: |-
         It seems that for the cytosolic Ilv3 version the loading with iron-sulphur can also be accomplished by the cytosolic assembly machinery CIA.
       why: >-
@@ -378,7 +363,6 @@
 - id: BM-PATH-011
   verdict: partially_supported
   publication: "doi:10.1038/s41598-019-40631-5"
-  corpus_file: "00223.txt"
   quote: |-
     In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex,
   quote_supports: >-
@@ -403,10 +387,8 @@
     testing that the atlas returns a name for one and a gap for the other.
   secondary_quotes:
     - publication: "doi:10.1080/21655979.2021.1978189"
-      corpus_file: "00289.txt"
       quote: |-
         Mitochondrial pyruvate carriers (MPC) which include mpc1, mpc2, and mpc3 were overexpressed in various combinations. Overexpression of mpc1 and mpc 3 improved isobutanol production.
     - publication: "doi:10.18632/oncotarget.7174"
-      corpus_file: "00960.txt"
       quote: |-
         There are three genes in yeast taking part in encoding the mitochondrial pyruvate carrier, i.e., MPC1, MPC2 and MPC3, with the first one being crucial for its function.

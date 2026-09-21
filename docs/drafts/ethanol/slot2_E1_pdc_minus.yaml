@@ -36,6 +36,18 @@
 # single spaces, so folding line breaks back to single spaces reproduces them character for
 # character. Empty reference brackets "[]" and empty parentheses "(Fig. )" are artefacts of the
 # stored text and are preserved as they stand.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 15 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   15 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 version: 1
 zone: R
@@ -68,7 +80,6 @@ candidates:
       blocking competing metabolic pathways as well as ethanol and glycerol formation
     year: 2019
     journal: "Biotechnology for Biofuels"
-    corpus_file: "00765.txt"
     pool_status: >-
       NOT IN THE E1 POOL. Discovery tagged it E3 and E5. See mis_tagged_candidates.
 
@@ -197,7 +208,6 @@ candidates:
       non-fermentative Saccharomyces cerevisiae
     year: 2012
     journal: "Microbial Cell Factories"
-    corpus_file: "00564.txt"
     pool_status: "in the E1 pool"
 
     pdc_genes_deleted:
@@ -329,7 +339,6 @@ candidates:
       chemicals biosynthesis
     year: 2025
     journal: "FEMS Yeast Research"
-    corpus_file: "00341.txt"
     pool_status: "in the E1 pool"
     publication_type: "REVIEW — this is the single most important thing to know about it"
 
@@ -505,7 +514,6 @@ pdc_dual_role:
   the_enzyme_assay:
     publication: "doi:10.1186/1754-6834-5-65"
     pmid: "22954227"
-    corpus_file: "00603.txt"
     pool_status: "in the E1 pool"
     genotype: >-
       Isoy21 — MATa leu2-3,112 ura3-52 trp1-289 his3-Δ1 MAL2-8c SUC2 Δpdc1::loxP Δpdc5::loxP
@@ -599,7 +607,6 @@ pool_assessment:
   runners_up_the_owner_may_prefer_to_swap_in:
     - doi: "10.1186/s12934-015-0305-6"
       pmid: "26253003"
-      corpus_file: "00664.txt"
       pool_status: "in the E1 pool"
       genotype: "pdc1Δ pdc5Δ pdc6Δ (PDC-E1), CEN.PK 113-5D × CEN.PK 110-10C background"
       one_line: >-
@@ -613,7 +620,6 @@ pool_assessment:
         allele that the incumbent isobutanol chassis actually uses.
     - doi: "10.1186/s12934-021-01594-3"
       pmid: "34098954"
-      corpus_file: "00684.txt"
       pool_status: "in the E1 pool"
       genotype: >-
         diploid xylose-utilizing S. cerevisiae; both copies of PDC1, PDC5 and PDC6 replaced, plus a
@@ -630,7 +636,6 @@ pool_assessment:
         and can accept that the Pdc content is incidental to a muconic acid paper.
     - doi: "10.1016/j.meteno.2016.01.002"
       pmid: "29142820"
-      corpus_file: "00126.txt"
       pool_status: "NOT in any ethanol criterion pool — see mis_tagged_candidates"
       genotype: >-
         IME307 — pdc1Δ pdc5Δ pdc6Δ MTH1ΔT ilv2Δ, CEN.PK, carrying a bacterial cofactor-balanced
@@ -649,7 +654,6 @@ pool_assessment:
   a_result_that_should_be_treated_with_caution:
     doi: "10.3390/foods15071163"
     pmid: "41976457"
-    corpus_file: "01128.txt"
     pool_status: "in the E1 pool"
     genotype: "S. cerevisiae GlmDP/pdc1Δpdc5Δpdc6Δ, CRISPR-Cas9, sequential knockouts"
     the_problem: >-
@@ -669,7 +673,6 @@ mis_tagged_candidates:
 
   - doi: "10.1186/s13068-019-1486-8"
     pmid: "31303893"
-    corpus_file: "00765.txt"
     currently_tagged: "E3 and E5"
     should_carry: "E1 (in addition to, or instead of, its current tags)"
     severity: "high — this is candidate 1 above"
@@ -684,7 +687,6 @@ mis_tagged_candidates:
 
   - doi: "10.1016/j.meteno.2016.01.002"
     pmid: "29142820"
-    corpus_file: "00126.txt"
     currently_tagged: >-
       none of E1–E6 — it is in the 1,311-document corpus but absent from every ethanol criterion
       pool, so it is presumably held in the isobutanol layer rather than the ethanol layer
@@ -698,7 +700,6 @@ mis_tagged_candidates:
       shows why the academic version of that lineage does not work.
 
   - doi: "10.1186/s13068-015-0374-0"
-    corpus_file: "00725.txt"
     currently_tagged: "none of E1–E6"
     should_carry: "worth checking for E1"
     severity: "medium"
@@ -709,7 +710,6 @@ mis_tagged_candidates:
       Not read in full in this session; flagged for triage rather than asserted.
 
   - doi: "10.1016/j.synbio.2022.02.007"
-    corpus_file: "00141.txt"
     currently_tagged: "none of E1–E6"
     should_carry: "worth checking for E1 and E5"
     severity: "medium"
@@ -719,7 +719,6 @@ mis_tagged_candidates:
       sweep. Not read in full in this session.
 
   - doi: "10.1128/mbio.00520-16"
-    corpus_file: "00489.txt"
     currently_tagged: "none of E1–E6"
     should_carry: "worth checking for E1"
     severity: "low-to-medium"
@@ -730,7 +729,6 @@ mis_tagged_candidates:
       review cites exactly this line of work. Not read in full in this session.
 
   - doi: "10.3390/ijms242216378"
-    corpus_file: "01162.txt"
     currently_tagged: "E2"
     should_carry: "possibly E1 as well"
     severity: "low"
@@ -742,7 +740,6 @@ mis_tagged_candidates:
       engineered non-ethanol producer. Genotype not confirmed in this session.
 
   - doi: "10.1128/spectrum.02277-22"
-    corpus_file: "00515.txt"
     currently_tagged: "E2"
     should_carry: "possibly E1 as well"
     severity: "low"

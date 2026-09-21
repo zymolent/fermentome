@@ -9,6 +9,18 @@
 # Every titre / yield / productivity below is stated with the conditions it was measured under.
 # Arithmetic the agent performed (e.g. % v/v -> g/L at 0.789 g/mL) is labelled as such and is
 # never presented as the paper's own number.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 7 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   7 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 slot:
   number: 5
@@ -40,7 +52,6 @@ candidates:
     title: "Conditions promoting effective very high gravity sugarcane juice fermentation."
     year: 2018
     journal: "Biotechnology for Biofuels"
-    corpus_file: "00755.txt"
     open_access: "Open access (BioMed Central / Biotechnology for Biofuels); full text stored in the corpus."
     strains:
       - "S. cerevisiae CAT-1 (Brazilian industrial bioethanol strain, purchased from LNF Latino Americana)"
@@ -135,7 +146,6 @@ candidates:
     title: "Large-scale robot-assisted genome shuffling yields industrial Saccharomyces cerevisiae yeasts with increased ethanol tolerance."
     year: 2015
     journal: "Biotechnology for Biofuels"
-    corpus_file: "00715.txt"
     open_access: "Open access (BioMed Central / Biotechnology for Biofuels); full text stored in the corpus."
     strains:
       - "Ethanol Red (commercial biofuel strain, coded P7) — used as the in-batch control strain in every fermentation"
@@ -250,7 +260,6 @@ candidates:
     title: "Brazilian industrial yeasts show high fermentative performance in high solids content for corn ethanol process."
     year: 2022
     journal: "Bioresources and Bioprocessing"
-    corpus_file: "00840.txt"
     open_access: "Open access (SpringerOpen / Bioresources and Bioprocessing); full text stored in the corpus."
     strains:
       - "Ethanol Red (ER) — the control, donated by Leaf by Lesaffre"
@@ -413,28 +422,24 @@ pool_assessment: >-
   asks for.
 
 pool_notes_not_shortlisted:
-  - corpus_file: "00609.txt"
-    doi: "10.1186/1754-6834-6-158"
+  - doi: "10.1186/1754-6834-6-158"
     note: "Highest yield fraction in the pool, and Ethanol Red by name, but the titre is below the owner's chassis."
     evidence:
       - quote: |-
           The highest ethanol yield (94.9 ± 2.8% of the theoretical yield) and sugars intake of 96.5 ± 2.9% were obtained after the fermentation of wort with an extract content of 250 g/kg supplemented with diammonium hydrogen phosphate (0.3 g/L of wort) and inoculated with 2 g of Ethanol Red dry yeast per L of wort.
       - quote: |-
           After 94 h of fermentation, ethanol concentration in the wort reached 12.4 ± 0.3% (v/v).
-  - corpus_file: "00602.txt"
-    doi: "10.1186/1754-6834-5-61"
+  - doi: "10.1186/1754-6834-5-61"
     note: "The cleanest pure-VHG record in the pool (glucose charged at 201/252/298 g/L, batch, ORP-controlled), but the variable of interest is a redox-potential intervention."
     evidence:
       - quote: |-
           As high as 131.0 ± 1.8 g/L ethanol was produced at 72 h when ORP was controlled at −150 mV for the VHG fermentation with medium containing 298 ± 3.8 g/L glucose,
-  - corpus_file: "00699.txt"
-    doi: "10.1186/s12934-024-02401-5"
+  - doi: "10.1186/s12934-024-02401-5"
     note: "Molasses at 250 g/L total fermentable sugars in a 5 L fermenter; a plausible fourth candidate, just below the chassis titre."
     evidence:
       - quote: |-
           Additionally, S. cerevisiae NGTM-F1 was used with 250 g/L (TFS) sugarcane molasses to synthesize ethanol in a 5-L fermenter, giving a yield of 111.65 g/L, the conversion of sugar to alcohol reached 95.53%.
-  - corpus_file: "00043.txt"
-    doi: "10.1007/s00253-025-13446-w"
+  - doi: "10.1007/s00253-025-13446-w"
     note: "145 g/L from 400 g/L corn syrup by SSF, but the engineered septuple-knockout strain is not an industrial reference, and the stated 41.1% sugar-to-ethanol conversion is a g/g figure (0.411), i.e. ~80% of the 0.511 theoretical — not a percentage of theoretical, which is an easy misreading to make."
     evidence:
       - quote: |-

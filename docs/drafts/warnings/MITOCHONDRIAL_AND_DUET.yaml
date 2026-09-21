@@ -58,6 +58,18 @@
 #      zinc-dependent and oligomeric (yeast Adh1 among the "tetrameric ADHs"). So the never_attempted
 #      gap is correctly placed -- and it is specifically the KDC, because a non-zinc ADH orthologue
 #      is an available hedge and there is no equivalent hedge for thiamine.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 12 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   12 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 version: 1
 zone: R
@@ -122,7 +134,6 @@ MITOCHONDRIAL_PROGRAM:
     unidentified 2-KIV export step entirely.
   verdict: incomplete
   publication: "doi:10.1038/s41598-019-40631-5"
-  corpus_file: "00223.txt"
   evidence:
     # doi:10.1038/s41598-019-40631-5  [00223.txt]
     - "In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex, and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix. The mitochondrial 2-KIV is then exported to the cytosol, and finally converted to isobutanol through Ehrlich pathway, involving endogenous KDCs and ADHs."
@@ -154,7 +165,6 @@ MITOCHONDRIAL_PROGRAM:
     single nuclear integration cannot match.
   verdict: overstated
   publication: "doi:10.1186/s12915-020-00786-4"
-  corpus_file: "00651.txt"
   evidence:
     # doi:10.1186/s12915-020-00786-4  [00651.txt]
     - "The number of mitochondrial genomes is generally constant across clades (Additional file : Figure S11), with no significant differences between domesticated and wild lineages, with a median of 18 mitochondrial genomes for each haploid nuclear genome. The variation is however particularly high across the population, reaching over 80 copies. As previously reported [], the mtDNA copy number scales up with ploidy in a linear way, with diploid strains having around double number of mitochondrial genomes and triploid having three times the number, compared to haploid cells"
@@ -209,7 +219,6 @@ MITOCHONDRIAL_PROGRAM:
     Strategy C has published precedent for this exact pathway, while strategy E has none.
   verdict: confirmed
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   evidence:
     # doi:10.1038/nbt.2509  [00190.txt]
     - "Compartmentalization of the \nEhrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in \nthe cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps \nof the biosynthetic pathway."
@@ -333,7 +342,6 @@ MITOCHONDRIAL_PROGRAM:
     Translation table 3: UGA = Trp, AUA = Met, CUN = Thr not Leu, CGA/CGC absent.
   verdict: incomplete
   publication: "doi:10.3390/ijms22094524"
-  corpus_file: "01149.txt"
   evidence:
     # doi:10.3389/fmicb.2023.1268944  [01060.txt]
     - "Yeast mitochondrial translation tables fall into either the Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code (NCBI table 4, hereafter referred to as the fungal code), which is consistent with other fungi, or the yeast mitochondrial code (NCBI table 3, originally based on S. cerevisiae, hereafter referred to as the Saccharomyces code) based on additional reassignments of AUA and CUN codons, which typically define the order Saccharomycetales."
@@ -387,7 +395,6 @@ MITOCHONDRIAL_PROGRAM:
     Yeast mtDNA is strongly AT-rich (~80%+).
   verdict: confirmed
   publication: "doi:10.7717/peerj.8362"
-  corpus_file: "01307.txt"
   evidence:
     # doi:10.7717/peerj.8362  [01307.txt]
     - "For example, some mitochondrial genomes are low in GC content (17% in yeast mitochondria; ) and pH milieu is different from the other part of cells (pH 7.5 in yeast mitochondria whereas pH 7.2 in the cytoplasm;"
@@ -435,7 +442,6 @@ MITOCHONDRIAL_PROGRAM:
     hydrophobic inner-membrane subunits, inserted co-translationally via Oxa1.
   verdict: confirmed
   publication: "doi:10.1091/mbc.e15-12-0811"
-  corpus_file: "00318.txt"
   evidence:
     # doi:10.1091/mbc.e15-12-0811  [00318.txt]
     - "These proteins are translated on membrane-associated ribosomes on the matrix side of the inner membrane and have to be inserted into the lipid phase by the mitochondrial protein export machinery. Oxa1 represents the core subunit of this mitochondrial export machinery. The channel-forming Oxa1 protein facilitates the membrane insertion of mitochondria-encoded proteins in a cotranslational manner"
@@ -482,7 +488,6 @@ MITOCHONDRIAL_PROGRAM:
     dehydrogenase is often Zn-dependent and oligomeric.
   verdict: confirmed
   publication: "doi:10.1186/s13068-025-02687-6"
-  corpus_file: "00815.txt"
   evidence:
     # doi:10.1186/s13068-025-02687-6  [00815.txt]
     - "X-ray crystal structure of KivdS286T reveals a tetrameric assembly composed of four polypeptide chains (Fig. a). The tetrameric structure is consistent with the results obtained from gel filtration chromatography, confirming that the crystal structure of KivdS286T represents the biologically active form of the protein."
@@ -595,7 +600,6 @@ MITOCHONDRIAL_PROGRAM:
     Comparison table, row 'precedent for isobutanol': strategy C = yes, strategy E = none.
   verdict: confirmed
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   evidence:
     # doi:10.1038/nbt.2509  [00190.txt]
     - "Compartmentalization of the \nEhrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in \nthe cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps \nof the biosynthetic pathway."
@@ -623,7 +627,6 @@ MITOCHONDRIAL_PROGRAM:
     copies.
   verdict: overstated
   publication: "doi:10.1186/s12915-020-00786-4"
-  corpus_file: "00651.txt"
   evidence:
     # doi:10.1186/s12915-020-00786-4  [00651.txt]
     - "The number of mitochondrial genomes is generally constant across clades (Additional file : Figure S11), with no significant differences between domesticated and wild lineages, with a median of 18 mitochondrial genomes for each haploid nuclear genome. The variation is however particularly high across the population, reaching over 80 copies. As previously reported [], the mtDNA copy number scales up with ploidy in a linear way, with diploid strains having around double number of mitochondrial genomes and triploid having three times the number, compared to haploid cells"
@@ -668,7 +671,6 @@ MITOCHONDRIAL_PROGRAM:
     unknown for these enzymes.
   verdict: confirmed
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   evidence:
     # doi:10.1038/nbt.2509  [00190.txt]
     - "We \ndetected all enzymes fused to the CoxIV mitochondrial localization \nsignal in the mitochondrial fractions, whereas we detected enzymes \nlacking the CoxIV signal only in cytoplasmic fractions ( Fig. 5)."
@@ -716,7 +718,6 @@ DUET_TARGET:
     biosynthesis, so it belongs in the competing-reaction set.
   verdict: confirmed
   publication: "doi:10.1186/s12934-015-0240-6"
-  corpus_file: "00662.txt"
   evidence:
     # doi:10.1186/s12934-015-0240-6  [00662.txt]
     - "A primary intermediate in isobutanol biosynthesis, 2-ketoisovalerate, also functions as an initial substrate in pantothenic acid biosynthesis []. 3-Methyl-2-oxobutanoate hydroxymethyltransferase, encoded by ECM31, catalyzes the first step in pantothenic acid biosynthesis. Consequently, deletion of ECM31 could prevent the diversion of 2-ketoisovalerate into the pantothenate pathway"
@@ -750,7 +751,6 @@ DUET_TARGET:
     point of failure: if matrix NADH-kinase flux is insufficient the pathway stalls at Ilv5.
   verdict: overstated
   publication: "doi:10.1093/femsyr/foae006"
-  corpus_file: "00336.txt"
   evidence:
     # doi:10.1016/j.mec.2024.e00245  [00124.txt]
     - "For this purpose, the kinase Pos5 – naturally a mitochondrial enzyme – is regarded as particularly suitable, as it strongly prefers NADH over NAD+"

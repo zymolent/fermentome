@@ -1,0 +1,561 @@
+# Slot 6 — Mitochondrial redox shuttle (criterion E5). SHORTLIST RE-RUN, 2026-09-22.
+#
+# Supersedes the candidate list in slot6_E5_redox_shuttle.yaml. That file's pool assessment,
+# its `not_shortlisted_but_notable` entries and its quote-verification notes all still stand;
+# what is replaced is the THREE-CANDIDATE list and the ranking.
+#
+# WHY IT WAS RE-RUN. PHASE2_STATUS.md §7 left it open, and §3b named
+# doi:10.1016/j.mec.2024.e00245 as a document that "should be read in full before slot 6 is
+# decided". It has now been read in full.
+#
+# ONE CORRECTION TO PHASE2_STATUS.md §3b, WHICH SAYS THE PAPER WAS "Not on the slot-6 shortlist".
+# That is half right and the other half matters. It was not among the three CANDIDATES, but it was
+# in the prior draft, under `not_shortlisted_but_notable`, with a stated reason:
+#   "Relocated to the cytosol it is the wrong compartment for this slot, which is why it is not
+#    shortlisted — but it is the best available evidence that Pos5's benefit is conditional on
+#    metabolic state."
+# So this is not a paper discovery missed. It is a paper the prior pass FOUND, judged, and filed
+# one tier too low. The re-run's job is to say whether that judgement was wrong. It was — but not
+# for the reason §3b implies. The paper's Pos5 IS cytosolic; the prior draft was factually right
+# about that and this pass confirms it from the methods (quote 5 below: the targeting sequence,
+# amino acids 1-17, is deleted). What the prior draft under-weighted is that the paper's CENTRAL
+# NEGATIVE RESULT is a direct, adverse prediction about DUET's architecture, and a record that
+# argues against the programme's own load-bearing hypothesis is worth more than one that flatters
+# it (PLAN.md J.4 — disputes are stored, not resolved).
+#
+# NOTHING IS ADMITTED HERE. No `confidence` value is written, `verified` is nowhere set, nothing
+# was written to data/ or to the database, and `fermdb extract` was not run. Per
+# ETHANOL_REFERENCE_SLOTS.md the agent shortlists and the owner picks; the `recommended` field
+# below is a recommendation with its reasoning exposed, not a choice.
+#
+# ─────────────────────────────────────────────────────────────── WHAT CHANGED SINCE THE LAST PASS
+#
+# * Eight candidates instead of three. The slots document's "three candidates per slot" rule was
+#   written for slots where the shortlist is a choice among comparable papers. E5 is not that: the
+#   realistic ceiling is ~5-8 QUALITATIVE records and the budget is 45, so the useful output is a
+#   ranked fillable set, not a three-way pick. This is stated as a deviation from the procedure
+#   rather than done quietly. If the owner wants the rule honoured literally, candidates 1-3 are
+#   the three.
+#
+# * PRIOR CANDIDATE 2 (doi:10.1073/pnas.1918216117, absolute mitochondrial proteome) IS DROPPED.
+#   The prior draft flagged a "DECISIVE UNKNOWN ... that check is a few minutes of work that should
+#   precede the pick". The check has now been run. Scanning its stored full text for the criterion's
+#   own vocabulary — ADH3/Adh3, POS5/Pos5, NAD(H) kinase, ethanol-acetaldehyde shuttle, mitochondrial
+#   alcohol dehydrogenase, mitochondrial/matrix NADPH, mitochondrial/matrix NADH — returns ZERO hits
+#   for all seven. It falls below the >=2-core-term bar that every candidate below clears, and on the
+#   evidence available offline it contributes nothing to E5. Whether PXD012802/PXD012803 contain
+#   Adh3 and Pos5 quantifications remains unverified and unverifiable without downloading the
+#   deposits; if the owner wants that done it is an acquisition task, not a shortlist task.
+#
+# * THE POOL IS NOW COUNTED LIVE, NOT INHERITED. Readable E5-tagged publications:
+#   136 (the prior draft said 129; PHASE2_STATUS.md §1 said 141 — the 141 counts E5 screening rows
+#   against all fulltext_asset rows, 136 counts DISTINCT readable publications). Of those 136,
+#   33 carry two or more core E5 terms; the eight below are what survives reading them.
+#
+# * EVERY CANDIDATE WAS PUT THROUGH `validate_admission` READ-ONLY, under E5, against the live
+#   database. ALL EIGHT RETURN NO PROBLEMS — correct criterion, ethanol tier present, screened
+#   through discovery, within budget, within cap, and each passes the loader's own E5 content check.
+#   So the blocker on E5 is not admissibility. It is that nobody has picked.
+#
+# QUOTE CHECK. Every string under `evidence` was re-resolved against the `fulltext_asset` store
+# (not the corpus cache — PHASE2_STATUS.md §6 records why that distinction is load-bearing) with
+# `fermdb.llm.validate.verify_span`. 10 of 10 exact, 0 failures, each unique in its source.
+# Offsets are 0-based half-open [char_start, char_end).
+
+slot:
+  number: 6
+  name: Mitochondrial redox shuttle
+  criterion: E5
+  budget: 45
+  admitted_today: 0
+  question: How do reducing equivalents reach the matrix?
+  pool_readable: 136
+  pool_with_two_or_more_core_terms: 33
+  realistic_ceiling: >-
+    5-8 QUALITATIVE records. Four independent passes (slot-6 agent, benchmark BM-COF-005, corpus
+    triage, PHASE2_STATUS.md §3a) agree that no paper measures a matrix NAD(P)H pool or ratio in
+    living S. cerevisiae under a named condition. That has not changed and this pass did not find a
+    counterexample. What IS fillable is B.3.5's wider admitted list: ADH3 localisation and
+    directionality, pos5-delta and POS5-overexpression phenotypes, and the respiratory /
+    diauxic-shift physiology of ethanol as a carbon source. The 45 stays substantially unspent and
+    is REPORTED, per ETHANOL_REFERENCE_SLOTS.md. This shortlist deliberately does not pad.
+  procedure_deviation: >-
+    Eight ranked candidates instead of three, for the reason given in the header. Candidates 1-3
+    are the three if the rule is to be honoured literally.
+  phase2_acceptance: >-
+    PLAN.md's phase-2 acceptance, amended 2026-09-22, requires at least one qualitative
+    ADH3/POS5/shuttle record admitted under E5. E5 at zero fails it. ANY ONE of the eight below
+    satisfies it as written, and all eight pass validate_admission today. The acceptance criterion
+    is therefore satisfiable without amending PLAN.md, PROVIDED the word "qualitative" is honoured
+    — PHASE2_STATUS.md §3a's separate finding, that the criterion cannot be met by a
+    MEASUREMENT-BEARING matrix-redox record, is unchanged and remains the owner's to resolve.
+
+recommended:
+  pick: doi:10.1016/j.mec.2024.e00245
+  runner_up: doi:10.1186/s13068-023-02309-z
+  reasoning: >-
+    Four reasons, and the fourth is the one that decides it.
+    (1) It is the only paper in the pool that puts a CONDITION on Pos5's usefulness instead of
+    treating Pos5 as a monotonic knob, and it names the mechanism: the NADH/NAD+ ratio falls by an
+    order of magnitude after the diauxic shift, so Pos5 runs out of substrate.
+    (2) That condition is DUET's condition. DUET proposes to feed Pos5 from matrix NADH generated by
+    Adh3 oxidising ethanol — i.e. in an ethanol-consuming redox state. This is the corpus's
+    strongest available warning that the substrate may not be there when the architecture needs it,
+    and G.8 already names POS5 capacity as the atlas's highest-priority bottleneck hypothesis.
+    (3) It is in S. cerevisiae (CEN.PK2-1C derivatives), in controlled bioreactors, in triplicate,
+    with t-tests — which candidates 3, 5 and 6 are not, and which candidate 4 is only in the wrong
+    organism.
+    (4) It is the only candidate that argues AGAINST the programme's own hypothesis. An atlas whose
+    E5 anchor is a paper that says "Pos5 helps" is worth less than one whose anchor says
+    "Pos5 helps, and here is the metabolic state in which it stops helping".
+  the_honest_caveat_on_this_pick: >-
+    ITS POS5 IS CYTOSOLIC. The N-terminal mitochondrial targeting sequence (amino acids 1-17) is
+    deleted, so the enzyme is in the wrong compartment for slot 6's literal question, and the
+    substrate pool whose collapse it reports is the CYTOSOLIC NADH/NAD+ ratio. The matrix NADH/NAD+
+    ratio after the diauxic shift is a different quantity and is exactly the thing nobody has
+    measured — it is the knowledge_gap row this layer already carries
+    (YAA:GAP:ethanol-0-matrix-nad-p-h-pool-size-and-nad-p-h-nad). So the warning transfers to DUET
+    as an L3 transfer claim under B.3.5's own evidence ceiling, NOT as a refutation, and an
+    admission of this record must say so on its face. It is also worth stating plainly that the
+    order-of-magnitude NADH/NAD+ figure is CITED by this paper from another study, not measured in
+    it, and the 50-fold NADH preference of Pos5 is likewise cited. Neither is this paper's own
+    measurement.
+  why_the_runner_up_could_win_instead: >-
+    doi:10.1186/s13068-023-02309-z is architecturally closer: a heterologous NADPH-consuming pathway
+    targeted INTO the matrix of a CEN.PK strain, with NATIVE (matrix) POS5 overexpressed against it
+    and the result read out as titer (+23.4% with -13.6% biomass; +33% with IDP1 co-overexpression;
+    ALD4 nothing; MAE1 negative). If the owner's priority is "what does raising matrix Pos5 buy",
+    that paper answers it and this one does not. The trade is: candidate 2 has the right compartment
+    and no condition-dependence; candidate 1 has the wrong compartment and the condition-dependence
+    that bears on whether DUET's regime supplies Pos5 at all. Picking both would spend 2 of 45 and
+    is defensible; they contradict each other in no respect.
+
+candidates:
+
+  - rank: 1
+    publication_id: doi:10.1016/j.mec.2024.e00245
+    pmid: '39072283'
+    doi: 10.1016/j.mec.2024.e00245
+    title: >-
+      A comparative analysis of NADPH supply strategies in Saccharomyces cerevisiae: Production of
+      d-xylitol from d-xylose as a case study.
+    year: 2024
+    journal: Metabolic engineering communications
+    b35_clause: POS5 overexpression phenotypes
+    strains:
+      - Saccharomyces cerevisiae CEN.PK2-1C background
+      - PRY39 (CEN.PK2-1C gre3-delta), PRY48 (PRY39 + ZWF1* under HXT7p)
+      - PRY53 / PRY54 — cPOS5 (POS5 lacking codons for the mitochondrial targeting signal, aa 1-17)
+        integrated at leu2 under the weak RNR2 promoter, in the PRY39 and PRY48 backgrounds
+      - plus ALD6-delta, PGI1 promoter-swap and KlGDP1 strains as the comparison arms
+    conditions: >-
+      Batch fermentation in selective SC medium, 30 g/L glucose + 20 g/L xylose, in shake flasks and
+      in stirred-tank bioreactors; glucose and ethanol used SEQUENTIALLY as carbon and redox donors,
+      so the experiment straddles the diauxic shift by design. Culture triplicates; t-tests reported
+      at p = 0.0148 / 0.0017 / 0.0001.
+    what_data_it_actually_contains:
+      - Xylitol titers and yields per consumed glucose, per strain, as time courses across the glucose phase and the ethanol phase separately — this per-phase split is the whole value of the paper.
+      - A head-to-head comparison of five NADPH-supply strategies in one genetic background (ZWF1* overexpression, ALD6 deletion, PGI1 down-regulation, KlGdp1 expression, cytosolic Pos5) rather than five papers' worth of incomparable contexts.
+      - Growth and carbon-source consumption rates for the cPos5 strains against their parents (supplementary), which is where the ATP dissipation cost shows up.
+      - A generalisation arm — the best two strategies re-tested on l-galactonate — establishing the result is not product-specific.
+      - Processed only, in figures and supplementary files.
+    accessions:
+      - none. No repository deposit appears in the stored full text.
+    why_this_slot: >-
+      B.3.5 admits "POS5 (mitochondrial NADH kinase) — expression level, overexpression phenotypes,
+      pos5-delta consequences, and any measured matrix NADPH response", and this is the pool's most
+      carefully controlled POS5 overexpression phenotype in S. cerevisiae. Its unique contribution is
+      the CONDITION-DEPENDENCE: cPos5 raises xylitol during the glucose phase, loses the gain past
+      ~24 h, and is net negative for the whole fermentation once ZWF1* is also present. The paper
+      then names the mechanism — NADH substrate availability collapses after the diauxic shift. That
+      is a testable, adverse prediction about the G.8 POS5-capacity hypothesis, generated from
+      inside the corpus rather than from the programme's own reasoning.
+    what_it_lacks:
+      - "THE COMPARTMENT IS WRONG, AND THIS IS THE FIRST THING AN OWNER SHOULD WEIGH. The targeting sequence is deleted; the enzyme is cytosolic; the pool it depletes is cytosolic NADH. DUET's Pos5 is native and matrix-resident. Everything transferable here is transferable at L3."
+      - "NO COFACTOR IS MEASURED. Not cytosolic NADH, not matrix NADH, not NADPH, not ATP. The entire redox argument is read off product titer, which also moves with expression burden, growth rate and carbon uptake. Same defect as the runner-up, stated in the same words because it is the same defect."
+      - "THE TWO NUMBERS THAT DO THE ARGUMENTATIVE WORK ARE CITED, NOT MEASURED HERE: the 50-fold NADH-over-NAD+ preference of Pos5, and the order-of-magnitude drop in NADH/NAD+ after the diauxic shift. Admitting this record means admitting a paper's reading of two other papers. The primary sources should be chased before either number is quoted as a measurement."
+      - "The product is xylitol via an NADPH-dependent xylose reductase — not an alcohol, not branched-chain, no Ilv5, no KARI, no Ehrlich step. It shares a cofactor demand with DUET and nothing else."
+      - "Pos5 is the paper's WORST-PERFORMING strategy, not its headline. The headline is ZWF1 overexpression. The POS5 result occupies one section (3.5) and one figure, and was not the experiment the study was designed around, so it is under-powered relative to the ZWF1 arm."
+      - "The RNR2 promoter is deliberately weak, chosen because stronger expression was reported to impair growth. So the experiment tests low-level cytosolic Pos5, and says nothing about what a high-capacity Pos5 would do."
+      - "No deposited data."
+    open_access_status: >-
+      fulltext_asset records oa_status 'gold', licence 'cc by', text_mining_allowed 'yes'.
+      Redistributable.
+    validate_admission_E5: no problems
+    evidence:
+      - quote: 'Expression of the mitochondrial NADH kinase Pos5 in the cytosol likewise improved the production of xylitol only on glucose, but not in combination with enhanced Zwf1 activity.'
+        char_start: 1512
+        char_end: 1688
+        occurrences_in_source: 1
+      - quote: 'The mitochondrial kinase Pos5 can phosphorylate both NADH and NAD+, but its preference for NADH is up to 50-fold higher compared to NAD+ ().'
+        char_start: 42036
+        char_end: 42176
+        occurrences_in_source: 1
+        note: >-
+          The empty parentheses are a stripped citation marker in the stored text and are reproduced
+          exactly, per the convention the prior draft records. The 50-fold figure is THIS PAPER
+          CITING ANOTHER, not measuring.
+      - quote: 'For cytosolic localization, the N-terminal targeting sequence (amino acids 1–17) of Pos5 was deleted based on previous work ().'
+        char_start: 42177
+        char_end: 42304
+        occurrences_in_source: 1
+        note: The sentence that makes the compartment caveat a fact rather than an inference.
+      - quote: 'In the PRY48 background, cPos5 had a negative effect during the whole fermentation, demonstrating that it does not act synergistically with the ZWF1* overexpression (a).'
+        char_start: 42844
+        char_end: 43013
+        occurrences_in_source: 1
+      - quote: 'A likely reason is a decrease in the NADH/NAD+ ratio by one order of magnitude after the diauxic shift (), which would decrease the substrate availability for Pos5.'
+        char_start: 59028
+        char_end: 59192
+        occurrences_in_source: 1
+        note: >-
+          The load-bearing sentence for the recommendation, and note its own hedge — "A likely
+          reason". The paper offers this as an explanation, not as a demonstration.
+
+  - rank: 2
+    publication_id: doi:10.1186/s13068-023-02309-z
+    pmid: '37031180'
+    doi: 10.1186/s13068-023-02309-z
+    title: Engineering yeast mitochondrial metabolism for 3-hydroxypropionate production.
+    year: 2023
+    journal: Biotechnology for biofuels and bioproducts
+    b35_clause: POS5 overexpression phenotypes; matrix NADPH routes
+    carried_forward_from: slot6_E5_redox_shuttle.yaml candidate 3 — unchanged in substance
+    summary: >-
+      The pool's only functional test of DUET's actual architecture: a heterologous NADPH-consuming
+      pathway targeted into the matrix of CEN.PK 113-5D, with NATIVE (matrix) POS5 overexpressed
+      against it. POS5 alone +23.4% titer with -13.6% biomass; POS5 + IDP1 +33%; ALD4 nothing;
+      MAE1 negative. It also names the whole matrix-NADPH set in one sentence and states Pos5's
+      primacy and its ATP cost.
+    what_it_lacks:
+      - No cofactor measured anywhere — matrix NADPH, matrix NADH, NADPH/NADP+ and ATP are all absent. Every redox claim is a titer proxy.
+      - The ATP cost of Pos5 is asserted from enzymology; the -13.6% biomass is its only shadow in the data and is uncontrolled.
+      - 3-HP via malonyl-CoA, not the Ehrlich pathway — shares the compartment and a cofactor requirement with DUET and nothing else.
+      - No ethanol, no Adh3, no shuttle; glucose-grown throughout. It answers "how is matrix NADPH made once NADH is there" and never touches how reducing equivalents reach the matrix, which is the slot's literal question.
+      - Matrix targeting of MCR is not verified by fractionation or microscopy; localisation rests on the targeting sequence plus a titer difference against a cytosolic control.
+      - No deposited data at all.
+    open_access_status: oa_status 'gold', licence 'cc by', text_mining_allowed 'yes'. Redistributable.
+    validate_admission_E5: no problems
+    evidence_note: >-
+      Eight verified quotes with offsets already exist in slot6_E5_redox_shuttle.yaml, candidate 3.
+      They were re-resolved in this pass and are not duplicated here.
+
+  - rank: 3
+    publication_id: doi:10.1128/aem.00362-26
+    pmid: '42429759'
+    doi: 10.1128/aem.00362-26
+    title: >-
+      Mitochondrial localization of key NAD(+)-dependent dehydrogenases explains the exceptionally
+      high biomass yield on ethanol of the yeast Cyberlindnera jadinii.
+    year: 2026
+    journal: Applied and environmental microbiology
+    b35_clause: >-
+      mitochondrial alcohol dehydrogenase — localisation and directionality; ethanol as a carbon
+      source
+    carried_forward_from: slot6_E5_redox_shuttle.yaml candidate 1 — unchanged in substance, demoted
+    why_demoted_from_rank_1: >-
+      Nothing about the paper changed; the ranking criterion did. The prior draft ranked it first
+      because it measures the compartment question directly, which it does and which nothing else in
+      the pool does. But it is not S. cerevisiae, and the mechanism it demonstrates depends on a
+      proton-pumping Complex I that S. cerevisiae does not have — so its energetic result cannot
+      transfer to DUET's chassis at all, only its localisation logic can. With the acceptance
+      criterion now asking for a qualitative ADH3/POS5/shuttle record, a record whose transferable
+      content is an analogy ranks below two records in the right organism.
+    summary: >-
+      Subcellular fractionation partitioning ADH specific activity between a mitochondria-enriched
+      fraction and the cytosol, in aerobic ethanol-limited chemostats (D = 0.050 and 0.10 /h), plus
+      a label-free DIA proteome with per-protein abundance for every detected ADH and ALD isozyme.
+      C. jadinii shows 50% HIGHER ADH activity in the mitochondria-enriched fraction; O.
+      parapolymorpha shows 10-fold LOWER. The most abundant C. jadinii ADH is predicted mitochondrial
+      and reaches almost 4% of the detected proteome.
+    what_it_lacks:
+      - NOT S. cerevisiae, and the Complex I dependence makes the energetics non-transferable. The single biggest reason to reject it.
+      - No NADH or NADPH measured in any compartment; matrix NADH is inferred from stoichiometry and enzyme location.
+      - No POS5, no NAD(H) kinase, no matrix NADPH — silent on the NADH-to-NADPH step DUET calls its single point of failure.
+      - No ADH3 and no ethanol-acetaldehyde shuttle as such. The regime is ethanol as a growth substrate under carbon limitation, not ethanol as a redox carrier in a fermenting, glucose-replete cell.
+      - The authors concede their own fractionation is leaky, so the 50% figure rests on a preparation the paper reports as compromised.
+      - Localisation of the abundant ADH is a prediction from three sequence algorithms, not an import assay or microscopy.
+      - n = 2 chemostats; no deposited raw data.
+    open_access_status: >-
+      Held in the fulltext store. No Creative Commons statement in the stored text; reuse licence
+      UNVERIFIED — check before redistributing figures or tables.
+    validate_admission_E5: no problems
+    evidence_note: Seven verified quotes with offsets in slot6_E5_redox_shuttle.yaml, candidate 1.
+
+  - rank: 4
+    publication_id: doi:10.1371/journal.pone.0346295
+    pmid: '41926382'
+    doi: 10.1371/journal.pone.0346295
+    title: Mitochondrial NAD kinase Pos5 is required for CoQ biosynthesis in yeasts.
+    year: 2026
+    journal: PLoS One
+    b35_clause: pos5-delta consequences
+    strains:
+      - Schizosaccharomyces pombe delta-pos5 (Bioneer deletion library) — the primary organism
+      - S. pombe delta-pos5 complemented with heterologous ScPOS5
+      - Saccharomyces cerevisiae delta-Scpos5
+    conditions: Deletion phenotypes on YES/YEGES media; growth on non-fermentable carbon sources.
+    what_data_it_actually_contains:
+      - CoQ content per strain as a fold of wild type — CoQ10 0.2-fold in S. pombe delta-pos5, restored to 0.9-fold by ScPOS5; CoQ6 0.2-fold in the S. cerevisiae delta-Scpos5.
+      - The CoQ-deficiency phenotype panel, including inability to grow on non-fermentable carbon sources.
+      - Processed only.
+    accessions: [none stated in the stored full text]
+    why_this_slot: >-
+      It carries the heaviest POS5 content of any readable paper in the pool by a wide margin
+      (Pos5/POS5 x109, pos5-delta x41, NAD(H) kinase x28) and it is the only one whose SUBJECT is
+      Pos5. Its value to DUET is as a WARNING rather than an anchor, and that is why it earns a slot
+      at all: Pos5 has a second, essential job — supplying NADPH to coenzyme Q biosynthesis — so
+      diverting Pos5 output to Ilv5 may compete with respiratory-chain assembly. That is a named,
+      mechanistic risk against the G.8 bottleneck hypothesis that no other record in the layer
+      supplies. It also contains an S. cerevisiae pos5-delta phenotype in its own right, which is
+      exactly what B.3.5's "pos5-delta consequences" clause admits.
+    what_it_lacks:
+      - Primary organism is S. pombe. The S. cerevisiae arm is a single confirmatory measurement, not the study.
+      - The readout is coenzyme Q, not NADPH. No cofactor is measured in any compartment.
+      - Deletion phenotypes on rich media, not a fermentation, not a named process condition. Nothing here is condition-annotated in the sense the atlas means.
+      - Says nothing about ethanol, Adh3, the shuttle, or how reducing equivalents reach the matrix.
+      - A pos5-null phenotype bounds what Pos5 is NECESSARY for; it says nothing about what extra Pos5 capacity would buy, which is the G.8 question.
+    open_access_status: oa_status 'gold', licence 'cc by', text_mining_allowed 'yes'. Redistributable.
+    validate_admission_E5: no problems
+    evidence:
+      - quote: 'Pos5 shares homology with Saccharomyces cerevisiae Pos5 (ScPos5), a mitochondrial NADH (or NAD+) kinase that generates NADPH (or NADP+).'
+        char_start: 422
+        char_end: 558
+        occurrences_in_source: 1
+      - quote: 'Consistently, CoQ6 level in ΔScpos5 was decreased to 0.2-fold of that in the wild-type strain.'
+        char_start: 747
+        char_end: 841
+        occurrences_in_source: 1
+
+  - rank: 5
+    publication_id: doi:10.1186/1471-2164-9-170
+    pmid: '18412983'
+    doi: 10.1186/1471-2164-9-170
+    title: >-
+      Multiway real-time PCR gene expression profiling in yeast Saccharomyces cerevisiae reveals
+      altered transcriptional response of ADH-genes to glucose stimuli.
+    year: 2008
+    journal: BMC Genomics
+    b35_clause: ADH3 — localisation, kinetics, directionality; ethanol as a carbon source
+    carried_forward_from: slot6_E5_redox_shuttle.yaml not_shortlisted_but_notable — PROMOTED
+    why_promoted: >-
+      The prior draft declined it because it is a chemometrics methods paper in which ADH3 is one of
+      fifteen genes. That is true and remains its principal defect. But the slot's own statement of
+      need is that "we currently have no transcriptomic anchor for matrix redox at all"
+      (ETHANOL_REFERENCE_SLOTS.md, slot 6), and this is the ONLY ADH3 transcript time course in the
+      readable pool. A weak anchor in the right place beats no anchor.
+    strains:
+      - CEN.PK-derived KOY.PK2-1C83 (wild type), KOY.HXT7P, KOY.TM6*P, KOY.VW100P — four strains
+        spanning a range of glycolytic rates
+    conditions: Grown on ethanol, then pulsed with glucose; 15 genes at 8 time points.
+    what_data_it_actually_contains:
+      - ADH3, ADH4, ADH5 and ADH6 transcript time courses across an ethanol-to-glucose transition in four CEN.PK-derived backgrounds — i.e. the transition between the state where Adh3 would be oxidising ethanol and the state where DUET's chassis ferments.
+      - The finding that matters to DUET is DIRECTIONAL AND ADVERSE - ADH3 clusters with the glucose-REPRESSED genes while ADH1 is induced. The matrix ADH goes down exactly when the chassis is fermenting.
+      - Fold changes in figures plus additional files. Processed only.
+    accessions: [none]
+    why_this_slot: >-
+      B.3.5 admits ADH3 directionality and the respiratory/diauxic-shift physiology of ethanol as a
+      carbon source, and this record sits on the join between them. It is also cheap to extract and
+      it carries a second adverse prediction for the architecture, which pairs with candidate 1's:
+      if ADH3 is glucose-repressed and Pos5's substrate collapses after the diauxic shift, then
+      DUET's matrix redox route is being asked to run in the two states where the corpus says both
+      of its components are least available. Whether that is true is the measurement nobody has
+      made; that it is the corpus's current expectation is a finding worth recording.
+    what_it_lacks:
+      - A chemometrics methods paper. ADH3 is 1 of 15 genes, is never followed up, and the ADH result is presented as a demonstration of the method rather than as a biological claim.
+      - Transcript only. No protein, no enzyme activity, no compartment measurement, no cofactor.
+      - Glucose-repression of a transcript is not the same as loss of Adh3 activity, and the paper does not bridge that gap.
+      - 2008-era reporting; fold changes in figures and additional files rather than a table; no deposit.
+      - The four strains differ in glycolytic capacity by construction, which is the paper's point but confounds a straight wild-type read.
+    open_access_status: oa_status 'gold', licence 'cc by', text_mining_allowed 'yes'. Redistributable.
+    validate_admission_E5: no problems
+
+  - rank: 6
+    publication_id: doi:10.3389/fmicb.2018.01460
+    pmid: '30018610'
+    doi: 10.3389/fmicb.2018.01460
+    title: GPD1 and ADH3 Natural Variants Underlie Glycerol Yield Differences in Wine Fermentation.
+    year: 2018
+    journal: Frontiers in Microbiology
+    b35_clause: ADH3 — consequences of allelic variation
+    carried_forward_from: slot6_E5_redox_shuttle.yaml not_shortlisted_but_notable — PROMOTED
+    strains:
+      - Four S. cerevisiae lineages — Wine/European (WE), Sake (SA), North American (NA), West
+        African (WA) — and their reciprocal hemizygotes
+    conditions: Synthetic wine must (SWM) fermentation.
+    what_data_it_actually_contains:
+      - A reciprocal hemizygosity assay establishing that ADH3 ALLELE IDENTITY CAUSALLY CHANGES GLYCEROL YIELD — ADH3(WA) and ADH3(SA) hemizygotes give significantly greater glycerol yields than ADH3(WE).
+      - Allele-specific expression data for the four lineages.
+      - Glycerol yields per strain under a named fermentation condition.
+    accessions: [an allele-specific-expression database is referenced; no raw deposit identified in the stored text]
+    why_this_slot: >-
+      It is the pool's only CAUSAL evidence that ADH3 identity shifts a whole-cell redox by-product,
+      established by reciprocal hemizygosity rather than by correlation. For an atlas whose ADH3
+      content is otherwise localisation predictions and transcript fold-changes, a causal
+      genotype-to-redox-phenotype link is a different and stronger kind of record. It is also the
+      only E5 candidate whose experimental regime is a real fermentation.
+    what_it_lacks:
+      - The mechanistic work is on GPD1. ADH3 gets a single hemizygosity panel and no follow-up.
+      - "NOTHING IS MEASURED IN THE MATRIX. The redox readout is CYTOSOLIC glycerol, which is the opposite compartment from the one the slot exists for. How a matrix ADH allele changes cytosolic glycerol yield is not established here, and the paper does not claim it is."
+      - No cofactor measured; no compartment resolution of any kind.
+      - Wine must, wine lineages — far from CEN.PK and far from an industrial bioethanol regime.
+      - Likely as useful to slot 7 (E6, natural variation in industrial performance) as to this slot, and admitting it here spends an E5 line on a record that may belong elsewhere.
+    open_access_status: oa_status 'gold', licence 'cc by', text_mining_allowed 'yes'. Redistributable.
+    validate_admission_E5: no problems
+    evidence:
+      - quote: 'A reciprocal hemizygosity assay demonstrated that hemizygotes expressing GPD1WA, GPD1SA, ADH3WA and ADH3SA alleles had significantly greater glycerol yields compared to GPD1WE and ADH3WE.'
+        char_start: 1084
+        char_end: 1271
+        occurrences_in_source: 1
+
+  - rank: 7
+    publication_id: doi:10.1093/femsyr/foae037
+    pmid: '39656626'
+    doi: 10.1093/femsyr/foae037
+    title: >-
+      Specific growth rates and growth stoichiometries of Saccharomycotina yeasts on ethanol as sole
+      carbon and energy substrate.
+    year: 2024
+    journal: FEMS Yeast Research
+    b35_clause: the respiratory / diauxic-shift physiology of ethanol as a CARBON SOURCE
+    carried_forward_from: slot6_E5_redox_shuttle.yaml not_shortlisted_but_notable — PROMOTED
+    why_promoted: >-
+      The prior draft filed it as "the quantitative companion to candidate 1" and dismissed it as
+      whole-cell only. It is whole-cell only. But B.3.5's LAST admitted clause is the respiratory
+      physiology of ethanol as a carbon source, "which is the condition under which all of the above
+      is normally measured", and this is the only readable record that supplies it at chemostat grade
+      WITH S. CEREVISIAE IN THE MEASURED SET. It is the one candidate here that carries a hard number
+      the atlas can use directly.
+    strains:
+      - 52 Saccharomycotina yeasts screened; 21 fastest characterised; 7 in chemostat, including
+        Saccharomyces cerevisiae and Kluyveromyces lactis
+    conditions: >-
+      Aerobic, ethanol-limited chemostats at D = 0.10 /h, plus growth-rate screening on ethanol as
+      sole carbon and energy substrate.
+    what_data_it_actually_contains:
+      - "Biomass yields on ethanol: S. cerevisiae 0.59 g/g, K. lactis 0.56 g/g, with Complex-I-bearing species measured alongside for contrast (Phaffomyces thermotolerans 0.58 g/g, Pichia ethanolica, others)."
+      - Specific growth rates on ethanol across 52 species, so S. cerevisiae's value has a distribution around it rather than standing alone.
+      - The Complex I contrast made explicit, which is the caveat candidate 3 depends on and cannot itself supply.
+    accessions: [none identified in the stored text]
+    why_this_slot: >-
+      DUET's redox architecture assumes ethanol reaches the matrix and is oxidised there. The
+      quantitative floor under that assumption is how much biomass and energy S. cerevisiae actually
+      extracts from ethanol as a substrate, under a defined regime, against comparators. This record
+      supplies it. It is also the one candidate that would survive contact with a reviewer asking
+      "what is the measured number", which no other E5 candidate can currently answer.
+    what_it_lacks:
+      - "WHOLE-CELL ONLY. No compartment resolution of any kind, no ADH3, no POS5, no shuttle, no cofactor. It anchors the substrate side of the architecture and is silent on every step inside the matrix."
+      - A survey across 52 species, which B.3.6 is otherwise suspicious of; it earns its place because S. cerevisiae is measured rather than merely listed, but the framing is comparative taxonomy.
+      - Carbon-limited aerobic chemostat on ethanol is a respiratory regime. DUET's C6 train is fermentative. The number is a reference point, not the operating condition.
+      - "LICENCE CONSTRAINT, UNIQUE AMONG THE EIGHT: fulltext_asset records oa_status 'green', licence 'cc by-nc-nd', text_mining_allowed 'NO'. Quoting it into an admission with offsets is ordinary scholarly use, but it must NOT be redistributed with the atlas and must not enter any text-mining corpus. Flagged because the other seven are unrestricted and a reader would otherwise assume this one is too."
+    open_access_status: >-
+      oa_status 'green', licence 'cc by-nc-nd', text_mining_allowed 'no'. NOT redistributable; see
+      what_it_lacks.
+    validate_admission_E5: no problems
+    evidence:
+      - quote: 'Saccharomyces cerevisiae and Kluyveromyces lactis, whose genomes do not encode Complex-I-type NADH dehydrogenases, showed biomass yields of 0.59 and 0.56 gbiomass gethanol−1, respectively.'
+        char_start: 690
+        char_end: 878
+        occurrences_in_source: 1
+        note: >-
+          "gbiomass gethanol−1" is the stored text's rendering of the subscripted unit; reproduced
+          exactly because cleaning it would break the offsets.
+
+  - rank: 8
+    publication_id: doi:10.1007/s00253-015-7266-x
+    pmid: '26743658'
+    doi: 10.1007/s00253-015-7266-x
+    title: >-
+      Alcohol dehydrogenase gene ADH3 activates glucose alcoholic fermentation in genetically
+      engineered Dekkera bruxellensis yeast.
+    year: 2016
+    journal: Applied Microbiology and Biotechnology
+    b35_clause: ADH3 — directionality (matrix ethanol oxidation vs. acetaldehyde reduction)
+    strains:
+      - Dekkera bruxellensis, auxotrophic host + recombinant strain Y997 carrying ADH3 under TEF1p
+    conditions: Glucose fermentation; DNA copy-number-verified integrants.
+    what_data_it_actually_contains:
+      - 1.4x and 1.7x faster specific glucose consumption in the ADH3-overexpressing recombinant — i.e. ADH3 overexpression driving fermentation FORWARD (acetaldehyde reduction), the opposite direction from the ethanol-oxidising role DUET assigns Adh3.
+      - A mitochondrial-targeting-motif analysis of the D. bruxellensis Adh3 done by direct pairwise alignment against the S. cerevisiae ADH3 sequence — the explicit bridge to the programme's organism.
+      - Promoter/transcription-factor binding-site analysis and qPCR normalisation; copy-number estimation.
+    accessions: [none identified in the stored text]
+    why_this_slot: >-
+      B.3.5 admits ADH3 "directionality (matrix ethanol oxidation vs. acetaldehyde reduction)" in as
+      many words, and stores disputes rather than resolving them (J.4). This is the pool's only
+      record in which a mitochondrial ADH3 is shown driving flux in the REDUCTIVE direction, and it
+      carries 75 ADH3 mentions — more than any other readable candidate. DUET's architecture depends
+      on Adh3 running oxidatively. A record that shows the same enzyme class running the other way,
+      in a Crabtree-positive yeast, is the counter-evidence the criterion is supposed to capture.
+    what_it_lacks:
+      - Dekkera bruxellensis, not S. cerevisiae. The transfer rests on a sequence alignment the paper itself performs, which is an argument for homology and not for equivalent behaviour.
+      - The direction claim is inferred from glucose consumption rate, not from a measured enzyme directionality or a flux split. No kinetics, no Keq, no compartment-resolved flux.
+      - The mitochondrial localisation is a MOTIF PREDICTION by pairwise alignment — weaker even than candidate 3's three-algorithm consensus.
+      - No cofactor measured, no matrix anything, no POS5, no shuttle.
+      - It is an applied strain-improvement paper; the ADH3 directionality question is a by-product of it rather than its subject.
+      - Ranked last because everything it offers is an inference across an organism boundary, and because it is the only candidate whose contribution is purely a caution.
+    open_access_status: oa_status 'gold', licence 'cc by', text_mining_allowed 'yes'. Redistributable.
+    validate_admission_E5: no problems
+    evidence:
+      - quote: 'The D. bruxellensis ADH3 protein sequence was searched for mitochondrial-targeting motifs by pairwise alignment with S. cerevisiae ADH3 sequence using EMBOSS ClustalW2'
+        char_start: 11765
+        char_end: 11932
+        occurrences_in_source: 1
+
+# ───────────────────────────────────────────────────── HOW THE EIGHT DIFFER, ON PURPOSE
+#
+#   #  organism        compartment   what is measured        POS5  ADH3  ethanol-as-C  deposit
+#   1  S. cerevisiae   cytosol       xylitol titer per phase  YES   no    YES (phases)  no
+#   2  S. cerevisiae   matrix (tgt)  3-HP titer               YES   no    no            no
+#   3  C. jadinii etc  MEASURED      ADH activity split       no    (ADH) YES           no
+#   4  S. pombe (+Sc)  n/a           CoQ content              YES   no    no            no
+#   5  S. cerevisiae   n/a           ADH3 transcript          no    YES   YES (shift)   no
+#   6  S. cerevisiae   cytosol       glycerol yield           no    YES   no            partial
+#   7  S. cerevisiae   whole cell    BIOMASS YIELD ON ETHANOL no    no    YES           no
+#   8  D. bruxellensis predicted     glucose uptake rate      no    YES   no            no
+#
+# NOT ONE MEASURES A COFACTOR. That column is omitted from the table above because it would be
+# eight consecutive "no" and the absence is the finding, not a column. It is the knowledge_gap row
+# YAA:GAP:ethanol-0-matrix-nad-p-h-pool-size-and-nad-p-h-nad, which this pass confirms for the
+# fifth time and does not resolve.
+
+still_not_shortlisted:
+  - doi: 10.1073/pnas.1918216117
+    was: prior candidate 2
+    verdict: >-
+      DROPPED. The prior draft's "DECISIVE UNKNOWN" has been checked: zero occurrences of ADH3,
+      POS5, NAD(H) kinase, shuttle, mitochondrial alcohol dehydrogenase, or matrix NAD(P)H in the
+      stored full text. Below the bar every candidate above clears.
+  - doi: 10.1186/1471-2091-7-3
+    title: Loss of NAD(H) from swollen yeast mitochondria.
+    verdict: >-
+      STILL THE STRONGEST NEAR-MISS, and the owner should know it is admissible today
+      (validate_admission returns no problems). It is the only readable paper that puts a NUMBER on
+      a matrix NAD(H) pool, by HPLC, with ethanol as the NAD-linked respiratory substrate. It is not
+      shortlisted for the reason the prior draft gave and this pass agrees with: the numbers come
+      from ISOLATED organelles under deliberately non-physiological osmotic swelling, so they do not
+      describe a living cell under a named condition and admitting them would put a preparation
+      artefact where a physiological measurement belongs. If the owner wants a matrix NAD pool figure
+      at any cost, this is the one, and the cost should be recorded on the record.
+  - doi: 10.1371/journal.pone.0333299
+    title: >-
+      Evaluating the effects of synthetic POM cycles and NAD+ kinase expression on fatty alcohol
+      production in Saccharomyces cerevisiae.
+    verdict: >-
+      A clean negative on UTR1 and YEF1 with only cytosolic POS5 giving a significant increase.
+      Worth a row if the owner wants the NAD+-kinase family bounded, but it duplicates candidate 1's
+      compartment defect without its condition-dependence finding.
+  - doi: 10.1016/j.xpro.2020.100160
+    verdict: >-
+      Unchanged from the prior draft. A method, not a record. It is the entry point if the owner
+      chooses to COMMISSION the matrix measurement rather than cite one — with the same caveat, that
+      roGFP reads the glutathione couple and an NAD(P)H sensor would have to be added.
+
+what_is_still_the_owners:
+  - The pick. This is a shortlist, not a decision.
+  - Whether to spend 1 line or 2-3. Candidates 1 and 2 contradict each other in no respect and
+    answer different halves of the question; 1, 2 and 5 together would give the layer a POS5
+    phenotype, a matrix-targeted POS5 test and an ADH3 time course for 3 of 45.
+  - Whether to record candidate 7's licence constraint as a blocker or a footnote.
+  - Whether PLAN.md's phase-2 acceptance is satisfied by a qualitative record. On this shortlist's
+    reading it is, and no amendment is needed for THAT clause; PHASE2_STATUS.md §3a's separate
+    finding about a measurement-bearing record stands and is not resolved here.

@@ -280,3 +280,297 @@ eight of twenty-three quotes — including one ellipsis splice — would fail `v
 **A repair pass is warranted and it is small:** three re-attributions, one desplice, seven
 re-slices, ten attribution fields to fill in, and a decision about whether `corpus_file:` markers
 should be replaced by DOIs everywhere now that the cache they point at is gone.
+
+---
+
+# REPAIRS APPLIED — 2026-09-22
+
+Everything below was done after the audit above, by a separate pass, against the same store opened
+`mode=ro`. `fermdb extract` was not run, the database was not modified, and nothing under `src/`,
+`tests/`, `PLAN.md` or `data/` was edited. **`data/pathways/parts_catalog.yaml` was deliberately
+not touched** — its eight bad quotes were being re-sliced concurrently by another agent, and that
+repair is theirs.
+
+**Every relocation below was re-verified by this pass rather than taken from the audit**, through
+`fermdb.extract.harness.load_source_text` and `fermdb.llm.validate.verify_span`. No quote string
+was edited anywhere in the repair: each is the same contiguous slice it was, re-resolved at its own
+offsets in its real source. Where a repair restructured a list to carry per-quote attribution, the
+set of quote strings before and after was diffed and confirmed identical.
+
+## 10. The re-attributions — four, not three
+
+The audit found three. A fourth was found by re-sweeping `allotopic_expression.yaml` in full: the
+audit's extractor reached 67 of that file's 78 quotes, and the fourth defect was among the 11 it
+did not reach. All four are the same failure mode — **a quote from a cited companion paper appended
+to an `evidence:` list whose attribution is a single record-level field, which cannot carry a
+second source.** None is a fabrication; every one is a real sentence in a real paper in the corpus.
+
+| # | entry | was attributed to | actually in | verify_span |
+|---|---|---|---|---|
+| 1 | `ethanol/slot1…yaml` `candidates[2].evidence[13]` | `doi:10.1186/1475-2859-9-16` | **`doi:10.1186/1475-2859-7-9`** | EXACT `[7090, 7184)`, 1 occurrence; absent from 9-16 |
+| 2 | `ethanol/slot1…yaml` `candidates[2].evidence[14]` | `doi:10.1186/1475-2859-9-16` | **`doi:10.1186/1754-6834-7-49`** | EXACT `[36111, 36365)`, 1 occurrence; absent from 9-16 |
+| 3 | `mitochondria/allotopic_expression.yaml` `relocation_attempts[0].evidence[3]` (VAR1) | `doi:10.1093/nar/gkaa424`, `doi:10.1093/nar/gkx426` | **`doi:10.1016/j.gendis.2019.08.001`** | EXACT `[15656, 16057)`, 1 occurrence; absent from both named papers |
+| 4 | `mitochondria/allotopic_expression.yaml` `relocation_attempts[2].evidence_expression_sensitivity[3]` (ATP8) — **NEW, not in the audit** | `doi:10.1091/mbc.e16-11-0775`, `doi:10.1016/j.gendis.2019.08.001` | **`doi:10.1093/nar/gkaa424`** | EXACT `[28552, 28806)`, 1 occurrence; absent from both named papers |
+
+Each is repaired **in place with an `attribution_corrected` block** recording the date, the previous
+attribution, the new one, and how it was checked. The DOI was not silently swapped: the correction
+is itself evidence about how the wave worked, and is written down as such.
+
+**Two things the repair recorded that the audit did not.**
+
+* **A date check would have caught #2 for free.** The quote is dated 2014 and the paper it was
+  charged to is from 2010. That attribution was impossible on its face, without reading either
+  text. This is now written into the entry as `the_tell`, and it is the cheapest available screen
+  for the next wave.
+* **The Cox2-in-a-Var1-record question was answered, not assumed.** The brief asked whether the
+  record's *claim* was affected and not merely its citation. It is not, and the check is recorded
+  on the record: every field of the VAR1 entry — COX4 presequence, full function restored, no
+  sequence changes, fractionation readout — rests on `evidence[0..2]`, and those three re-resolve
+  EXACT against the two papers the record names (`[0]` and `[2]` in `gkaa424`, `[1]` in `gkx426`),
+  as do both `evidence_caveats`. The misfiled sentence supports only the COX4 contrast drawn in
+  `why_it_matters`, which already named `gendis` as its source. Same for the ATP8 record: its
+  fields rest on `evidence[0..4]`, all EXACT against the papers it names. **What was wrong was the
+  filing, not either finding.**
+
+## 11. Header corrections
+
+| file | claim | verdict | action |
+|---|---|---|---|
+| `mitochondria/allotopic_expression.yaml` | "78 quotes, 78 passes, 0 failures" | **wrong by two, not one** | corrected, and made true again by the repair |
+| `ethanol/phase2_admissions.yaml` | `spans_checked: 63` | **correct** | left; a `what_the_63_is_made_of` note added so the number cannot be conflated again |
+| `data/literature/ethanol_admissions.yaml` | `re_resolved_exact: 53` | **correct** | **not edited — it is under `data/`. It needs no change.** |
+
+The `allotopic_expression.yaml` count of **78 is itself right** — this pass found exactly 78 quotes,
+matching the header. What was wrong was "78 passes": two quotes passed against the paper they came
+from rather than the paper their record names, and eleven more named no paper at all, so they could
+not be checked from the file in either direction. After the repair the claim holds as written:
+**78 quotes, 78 resolve byte-exact against the publication the record itself names, 0 absent,
+0 unattributed.** The header now also states plainly that the file records no `char_start`/
+`char_end`, so "extracted by offset" describes how the work was done and is not reproducible from
+the file — the §5 finding, applied to the one file whose header this pass rewrote.
+
+## 12. Attribution gaps filled — fourteen, not ten
+
+All ten the audit listed, plus four more of the same kind found while re-sweeping. All fourteen
+resolve byte-exact; none was a fabrication.
+
+| file | entries | resolved to |
+|---|---|---|
+| `mitochondria/allotopic_expression.yaml` | `hydrophobicity_hypothesis.evidence[0..5]` | `pgen.1002876`, `mbc.e17-09-0560`, `nar/gkq769` ×2, `gendis.2019.08.001` ×2 |
+| " | `…evidence_natural[0..1]` — **not in the audit's ten** | `nar/gkq769`, `mbc.e17-09-0560` |
+| " | `…evidence_caveats[0..1]` — **not in the audit's ten** | `mbc.e17-09-0560`, `genetics/iyaf037` |
+| " | `scope_exclusions[0].evidence[0]` | `doi:10.26508/lsa.202301965` |
+| `mitochondria/rho_zero_physiology.yaml` | `nomenclature_discipline.definitions[0]` | `doi:10.1093/femsre/fuv028` |
+| `ethanol/slot7_E6_industrial_performance.yaml` | the two Ethanol Red quotes | `doi:10.1186/s13068-015-0421-x` (verified independently — see §13) |
+
+Two of these are worth separating out, because they are different defects wearing the same label.
+
+* **The `hydrophobicity_hypothesis` block was never a one-paper record.** Its six quotes come from
+  four different papers — which is exactly what its own `status` field claims — so a record-level
+  `publication:` could never have carried them. The list shape was changed to `{publication, quote}`
+  pairs, and a `the_four_papers` field now names the four so the "stated explicitly in four papers"
+  claim can be checked rather than taken. The four are `pgen.1002876`, `mbc.e17-09-0560`,
+  `nar/gkq769` and `gendis.2019.08.001`. **The claim checks out.**
+* **`rho_zero_physiology.yaml` was never missing its attribution at all.** It wrote
+  `definition_source: doi:10.1093/femsre/fuv028` — the right DOI, under a key name used nowhere
+  else in the repo, so no tool reading attribution by key could see it. The source was never wrong,
+  only unreadable. It now carries `publication:` as well.
+
+## 13. The dead `corpus_file:` markers — replaced, and the count was wrong
+
+**Decision: replaced, per the owner's steer, and the two exceptions fixed specifically.** The
+markers pointed at a numbered scratchpad cache (`NNNNN.txt`); this pass confirmed no such cache
+exists anywhere on the machine — no `scratchpad/` directory, no `E3.json`, no `00727.txt` under the
+data directory. The pointers were dereferenceable by nobody.
+
+**The audit's count is wrong.** It reports "267 `corpus_file:` markers across 14 draft files". The
+actual figure is **191 markers across 15 files**. The audit's own per-file leaders are right and
+match this pass exactly (`pathway_compartment` 30, `PLAN` 29, `ISOBUTANOL_PROGRAM` 24) — it is the
+total and the file count that are off, so this looks like a summing error rather than a different
+definition. The 15 files are the 14 it names plus `benchmarks/ethanol_reference.yaml`.
+
+| action | count | rule |
+|---|---|---|
+| removed as redundant | **173** | a `doi:` or `publication:` sat beside the marker in the same record and already carried the provenance |
+| replaced by a DOI resolved from an adjacent `pmid:` | **16** | all in `slots3_4_E4_ethanol_stress.yaml`; a PMID is a live id, so the dead pointer became a live one rather than vanishing |
+| resolved by hand from the store | **2** | the `slot7` Ethanol Red pair — the two exceptions, below |
+| **total** | **191** | |
+
+**Checked before removing anything:** across all 15 files the **101 distinct cache numbers each map
+to exactly one DOI** — zero numbers map to two papers. The markers were internally consistent and
+carried no information the adjacent DOI does not, which is what makes dropping them safe. Every
+file that lost markers carries a header note recording how many went and why. All 15 still parse.
+
+**The two exceptions**, whose only source marker was `corpus_file: 00727.txt`, were verified by this
+pass rather than taken from the audit. Both are in **`doi:10.1186/s13068-015-0421-x`**:
+
+* `ethanol_red_coverage.how_it_actually_appears[3].evidence[0]` — EXACT `[8423, 8581)`, 1 occurrence
+* `…the_one_quantitative_claim_about_its_performance.evidence[0]` — EXACT `[7836, 7887)`, 1 occurrence
+
+Each now carries the DOI plus an `attribution_recovered` block naming the dead marker it replaced.
+Recording the 18% ethanol titre's source also makes visible what it is: a sentence in that paper's
+**introduction**, which is why it carries no conditions.
+
+**One thing the markers were hiding.** The same file's prose named "corpus files 00727, 00494,
+00495, 00473" as a Thevelein-group polygenic series. Three were identified from the store by trait
+and by searching for `Ethanol Red` / `ER18` / `ER7A`: `doi:10.1186/s13068-015-0421-x` (= 00727),
+`doi:10.1128/aem.00814-22` and `doi:10.1128/mbio.01279-18`. **The fourth could not be identified and
+is recorded as unresolved rather than guessed at** — the obvious candidate,
+`doi:10.1186/s13068-020-01761-5`, does not mention Ethanol Red at all, and no paper in the store was
+found using `ER18A` as a parent, so the file's claim that ER18A appears as a parent is now flagged
+as unsupported.
+
+**A residue that was left alone, deliberately.** `MITOCHONDRIAL_AND_DUET.yaml` and `PLAN.yaml`
+carry cache numbers inside YAML *comments* (`# doi:10.1093/nar/gkad849  [00391.txt]`), and
+`ISOBUTANOL_PROGRAM.yaml` carries them inside `also_in:` strings. These are not `corpus_file:` keys,
+they were not in either count, and in every case a DOI sits beside the number in the same string —
+so they are harmless. See §16.
+
+## 14. DOI case — the draft was right, the lookup is the trap
+
+**The audit read this backwards.** It reports that `slots3_4_E4_ethanol_stress.yaml` "writes the DOI
+as `10.1128/AEM.00588-21` while the store keys `doi:10.1128/aem.00588-21`", and treats the draft as
+the defect. Checked against the store:
+
+```
+publication.id  = doi:10.1128/aem.00588-21
+publication.doi = 10.1128/AEM.00588-21      <- the publisher's canonical casing
+```
+
+The draft's `doi:` value **was correct all along** and matches `publication.doi` byte for byte. What
+it lacked was the *store key*. The draft now carries both, the way `phase2_admissions.yaml` and
+`data/literature/ethanol_admissions.yaml` already do: `doi:` is the publisher's form,
+`publication_id:` is the store's key. All six of that candidate's quotes re-resolve under it.
+
+### Should the lookup case-fold? Yes. Reported, not changed — `src/` is owned elsewhere.
+
+Measured over the store, publication ids are **already case-normalised and DOIs are not**:
+
+| measurement | value |
+|---|---|
+| publications total | 5,164 |
+| DOI-keyed | 4,864 |
+| `publication.id` containing any uppercase | **0** |
+| `publication.doi` that is not already lowercase | **625 (12.9% of DOI-keyed)** |
+| rows where `id` differs from `'doi:' + doi` | **625** |
+| rows where `id` differs from `'doi:' + lower(doi)` | **0** |
+
+So the invariant is exact and undocumented: **`publication.id` equals `'doi:'` concatenated with
+`lower(publication.doi)`, for all 4,864.** `canonical_publication_id` in
+`src/fermdb/literature/discovery.py:74` lowercases when minting, which is why no id has uppercase;
+nothing on the read side does the same.
+
+**Where it bites.** `load_source_text` (`src/fermdb/extract/harness.py:1247`) matches
+`fulltext_asset.publication_id` with a bare `=`. No column in `schema.sql` is declared
+`COLLATE NOCASE`, so that comparison is binary. Demonstrated live:
+
+```
+load_source_text(publication_id="doi:10.1128/AEM.00588-21") -> SourceTextError:
+    "no stored full text for … Either it is not open access … or it was never fetched."
+load_source_text(publication_id="doi:10.1128/aem.00588-21") -> 75,310 characters
+```
+
+**The message is the real danger.** It names two plausible causes — not open access, never fetched —
+and the actual cause, a case-mismatched key, is not among them. A caller who trusts it records
+"no stored full text" for a paper that is sitting in the store. That is how a 12.9% slice of the
+corpus can be silently reported as unavailable.
+
+**Reachable from the CLI.** `_resolve_publication_id` (`src/fermdb/cli.py:436`) passes
+`--publication-id` through verbatim, so `fermdb extract run --publication-id doi:10.1128/AEM.00588-21`
+hits exactly this. `--doi` is partly protected: `find_publication` (`harness.py:1229`) matches
+`doi = ? OR id = ?`, which covers the canonical and the lowercase spellings but not a third casing —
+`find_publication(doi="10.1128/Aem.00588-21")` returns `None`.
+
+**Recommendation for whoever owns `src/`:** fold case on the read side, at the point an id is
+matched rather than at every call site — `lower(publication_id) = lower(?)`, or `COLLATE NOCASE` on
+the id columns. Failing that, `SourceTextError` should at least say "no row matched this id
+exactly; a case-insensitive match does exist" when one does, so the trap announces itself. **Nothing
+under `src/` was changed by this pass.**
+
+## 15. The count reconciliation — 53 and 63 are both right
+
+**Neither header is wrong, and neither needed correcting.** Both documents were re-counted by
+walking them for objects carrying `quote` + `char_start` + `char_end`:
+
+| file | spans found | where they sit | header says | verdict |
+|---|---|---|---|---|
+| `data/literature/ethanol_admissions.yaml` | **53** | all under `records` | `spans_in_this_file: 53`, `re_resolved_exact: 53` | **correct — no change, and none made** |
+| `docs/drafts/ethanol/phase2_admissions.yaml` | **63** | 53 under `records` + 10 under `retagging_E5` | `spans_checked: 63`, `re_resolved_exact: 63` | **correct** |
+
+**63 = 53 + 10.** The installed `data/` layer carries the admissions only, so it holds 53; the draft
+additionally carries the 10 basis quotes on the re-tagging proposals, which stay in the draft
+because installing the admissions re-tags nothing. `retagging_other` holds 8 entries and no spans,
+which is why it adds to neither total. The `data/` file's own `span_verification.note` already
+explained this precisely; the error was never in either file but in reporting that cited "63 of 63"
+against the `data/` file. A `what_the_63_is_made_of` field was added to the **draft** to stop the
+conflation recurring. **The `data/` file was read and not edited.**
+
+## 16. Post-repair verification
+
+Every file this pass touched, re-swept the same way the audit swept: each quote resolved against the
+publication its own record names, through `load_source_text`, checked with `verify_span` — at the
+recorded offsets where the file carries them, at the quote's own located offsets where it does not.
+
+| file | quotes | exact at recorded offsets | byte-exact, no offsets recorded | absent | unattributed |
+|---|---|---|---|---|---|
+| `benchmarks/cofactor_redox.yaml` | 5 | — | 5 | 0 | 0 |
+| `benchmarks/competing_pathway.yaml` | 6 | — | 6 | 0 | 0 |
+| `benchmarks/ethanol_reference.yaml` | 4 | — | 4 | 0 | 0 |
+| `benchmarks/mitochondrial_genetics.yaml` | 5 | — | 5 | 0 | 0 |
+| `benchmarks/pathway_compartment.yaml` | 30 | — | 30 | 0 | 0 |
+| `benchmarks/tolerance.yaml` | 3 | — | 3 | 0 | 0 |
+| `ethanol/phase2_admissions.yaml` | 63 | **63** | — | 0 | 0 |
+| `ethanol/slot1_E3_baseline_physiology.yaml` | 68 | — | 68 | 0 | 0 |
+| `ethanol/slot2_E1_pdc_minus.yaml` | 19 | — | 19 | 0 | 0 |
+| `ethanol/slot5_E2_vhg_ceiling.yaml` | 31 | — | 31 | 0 | 0 |
+| `ethanol/slot6_E5_redox_shuttle.yaml` | 20 | — | 20 | 0 | 0 |
+| `ethanol/slot7_E6_industrial_performance.yaml` | 28 | — | 28 | 0 | 0 |
+| `ethanol/slots3_4_E4_ethanol_stress.yaml` | 55 | — | 55 | 0 | 0 |
+| `mitochondria/allotopic_expression.yaml` | 78 | — | 78 | 0 | 0 |
+| `mitochondria/rho_zero_physiology.yaml` | 9 | — | 9 | 0 | 0 |
+| `warnings/ISOBUTANOL_PROGRAM.yaml` | 56 | — | 56 | 0 | 0 |
+| `warnings/MITOCHONDRIAL_AND_DUET.yaml` | 48 | — | 48 (see below) | 0 | 0 |
+| `warnings/PLAN.yaml` | 58 | — | 58 (see below) | 0 | 0 |
+| **TOTAL** | **586** | **63** | **523** | **0** | **0** |
+
+`slot1` reads 68 and `slots3_4` reads 55, matching the audit's per-file tally exactly. The audit
+records `PLAN.yaml` at 68 quotes; this pass finds 58 — a difference in what each extractor counts as
+a quote, not a disagreement about any quote, since all 58 resolve and none of the audit's 68 was
+reported failing.
+
+**A finding that only appeared during this verification: 34 quotes carry attribution that no parser
+can read.** Swept strictly — resolving each quote against the publication its record names as a
+*field* — 552 of the 586 pass and 34 do not, all in `MITOCHONDRIAL_AND_DUET.yaml` (33) and
+`PLAN.yaml` (1). **None is mis-attributed.** Those files attribute each quote in a YAML **comment
+directly above it**:
+
+```yaml
+  evidence:
+    # doi:10.1093/nar/gkad849  [00391.txt]
+    - "This analysis revealed a consistent ~1.6-fold increase of mtDNA CN in cim1-null cells …"
+```
+
+Every one of these commented attributions was extracted and checked against the store:
+**`MITOCHONDRIAL_AND_DUET.yaml` 48 of 48 correct, `PLAN.yaml` 58 of 58 correct, zero wrong.** The
+curator's attribution is exact; it is simply invisible to every tool, because a comment is not data.
+This is the same defect as `rho_zero_physiology.yaml`'s `definition_source` — a correct source that
+no machine can read — and it is why the audit, whose fallback retried failures against every paper
+named anywhere in the same file, scored both files clean without noticing.
+
+**It was left unrepaired, deliberately.** Converting 106 commented attributions into fields is a
+larger and more mechanical change than this pass was asked for, it touches two files whose quotes
+are all correct, and it should be done as its own pass with its own verification. It is recorded
+here as the next repair rather than half-done now.
+
+## 17. What this repair did not do
+
+* **`data/pathways/parts_catalog.yaml` — untouched.** Its one splice and seven retyped quotes are
+  another agent's concurrent work. Nothing here overlaps it.
+* **`data/literature/ethanol_admissions.yaml` — read, not edited.** Its header is correct (§15).
+* **No `src/`, `tests/`, `PLAN.md` or `data/` file was modified.** The case-folding fix §14 argues
+  for is reported for the owner of `src/`, not applied.
+* **The 655 offset-less quotes of §5 remain offset-less.** Recording real offsets means re-slicing
+  every quote against the store, which is a re-extraction, not a repair. The one header that
+  claimed offsets it does not carry now says so.
+* **The database was not modified**; every connection was opened `mode=ro`. `fermdb extract` was
+  not run.

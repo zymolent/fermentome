@@ -726,7 +726,15 @@ pathway_feedback_onto_mtdna:
 nomenclature_discipline:
 
   definitions:
-    - definition_source: doi:10.1093/femsre/fuv028
+    # ATTRIBUTION NORMALISED 2026-09-22. This was `definition_source: doi:10.1093/femsre/fuv028` —
+    # the right DOI under a key name used nowhere else in the repo, so no tool that reads
+    # attribution by key could see it and the 2026-09-22 provenance sweep counted the quote as
+    # unattributed. The source was never wrong, only unreadable. `publication:` is what the
+    # sibling record below and every other draft use; `definition_source` is kept as a descriptive
+    # alias so nothing that referred to it by name silently loses meaning. Re-resolved byte-exact
+    # against the stored full text with fermdb.llm.validate.verify_span.
+    - publication: doi:10.1093/femsre/fuv028
+      definition_source: doi:10.1093/femsre/fuv028
       evidence: >-
         "(3) Further, there are cytoplasmic petites that have lost the ability to respire due to a
         point mutation or mutations in only one or two of the mitochondrial genes necessary for

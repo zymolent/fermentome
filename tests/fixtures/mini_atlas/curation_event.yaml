@@ -1,0 +1,57 @@
+# PLAN.md J.5's third arm -- curation_event -> curator -> date -> rationale -- as fixture rows.
+#
+# One event per assertion in assertion.yaml. Until this file existed the fixture had a source for
+# every claim and a curator for none of them, which is exactly the state PLAN.md L.5 exists to
+# prevent: `assertion.created_by` is a string the writer chose, while an event is the logged act
+# with a reason attached. `fermdb query traceability` walked the fixture and reported
+# `no_curation_event` on all four.
+#
+# `actor_kind` mirrors each assertion's `created_by_kind`, and `curator` mirrors its `created_by`,
+# because an event that claimed a different author than the row it is about would make the log
+# worse than no log. fx-l5 is therefore an *agent* event: its evidence is `review_state: pending`,
+# so no human has accepted it and an 'accept' by a human would be a fiction. Schema note: the
+# curation_event CHECK refuses 'accept', 'edit' and 'promote' from a non-human actor, and 'create'
+# is the only action honestly available to the model here.
+#
+# `zone` is R on every row: the schema pins it there (CHECK zone = 'R'), because the log of who
+# did what is a recorded fact even when the row it records is a Zone I proposal.
+
+- id: YAA:CUEV:fx-l1
+  curator: "fixture-loader (synthetic)"
+  actor_kind: human
+  action: create
+  target_type: assertion
+  target_id: YAA:ASSERT:fx-l1
+  rationale: "Hand-written phase-0 fixture row: Fixture Study A reports a titer increase for the AHAS/KARI/DHAD host, recorded here as a direct_perturbation-backed claim so the L1 branch of assertion_level has something to derive from. Synthetic, not a real observation."
+  created_at: "2026-09-19T09:00:00+00:00"
+  zone: R
+
+- id: YAA:CUEV:fx-l5
+  curator: "fixture-fake-model@v0 (synthetic)"
+  actor_kind: agent
+  action: create
+  target_type: assertion
+  target_id: YAA:ASSERT:fx-l5
+  rationale: "Proposed by the fixture's fake model from Fixture Study A, which is the publication YAA:EV:fx-l5 names. Left at review_state 'pending' and Zone I: no human has accepted it, so this event records the proposal and nothing more. Synthetic, not a real observation."
+  created_at: "2026-09-19T09:05:00+00:00"
+  zone: R
+
+- id: YAA:CUEV:fx-conflict-a
+  curator: "fixture-loader (synthetic)"
+  actor_kind: human
+  action: create
+  target_type: assertion
+  target_id: YAA:ASSERT:fx-conflict-a
+  rationale: "Side A of the fixture's magnitude conflict: Fixture Study A's 1.8 g/L shake-flask titer for YAA:STRAIN:fx-host. Recorded as its own assertion rather than overwriting side B, which is the whole point of conflict.yaml. Synthetic, not a real observation."
+  created_at: "2026-09-19T09:10:00+00:00"
+  zone: R
+
+- id: YAA:CUEV:fx-conflict-b
+  curator: "fixture-loader (synthetic)"
+  actor_kind: human
+  action: create
+  target_type: assertion
+  target_id: YAA:ASSERT:fx-conflict-b
+  rationale: "Side B of the same conflict: Fixture Study B's 3.4 g/L fed-batch titer for the same strain and quantity. Different conditions, different number, neither retracted -- the conflict is open and stays open. Synthetic, not a real observation."
+  created_at: "2026-09-19T09:15:00+00:00"
+  zone: R

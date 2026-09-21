@@ -31,11 +31,13 @@ from fermdb.metabolic.curated import Part, load_parts
 from fermdb.metabolic.recall import (
     BY_GENE_SYMBOL,
     BY_SOURCE_ORGANISM,
+    BY_VARIANT_DESIGNATION,
     ENZYME_ALIASES,
     MATCHING_RULE,
     Configuration,
     classify,
     describe_report,
+    designation_index,
     enzyme_entries,
     gene_index,
     load_configurations,
@@ -120,6 +122,35 @@ def _a_second_lactococcal_kdc() -> Part:
     )
 
 
+#: The published build the variant clause exists for: the same four native genes as above with a
+#: NAMED KARI variant in place of the bare symbol. `ilvC6E6` is how 10.1016/j.synbio.2022.02.007
+#: writes it, and it is the spelling `ilvc6e6_ecoli` was curated from.
+_NAMED_KARI_BUILD = ["ILV2", "ilvC6E6", "ILV3", "ARO10", "ADH6"]
+
+
+def _a_second_ilvc_6e6() -> Part:
+    """A hypothetical second part carrying `ilvC` AND the designation `6E6`.
+
+    The variant clause is safe only while the catalog holds ONE part for the (symbol, designation)
+    pair, exactly as the organism clause is safe only while it holds one for (role, organism).
+    Testing that means making the catalog hold two, which is a fixture and not a curation act —
+    `data/pathways/parts_catalog.yaml` is untouched, and it is another agent's file besides.
+    """
+    return Part(
+        id="ilvc6e6_fixture",
+        step_role="KARI",
+        source_organism="Escherichia coli",
+        genes=("ilvC",),
+        native_compartment="cytosol",
+        sequence_encoding_genome="nuclear",
+        cofactor_preference="NADH",
+        oxygen_sensitivity="unknown",
+        evidence="synthetic test fixture: a second part for an already-occupied (gene, variant)",
+        confidence="low",
+        variant_of="ilvc_ecoli",
+    )
+
+
 # ------------------------------------------------------------------ the rule is inspectable
 
 
@@ -154,17 +185,25 @@ def test_every_clause_of_the_rule_is_reachable(parts: tuple, routes: list) -> No
         "catalog_gap": _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH2"]),
         "under_specified": _configuration(["ILV2", "ILV5", "ILV3", "KDC", "ADH"]),
     }
-    # `source_organism_ambiguous` is the one clause that cannot be reached against the real
-    # catalog, because the catalog holds exactly one Lactococcus KDC — which is precisely the fact
-    # that makes those two configurations resolvable. Reaching it needs a second such part.
-    ambiguous = (_configuration(_CELS_2019), (*parts, _a_second_lactococcal_kdc()))
-    assert set(cases) | {"source_organism_ambiguous"} == {c.name for c in MATCHING_RULE}
+    # The two ambiguity clauses are the ones that cannot be reached against the real catalog,
+    # because the catalog holds exactly one Lactococcus KDC and exactly one ilvC 6E6 — which is
+    # precisely the fact that makes each resolvable. Reaching them needs a colliding part each.
+    refusals = {
+        "source_organism_ambiguous": (
+            _configuration(_CELS_2019),
+            (*parts, _a_second_lactococcal_kdc()),
+        ),
+        "variant_designation_ambiguous": (
+            _configuration(_NAMED_KARI_BUILD),
+            (*parts, _a_second_ilvc_6e6()),
+        ),
+    }
+    assert set(cases) | set(refusals) == {c.name for c in MATCHING_RULE}
     for expected, config in cases.items():
         assert _verdict(config, parts, routes).clause == expected, expected
-    assert (
-        classify(ambiguous[0], ambiguous[1], routes, chassis_organism_id=_YEAST).clause
-        == "source_organism_ambiguous"
-    )
+    for expected, (config, crowded) in refusals.items():
+        verdict = classify(config, crowded, routes, chassis_organism_id=_YEAST)
+        assert verdict.clause == expected, expected
 
 
 # ---------------------------------------------------------------- where the enzyme names come from
@@ -227,8 +266,11 @@ def test_an_alias_is_a_named_exception_and_not_a_prefix_rule(parts: tuple) -> No
 
 def test_a_shared_gene_symbol_resolves_ambiguously_rather_than_picking_one(parts: tuple) -> None:
     """Four KARI parts carry the gene symbol `ilvC`, and they differ by exactly the NADPH/NADH
-    question the whole atlas is about. The harness reports the ambiguity; it does not resolve it,
-    because deciding that a paper's "ilvC6E6" is the catalog's `ilvc6e6_ecoli` is curation."""
+    question the whole atlas is about. The harness reports the ambiguity; it does not resolve it.
+
+    Unchanged by the owner's 2026-09-22 variant ruling, which reaches `ilvC6E6` and never `ilvC`.
+    See `test_a_bare_ilvc_is_still_not_narrowed_and_it_is_the_half_that_erodes` for the defence.
+    """
     resolution = resolve_roles(["ilvC"], parts)
     kari = next(r for r in resolution.roles if r.role == "KARI")
     assert len(kari.part_ids) == 4
@@ -397,6 +439,139 @@ def test_a_gene_symbol_beats_an_organism_phrase_and_the_kind_says_which(parts: t
     assert resolution.organism_resolved_roles == ()
 
 
+# ---------------------------------------- 'GENE + VARIANT DESIGNATION' — the owner's second
+# 2026-09-22 ruling, deliberately the same shape as the first: a qualified name identifies, a bare
+# one does not. `6E6` and `P2D1-A1` ARE the identification and they are what the papers use.
+
+
+def test_a_variant_designation_identifies_the_part_a_bare_symbol_cannot(parts: tuple) -> None:
+    """The ruling, in the four spellings the literature actually uses.
+
+    All of them have to reach `ilvc6e6_ecoli` — the NADH-preferring KARI that closes the matrix
+    without Pos5 — rather than the four-way `ilvC` ambiguity, because which of the four a build
+    used is the NADPH/NADH question the whole programme turns on.
+
+    The resolution must say it used BOTH kinds at that role: the symbol found the four candidates
+    and the designation chose among them, and a reader counting match kinds is entitled to see
+    that the choice was made by the designation rather than by the symbol alone.
+    """
+    for entry in ("ilvC6E6", "ilvC 6E6", "ilvC-6E6", "IlvC^6E6"):
+        resolution = resolve_roles([entry], parts)
+        kari = next(r for r in resolution.roles if r.role == "KARI")
+        assert kari.part_ids == ("ilvc6e6_ecoli",), entry
+        assert not kari.ambiguous, entry
+        assert kari.resolved_by == (BY_GENE_SYMBOL, BY_VARIANT_DESIGNATION), entry
+        assert resolution.variant_resolved_roles == ("KARI",), entry
+        assert resolution.ambiguous_variants == (), entry
+
+    # A designation written in parts, which is how the other curated variant is cited: the run of
+    # tokens after the symbol is read whole, so 'P2D1' + 'A1' reaches `p2d1a1`.
+    for entry in ("ilvC P2D1-A1", "Ec_ilvC(P2D1-A1)", "ilvC P2D1A1"):
+        resolved = dict((r.role, r.part_ids) for r in resolve_roles([entry], parts).roles)
+        assert resolved["KARI"] == ("ilvc_p2d1a1_ecoli",), entry
+
+
+def test_a_bare_ilvc_is_still_not_narrowed_and_it_is_the_half_that_erodes(parts: tuple) -> None:
+    """THE HALF OF THE RULING THAT IS EASY TO LOSE, and the reason it must not be.
+
+    Four parts carry `ilvC` — `ilvc_ecoli` on NADPH, and `ilvc_nadh_variant`, `ilvc6e6_ecoli`,
+    `ilvc_p2d1a1_ecoli` on NADH. They differ by the cofactor and almost nothing else. So a bare
+    `ilvC` identifies NOTHING, and narrowing it would not be a convenience: it would SILENTLY PICK
+    A COFACTOR, which is the one property the atlas exists to reason about, and the picked route
+    would then score, rank and export looking exactly like a route somebody had checked.
+
+    `ilvCP2D1` is the near-miss that proves the conservatism is real rather than incidental: it
+    names a designation, the alias table even knows the spelling, and no part carries `P2D1` — so
+    it stays ambiguous instead of being rounded to the part whose designation merely starts that
+    way. Same for a designation the catalog has never heard of.
+    """
+    for entry in ("ilvC", "ilvC P2D1", "ilvCP2D1", "ilvC 9X9", "ilvC nadh variant"):
+        resolution = resolve_roles([entry], parts)
+        kari = next(r for r in resolution.roles if r.role == "KARI")
+        assert len(kari.part_ids) == 4, entry
+        assert kari.ambiguous, entry
+        assert kari.resolved_by == (BY_GENE_SYMBOL,), entry
+        assert resolution.variant_resolved_roles == (), entry
+        assert resolution.ambiguous_variants == (), entry
+
+
+def test_a_second_part_with_the_same_symbol_and_variant_turns_the_match_into_a_refusal(
+    parts: tuple, routes: list
+) -> None:
+    """THE SAFEGUARD, tested by breaking it — the same test the organism clause has, because the
+    owner asked for the same shape and uniqueness is the price of both.
+
+    Add a second part carrying `ilvC` and the designation `6E6` and today's match has to become a
+    REFUSAL by itself, with both colliding parts named. Not a stale answer kept, not a coin toss,
+    and — the part specific to this clause — NOT a quiet fall-back to 'matched, ambiguous at
+    KARI'. That fall-back is what makes this refusal look harsher than a bare `ilvC`'s ambiguity,
+    and it is the right harshness: the record WROTE `6E6`, which is to say it named the cofactor,
+    and reporting a match that averages over NADPH and NADH would discard the very thing the
+    record was careful to say.
+    """
+    config = _configuration(_NAMED_KARI_BUILD)
+    before = _verdict(config, parts, routes)
+    assert before.clause == "matched"
+    assert before.variant_resolved_roles == ("KARI",)
+    assert "ilvc6e6_ecoli" in before.route_ids[0]
+
+    crowded = (*parts, _a_second_ilvc_6e6())
+    after = classify(config, crowded, routes, chassis_organism_id=_YEAST)
+    assert after.clause == "variant_designation_ambiguous"
+    assert after.outcome == "not_evaluable", "a refusal is never a match and never a miss"
+    assert "ilvc6e6_ecoli" in after.detail and "ilvc6e6_fixture" in after.detail
+    assert "'6E6'" in after.detail, "the refusal quotes the designation as the record wrote it"
+    assert after.resolution is not None
+    assert [a.role for a in after.resolution.ambiguous_variants] == ["KARI"]
+    assert after.resolution.unfilled_roles == ("KARI",), "refused means unfilled, not half-filled"
+    # And the refusal must not leak into the figure as a match by any other door.
+    report = recall_report((config,), crowded, routes, chassis_organism_id=_YEAST)
+    assert report.matched == ()
+    assert report.matched_by_variant_designation == ()
+    assert report.recall is None and report.coverage == 0.0
+
+
+def test_a_variant_designation_can_only_narrow_and_never_fill(parts: tuple) -> None:
+    """THE CONTAINMENT, and the whole reason splitting a token is allowed in a module that refuses
+    substring matching everywhere else.
+
+    A designation is applied only to the candidates a GENE SYMBOL already resolved to, so it can
+    only ever return a subset. It cannot fill a role the symbol left empty (`6E6` alone is not an
+    enzyme), it cannot rescue a spelling the catalog does not know (`ilvZ6E6` stays a catalog
+    gap), and it cannot cross from one entry to another (`ILV5` is not narrowed by a `6E6` sitting
+    in a different entry — and could not be, since it resolves to one part).
+
+    The consequence is that the worst a misread designation can do is REFUSE a match that would
+    otherwise have been ambiguous, which is the pessimistic direction this harness is allowed to
+    be wrong in.
+    """
+    assert not any(role.filled for role in resolve_roles(["6E6"], parts).roles)
+    assert resolve_roles(["6E6"], parts).unrecognised == ("6E6",)
+    assert resolve_roles(["ilvZ6E6"], parts).unrecognised == ("ilvZ6E6",)
+
+    across_entries = resolve_roles(["ILV5", "ilvC 6E6"], parts)
+    by_role = dict((r.role, r.part_ids) for r in across_entries.roles)
+    assert by_role["KARI"] == ("ilv5_native", "ilvc6e6_ecoli")
+
+
+def test_only_a_declared_variant_part_carries_a_designation(parts: tuple) -> None:
+    """The catalog side of the rule, which is where a false designation would come from.
+
+    A part carries a designation only if it declares `variant_of` — the catalog saying "this is a
+    variant of that", which is exactly what D3 said a curator would have to add before the harness
+    could key on anything. Everything else carries none, so no ordinary part can acquire a
+    designation by an accident of naming: `ilv2_ilv6_native` must not read its second gene as a
+    designation of its first, and `ilvc_nadh_variant` must not read the word `nadh` as one — a
+    descriptive word in an id is not something a paper would cite.
+    """
+    designations = designation_index(parts)
+    carried = {part_id: sorted(keys) for part_id, keys in designations.items() if keys}
+    assert carried == {"ilvc6e6_ecoli": ["6e6"], "ilvc_p2d1a1_ecoli": ["p2d1a1"]}
+    for part in parts:
+        if part.variant_of is None:
+            assert designations[part.id] == frozenset(), part.id
+
+
 # ------------------------------------------------------------------------- matching and misses
 
 
@@ -501,22 +676,39 @@ def test_recall_is_over_the_judgeable_set_and_coverage_says_how_big_that_was(
     assert report.partial >= report.recall * report.coverage
 
 
-def test_the_report_counts_the_two_kinds_of_match_apart(parts: tuple, routes: list) -> None:
-    """Somebody reading 100% must be able to see how much of it rests on the weaker
-    identification. Both kinds are counted, both are printed, and the per-configuration line says
-    which one that configuration used — so the breakdown is never only a total."""
+def test_the_report_counts_the_three_kinds_of_match_apart(parts: tuple, routes: list) -> None:
+    """Somebody reading 100% must be able to see what it is made of.
+
+    Three kinds now, since the owner's second 2026-09-22 ruling: a bare gene symbol, a symbol
+    narrowed by a variant designation, and a role name qualified by a source organism. All three
+    are counted, all three are printed, and the per-configuration line says which one that
+    configuration used — so the breakdown is never only a total, and nobody has to assume that a
+    recall figure rests on the strongest of the three.
+
+    `matched_by_gene_symbol` is the complement of the other two rather than a third independent
+    count, because a single configuration can name an organism at one role and a variant at
+    another; adding three overlapping counts would exceed the total.
+    """
     configurations = (
         _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH6"], name="by gene symbol"),
+        _configuration(_NAMED_KARI_BUILD, name="by variant designation"),
         _configuration(_CELS_2019, name="by source organism"),
     )
     report = recall_report(configurations, parts, routes, chassis_organism_id=_YEAST)
     assert report.recall == pytest.approx(1.0)
     assert [v.configuration.name for v in report.matched_by_gene_symbol] == ["by gene symbol"]
+    assert [v.configuration.name for v in report.matched_by_variant_designation] == [
+        "by variant designation"
+    ]
     assert [v.configuration.name for v in report.matched_by_source_organism] == [
         "by source organism"
     ]
     body = "\n".join(describe_report(report))
-    assert "1   matched by gene symbol, and 1 by a role name plus a source organism" in body
+    assert (
+        "1   matched by gene symbol alone, 1 by a variant designation, and 1 by a role name "
+        "plus a source organism" in body
+    )
+    assert "resolved BY VARIANT DESIGNATION at KARI" in body
     assert "resolved BY SOURCE ORGANISM at KDC" in body
 
 

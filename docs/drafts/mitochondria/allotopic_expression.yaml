@@ -48,6 +48,37 @@
 # quotes on purpose. No quote in this file splices two passages; where two passages are needed
 # they are two list items.
 #
+# THAT CLAIM WAS FALSE WHEN FIRST WRITTEN, AND IS TRUE AGAIN AS OF 2026-09-22. It was false in a
+# specific and instructive way: all 78 quotes did pass, but two of them passed against the paper
+# they came from rather than against the paper their record names, and eleven more named no paper
+# at all, so they could not be checked from this file in either direction. The 2026-09-22
+# provenance sweep caught one of the two and seven of the eleven; the repair pass that followed it
+# re-swept all 78 and found the rest. What changed:
+#
+#   * 2 quotes re-attributed. `relocation_attempts[0]` (VAR1) held a Cox2 sentence from
+#     doi:10.1016/j.gendis.2019.08.001, and `relocation_attempts[2]` (ATP8) held a sentence from
+#     doi:10.1093/nar/gkaa424. Both were bare list items inheriting a record-level `publication:`
+#     that did not contain them. Each now sits in its own attributed block with an
+#     `attribution_corrected` note recording the previous attribution, the date and the check.
+#     NEITHER RECORD'S CLAIM CHANGES — that was verified field by field, not assumed, and the
+#     check is written out in each block.
+#   * 11 quotes given attribution they never had: the six in `hydrophobicity_hypothesis.evidence`
+#     (four different papers between them), two in `evidence_natural`, two in `evidence_caveats`,
+#     and the one in `scope_exclusions[0]`. All eleven were located and all eleven re-resolve
+#     byte-exact; none was a fabrication. The list shape changed from bare strings to
+#     `{publication, quote}` pairs where the sources differ per item, because a record-level field
+#     cannot attribute a multi-paper synthesis.
+#
+# NO QUOTE STRING WAS EDITED in the repair. Every one is the same contiguous slice it was, and the
+# current standing after the repair is: 78 quotes, 78 resolve byte-exact against the publication
+# the record itself names, 0 absent, 0 unattributed.
+#
+# WHAT THIS FILE STILL DOES NOT DO, stated plainly because the header above overclaims it: the
+# quotes are verbatim and verified, but this file records no `char_start`/`char_end`, so "by
+# offset" is a description of how the work was done and not something a reader can reproduce from
+# the file. `ethanol/phase2_admissions.yaml` and `configurations/host_resolution.yaml` are the
+# model for doing that properly.
+#
 # CONVENTIONS.md: no `confidence` is written anywhere in this file. A human sets it.
 
 version: 1
@@ -81,27 +112,48 @@ hydrophobicity_hypothesis:
     the hydrophobicity of the product. Four papers in this corpus state it in so many words, and
     two of them offer a quantitative form of it (mean hydrophobicity of a transmembrane helix;
     "mesohydrophobicity" as a predictor of importability).
+  # ATTRIBUTION ADDED 2026-09-22. This block is a multi-paper synthesis, so a record-level
+  # `publication:` cannot carry it: the six quotes below come from four different papers, which is
+  # precisely the "four papers" `status` claims. Until this repair the quotes were bare strings
+  # with no source anywhere in the file, so none of them could be re-verified from the file as
+  # written — the finding was true and unfalsifiable at the same time. Each now names its own
+  # publication; the quote strings are unchanged and each was re-resolved byte-exact at its own
+  # offsets with fermdb.llm.validate.verify_span against the fulltext_asset store.
   evidence:
-    - |-
-      Alternatively, genes may have been confined to mitochondria due to the difficulty of transporting their protein products into the organelle, an idea that stems from the enrichment of genes encoding hydrophobic proteins in organellar genomes .
-    - |-
-      The hydrophobic nature of the proteins encoded in this genome plays a central role in gene retention (; ; ).
-    - |-
-      The major impediment to allotopic expression is the highly hydrophobic nature of the mitochondrial-endoced polypeptides.
-    - |-
-      Several studies suggest that allotopic expression of most mitochondrial proteins is not feasible because of their high mesohydrophobicity, a parameter that can be used to predict the importability of hydrophobic peptides ().
-    - |-
-      One of the critical steps dictating the success of the allotopic expression approach is the protein import process into mitochondria. Hydrophobicity of the proteins has been considered to be the primary barrier.
-    - |-
-      It is important to note that the high hydrophobicity of the nascent polypeptides has been indicated to be one of the limiting constraints for successful mitochondrial import of allotopically expressed mitochondrial proteins. This can be overcome by reducing the hydrophobicity of the proteins which are to be allotopically expressed.
+    - publication: doi:10.1371/journal.pgen.1002876
+      quote: |-
+        Alternatively, genes may have been confined to mitochondria due to the difficulty of transporting their protein products into the organelle, an idea that stems from the enrichment of genes encoding hydrophobic proteins in organellar genomes .
+    - publication: doi:10.1091/mbc.e17-09-0560
+      quote: |-
+        The hydrophobic nature of the proteins encoded in this genome plays a central role in gene retention (; ; ).
+    - publication: doi:10.1093/nar/gkq769
+      quote: |-
+        The major impediment to allotopic expression is the highly hydrophobic nature of the mitochondrial-endoced polypeptides.
+    - publication: doi:10.1093/nar/gkq769
+      quote: |-
+        Several studies suggest that allotopic expression of most mitochondrial proteins is not feasible because of their high mesohydrophobicity, a parameter that can be used to predict the importability of hydrophobic peptides ().
+    - publication: doi:10.1016/j.gendis.2019.08.001
+      quote: |-
+        One of the critical steps dictating the success of the allotopic expression approach is the protein import process into mitochondria. Hydrophobicity of the proteins has been considered to be the primary barrier.
+    - publication: doi:10.1016/j.gendis.2019.08.001
+      quote: |-
+        It is important to note that the high hydrophobicity of the nascent polypeptides has been indicated to be one of the limiting constraints for successful mitochondrial import of allotopically expressed mitochondrial proteins. This can be overcome by reducing the hydrophobicity of the proteins which are to be allotopically expressed.
+  the_four_papers: >-
+    Named explicitly now that each quote carries its source, so the `status` line above can be
+    checked rather than taken: doi:10.1371/journal.pgen.1002876, doi:10.1091/mbc.e17-09-0560,
+    doi:10.1093/nar/gkq769 and doi:10.1016/j.gendis.2019.08.001 — four distinct papers, which is
+    what `stated_explicitly_in_four_papers` asserts. The two that give the quantitative form
+    (mesohydrophobicity as a predictor) are gkq769 and gendis.
   the_natural_experiment: >-
     The strongest support is not from the engineering at all but from evolution: the few mtDNA
     genes that went nuclear on their own did so with a hydrophobicity reduction attached.
   evidence_natural:
-    - |-
-      Interestingly, in the few cases where these genes have transferred to the nucleus naturally, this was accompanied by a significant reduction in hydrophobicity.
-    - |-
-      Inner-membrane protein products of genes that naturally migrated to the nucleus tend to be less hydrophobic than their mitochondria-­encoded counterparts (; ; , ).
+    - publication: doi:10.1093/nar/gkq769
+      quote: |-
+        Interestingly, in the few cases where these genes have transferred to the nucleus naturally, this was accompanied by a significant reduction in hydrophobicity.
+    - publication: doi:10.1091/mbc.e17-09-0560
+      quote: |-
+        Inner-membrane protein products of genes that naturally migrated to the nucleus tend to be less hydrophobic than their mitochondria-­encoded counterparts (; ; , ).
   where_it_is_incomplete: >-
     Two caveats a human reviewer should not let this table hide. (1) Hydrophobicity is necessary
     but demonstrably not sufficient: Cox2-W56R is importable and still only partly functional,
@@ -109,10 +161,12 @@ hydrophobicity_hypothesis:
     in TMH1. (2) Hydrophobicity can be reduced too far — doi:10.1091/mbc.e17-09-0560 argues for a
     window, not a gradient, because the helix must still be recognised as a helix by Oxa1.
   evidence_caveats:
-    - |-
-      A delicate balance between a low hydrophobicity that allows the effective translocation of the first TMS through TIM23, and a high enough hydrophobicity to be recognized as a TMS by the membrane insertion machinery (Oxa1), and therefore to be introduced with the right topology into the inner mitochondrial membrane, is required.
-    - |-
-      Interestingly, we observed that several favourable mutations were concentrated in the second TMH, resulting in a significant decrease in hydrophobicity ( and ).
+    - publication: doi:10.1091/mbc.e17-09-0560
+      quote: |-
+        A delicate balance between a low hydrophobicity that allows the effective translocation of the first TMS through TIM23, and a high enough hydrophobicity to be recognized as a TMS by the membrane insertion machinery (Oxa1), and therefore to be introduced with the right topology into the inner mitochondrial membrane, is required.
+    - publication: doi:10.1093/genetics/iyaf037
+      quote: |-
+        Interestingly, we observed that several favourable mutations were concentrated in the second TMH, resulting in a significant decrease in hydrophobicity ( and ).
 
 # ================================================================== the relocation attempts
 
@@ -141,8 +195,45 @@ relocation_attempts:
         the Δmss116/SUP intronless strain was transformed with a construct that successfully relocates a recoded version of the VAR1 gene to the nucleus as described previously ().
       - |-
         Similar to the other mtSSU proteins, Var1 accumulated in equal amounts in WT and sov1 null mutant mitochondria (Figure ), suggesting that Var1u is stable in the absence of Sov1. However, while in WT mitochondria all detected Var1 protein appeared to incorporate into the mtSSU, in the Δsov1/VAR1u strain, only a small portion of Var1u sedimented in the fractions corresponding to the mtSSU (Figure ), suggesting that Var1 protein assembly into the mitoribosome is impaired.
-      - |-
-        For example, the W56R mutant of the yeast cytochrome c oxidase could be allotopically expressed using an MTS derived from the S. cerevisiae—OXA1 gene or Neurospora crassa mitochondrial ATP synthase subunit 9 gene, both of which code for hydrophobic mitochondrial proteins, but not with an MTS derived from the COX4 gene, which codes for a hydrophilic protein, the yeast cytochrome c oxidase subunit 4.
+    # The COX4-presequence contrast drawn in `why_it_matters` below is a Cox2 fact from a review,
+    # not a Var1 fact from either paper this record names. It was previously the fourth item of
+    # `evidence:` above and so was charged to `publication:`; it is now its own attributed block.
+    evidence_for_the_MTS_contrast:
+      publication: doi:10.1016/j.gendis.2019.08.001
+      is_this_record_s_evidence: false
+      what_it_supports: >-
+        Only the parenthetical in `why_it_matters` — that COX4 is the presequence which does NOT
+        work for hydrophobic cargo. It says nothing about Var1 and carries none of this record's
+        fields. It is kept here rather than deleted because the contrast is the reason this record
+        matters to the programme, and the contrast needs a source.
+      source_type: "review, not a primary report — the same paper the hypothesis section leans on"
+      attribution_corrected:
+        date: 2026-09-22
+        was: >-
+          relocation_attempts[0].evidence[3], carrying no attribution of its own and therefore
+          inheriting this record's `publication: doi:10.1093/nar/gkaa424, doi:10.1093/nar/gkx426`.
+          The sentence occurs in neither of those papers.
+        now: "doi:10.1016/j.gendis.2019.08.001 — Allotopic expression of mitochondrial genes: Basic strategy and progress"
+        how_checked: >-
+          fermdb.extract.harness.load_source_text on all three papers, then
+          fermdb.llm.validate.verify_span at the quote's own offsets. EXACT at [15656, 16057) in
+          gendis, one occurrence; absent from gkaa424 and from gkx426.
+        is_the_record_s_claim_affected: >-
+          NO, and this was checked rather than assumed. Every field of this record — the COX4
+          presequence, full function restored, no sequence changes, fractionation as the readout —
+          rests on evidence[0..2], and those three were re-verified against the papers this record
+          names: [0] EXACT in doi:10.1093/nar/gkaa424, [1] EXACT in doi:10.1093/nar/gkx426, [2]
+          EXACT in doi:10.1093/nar/gkaa424. Both `evidence_caveats` entries are EXACT in
+          doi:10.1093/nar/gkaa424 as well. The Var1 result stands unchanged; what was wrong was
+          the filing of a Cox2 sentence, not the finding.
+        why_it_happened: >-
+          `why_it_matters` names doi:10.1016/j.gendis.2019.08.001 as the source of exactly this
+          fact two lines below, so the curator knew where it came from. The quote was simply
+          appended to an `evidence:` list whose attribution is a record-level field, and a
+          record-level field cannot carry a second source.
+      evidence:
+        - |-
+          For example, the W56R mutant of the yeast cytochrome c oxidase could be allotopically expressed using an MTS derived from the S. cerevisiae—OXA1 gene or Neurospora crassa mitochondrial ATP synthase subunit 9 gene, both of which code for hydrophobic mitochondrial proteins, but not with an MTS derived from the COX4 gene, which codes for a hydrophilic protein, the yeast cytochrome c oxidase subunit 4.
     why_it_matters: >-
       THE record in this file for DUET's purposes. Var1 is the only soluble protein yeast mtDNA
       encodes, and it relocates with nothing but a codon change and a presequence — and the
@@ -240,8 +331,34 @@ relocation_attempts:
         The genetic screen used in this study to isolate mutants in nuclear gene products required specifically for expression of mitochondrial ATP8 was based on the ability of nATP8 to complement atp8 mutants (; ).
       - |-
         In other studies, tandem duplication of MTS was found to improve the mitochondrial import efficiency of allotopically expressed subunit 8 of yeast mitochondrial ATP synthase.
-      - |-
-        It has been previously shown that complementation of mutants in the mitochondrial translation factors Pet111 and Aep3 by allotopic expression of COX2 and ATP8 respectively depends on a high level of expression achieved by the use of multicopy vectors ().
+    # NOT FOUND BY THE 2026-09-22 PROVENANCE SWEEP — found by the repair pass that followed it,
+    # because the sweep's extractor reached 67 of this file's 78 quotes and this was one of the 11
+    # it missed. Same defect as the VAR1 record above: a quote from a third paper appended to a
+    # list whose attribution is a record-level field.
+    evidence_expression_level_dependence:
+      publication: doi:10.1093/nar/gkaa424
+      attribution_corrected:
+        date: 2026-09-22
+        was: >-
+          relocation_attempts[2].evidence_expression_sensitivity[3], carrying no attribution of
+          its own and therefore inheriting this record's `publication: doi:10.1091/mbc.e16-11-0775,
+          doi:10.1016/j.gendis.2019.08.001`. The sentence occurs in neither of those papers — the
+          strings "Pet111 and Aep3", "multicopy vectors" and "allotopic expression of COX2 and
+          ATP8" appear nowhere in either stored text.
+        now: "doi:10.1093/nar/gkaa424 — the same NAR paper the VAR1 record above is built on"
+        how_checked: >-
+          fermdb.extract.harness.load_source_text, then fermdb.llm.validate.verify_span at the
+          quote's own offsets. EXACT at [28552, 28806) in doi:10.1093/nar/gkaa424, one occurrence;
+          absent from every other publication named anywhere in this file.
+        is_the_record_s_claim_affected: >-
+          NO. This quote sits under `evidence_expression_sensitivity`, which qualifies the ATP8
+          result rather than establishing it, and the qualification it makes — that complementation
+          needs multicopy expression — is if anything strengthened by coming from a third,
+          independent paper. The ATP8 record's own fields rest on `evidence[0..4]`, all of which
+          re-resolve EXACT against the two papers the record names.
+      evidence:
+        - |-
+          It has been previously shown that complementation of mutants in the mitochondrial translation factors Pet111 and Aep3 by allotopic expression of COX2 and ATP8 respectively depends on a high level of expression achieved by the use of multicopy vectors ().
 
   # ------------------------------ two transmembrane helices: partial, and the limit is measurable
 
@@ -720,6 +837,10 @@ relocation_attempts:
 scope_exclusions:
 
   - item: "doi:10.26508/lsa.202301965 — 'Allotopic expression of COX6'"
+    # ATTRIBUTION ADDED 2026-09-22. The DOI was only ever inside the `item` string, which is prose
+    # and not a field any tool reads as a source, so the quote below had no machine-readable
+    # attribution. Re-resolved byte-exact at [104, 302) in the stored text.
+    publication: doi:10.26508/lsa.202301965
     reason: >-
       Wrong direction. Despite the title, this is a NUCLEAR gene moved INTO mtDNA — the strategy-E
       direction, not the mirror image. The word "allotopic" is used in this literature for

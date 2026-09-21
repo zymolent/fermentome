@@ -1,0 +1,438 @@
+# The atlas's first assertion batch, as proposals. NOTHING HERE HAS BEEN WRITTEN.
+#
+# The argument for every entry is in docs/drafts/assertions/FIRST_BATCH.md; this file is the
+# machine-readable half and is deliberately not self-justifying.
+#
+# Two fields you will not find, on purpose:
+#   * `level` -- there is no such column. `assertion_level` derives it. `expected_level` below is
+#     a prediction plus the rule it follows, checked by an in-memory rehearsal, never a value to
+#     be written.
+#   * `effect_size` -- every cited measurement is a titer. A titer is not an effect, and the
+#     difference from the control is a number this atlas would have computed rather than one the
+#     paper reported. Left NULL on all six; recoverable later from measurement + control_measurement.
+
+batch: first_batch
+status: proposal
+approved_set: direct_perturbation
+drafted_by: agent
+drafted_on: 2026-09-22
+source_database: "~/fermdb-data/fermdb.sqlite3 (opened mode=ro)"
+writes_performed: none
+live_counts_after_drafting:
+  assertion: 0
+  evidence_item: 0
+
+search:
+  query: "join strain x modification x measurement on strain_id; require a comparator strain with a measurement of the same quantity_kind and product_id"
+  triples_strain_modification_measurement: 17
+  candidate_strain_modification_pairs: 9
+  candidate_strains: 8
+  pairs_with_a_comparator_that_isolates_the_modification: 6
+  pairs_drafted: 6
+  pairs_refused: 3
+  note: >-
+    14 of the 17 triples have some other strain measured the same way in the same paper. That is
+    not a comparator. A perturbation claim needs a control differing by the recorded modification
+    and nothing else, and `strain_lineage` holds 0 rows, so every comparator below was read from
+    span text and stored full text rather than joined.
+
+independent_groups:
+  - id: group:boles-goethe-frankfurt
+    used_by: [A1, A2, A3, A4, A5, A6]
+    decided_from: >-
+      PubMed author affiliations for PMID 31303893: Wess J, Brinek M and Boles E are all Institute
+      of Molecular Biosciences, Goethe University Frankfurt. One institute, one senior author.
+    not_decided_from: >-
+      the publication id. PLAN.md J.3 counts independence by group precisely so that one lab's
+      three papers do not read as three groups, and `assertions.py` refuses to default it.
+    owner_decision_required: true
+    owner_decision: >-
+      the slug itself. It becomes a permanent key in COUNT(DISTINCT independent_group).
+
+defaults_shared_by_all_proposals:
+  subject_type: modification
+  predicate: affects_production_of
+  predicate_checked_against: "`predicate` table, 17 active terms (PLAN.md J.2)"
+  predicate_rejected_alternatives:
+    affects_yield_of: "every cited measurement is a titer (g/L), not a yield; the two are different numbers"
+    improves_when_modified_by: "structurally impossible -- assertion.object_type has no 'modification' value"
+  object_type: product
+  object_id: YAA:PRODUCT:isobutanol
+  product_id: YAA:PRODUCT:isobutanol
+  evidence_type: direct_perturbation
+  evidence_type_reason: >-
+    a gene was deleted, the product was measured, and a control differing by that deletion was
+    measured the same way in the same experiment -- PLAN.md J.3's definition verbatim.
+  zone: R
+  confidence: medium
+  effect_size: null
+  effect_unit: null
+  effect_ci_low: null
+  effect_ci_high: null
+  effect_n: null
+  built_by: fermdb.curate.assertions.from_modification
+  publication_source: >-
+    read off modification.publication_id (schema v12 FK), not supplied by the drafter.
+
+proposals:
+  - key: A1
+    name: ilv2 deletion increases isobutanol production
+    assertion_id: YAA:ASSERT:80b93f76dadaa25c
+    evidence_id: YAA:EV:c2ae5342200612e3
+    subject_id: YAA:MOD:219464d2528382f9
+    subject_label: "deletion of ILV2 (mitochondrial acetolactate synthase), strain JWY0"
+    direction: increases
+    evidence:
+      evidence_type: direct_perturbation
+      independent_group: group:boles-goethe-frankfurt
+      strain_id: YAA:STRAIN:jwy0
+      control_strain_id: YAA:STRAIN:cen-pk113-7d
+      control_condition_id: null
+      measurement_id: YAA:MEAS:847c6e027ad9b73b
+      span_id: YAA:SPAN:7823495e6115441a9101152a1837d1dd
+      publication_id: doi:10.1186/s13068-019-1486-8
+      direction: increases
+      zone: R
+      confidence: medium
+    measured: {test: "0.22 g/L", control: "0.01 g/L"}
+    control_measurement_id: YAA:MEAS:387df4102862207b
+    comparator_justification: >-
+      the results section states the 0.01 g/L figure is "for the wt strain CEN.PK113-7D expressing
+      the cytosolic isoforms of Ilv2, Ilv5, and Ilv3". Both arms carry the cytosolic pathway; they
+      differ by ilv2-delta. The abstract's "22-fold" credits overexpression and deletion together,
+      which would have made this control wrong; the results text settles it.
+    expected_level: L1
+    expected_basis: direct_evidence
+    expected_level_reason: >-
+      one active direct evidence item, one independent group, one direction, no open direction
+      conflict. Not L2: assertion_level needs n_direct_groups >= 2.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:80b93f76dadaa25c with 1 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+    data_note: >-
+      not a blocker. The curated span stops at "for the wt strain CEN.PK113-7D" and drops the
+      clause that makes the control valid, and the strain row records no IsoV100 plasmid. A reader
+      following the span alone would wrongly read the control as a bare wild type. The strain row
+      is where that belongs, not this assertion.
+
+  - key: A2
+    name: bdh1/bdh2 deletion increases isobutanol production
+    assertion_id: YAA:ASSERT:9fb20030a088b251
+    evidence_id: YAA:EV:bab411ee80a4e072
+    subject_id: YAA:MOD:510bd21a2c8e8ad8
+    subject_label: "deletion of BDH1/BDH2 (2,3-butanediol branch), strain JWY01"
+    direction: increases
+    evidence:
+      evidence_type: direct_perturbation
+      independent_group: group:boles-goethe-frankfurt
+      strain_id: YAA:STRAIN:jwy01
+      control_strain_id: YAA:STRAIN:jwy0
+      control_condition_id: null
+      measurement_id: YAA:MEAS:19c6160b30e66eeb
+      span_id: YAA:SPAN:25032f244565461181afc4071bb55143
+      publication_id: doi:10.1186/s13068-019-1486-8
+      direction: increases
+      zone: R
+      confidence: medium
+    measured: {test: "0.28 g/L", control: "0.22 g/L"}
+    control_measurement_id: YAA:MEAS:847c6e027ad9b73b
+    comparator_justification: >-
+      JWY01 is JWY0 plus bdh1-delta bdh2-delta; the abstract says the series was built by
+      successively deleting, and the span says "deletion of BDH1/2 (strain JWY01) further
+      increased isobutanol production" -- "further" is the authors naming JWY0 as the baseline.
+    expected_level: L1
+    expected_basis: direct_evidence
+    expected_level_reason: one direct item, one group, one direction, no conflict.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:9fb20030a088b251 with 1 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+
+  - key: A3
+    name: leu4/leu9 deletion increases isobutanol production
+    assertion_id: YAA:ASSERT:de97fba6db568868
+    evidence_id: YAA:EV:de07578a268e6b36
+    subject_id: YAA:MOD:a5b8b1111f6c42af
+    subject_label: "deletion of LEU4/LEU9 (leucine branch off 2-ketoisovalerate), strain JWY02"
+    direction: increases
+    evidence:
+      evidence_type: direct_perturbation
+      independent_group: group:boles-goethe-frankfurt
+      strain_id: YAA:STRAIN:jwy02
+      control_strain_id: YAA:STRAIN:jwy01
+      control_condition_id: null
+      measurement_id: YAA:MEAS:84f9fa99523b400b
+      span_id: YAA:SPAN:878de66dfdbf4404892f7ecfa0e49884
+      publication_id: doi:10.1186/s13068-019-1486-8
+      direction: increases
+      zone: R
+      confidence: medium
+    measured: {test: "0.50 g/L", control: "0.28 g/L"}
+    control_measurement_id: YAA:MEAS:19c6160b30e66eeb
+    comparator_justification: >-
+      next step of the same series: "Further suppression of leucine biosynthesis by deletion of
+      LEU4/9 (strain JWY02) had an additional large effect ... and resulted in a titer of 0.50
+      g/L". JWY02 = JWY01 + leu4-delta leu9-delta.
+    expected_level: L1
+    expected_basis: direct_evidence
+    expected_level_reason: one direct item, one group, one direction, no conflict.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:de97fba6db568868 with 1 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+
+  - key: A4
+    name: ecm31 deletion has no effect on isobutanol production
+    assertion_id: YAA:ASSERT:f75570bed59e4456
+    evidence_id: YAA:EV:1d70c7089712a5d1
+    subject_id: YAA:MOD:4471c21875d88f81
+    subject_label: "deletion of ECM31 (pantothenate branch off 2-ketoisovalerate), strain JWY03"
+    direction: no_effect
+    evidence:
+      evidence_type: direct_perturbation
+      independent_group: group:boles-goethe-frankfurt
+      strain_id: YAA:STRAIN:jwy03
+      control_strain_id: YAA:STRAIN:jwy02
+      control_condition_id: null
+      measurement_id: YAA:MEAS:6f685ea5b4b553f7
+      span_id: YAA:SPAN:d221c3ccc6834044a8d37a644a05fd42
+      publication_id: doi:10.1186/s13068-019-1486-8
+      direction: no_effect
+      zone: R
+      confidence: medium
+    measured: {test: "0.52 g/L", control: "0.50 g/L"}
+    control_measurement_id: YAA:MEAS:84f9fa99523b400b
+    comparator_justification: >-
+      JWY03 = JWY02 + ecm31-delta, same series.
+    direction_justification: >-
+      the only negative result in the batch, and a tested one: "deletion of ECM31 (strain JWY03)
+      had no statistically significant effect on isobutanol production (0.52 g/L)". 0.52 > 0.50,
+      so reading a direction off the two numbers would have given `increases`. The direction comes
+      from the authors' stated statistical result -- which is exactly why assertions.py refuses to
+      derive a direction from a measurement.
+    expected_level: L1
+    expected_basis: direct_evidence
+    expected_level_reason: >-
+      one direct item, one group, one direction, no conflict. A no_effect direction is a direction
+      like any other to the view; it does not downgrade.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:f75570bed59e4456 with 1 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+    related_row_not_touched: >-
+      an unpromoted bottleneck candidate span sits at the same offsets [17099, 17227)
+      (record_path bottlenecks[0]). It has no `bottleneck` row and is outside the approved set.
+
+  - key: A5
+    name: gpd1/gpd2 deletion increases isobutanol production
+    assertion_id: YAA:ASSERT:15a8bd300d887a9d
+    evidence_id: YAA:EV:c811e0ec5667cada
+    subject_id: YAA:MOD:cc361f36d38986e4
+    subject_label: "deletion of GPD1/GPD2 (glycerol formation), strain JWY19"
+    direction: increases
+    owner_decision_required: true
+    owner_decision: "approve with the caveat below, or hold until JWY16's titer is curated"
+    evidence:
+      evidence_type: direct_perturbation
+      independent_group: group:boles-goethe-frankfurt
+      strain_id: YAA:STRAIN:jwy19
+      control_strain_id: YAA:STRAIN:jwy18
+      control_condition_id: null
+      measurement_id: YAA:MEAS:f661cca85c3e05e3
+      span_id: YAA:SPAN:2dd368f3cfee45858b29e4a6b42913a6
+      publication_id: doi:10.1186/s13068-019-1486-8
+      direction: increases
+      zone: R
+      confidence: medium
+    measured: {test: "1.32 g/L", control: "1.02 g/L"}
+    control_measurement_id: YAA:MEAS:a1c350fceb0a2631
+    comparator_caveat: >-
+      the modification records GPD1/GPD2, both genes, but the only comparator with a promoted
+      titer is JWY18, which already carries gpd2-delta. What this evidence demonstrates is the
+      gpd1-delta increment on a gpd2-delta background. The fully isogenic control is JWY16
+      (delta-adh1, both GPD genes intact, no promoted titer); JWY17 (delta-gpd1 only, 0.43 g/L in
+      Fig. 7b) is also uncurated.
+    comparator_justification: >-
+      proposed anyway because the assertion carries no effect_size and so claims only the
+      direction, which holds on both readings: JWY19 > JWY18 in the results, and the abstract
+      states independently that "deletion of glycerol-3-phosphate dehydrogenase genes GPD1 and
+      GPD2 prevented formation of glycerol and increased isobutanol production up to 1.32 g/L".
+    expected_level: L1
+    expected_basis: direct_evidence
+    expected_level_reason: one direct item, one group, one direction, no conflict.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:15a8bd300d887a9d with 1 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+
+  - key: A6
+    name: ald6 deletion increases isobutanol production
+    assertion_id: YAA:ASSERT:65a970e162e06e63
+    evidence_id: YAA:EV:af60e8d044efa999
+    subject_id: YAA:MOD:5ad5ac8c1f7d0d2c
+    subject_label: "deletion of ALD6 (isobutyrate by-product), strain JWY23"
+    direction: increases
+    evidence:
+      evidence_type: direct_perturbation
+      independent_group: group:boles-goethe-frankfurt
+      strain_id: YAA:STRAIN:jwy23
+      control_strain_id: YAA:STRAIN:jwy19
+      control_condition_id: null
+      measurement_id: YAA:MEAS:a4cb6381273139ff
+      span_id: YAA:SPAN:2e43a10d665b48fe8f4caa3b50cd2699
+      publication_id: doi:10.1186/s13068-019-1486-8
+      direction: increases
+      zone: R
+      confidence: medium
+    measured: {test: "2.09 g/L", control: "1.32 g/L"}
+    control_measurement_id: YAA:MEAS:f661cca85c3e05e3
+    comparator_justification: >-
+      the text names the parent: "the ALD6 gene ... was additionally deleted in strain JWY19,
+      resulting in strain JWY23", and Fig. 7's caption lists JWY23 as JWY19's genotype plus
+      delta-ald6. The cleanest pair in the batch and the largest step.
+    expected_level: L1
+    expected_basis: direct_evidence
+    expected_level_reason: one direct item, one group, one direction, no conflict.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:65a970e162e06e63 with 1 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+    honest_wrinkle: >-
+      the authors note JWY19 "had obviously not reached maximal isobutanol titers even after 120
+      h" while JWY23 peaked at 96 h, so part of the gap may be timing rather than flux. That
+      weakens a future effect_size; it does not weaken `increases`, which is why none is proposed.
+
+refused:
+  - key: R1
+    name: bat1 deletion in IbOH-1bat1-delta
+    modification_id: YAA:MOD:8003a204b05640ff
+    strain_id: YAA:STRAIN:iboh-1bat1
+    publication_id: doi:10.1016/j.btre.2026.e00959
+    would_be_group: group:koonthongkaew-chulalongkorn
+    reason: no isogenic control exists
+    detail: >-
+      the only other titer in that paper is YAA:STRAIN:wild-type-s-cerevisiae at 6.4 mg/L, whose
+      span is a background statement in the discussion, not a control run beside the test strain.
+      IbOH-1bat1-delta is IbOH-1 -- a mutagenised, isobutanol-tolerant industrial isolate -- plus
+      bat1-delta, so comparing it with a generic wild type attributes to BAT1 an effect that
+      includes the whole mutagenesis. That is inventing a direction.
+    direct_biochemical_considered: true
+    direct_biochemical_result: >-
+      plan_assertion returns ready=false, "needs evidence[0].assay_method: which assay produced
+      the number -- enzyme assay, isotope tracing, flux". Every measurement.assay_method in the
+      atlas is NULL, and a whole-strain titer is not a biochemical assay of Bat1 in any case.
+      Forcing a type that needs no control onto a claim that needs one is how an L1 badge lands on
+      an uncontrolled number.
+    unblocked_by: >-
+      curating a titer for YAA:STRAIN:iboh-1, which is already a row in the atlas with no
+      measurement. Highest-value curation task this exercise found.
+
+  - key: R2
+    name: lpd1 deletion on BSW191
+    modification_id: YAA:MOD:a7c8f9da22ee16e0
+    strain_id: YAA:STRAIN:bsw191
+    publication_id: doi:10.1186/1475-2859-12-119
+    would_be_group: group:kondo-kobe-riken
+    reason: the modification is recorded on a strain whose curated genotype does not carry it
+    detail: >-
+      the genotype spans from the same paper give BSW191 as
+      "BY4741/pATP426-kivd-ADH6-ILV2/pILV532cytM/pATP423-PMsM" with no lpd1-delta; BSW205 and
+      BSW206 are the lpd1-delta strains. The modification was promoted from an abstract sentence
+      that names no strain. Asserting on it would produce a cleanly-resolving L1 statement about
+      the wrong strain, which traceability.py calls worse than one that fails to resolve.
+    rows_for_the_owner:
+      - "YAA:MOD:a7c8f9da22ee16e0.strain_id -- likely YAA:STRAIN:bsw206 (PMsM) rather than bsw191"
+      - >-
+        YAA:MEAS:f7a49e8797f74431 -- BSW191, 1.62 g/L, promoted from the abstract sentence
+        immediately after the lpd1-delta one, which reports the two *integrated* (lpd1-delta +
+        shunt) strains. BSW191's in-text titer is 83 mg/L. Looks like the same mis-attribution.
+
+  - key: R3
+    name: kivd insertion on BSW191
+    modification_id: YAA:MOD:dd058febc2a55035
+    strain_id: YAA:STRAIN:bsw191
+    publication_id: doi:10.1186/1475-2859-12-119
+    would_be_group: group:kondo-kobe-riken
+    reason: the only available control carries the modification too
+    detail: >-
+      the comparator BSW100 (22 mg/L) is the strain into which "ILV2, kivd, and ADH6 were
+      introduced". Both arms carry kivd. The difference between BSW191 (83 mg/L) and BSW100 is the
+      transhydrogenase-like shunt plasmid pATP423-PMsM, which has no `modification` row. Drafting
+      it would attribute the shunt's effect to kivd.
+    unblocked_by: promoting a modification row for the transhydrogenase-like shunt.
+
+planner_limitation_found:
+  finding: >-
+    all three refusals return ready=true from plan_assertion.
+  why: >-
+    the planner checks that every cited row exists, that the per-type fields are present and that
+    a J.5 arm closes. It cannot check whether the control isolates the modification, because
+    nothing in the schema says what a strain's genotype is -- `strain_lineage` holds 0 rows and
+    genotypes live in span prose. That judgement is the curation, and it is not automatable today.
+  not_proposed_as_a_fix: >-
+    teaching the planner to guess lineage from strain names or span text would be the same guess
+    CONVENTIONS.md forbids elsewhere. Populating `strain_lineage` would make it checkable.
+
+near_misses:
+  - name: GLN3 tolerance and titer
+    publication_id: doi:10.1016/j.cels.2019.10.006
+    have: >-
+      gln3D/gln3D homozygous diploid BY4743 at 306 mg/L, BY4743 at 63 mg/L, a fold_change of 4.9,
+      and tolerance numbers for gln3D vs BY4741 -- a perturbation with its own control.
+    missing: "no `modification` row for gln3-delta, so assertion.subject_id has nothing to point at"
+    would_yield: "two L1 assertions (affects_production_of and affects_tolerance_to)"
+  - name: BAT1 / BAT2 across two backgrounds
+    publication_id: doi:10.1016/j.ymben.2017.10.001
+    group: group:avalos-princeton
+    have: "24 promoted measurements including a 14.2-fold increase from bat1-delta"
+    missing: "no `modification` rows in this publication"
+    would_yield: >-
+      the atlas's first L2. A bat1-delta claim supported by group:avalos-princeton and
+      group:koonthongkaew-chulalongkorn would be two independent groups concordant in direction --
+      which also needs R1's IbOH-1 control titer.
+
+rehearsal:
+  method: >-
+    each request planned against the live atlas (mode=ro), then built with build_assertion as a
+    human curator in a throwaway in-memory database loaded with copies of the organism, product,
+    publication, extraction, span, strain, measurement and modification rows it cites. The level
+    was read back out of the assertion_level view, never chosen.
+  levels_reported_by_the_view:
+    YAA:ASSERT:80b93f76dadaa25c: "L1 / direct_evidence"
+    YAA:ASSERT:9fb20030a088b251: "L1 / direct_evidence"
+    YAA:ASSERT:de97fba6db568868: "L1 / direct_evidence"
+    YAA:ASSERT:f75570bed59e4456: "L1 / direct_evidence"
+    YAA:ASSERT:15a8bd300d887a9d: "L1 / direct_evidence"
+    YAA:ASSERT:65a970e162e06e63: "L1 / direct_evidence"
+  traceability_walk:
+    n_walked: 6
+    n_closed: 6
+    n_broken: 0
+    breaks: {}
+    gaps: {}
+    exit_code: 0
+    note: >-
+      the literature arm closes through span -> publication for all six; the analysis arm is not
+      involved, so the known dataset_unreachable gap never arises. exit_code 0 rather than
+      EXIT_VACUOUS 3 -- the first time that gate has had anything to walk.
+  live_atlas_recounted_afterwards:
+    assertion: 0
+    evidence_item: 0
+
+owner_decisions:
+  - "the independent_group slug (`group:boles-goethe-frankfurt` is a proposal)"
+  - "A5: approve with the stated control caveat, or hold until JWY16's titer is curated"
+  - "the two suspect rows named under R2 -- they belong to whoever owns data/ and promotion"

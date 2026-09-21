@@ -53,6 +53,21 @@
 # NO `confidence` FIELD APPEARS ANYWHERE IN THIS FILE, and nothing here is marked accepted or
 # verified. Quotes are verbatim literal blocks taken by offset from the stored full texts; none
 # is spliced, and where two passages are needed they are listed as separate quotes.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 11 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   11 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+#   Two further markers in `ethanol_red_coverage` had NO DOI beside them and were the only
+#   source those quotes carried. They were resolved by searching the store and are recorded
+#   in place with an `attribution_recovered` block; see doi:10.1186/s13068-015-0421-x.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 version: 1
 slot: 7
@@ -93,7 +108,6 @@ candidates:
       tolerance in yeast using pooled-segregant whole-genome sequence analysis
     year: 2012
     journal: Genome research
-    corpus_file: 00430.txt
     strains:
       - "VR1 — diploid Brazilian bioethanol production strain, isolated as a wild yeast from a plant fermentor"
       - "VR1-5B — highly ethanol-tolerant haploid segregant of VR1, the superior parent"
@@ -191,7 +205,6 @@ candidates:
       an industrial Saccharomyces cerevisiae strain to combined heat and hydrolysate stress
     year: 2015
     journal: BMC genomics
-    corpus_file: 00632.txt
     strains:
       - "Ethanol Red (ER) — the diploid Lesaffre/Fermentis commercial bioethanol strain itself, named as such"
       - "ISO12 — an ER derivative from around 300 generations of adaptive evolution under heat plus spruce hydrolysate"
@@ -305,7 +318,6 @@ candidates:
     title: Adaptation to High Ethanol Reveals Complex Evolutionary Pathways
     year: 2015
     journal: PLoS genetics
-    corpus_file: 00863.txt
     strains:
       - "Isogenic haploid, diploid and tetraploid derivatives of the prototrophic S288C strain FY5, with FLO1, FLO10 and FLO11 deleted"
       - "More than 30 evolved populations and over 100 adapted clones sequenced across two years / about 200 generations"
@@ -398,7 +410,6 @@ not_shortlisted_but_notable:
       Chromosome III Aneuploidy Enhances Ethanol Tolerance in Industrial Saccharomyces cerevisiae
       by Increasing the TUP1 Copy Number
     year: 2025
-    corpus_file: 00448.txt
     accessions: ["PRJNA1153811 (RNA-seq)"]
     open_access: "Microbial Biotechnology, fully open access"
     what_it_offers: >-
@@ -443,7 +454,6 @@ not_shortlisted_but_notable:
     pmid: "31572430"
     title: "Controlled Reduction of Genomic Heterozygosity in an Industrial Yeast Strain Reveals Wide Cryptic Phenotypic Variation"
     year: 2019
-    corpus_file: 01009.txt
     what_it_offers: >-
       The strongest treatment in the pool of a genuine industrial hyper-producer's genome
       ARCHITECTURE: PE-2/JAY270, the sugarcane distillery strain, with heterozygosity manipulated
@@ -464,7 +474,6 @@ not_shortlisted_but_notable:
       Natural allelic variations of Saccharomyces cerevisiae impact stuck fermentation due to the
       combined effect of ethanol and temperature; a QTL-mapping study
     year: 2019
-    corpus_file: 00636.txt
     what_it_offers: >-
       QTL mapping plus reciprocal hemizygosity validation of two causative genes (VHS1 and OYE2,
       both stop-codon insertions) for fermentation completion under high gravity (over 240 g/L
@@ -482,7 +491,6 @@ not_shortlisted_but_notable:
       The genetic basis of variation in clean lineages of Saccharomyces cerevisiae in response to
       stresses encountered during bioethanol fermentations
     year: 2014
-    corpus_file: 00897.txt
     what_it_offers: >-
       Six F1 crosses among four divergent lineages, linkage analysis, and reciprocal hemizygosity
       validation of COX20 (weak acid) and RCK2 (osmotic stress).
@@ -494,7 +502,6 @@ not_shortlisted_but_notable:
     pmid: "27172212"
     title: "Genome Sequence and Analysis of a Stress-Tolerant, Wild-Derived Strain of Saccharomyces cerevisiae Used in Biofuels Research"
     year: 2016
-    corpus_file: 00934.txt
     what_it_offers: >-
       A near-complete PacBio plus Illumina assembly of a biofuels strain (GLBRCY22-3) with contig
       N50 693 kb, chromosome-level for most chromosomes plus mtDNA and the 2-micron plasmid, and
@@ -511,7 +518,6 @@ not_shortlisted_but_notable:
     pmid: "22978491"
     title: "Genome sequencing and genetic breeding of a bioethanol Saccharomyces cerevisiae strain YJS329"
     year: 2012
-    corpus_file: 00545.txt
     what_it_offers: >-
       Whole-genome sequence, array-CGH karyotype and RNA-seq of a bioethanol strain against an
       S288C-derived comparator — the same comparison shape the slot's computable layer will run,
@@ -527,7 +533,6 @@ not_shortlisted_but_notable:
       Screening novel genes by a comprehensive strategy to construct multiple stress-tolerant
       industrial Saccharomyces cerevisiae with prominent bioethanol production
     year: 2022
-    corpus_file: 00795.txt
     what_it_offers: >-
       Comparative transcriptomics between a multi-stress-tolerant industrial strain and its parent
       across five stresses, followed by construction of overexpression strains and fermentation
@@ -560,30 +565,69 @@ ethanol_red_coverage:
         Included as the industrial comparator in cellulolytic-strain work without any analysis of
         why it performs as it does.
       evidence:
-        - corpus_file: 00046.txt
-          doi: 10.1007/s00253-026-13830-0
+        - doi: 10.1007/s00253-026-13830-0
           in_e6_pool: false
           note: "Cited only as evidence of how Ethanol Red is used, not as a candidate."
           quote: |-
               The industrial strain Ethanol Red® (ER) was included as a benchmark due to its widespread application in established bioethanol production processes.
     - role: "as a genetic background supplying haploid segregants for QTL analysis"
       note: >-
-        ER18, ER18A and ER7A appear as parents in the Thevelein-group polygenic-analysis series
-        (corpus files 00727, 00494, 00495, 00473). The traits analysed there are acetic acid
-        tolerance, thermotolerance and isoamyl acetate flavour formation — never ethanol
-        tolerance and never ethanol yield.
+        ER18, ER18A and ER7A appear as parents in the Thevelein-group polygenic-analysis series.
+        The traits analysed there are acetic acid tolerance, thermotolerance and isoamyl acetate
+        flavour formation — never ethanol tolerance and never ethanol yield.
+      dead_cache_markers_resolved:
+        date: 2026-09-22
+        was: "corpus files 00727, 00494, 00495, 00473 — four numbered cache files, none of which can now be dereferenced"
+        resolved_to:
+          - "doi:10.1186/s13068-015-0421-x — high acetic acid tolerance; this is 00727, confirmed by the two quotes below, and it names Ethanol Red 9 times and ER18 72 times"
+          - "doi:10.1128/aem.00814-22 — CO2 inhibition of isoamyl acetate 'banana' flavour; names Ethanol Red and uses ER7A as a parent (117 mentions)"
+          - "doi:10.1128/mbio.01279-18 — flavour ester biosynthesis in the absence of ATF1; names Ethanol Red once"
+        unresolved: >-
+          One of the four could not be identified. doi:10.1186/s13068-020-01761-5 (very high acetic
+          acid tolerance, the obvious fourth member of the series) is in the store but does not
+          mention Ethanol Red at all, so it is NOT assumed to be one of the four, and no paper in
+          the store was found using ER18A as a parent. The fourth cache number is therefore
+          recorded as unresolved rather than guessed at, and the claim that ER18A appears as a
+          parent is unsupported by anything this repair could verify.
+        method: >-
+          The three named were matched by trait and by searching the stored full texts for
+          'Ethanol Red', 'ER18' and 'ER7A'; the cache numbers themselves are not dereferenceable
+          and played no part. Only 00727 is pinned to its DOI with certainty, because its two
+          quotes re-resolve byte-exact in that paper.
     - role: "as the INFERIOR parent"
       note: >-
         The single most useful corrective in the corpus. Ethanol Red is not uniformly superior;
         for acetic acid it is the sensitive parent, which is a direct caution against reading the
         proxy genome as a general-purpose robustness reference.
       evidence:
-        - corpus_file: 00727.txt
+        # ATTRIBUTION RECOVERED 2026-09-22. `corpus_file: 00727.txt` was this quote's ONLY source
+        # marker, and the numbered scratchpad cache it names no longer exists on this machine, so
+        # the attribution was dead on its own terms — not wrong, but unresolvable from the file.
+        # Recovered by full-text search of the fulltext_asset store and confirmed with
+        # fermdb.llm.validate.verify_span: EXACT at [8423, 8581), one occurrence.
+        - doi: 10.1186/s13068-015-0421-x
+          corpus_file_dead_marker: 00727.txt
+          attribution_recovered:
+            date: 2026-09-22
+            was: "corpus_file: 00727.txt — a numbered cache file that no longer exists"
+            now: "doi:10.1186/s13068-015-0421-x — Polygenic analysis and targeted improvement of the complex trait of high acetic acid tolerance in the yeast S. cerevisiae"
+            method: "corpus-wide search of the store, then verify_span at the quote's own offsets"
           quote: |-
               To determine the polygenic basis of high acetic acid tolerance, we have used Ethanol Red as the inferior parent strain displaying lower acetic acid tolerance.
   the_one_quantitative_claim_about_its_performance:
     evidence:
-      - corpus_file: 00727.txt
+      # Same recovery as above, same paper. EXACT at [7836, 7887), one occurrence. Note that the
+      # 18% titre is asserted in this paper's INTRODUCTION, which is why it carries no conditions:
+      # it is the authors' framing of why Ethanol Red is worth studying, not a measurement they
+      # made. Now that the source is named, that can be read off the record instead of taken on
+      # trust — which is the whole argument for replacing the dead cache markers.
+      - doi: 10.1186/s13068-015-0421-x
+        corpus_file_dead_marker: 00727.txt
+        attribution_recovered:
+          date: 2026-09-22
+          was: "corpus_file: 00727.txt — a numbered cache file that no longer exists"
+          now: "doi:10.1186/s13068-015-0421-x"
+          method: "corpus-wide search of the store, then verify_span at the quote's own offsets"
         note: >-
           An 18% ethanol titre, asserted in passing in the introduction of a paper about acetic
           acid tolerance, with no conditions, no medium and no reference to a measurement. This is

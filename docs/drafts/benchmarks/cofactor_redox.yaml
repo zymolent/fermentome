@@ -2,11 +2,22 @@
 # Read-only evidence-finding pass against the local stored-fulltext corpus (1,309 papers).
 # No confidence value is asserted here and nothing is marked verified: that is a curator's act.
 # Quotes are verbatim substrings of the named corpus file, copied character-for-character.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 5 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   5 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - id: BM-COF-001
   verdict: supported
   publication: "doi:10.1186/s13068-019-1486-8"
-  corpus_file: "00765.txt"
   quote: |-
     In the native pathway, after transport into mitochondria, two molecules of pyruvate are condensed to one molecule of 2-acetolactate (ALAC) by the Ilv2Ilv6 complex. Reduction and isomerization of ALAC to 2,3-dihydroxyisovalerate (DIV) by Ilv5 requires redox cofactor NADPH.
   quote_supports: >-
@@ -35,7 +46,6 @@
 - id: BM-COF-002
   verdict: supported
   publication: "doi:10.1016/j.synbio.2022.02.007"
-  corpus_file: "00141.txt"
   quote: |-
     the redox cofactor-imbalance that exists between glycolysis and isobutanol fermentation; glycolysis produces two NADH per molecule of glucose, while isobutanol fermentation consumes one NADPH by ILV5 and one NADH by ADH. This results in an NADPH shortage and NADH excess.
   quote_supports: >-
@@ -78,7 +88,6 @@
 - id: BM-COF-003
   verdict: supported
   publication: "doi:10.1128/aem.00362-26"
-  corpus_file: "00468.txt"
   quote: |-
     Because the yeast inner mitochondrial membrane is impermeable to NADH and NAD+, respiratory reoxidation of NADH is strictly compartmentalized (). In the model yeast Saccharomyces cerevisiae, oxidation of NADH generated in the mitochondrial matrix is coupled to respiration by a simple, non-proton-translocating NADH dehydrogenase (Ndi) ().
   quote_supports: >-
@@ -118,7 +127,6 @@
 - id: BM-COF-004
   verdict: partially_supported
   publication: "doi:10.3389/fmicb.2012.00196"
-  corpus_file: "01015.txt"
   quote: |-
     To overcome this cofactor imbalance issue, constructed an NADH-dependent pathway by engineering a ketol-acid reductoisomerase IlvC (E. coli) and ADH AdhA (L. lactis). Directed evolution approaches () were applied to IlvC and AdhA to switch cofactor dependence from NADPH to NADH. In an anaerobic, fully NADH-dependent strain containing AdhARE1 and IlvC6E6-his6, 13.4 g/L isobutanol at 100% theoretical maximum yield was produced in M9 media supplemented with glucose, yeast extract, and trace met als (hereafter modified M9).
   quote_supports: >-
@@ -168,7 +176,6 @@
 - id: BM-COF-005
   verdict: partially_supported
   publication: "doi:10.1186/s13068-023-02309-z"
-  corpus_file: "00803.txt"
   quote: |-
     While the cytosolic NADPH is mainly derived from the reactions catalyzed by glucose-6-phosphate dehydrogenase Zwf1, acetaldehyde dehydrogenase Ald6 and isocitrate dehydrogenase Idp2, the mitochondrial NADPH is relying on the reactions catalyzed by NAD+/NADH kinase Pos5 and NADP+ dependent enzymes, including acetaldehyde dehydrogenases Ald4 and Ald5, isocitrate dehydrogenase Idp1, and malic enzyme Mae1 [, ]. Pos5 is considered as the main source of mitochondrial NADPH and possesses higher NADH kinase activity than NAD kinase activity [, ], suggesting active NADPH synthesis from NADH with ATP consumed, both of which are abundant in the mitochondriona.
   quote_supports: >-

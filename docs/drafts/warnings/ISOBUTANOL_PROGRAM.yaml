@@ -3,6 +3,18 @@
 # Quotes are verbatim from the named corpus file. No confidence values are set here;
 # nothing in this file is marked verified. A human curator decides that.
 # Generated 2026-09-21. Source doc not modified.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 24 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   24 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - line: 6
   claim: >-
@@ -20,7 +32,6 @@
     Diagram node: ILV3 [Fe-S, O2-labile]. Ilv3 carries an iron-sulfur cluster and is oxygen-labile.
   verdict: incomplete
   publication: "doi:10.1002/chem.202203140"
-  corpus_file: "00007.txt"
   also_in:
     - "00603.txt doi:10.1186/1754-6834-5-65"
     - "00141.txt doi:10.1016/j.synbio.2022.02.007"
@@ -46,7 +57,6 @@
     Diagram: the carrier that moves 2-ketoisovalerate out of the mitochondrial matrix is UNKNOWN; the 2-KIV competing set is BAT1, ECM31, LEU4/LEU9.
   verdict: confirmed
   publication: "doi:10.1016/j.btre.2026.e00959"
-  corpus_file: "00080.txt"
   also_in:
     - "00767.txt doi:10.1186/s13068-019-1560-2"
     - "00126.txt doi:10.1016/j.meteno.2016.01.002"
@@ -68,7 +78,6 @@
     Diagram: pantothenate (drawn from 2-KIV via Ecm31) feeds CoA.
   verdict: confirmed
   publication: "doi:10.1186/s12934-015-0240-6"
-  corpus_file: "00662.txt"
   also_in:
     - "00765.txt doi:10.1186/s13068-019-1486-8"
     - "00728.txt doi:10.1186/s13068-016-0456-7"
@@ -92,7 +101,6 @@
     Ilv5 takes NADPH; the alcohol dehydrogenase step typically takes NADH.
   verdict: overstated
   publication: "doi:10.1186/1475-2859-12-119"
-  corpus_file: "00569.txt"
   also_in:
     - "00341.txt doi:10.1093/femsyr/foaf014"
     - "00028.txt doi:10.1007/s00253-009-2085-6"
@@ -116,7 +124,6 @@
     How 2-ketoisovalerate leaves the matrix in the cytosolic-Ehrlich configuration is not settled.
   verdict: confirmed
   publication: "doi:10.1016/j.btre.2026.e00959"
-  corpus_file: "00080.txt"
   also_in:
     - "00603.txt doi:10.1186/1754-6834-5-65"
   evidence:
@@ -136,7 +143,6 @@
     Strategy B: truncate the Ilv targeting presequences so Ilv2/Ilv5/Ilv3 stay cytosolic; Fe-S maturation of Ilv3 in the cytosol is a known difficulty.
   verdict: confirmed
   publication: "doi:10.1186/1754-6834-5-65"
-  corpus_file: "00603.txt"
   also_in:
     - "00223.txt doi:10.1038/s41598-019-40631-5"
     - "00126.txt doi:10.1016/j.meteno.2016.01.002"
@@ -161,7 +167,6 @@
     Strategy C: add presequences to a ketoacid decarboxylase and an ADH so they act in the matrix; reported to improve isobutanol substantially.
   verdict: confirmed
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   evidence:
     - |-
         Compartmentalization of the 
@@ -191,7 +196,6 @@
     Table header: the `common parts` column lists the parts commonly used for each of the five step roles.
   verdict: incomplete
   publication: "doi:10.1186/s13068-015-0374-0"
-  corpus_file: "00725.txt"
   also_in:
     - "00603.txt doi:10.1186/1754-6834-5-65"
     - "00198.txt doi:10.1038/s41467-021-27852-x"
@@ -212,7 +216,6 @@
     AlsS is catabolic and not feedback-inhibited by valine, which is why it is preferred in heterologous builds.
   verdict: incomplete
   publication: "doi:10.1002/elsc.201900151"
-  corpus_file: "00012.txt"
   also_in:
     - "00474.txt doi:10.1128/aem.00976-22"
     - "00029.txt doi:10.1007/s00253-010-2522-6"
@@ -235,7 +238,6 @@
     KARI parts: S. cerevisiae Ilv5; E. coli IlvC and its NADH-preferring engineered variants.
   verdict: confirmed
   publication: "doi:10.1038/s41467-021-27852-x"
-  corpus_file: "00198.txt"
   also_in:
     - "00141.txt doi:10.1016/j.synbio.2022.02.007"
     - "00341.txt doi:10.1093/femsyr/foaf014"
@@ -256,7 +258,6 @@
     DHAD design variable: "[4Fe-4S] cluster: oxygen lability, and cytosolic Fe-S maturation if relocalized".
   verdict: wrong
   publication: "doi:10.1002/chem.202203140"
-  corpus_file: "00007.txt"
   also_in:
     - "00141.txt doi:10.1016/j.synbio.2022.02.007"
     - "00126.txt doi:10.1016/j.meteno.2016.01.002"
@@ -281,7 +282,6 @@
     KDC parts: L. lactis KivD; S. cerevisiae Aro10, Pdc1/5/6.
   verdict: incomplete
   publication: "doi:10.1186/1754-6834-5-65"
-  corpus_file: "00603.txt"
   also_in:
     - "00725.txt doi:10.1186/s13068-015-0374-0"
     - "00669.txt doi:10.1186/s12934-016-0449-z"
@@ -304,7 +304,6 @@
     ADH parts: L. lactis AdhA; S. cerevisiae Adh1-7, Adh6; E. coli YqhD.
   verdict: incomplete
   publication: "doi:10.3389/fmicb.2012.00196"
-  corpus_file: "01015.txt"
   also_in:
     - "00028.txt doi:10.1007/s00253-009-2085-6"
     - "00190.txt doi:10.1038/nbt.2509"
@@ -324,7 +323,6 @@
     Swapping in an NADH-preferring KARI is what made near-theoretical anaerobic isobutanol possible in E. coli.
   verdict: incomplete
   publication: "doi:10.3389/fmicb.2012.00196"
-  corpus_file: "01015.txt"
   also_in:
     - "00054.txt doi:10.1007/s10295-020-02319-y"
   evidence:
@@ -345,7 +343,6 @@
     Compartment targeting is routine, high-throughput, and what essentially all published mitochondrial isobutanol work actually is.
   verdict: incomplete
   publication: "doi:10.1038/nbt.2509"
-  corpus_file: "00190.txt"
   evidence:
     - |-
         Efforts to improve the production of a compound of interest in Saccharomyces cerevisiae have mainly involved engineering or 
@@ -366,7 +363,6 @@
     The S. cerevisiae mitochondrial chromosome is ~86 kb.
   verdict: incomplete
   publication: "doi:10.1093/nar/gkx443"
-  corpus_file: "00413.txt"
   also_in:
     - "00291.txt doi:10.1080/23802359.2017.1407699"
     - "00287.txt doi:10.1080/15476286.2021.1943929"
@@ -387,7 +383,6 @@
     Yeast mtDNA encodes Cox1, Cox2, Cox3, Cob, Atp6, Atp8, Atp9, Var1, the two rRNAs, the tRNAs and the RNase P RNA - and essentially nothing the isobutanol route needs.
   verdict: incomplete
   publication: "doi:10.1080/23802359.2017.1407699"
-  corpus_file: "00291.txt"
   also_in:
     - "00364.txt doi:10.1093/gbe/evu203"
     - "00287.txt doi:10.1080/15476286.2021.1943929"
@@ -409,7 +404,6 @@
     Table header: the four listed mtDNA-engineering techniques and their states are the available techniques, honestly stated.
   verdict: incomplete
   publication: "doi:10.3390/microorganisms11041040"
-  corpus_file: "01210.txt"
   evidence:
     - |-
         MTS-fused modular DNA-binding proteins such as transcription activator-like effector nuclease (TALEN) and nucleic acid deaminase enzymes, which do not require gRNA and donor DNA for genome editing, respectively, have been fused as base-editing enzymes and transported into the mitochondria for genome editing [,,].
@@ -426,7 +420,6 @@
     DdCBE-class base editors: demonstrated for mitochondrial base editing.
   verdict: incomplete
   publication: "doi:10.3390/microorganisms11041040"
-  corpus_file: "01210.txt"
   evidence:
     - |-
         A comparison of the latest targeted mitochondrial DNA-editing technologies in mammalian cells.
@@ -450,7 +443,6 @@
     CRISPR-Cas in the matrix is not established, and guide RNA import into mitochondria is the unsolved step.
   verdict: wrong
   publication: "doi:10.3390/microorganisms11041040"
-  corpus_file: "01210.txt"
   evidence:
     - |-
         A recent study demonstrated the potential of the CRISPR-Cas9 system to target mtDNA in yeast cells []. To efficiently construct cells lacking mtDNA (ρ °cells), Cas9 fused with MTS from COX4 at the N-terminus (MTS-Cas9) was expressed on a centromeric plasmid with a strong constitutive TDH3 (GPD) promoter. When gRNA targeting ATP8 encoded by mtDNA was expressed on a multi-copy plasmid with the SNR52 promoter, the formation rate of mitochondria-depleted cells that lost viability in non-fermentative glycerol medium was significantly increased in comparison to that of control cells without gRNA expression [].
@@ -472,7 +464,6 @@
     S. cerevisiae mitochondria translate by NCBI table 3, not the standard code, with UGA=Trp, AUA=Met, CUN=Thr and CGA/CGC absent.
   verdict: incomplete
   publication: "doi:10.3389/fmicb.2023.1268944"
-  corpus_file: "01060.txt"
   also_in:
     - "00969.txt doi:10.26508/lsa.202301965"
     - "00154.txt doi:10.1016/j.xpro.2022.101359"
@@ -500,7 +491,6 @@
     The five seeded knowledge gaps: the mitochondrial 2-KIV carrier; isobutanol/isobutyraldehyde export across the plasma membrane; cytosolic Fe-S maturation capacity for relocalized Ilv3; matrix NADPH supply under production conditions; whether an NADH-preferring KARI confers in yeast the benefit it confers in E. coli.
   verdict: wrong
   publication: "doi:10.3389/fbioe.2022.1080024"
-  corpus_file: "00989.txt"
   also_in:
     - "00118.txt doi:10.1016/j.jbc.2026.113228"
     - "00126.txt doi:10.1016/j.meteno.2016.01.002"
@@ -529,7 +519,6 @@
     Chassis property: Pdc status intact / attenuated / minus, with a C2 requirement and evolved glucose tolerance; the single largest determinant of pyruvate availability.
   verdict: incomplete
   publication: "doi:10.1186/s12934-015-0305-6"
-  corpus_file: "00664.txt"
   also_in:
     - "00564.txt doi:10.1186/1475-2859-11-131"
     - "00765.txt doi:10.1186/s13068-019-1486-8"
@@ -556,7 +545,6 @@
     Sample route output, deletions line: BAT1, LEU4, ECM31 (attenuate) - ECM31 is not a like-for-like deletion candidate because pantothenate feeds CoA and the pathway is plausibly essential, so an ecm31-delta proposal must carry an essentiality check and fall back to attenuation.
   verdict: wrong
   publication: "doi:10.1186/s13068-019-1486-8"
-  corpus_file: "00765.txt"
   also_in:
     - "00662.txt doi:10.1186/s12934-015-0240-6"
     - "00126.txt doi:10.1016/j.meteno.2016.01.002"

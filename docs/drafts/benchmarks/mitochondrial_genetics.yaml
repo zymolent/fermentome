@@ -6,11 +6,22 @@
 # character-for-character out of the corpus text, including hard line breaks and
 # PDF-extraction artefacts; empty parentheses "()" are where the stored text dropped a
 # citation marker.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 6 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   6 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - id: BM-MIT-001
   verdict: supported
   publication: "doi:10.7717/peerj.8362"
-  corpus_file: "01307.txt"
   quote: |-
     Also, a number of TGG were replaced with UGA, which is a stop codon in the universal codon system but is translated into tryptophan in yeast mitochondria ().
   quote_supports: >-
@@ -40,7 +51,6 @@
 - id: BM-MIT-002
   verdict: partially_supported
   publication: "doi:10.1093/nar/gkq1345"
-  corpus_file: "00401.txt"
   quote: |-
     The presence of tRNATrp with an UCA anticodon, and the absence of an S. cerevisiae homolog of the abnormal tRNAThr1 with 8-nt in the anticodon loop (decoding CUN as threonine), indicate that UGA and CUN codons are recognized as tryptophan and leucine, respectively.
   quote_supports: >-
@@ -72,7 +82,6 @@
 - id: BM-MIT-003
   verdict: partially_supported
   publication: "doi:10.3389/fmicb.2023.1268944"
-  corpus_file: "01060.txt"
   quote: |-
     Yeast mitochondrial translation tables fall into either the Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code (NCBI table 4, hereafter referred to as the fungal code), which is consistent with other fungi, or the yeast mitochondrial code (NCBI table 3, originally based on S. cerevisiae, hereafter referred to as the Saccharomyces code) based on additional reassignments of AUA and CUN codons, which typically define the order Saccharomycetales.
   quote_supports: >-
@@ -101,7 +110,6 @@
 - id: BM-MIT-004
   verdict: supported
   publication: "doi:10.1093/nar/gkx127"
-  corpus_file: "00411.txt"
   quote: |-
     Indeed, the S. cerevisiae mitochondrial translational activators can bind to the 5΄-UTRs of their respective cognate mRNAs (–). In S. cerevisiae, translation of COX1, COX2, COX3 and CYTB mRNAs requires specific nuclear-encoded proteins: Pet309/Mss51/Mam33 for COX1 (,–), Pet111 for COX2 (,), Pet54/Pet122/Pet494 for COX3 (–) and Cbp3/Cbp6 for CYTB ().
   quote_supports: >-
@@ -131,7 +139,6 @@
 - id: BM-MIT-005
   verdict: partially_supported
   publication: "doi:10.1093/nar/gkx426"
-  corpus_file: "00412.txt"
   quote: |-
     The strains are deleted for the nuclear ARG8 gene, and the reporter is a recoded version of ARG8, termed ARG8m, that encodes a matrix-localized biosynthetic enzyme, which allows us to look directly at mitochondrial translation by scoring the growth of yeast in the absence of arginine and accumulation of the reporter protein. In the strain XPM10b, the COX1 coding sequence was completely replaced by ARG8m (Δcox1::ARG8m) (Figure ) and in the strain XPM78a, ARG8m was introduced at the end of the 512-nt long intronless COX1 coding sequence [COX1 (1–512)::ARG8m] (Figure ). In these strains, ARG8 mRNA translation is dependent on the COX1 5΄- and 3΄-untranslated regions (UTRs).
   quote_supports: >-
@@ -171,7 +178,6 @@
 - id: BM-MIT-006
   verdict: contradicted
   publication: "doi:10.7717/peerj.8362"
-  corpus_file: "01307.txt"
   quotes:
     # SPLIT BY THE CURATOR, 2026-09-21. The agent submitted these as ONE quote joined by a literal
     # "[...]" and disclosed the splice honestly. A spliced quote still cannot be re-resolved at an

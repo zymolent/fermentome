@@ -5,11 +5,22 @@
 # Every `quote` is copied character-for-character out of the named corpus file, including the
 # empty-bracket artefacts ("[]", "[, ]", "()") left by reference stripping during text
 # extraction, and including hard line breaks. Do not normalise them before comparing.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 3 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   3 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 - id: BM-TOL-001
   verdict: partially_supported
   publication: "doi:10.1016/j.jbc.2026.113228"
-  corpus_file: "00118.txt"
   corpus_title: "Leucyl-tRNA synthetase as a molecular target of isobutanol-mediated growth inhibition in Saccharomyces cerevisiae."
   quote: |-
     In particular, the concentration of isobutanol that inhibits growth (>1.4% w/v, approximately 190 mM) is much higher than the typical concentrations at which specific protein-ligand interactions occur, indicating that the binding affinity of isobutanol for its targets is likely to be low.
@@ -27,7 +38,6 @@
 - id: BM-TOL-002
   verdict: partially_supported
   publication: "doi:10.1186/s13068-021-02048-z"
-  corpus_file: "00791.txt"
   corpus_title: "Tryptophan plays an important role in yeast tolerance to isobutanol."
   quote: |-
     Growth assay was applied to two pentose phosphate pathway (PPP) defective strains (Sc1 and Sc3). The two mutant strains showed more sensitive to isobutanol (1%) compared to the wild type. b, c Two PPP-defective strains (Sc1 and Sc3) and two tryptophan pathway defective strains (Sc7 and Sc12) were used in recovery assays and the two tryptophan pathway defective strains were recovered earlier (b) than the two PPP-defective strains (c). d All defective strains were recovered at 70 h. The recovery assays was performed at 200 μg/ml tryptophan addition
@@ -45,7 +55,6 @@
 - id: BM-TOL-003
   verdict: partially_supported
   publication: "doi:10.1016/j.btre.2026.e00959"
-  corpus_file: "00080.txt"
   corpus_title: "Development of Saccharomyces cerevisiae isobutanol production strain from osmotolerant and ethanol-producing industrial isolated yeast."
   quote: |-
     In conclusion, this preliminary genomic characterization of the IbOH-1 strain indicates that the synergistic accumulation of mutations across the HOG, CWI, and NCR pathways, as well as in genes related to ion homeostasis and amino acid biosynthesis, could confer robust isobutanol tolerance to the IbOH-1 strain. However, it is important to note that the proposed mechanisms remain hypothetical, as they are derived from genomic analysis alone.

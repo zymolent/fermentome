@@ -11,9 +11,24 @@
   evidence: synthetic test fixture, not a real observation
   confidence: low
 
+# The one row whose J.5 chain used to resolve to nothing. `evidence_item`'s per-type CHECK asks an
+# ai_inference for a model, a model version, a prompt version and a review state, and asks it for
+# no source at all -- so this row was storable while naming no publication, no extraction and no
+# processing run, and `fermdb query traceability` reported `evidence_cites_nothing` against it.
+# `publication_id` is what the model was shown; an inference drawn from nothing is a hallucination
+# with an id, and the fixture should not ship one as its worked example of L5. The level it
+# derives is unchanged -- assertion_level reads evidence_type, not the citation -- so fx-l5 is
+# still the L5/Zone I case it was written to be, now with a paper behind it.
+#
+# Rejected: keeping it broken as the fixture's worked example of a chain that does not close. The
+# worked examples live in tests/test_traceability.py, one per break kind, each made by damaging a
+# single hop of a chain that closes -- more precise than one permanently red row, and unlike that
+# row they do not stop the fixture from being CI's traceability gate. See
+# test_the_phase_zero_fixture_resolves_a_complete_chain for the argument in full.
 - id: YAA:EV:fx-l5
   assertion_id: YAA:ASSERT:fx-l5
   evidence_type: ai_inference
+  publication_id: "doi:10.9999/fixture-a"
   model: fixture-fake-model
   model_version: v0
   prompt_version: p0

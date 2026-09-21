@@ -44,13 +44,16 @@ cannot be derived.** J.5 requires assertion -> evidence -> {analysis_result -> p
 dataset -> accession} u {extraction -> span -> publication} u {curation_event -> curator}. So an
 evidence item must name a publication, an analysis_result, a processing_run or an extraction; one
 that names none is refused, because the chain would not resolve and CI would fail on it later
-with much less context. The sharp edge is that **`measurement` has no `publication_id` column** --
-promotion records the paper in the `evidence` prose ("promoted from curation task ... on
-doi:10.1186/...") and nowhere structured. Parsing that string back out was rejected: it is
-citing a file in this repository, which CONVENTIONS.md calls citing memory with an extra hop, and
-it would silently produce a wrong publication the day the string's format changes. The curator
-supplies the publication id; see this module's report for the schema change that would remove the
-need.
+with much less context. This used to have a sharp edge: `measurement` and `bottleneck` had no
+`publication_id` column, so the paper survived only in the `evidence` prose ("promoted from
+curation task ... on doi:10.1186/...") and J.5's last hop was a sentence rather than a join.
+Parsing that string back out was rejected: it is citing a file in this repository, which
+CONVENTIONS.md calls citing memory with an extra hop, and it would silently produce a wrong
+publication the day the string's format changed. Schema v12 added the column to both and
+backfilled every row (97/97 measurements, 4/4 bottlenecks), so **all three `from_*` helpers read
+the publication off the row** the way `from_modification` always did. A curator is asked for it
+only when the cited row's own column is NULL -- a measurement derived from a deposited dataset, a
+bottleneck inferred from the curated pathway model -- which is a real state and not a gap.
 
 **5. Building an assertion is a human act.** `promote.py` refuses an agent and so does this, for
 the same reason and one more: `assertion_level` does not look at `zone`, so an agent-written
@@ -695,9 +698,11 @@ def _check_evidence(
                 f"{where}.publication_id",
                 "this evidence closes no J.5 chain: it names no publication, analysis_result, "
                 "processing_run or extraction, so assertion -> evidence -> source does not "
-                "resolve and CI's traceability walk will fail on it. `measurement` carries no "
-                "publication of its own -- promotion writes the paper into its `evidence` prose "
-                "and nowhere structured -- so for measurement-backed evidence a curator names it",
+                "resolve and CI's traceability walk will fail on it. A `measurement`, a "
+                "`modification` and a `bottleneck` each carry a real `publication_id` now, and "
+                "`from_measurement`, `from_modification` and `from_bottleneck` read it off the "
+                "row -- so reaching this requirement means the cited row's own column is NULL "
+                "(or nothing was cited), and a curator names the paper",
             )
         )
 
@@ -1227,9 +1232,11 @@ def from_measurement(
       `assertion.effect_size`. A titer of 1.32 g/L is not an effect of 1.32; the effect is the
       difference from the control, and a fabricated one would be indistinguishable afterwards
       from a reported one.
-    * **the publication.** `measurement` has no `publication_id` column; promotion put the paper
-      in its `evidence` prose. Re-parsing that string is citing this repository instead of the
-      source, so the curator names it.
+
+    What it *does* supply, since schema v12, is the publication: `measurement.publication_id` is
+    a real foreign key and all 97 rows were backfilled, so the paper is read off the row rather
+    than asked for. An explicit ``publication_id`` still wins, for the case where the row's is
+    NULL -- a measurement taken from a deposited dataset rather than from a paper.
     """
     row = _row(conn, "measurement", measurement_id)
     strain_id = row["strain_id"]
@@ -1238,7 +1245,11 @@ def from_measurement(
     evidence = EvidenceRequest(
         evidence_type=evidence_type,
         independent_group=independent_group,
-        publication_id=publication_id,
+        # Read off the row, exactly as `from_modification` does. Schema v12 gave `measurement` a
+        # real `publication_id` foreign key and backfilled all 97 rows, so J.5's last hop is a
+        # join rather than a sentence, and asking a curator for what the row already knows would
+        # be an invented gap. An explicit argument still wins, for a row whose column is NULL.
+        publication_id=publication_id or row["publication_id"],
         span_id=span_id,
         direction=direction,
         strain_id=strain_id,
@@ -1372,6 +1383,10 @@ def from_bottleneck(
     The bottleneck row also carries no measurement, strain or control, so a direct evidence type
     asked for here will be refused for the fields it cannot produce -- which is the honest answer:
     a bottleneck record on its own is a claim about a paper, not a perturbation experiment.
+
+    It does carry its paper: `bottleneck.publication_id` became a real foreign key in schema v12
+    and all 4 rows were backfilled, so the publication is read off the row. An explicit argument
+    still wins, for a bottleneck inferred from the curated pathway model rather than from a paper.
     """
     row = _row(conn, "bottleneck", bottleneck_id)
     if subject_type is None and subject_id is None and row["reaction_id"]:
@@ -1380,7 +1395,11 @@ def from_bottleneck(
     evidence = EvidenceRequest(
         evidence_type=evidence_type,
         independent_group=independent_group,
-        publication_id=publication_id,
+        # Schema v12 gave `bottleneck` the same real `publication_id` foreign key as
+        # `modification` and backfilled all 4 rows, so the paper is read off the row here too.
+        # An explicit argument still wins, for a bottleneck inferred from the curated pathway
+        # model rather than from a paper, whose column is legitimately NULL.
+        publication_id=publication_id or row["publication_id"],
         span_id=span_id,
         direction=direction,
         strain_id=strain_id,

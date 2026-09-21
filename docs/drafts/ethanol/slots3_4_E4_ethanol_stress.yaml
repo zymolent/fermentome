@@ -1,6 +1,37 @@
 # Ethanol reference layer -- shortlists for slots 3 and 4 (criterion E4)
 # Draft proposal. The agent shortlists; the owner picks.
 # Nothing here is accepted or verified, and no candidate is scored.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 21 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   5 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+#   16 were replaced by a DOI resolved from the `pmid:` beside them.
+#   The 16 replaced here had a `pmid:` beside them but no DOI, so the marker was replaced by
+#   the DOI that PMID resolves to in the store rather than simply dropped.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
+#
+# DOI CASE, 2026-09-22 — `publication_id` added beside `doi:` for candidate 3.2.
+# The 2026-09-22 provenance sweep reported that this file "writes the DOI as
+# 10.1128/AEM.00588-21 while the store keys doi:10.1128/aem.00588-21", and read that as a defect
+# in this file. It is not one. Checked against the store: `publication.doi` for that paper IS
+# `10.1128/AEM.00588-21` — the publisher's canonical casing — and `publication.id` is
+# `doi:10.1128/aem.00588-21`. The invariant across all 4,864 DOI-keyed publications is
+# `id == 'doi:' || lower(doi)`, and 625 of them (12.9%) have a `doi` that is not already
+# lowercase. So this file's `doi:` value was correct all along; what it lacked was the STORE KEY,
+# which is what `load_source_text` matches on. Both are now written, the same way
+# `ethanol/phase2_admissions.yaml` and `data/literature/ethanol_admissions.yaml` write them:
+# `doi:` is the publisher's form and `publication_id:` is the store's key. All six of this
+# candidate's quotes re-resolve exactly under the latter.
+#
+# The underlying trap is in the lookup, not in this file, and it is reported rather than fixed
+# here because `src/` is owned elsewhere. See PROVENANCE_SWEEP.md §11.
 
 meta:
   produced: 2026-09-21
@@ -104,6 +135,7 @@ slot_3_ethanol_stress_acute_shock:
         under E3 (wild-type baselines), not E4
       pmid: '34105981'
       doi: 10.1128/AEM.00588-21
+      publication_id: doi:10.1128/aem.00588-21
       title: >-
         Reprogramming of the Ethanol Stress Response in Saccharomyces cerevisiae by the
         Transcription Factor Znf1 and Its Effect on the Biosynthesis of Glycerol and Ethanol
@@ -217,7 +249,7 @@ slot_3_ethanol_stress_acute_shock:
 
   pool_candidates_considered_and_not_shortlisted:
     - pmid: '24147009'
-      corpus_file: 00892.txt
+      doi: 10.1371/journal.pone.0077501
       title: >-
         Generating Phenotypic Diversity in a Fungal Biocatalyst to Investigate Alcohol
         Stress Tolerance Encountered during Microbial Cellulosic Biofuel Production
@@ -416,7 +448,6 @@ slot_4_ethanol_stress_adapted_growth:
 
   pool_candidates_considered_and_not_shortlisted:
     - pmid: '24779776'
-      corpus_file: 00437.txt
       doi: 10.1111/1751-7915.12121
       title: >-
         The relationship between lysine 4 on histone H3 methylation levels of alcohol
@@ -458,7 +489,7 @@ shock_vs_adapted_assignment:
     on the word the authors used.
   papers:
 
-    - corpus_file: 00809.txt
+    - doi: 10.1186/s13068-024-02503-7
       pmid: '38730312'
       assignment: BOTH -- shock and adapted, reported as separate arms
       basis: >-
@@ -469,7 +500,7 @@ shock_vs_adapted_assignment:
         to be inferred.
       ambiguity: none
 
-    - corpus_file: 00936.txt
+    - doi: 10.1534/g3.118.200677
       pmid: '30301737'
       assignment: ADAPTED
       basis: >-
@@ -479,7 +510,7 @@ shock_vs_adapted_assignment:
         but means the exposure is not directly comparable in hours to the other papers.
       ambiguity: none for the slot; exposure is in generations, so any cross-paper timing comparison needs the growth rate, which is in the growth-curve figures
 
-    - corpus_file: 00437.txt
+    - doi: 10.1111/1751-7915.12121
       pmid: '24779776'
       assignment: ADAPTED for the phenotype; NOT ASSIGNABLE for the molecular data
       basis: >-
@@ -490,7 +521,8 @@ shock_vs_adapted_assignment:
         assign.
       ambiguity: FLAGGED -- the paper's headline mechanism is measured in the absence of the stressor
 
-    - corpus_file: 00471.txt
+    - doi: 10.1128/AEM.00588-21
+      publication_id: doi:10.1128/aem.00588-21
       pmid: '34105981'
       assignment: SHOCK
       basis: >-
@@ -500,7 +532,7 @@ shock_vs_adapted_assignment:
         described.
       ambiguity: PARTIAL -- if the owner requires that an adapted condition show growth, only the 25 min point is clean; the paper never states whether cells divide during the 6 h
 
-    - corpus_file: 00086.txt
+    - doi: 10.1016/j.crmicr.2026.100653
       pmid: '42598231'
       assignment: SHOCK
       basis: >-
@@ -509,7 +541,7 @@ shock_vs_adapted_assignment:
         ethanol arm.
       ambiguity: dose-to-panel mapping lives in figure legends, so which dose produced a given phenotype is not always recoverable from the text alone
 
-    - corpus_file: 00163.txt
+    - doi: 10.1021/acs.jproteome.1c00139
       pmid: '34236875'
       assignment: ADAPTED, on two timescales
       basis: >-
@@ -518,7 +550,7 @@ shock_vs_adapted_assignment:
         layers are chronic.
       ambiguity: none
 
-    - corpus_file: 00507.txt
+    - doi: 10.1128/msystems.00827-25
       pmid: '41147734'
       assignment: ADAPTED
       basis: >-
@@ -527,7 +559,7 @@ shock_vs_adapted_assignment:
         through the ethanol across the time course.
       ambiguity: the earliest post-addition point behaves partly as a shock response, so the t1 samples straddle the boundary; the later points do not
 
-    - corpus_file: 00892.txt
+    - doi: 10.1371/journal.pone.0077501
       pmid: '24147009'
       assignment: BOTH, in different assays
       basis: >-
@@ -537,7 +569,7 @@ shock_vs_adapted_assignment:
         a yeast.
       ambiguity: none on the regimes; the objection is the organism, not the design
 
-    - corpus_file: 00680.txt
+    - doi: 10.1186/s12934-019-1205-y
       pmid: '31506091'
       assignment: ADAPTED (weakly) -- 24 h and 48 h exposures with growth
       basis: >-
@@ -547,7 +579,7 @@ shock_vs_adapted_assignment:
         acclimated sense.
       ambiguity: FLAGGED -- the isobutanol arm gives no concentration in the stored text ('various titer exposures'), so the isobutanol result has a duration but no stated dose and cannot be entered as a measurement
 
-    - corpus_file: 01070.txt
+    - doi: 10.3389/fmicb.2026.1757951
       pmid: '41822134'
       assignment: NOT ASSIGNABLE -- no stress-exposure experiment
       basis: >-
@@ -555,7 +587,7 @@ shock_vs_adapted_assignment:
         stated exposure duration; the rest is icewine fermentation.
       ambiguity: not applicable -- inadmissible for E4
 
-    - corpus_file: 00535.txt
+    - doi: 10.1155/tswj/2063235
       pmid: '42206462'
       assignment: NOT ASSIGNABLE -- phenomenological screen
       basis: >-
@@ -564,7 +596,7 @@ shock_vs_adapted_assignment:
         Issatchenkia/Pichia isolate, not a mechanism.
       ambiguity: not applicable -- inadmissible for E4
 
-    - corpus_file: 01297.txt
+    - doi: 10.5936/csbj.201210005
       pmid: '24688665'
       assignment: NOT ASSIGNABLE -- review, no ethanol stress experiment at all
       basis: It is a review of Km/kcat/Ki parameters for enzyme selection; there is no stress exposure of any kind.
@@ -582,7 +614,7 @@ pool_assessment:
     criteria, the admissible set for slots 3 and 4 reaches eight -- about half the budget.
   inadmissible_and_why:
     - pmid: '41822134'
-      corpus_file: 01070.txt
+      doi: 10.3389/fmicb.2026.1757951
       reason: >-
         Icewine fermentation with Metschnikowia pulcherrima and S. cerevisiae. The ethanol
         content is a screening ceiling with no exposure duration and no mechanism. E4 asks
@@ -590,7 +622,7 @@ pool_assessment:
       evidence:
         - "The ethanol tolerance of the M. pulcherrima strain was limited to 4% (v/v), whereas the S. cerevisiae strain tolerated up to 12% (v/v)."
     - pmid: '42206462'
-      corpus_file: 00535.txt
+      doi: 10.1155/tswj/2063235
       reason: >-
         Loog-pang starter development for black glutinous rice Sato. Alcohol tolerance is
         scored by gas production in a Durham tube in a non-Saccharomyces isolate (95.57%
@@ -599,7 +631,7 @@ pool_assessment:
       evidence:
         - "Ethanol was added to achieve final concentrations of 10% and 15%. The solutions were aliquoted into 10‐mL tubes, sterilized at 110°C for 15 min, and inoculated with 1 mL of yeast culture. Fermentation was conducted at 30°C and 37°C for 5 days. Alcohol tolerance was evaluated based on gas production observed in the Durham tube."
     - pmid: '24688665'
-      corpus_file: 01297.txt
+      doi: 10.5936/csbj.201210005
       reason: >-
         A review of enzyme kinetic parameters for metabolic engineering. It mentions
         isobutanol and 1-butanol, which is probably why it scored, but it contains no
@@ -651,7 +683,7 @@ mis_tagged_candidates:
 
     - pmid: '34105981'
       doi: 10.1128/AEM.00588-21
-      corpus_file: 00471.txt
+      publication_id: doi:10.1128/aem.00588-21
       currently_tagged: E3 (wild-type baselines, slot 1)
       proposed_for: slot 3 (acute shock, E4) -- shortlisted above as candidate 3.2
       argument: >-
@@ -664,7 +696,6 @@ mis_tagged_candidates:
 
     - pmid: '42598231'
       doi: 10.1016/j.crmicr.2026.100653
-      corpus_file: 00086.txt
       currently_tagged: E5 (mitochondrial redox shuttle, slot 6)
       proposed_for: slot 3 (acute shock, E4) -- shortlisted above as candidate 3.3
       argument: >-
@@ -680,7 +711,6 @@ mis_tagged_candidates:
 
     - pmid: '34236875'
       doi: 10.1021/acs.jproteome.1c00139
-      corpus_file: 00163.txt
       currently_tagged: E5 (mitochondrial redox shuttle, slot 6)
       proposed_for: slot 4 (adapted growth, E4) -- shortlisted above as candidate 4.3
       argument: >-
@@ -696,7 +726,6 @@ mis_tagged_candidates:
 
     - pmid: '41147734'
       doi: 10.1128/msystems.00827-25
-      corpus_file: 00507.txt
       currently_tagged: E3 (wild-type baselines, slot 1)
       proposed_for: slot 4 (adapted growth, E4) -- NOT shortlisted, offered as an alternate to candidate 4.3
       argument: >-

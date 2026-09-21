@@ -30,6 +30,18 @@
 #
 # NO `confidence` FIELD IS WRITTEN ANYWHERE IN THIS FILE, and nothing here is marked accepted or
 # verified. This is a draft shortlist for the owner's decision.
+#
+# DEAD `corpus_file:` MARKERS REPLACED, 2026-09-22 — 4 of them in this file.
+# They pointed at a numbered scratchpad cache (`NNNNN.txt`) that no longer exists anywhere on
+# this machine, so as provenance they could not be dereferenced by anyone, including the
+# 2026-09-22 provenance sweep. That sweep also established that the cache was not a DIFFERENT
+# text — every quote checked against it re-resolves character-identically against the
+# `fulltext_asset` store — so nothing is lost by dropping the pointer and keeping the DOI.
+#   4 were removed as redundant: a `doi:` or `publication:` sat beside them in the
+#   same record and already carried the provenance.
+# Checked before removal: across all 15 draft files the 101 distinct cache numbers each map
+# to exactly ONE DOI, so the markers were internally consistent and carried no information
+# the adjacent DOI does not. No quote string was touched.
 
 version: 1
 slot:
@@ -389,11 +401,46 @@ candidates:
           "The carbon balance was calculated by taking all measured compounds (external metabolites,
           biomass, CO2and ethanol in off-gas) into account. A value of 26.4 g/C-mol biomass [] was
           used to calculate the amount of carbon transformed into biomass."
+      # The two entries below are NOT from this candidate's paper. They are from cited companion
+      # papers of the same Graz/Nidetzky lineage, and each now carries its own `doi:` so it no
+      # longer inherits the candidate's. See `attribution_corrected` on each.
       - context: strain lineage as stated in the companion paper doi:10.1186/1475-2859-7-9 (also in the E3 pool)
+        doi: "10.1186/1475-2859-7-9"
+        attribution_corrected:
+          date: 2026-09-22
+          was: >-
+            no `doi` on this entry, so it inherited the candidate's
+            doi:10.1186/1475-2859-9-16 — a paper the quote does not occur in. The words
+            "isogenic" and "CEN.PK 113-7D" appear nowhere in 9-16.
+          now: "doi:10.1186/1475-2859-7-9 — Altering the coenzyme preference of xylose reductase… (Microb Cell Fact, 2008)"
+          how_checked: >-
+            fermdb.extract.harness.load_source_text on doi:10.1186/1475-2859-7-9, then
+            fermdb.llm.validate.verify_span at the quote's own offsets: EXACT at
+            [7090, 7184), one occurrence in that text and none in 9-16.
+          why_it_happened: >-
+            The candidate's `context` field already named the real paper; only the machine-readable
+            attribution was missing, so every tool that reads this file by key — including the
+            provenance sweep — charged the quote to the candidate's DOI.
         quote: >-
           "Two isogenic yeast strains were derived from the laboratory strain S. cerevisiaeCEN.PK
           113-7D."
       - context: strain lineage as stated in doi:10.1186/1754-6834-7-49 (also in the E3 pool) — it disagrees
+        doi: "10.1186/1754-6834-7-49"
+        attribution_corrected:
+          date: 2026-09-22
+          was: >-
+            no `doi` on this entry, so it inherited the candidate's
+            doi:10.1186/1475-2859-9-16 — a paper the quote does not occur in.
+          now: "doi:10.1186/1754-6834-7-49 — Process intensification through microbial strain evolution… (Biotechnol Biofuels, 2014)"
+          how_checked: >-
+            fermdb.extract.harness.load_source_text on doi:10.1186/1754-6834-7-49, then
+            fermdb.llm.validate.verify_span at the quote's own offsets: EXACT at
+            [36111, 36365), one occurrence in that text and none in 9-16.
+          the_tell: >-
+            The quote is dated 2014 and the candidate's paper is from 2010. A 2010 paper cannot
+            quote a 2014 one, so this attribution was impossible on its face and could have been
+            caught by a date check alone, without reading either text. Worth recording as a cheap
+            screen for the next wave.
         quote: >-
           "Strain BP10001 was previously constructed from S. cerevisiae CEN.PK 113-5D through
           genomic integration of genes encoding a doubly mutated (Lys274-to-Arg; Asn276-to-Asp)
@@ -694,7 +741,6 @@ pool_assessment:
     and that no pool candidate can supply.
   out_of_pool_papers_worth_retagging:
     - doi: "10.1186/s13068-023-02329-9"
-      corpus_file: "00804.txt"
       title: >-
         Quantification and mitigation of byproduct formation by low-glycerol-producing Saccharomyces
         cerevisiae strains containing Calvin-cycle enzymes.
@@ -710,7 +756,6 @@ pool_assessment:
             promoter did not show a significant correlation with specific growth rate (Fig. )."
       note: "Not read in full; surfaced by corpus-wide search only. Nothing here is verified."
     - doi: "10.1186/s13068-017-1001-z"
-      corpus_file: "00747.txt"
       title: >-
         Optimizing anaerobic growth rate and fermentation kinetics in Saccharomyces cerevisiae
         strains expressing Calvin-cycle enzymes for improved ethanol yield.
@@ -724,7 +769,6 @@ pool_assessment:
             glucose-limited chemostats and batch cultures."
       note: "Not read in full. Nothing here is verified."
     - doi: "10.1186/1754-6834-6-125"
-      corpus_file: "00606.txt"
       title: "Carbon dioxide fixation by Calvin-Cycle enzymes improves ethanol yield in yeast."
       what_it_appears_to_carry: "anaerobic sugar-limited chemostats with an isogenic reference strain and ethanol/glycerol yields"
       evidence:
@@ -733,7 +777,6 @@ pool_assessment:
             compared to those of an isogenic reference strain in anaerobic, sugar-limited chemostats"
       note: "Not read in full. Nothing here is verified."
     - doi: "10.1186/s12934-016-0465-z"
-      corpus_file: "00670.txt"
       title: >-
         Improving ethanol yield in acetate-reducing Saccharomyces cerevisiae by cofactor engineering
         of 6-phosphogluconate dehydrogenase and deletion of ALD6.
@@ -764,6 +807,25 @@ provenance:
     Every quote was taken verbatim from the stored full text, including the empty bracket pairs and
     run-together words that the stored text contains where citations and italics were stripped. No
     quote is spliced with an ellipsis; where two passages are needed they are listed separately.
+  attributions_corrected:
+    date: 2026-09-22
+    what: >-
+      Two of candidate C's fifteen evidence quotes carried no `doi` of their own and therefore
+      inherited the candidate's doi:10.1186/1475-2859-9-16, which neither of them occurs in. Both
+      now carry an explicit `doi` and an `attribution_corrected` block recording what the
+      attribution was before, what it is now, and how the relocation was checked. The quote strings
+      themselves are unchanged — each is still the same contiguous slice, re-verified at its own
+      offsets in its real source.
+    entries: ["candidates[2].evidence[13]", "candidates[2].evidence[14]"]
+    verified_with: >-
+      fermdb.extract.harness.load_source_text against the fulltext_asset store, then
+      fermdb.llm.validate.verify_span at each quote's own offsets. Both EXACT, one occurrence
+      each, and absent from the paper they were previously charged to.
+    note: >-
+      Neither is a fabrication and neither changes a number in this file. `strains.background_note`
+      on candidate C already attributed both sentences to the right papers in prose, which is how
+      the disagreement about the CEN.PK parent came to be recorded at all; the defect was that the
+      prose knew and the fields did not.
   not_done:
     - "Nothing under data/ was read or modified."
     - "No confidence value is written anywhere in this file."

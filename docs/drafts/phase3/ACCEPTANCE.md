@@ -34,9 +34,16 @@ source organism* is a real enzyme identification where the catalog holds exactly
 **100% on the judgeable set, 2/2, coverage 50%** — and **both matches rest on that weaker
 identification**, which the report says on its own line rather than leaving to be inferred.
 
+**Updated 2026-09-22 — C1, a second time, and the figure did not move.** The owner settled **D3**:
+a *variant designation* attached to a gene symbol — `6E6`, `P2D1-A1` — **is** the identification,
+and a bare `ilvC` still refuses. The clause is built, with the same uniqueness price as D5. **The
+recall figure is unchanged — 100%, 2/2, coverage 50%, all four verdicts identical** — because no
+published configuration in the atlas today names a KARI variant. That is the honest outcome and it
+is recorded as one; see "the figure, before and after" in the D3 section for the full breakdown.
+
 | # | Clause | Verdict | What it needs |
 |---|---|---|---|
-| C1 | Recall against phase 1 | **PASSES, as of 2026-09-22 — 100%, 2/2 judgeable, coverage 50%.** Both matches are *resolved-by-source-organism*, the weaker of the two identifications the rule allows, and are counted apart | Nothing in code. More rows: a denominator of 2 is not a trend, and `coverage` is 50% |
+| C1 | Recall against phase 1 | **PASSES, as of 2026-09-22 — 100%, 2/2 judgeable, coverage 50%.** Both matches are *resolved-by-source-organism*, the weakest of the three identifications the rule allows, and the three kinds are counted apart | Nothing in code. More rows: a denominator of 2 is not a trend, and `coverage` is 50% |
 | C2 | Per-compartment redox balance, imbalance named | **PASSES**, as of 2026-09-22, under the owner's amended clause. Tally over 6,400 routes: **0 balanced / 4,800 unbalanced / 1,600 unknown**, with the matrix closing on 240 of them | Nothing in code for the clause. PLAN.md's wording still says *excluded*; the proposed amendment is at the foot of this section and is the owner's to apply. To reach a *balanced* route: either curated stoichiometric multiplicity (a part used more than once) or a cytosolic NADH-regenerating part — both curation, not code |
 | C3 | ≥1 enumerated-but-never-built route is scientifically defensible | **NOT A TEST** | A human reads a route card and says so. Effectively blocked behind C1: "never built" is the complement of the matched configurations, and that complement is currently all 600 routes |
 | C4 | Every rank explainable term by term | **PASSES**, as of this change | Nothing. It did not pass before: `rank`'s fourth key was invisible to `explain` |
@@ -276,12 +283,14 @@ Three axes, and only two of them are usable:
 2. **Enzyme set** — parsed out of `description`, which is where `curate/promote.py` puts it, and
    resolved to part ids by **exact, case-folded gene-symbol token equality** against `part.genes`,
    plus a small curated `ENZYME_ALIASES` table of named exceptions — or, since the 2026-09-22
-   ruling, by a **role name qualified with a source organism**, where the catalog holds exactly
-   one part for that `(step_role, source_organism)` pair. The two kinds are counted apart.
+   rulings, by a **gene symbol narrowed with a variant designation** (`ilvC6E6`), where exactly
+   one part carries that symbol and that designation, or by a **role name qualified with a source
+   organism**, where the catalog holds exactly one part for that `(step_role, source_organism)`
+   pair. The three kinds are counted apart.
 3. **Host** — `host_strain_id` resolves to an organism, but **`enumerate_routes` has no host axis**
    (see D2). So the host is used only to decide scope, never to match.
 
-**Eight** clauses, applied in order, first one wins — seven until 2026-09-22.
+**Nine** clauses, applied in order, first one wins — seven until 2026-09-22, then eight, then nine.
 `fermdb atlas recall --rule` prints the full text of each; the short version:
 
 | clause | outcome | in one line |
@@ -290,9 +299,10 @@ Three axes, and only two of them are usable:
 | `host_not_recorded` | not evaluable | no host, so the configuration cannot be placed in or out of scope |
 | `host_outside_enumeration` | not evaluable | an *E. coli* build against a yeast-only enumeration |
 | `no_enzyme_set_recorded` | not evaluable | the description has no `enzymes as reported:` segment |
-| `matched` | **hit** | all five roles resolved — by gene symbol or by role-plus-organism, and it says which — and some route of that strategy agrees at all five |
+| `matched` | **hit** | all five roles resolved — by gene symbol, by symbol-plus-variant, or by role-plus-organism, and it says which — and some route of that strategy agrees at all five |
 | `catalog_gap` | **miss** | a role is unfilled *and* an enzyme was named that no part carries |
 | `source_organism_ambiguous` | not evaluable | `ROLE from ORGANISM`, and the catalog holds two or more parts for that pair — refused, both named |
+| `variant_designation_ambiguous` | not evaluable | `GENE + DESIGNATION`, and two or more parts carry that symbol and that designation — refused, both named |
 | `under_specified` | not evaluable | a role is unfilled and every named enzyme was recognised |
 
 ### Four decisions inside that rule that could each have gone the other way
@@ -356,12 +366,131 @@ One case is knowingly harsh: an unrecognised entry that is only a variant spelli
 already filled (`ILV6V90D/L91F` beside `ILV2`) is counted as a catalog gap. The verdict prints the
 entry verbatim so a reader sees immediately that it is spelling and not substance.
 
-### Ambiguity is reported, not resolved
+### Ambiguity is reported, not resolved — and a **named variant** is not ambiguity
 
 Four KARI parts carry the gene symbol `ilvC` — `ilvc_ecoli`, `ilvc_nadh_variant`,
 `ilvc6e6_ecoli`, `ilvc_p2d1a1_ecoli` — and they differ by **exactly the NADPH/NADH question the
-whole atlas exists for**. Gene-symbol resolution cannot separate them. A match through `ilvC` is
-therefore reported as *ambiguous at KARI*, and the harness does not pick. See D3.
+whole atlas exists for**. Gene-symbol resolution cannot separate them. A match through a **bare**
+`ilvC` is therefore reported as *ambiguous at KARI*, and the harness does not pick.
+
+*Amended 2026-09-22, and the word that carries the amendment is again **bare**.* Under the owner's
+D3 ruling a **variant designation** attached to the symbol — `ilvC6E6`, `ilvC P2D1-A1` — resolves
+to the part carrying it, where exactly one part does. The four-way ambiguity above is what a
+record that named no variant gets, and it is unchanged.
+
+### 2026-09-22 — the owner's ruling on `GENE + VARIANT DESIGNATION`, and why the figure did not move
+
+> **Variant designations identify.** Treat `6E6`, `P2D1A1` and the like as distinguishing — they
+> *are* the identification and they are what the papers use. **A bare `ilvC` with no variant stays
+> ambiguous and still refuses.**
+>
+> — the owner, 2026-09-22, settling **D3**
+
+Deliberately **the same shape as D5**: *a qualified name identifies; a bare one does not.* What
+qualifies the name differs — an organism there, a designation here — and the price is the same in
+both: **uniqueness**, recomputed on every run from the parts passed in, never cached.
+
+**Why this is load-bearing rather than tidy.** The four `ilvC` parts differ by the NADPH/NADH
+question and almost nothing else, and the redox work established that the NADH-preferring ones
+close the mitochondrial matrix **without Pos5** — PLAN.md B.3.5's named de-risking part. So
+"which KARI did this paper use" is not a labelling detail; it is the question C2 and DUET turn on.
+A build naming `ilvC6E6` and a build naming `ilvC` are different claims, and until today the
+harness read them as the same one.
+
+**The figure, before and after. It did not move, and that is the honest result.** Same 6,400
+routes, same four configurations, nothing in `data/` touched and no `pathway_configuration` row
+edited:
+
+```
+                    before              after
+  recall                100%   2/2      100%   2/2
+  coverage               50%   2/4       50%   2/4
+  partial               100%            100%
+  of which   0 by gene symbol,          0 by gene symbol alone,
+             2 by role+organism         0 by a variant designation,
+                                        2 by a role name plus a source organism
+```
+
+All four verdicts are identical, clause for clause, part for part, route id for route id. **No
+published configuration in the atlas today names a KARI variant** — the two matched builds are the
+cels-2019 pair, which name `ILV5`, and the two `under_specified` ones say `"ILV genes"`. A rule
+that is correct and currently changes nothing is a perfectly good outcome; the alternative would
+have been to manufacture a number out of it, which is the failure mode this whole document exists
+to prevent. The clause is here for the `synbio-2022` and `s41467-2021` builds when they are
+promoted — both name their KARI variant in prose the clause reads (`ilvC6E6` and
+`Ec_ilvC(P2D1-A1)` respectively), and both are in the corpus.
+
+*One honest limit, worth recording before it surprises somebody.* A designation buried inside a
+**strain name** is not read: `pRS62N-IlvC6E6` resolves, because `IlvC6E6` is its own token, but
+`mIBAIlvC6E6` — the synbio-2022 strain label — is a single token that no gene symbol and no alias
+recognises, so it stays *unrecognised* and lands on the curation worklist. That is the rule
+working, not failing: splitting an arbitrary strain label to find a gene inside it is exactly the
+substring matching this module refuses, and the worklist line is the actionable outcome.
+
+**What it recognises**, in the forms the papers use: `ilvC6E6`, `ilvC 6E6`, `ilvC-6E6`,
+`IlvC^6E6`, `ilvC P2D1-A1`, `Ec_ilvC(P2D1-A1)`. A run of tokens after the symbol is read whole and
+prefix by prefix, so `P2D1` + `A1` reaches `p2d1a1`; separators and case are normalised away,
+because the difference between `P2D1-A1` and `P2D1A1` is typography rather than identity.
+
+**The one place in the module a token is split rather than compared whole**, which is the
+"substring match wearing a hat" everything else here refuses. Four things contain it, and they are
+argued in full in the source:
+
+* **narrowing only.** A designation is applied *only* to the candidate parts a gene symbol already
+  resolved to, so it can only return a subset. It cannot fill an empty role, cannot reach a part
+  the symbol did not reach, and cannot rescue an unrecognised spelling — `ilvZ6E6` is still a
+  catalog gap. The worst a misread designation can do is **refuse** a match that would otherwise
+  have been ambiguous, which is the pessimistic direction;
+* **the split point is curated.** A *glued* token (`ilvC6E6`) is split only where it is an
+  `ENZYME_ALIASES` key whose target symbol is a prefix of it — i.e. where a curator already wrote
+  down that this spelling is that gene. An unknown glued spelling is not split;
+* **the catalog side is declared.** A part carries a designation only if it declares `variant_of`,
+  which is the catalog saying "this is a variant of that" — exactly what the old D3 entry said a
+  curator would have to add before the harness could key on anything. It is there now, on all
+  three `ilvC` variants. The designation is then read from the part id;
+* **shape.** A designation must mix letters and digits, which `6E6`, `P2D1A1` and `V90D` do and
+  `nadh`, `native`, `ecoli` and `variant` do not — so `ilvc_nadh_variant` carries **no**
+  designation and `ilv2_ilv6_native` does not read its second gene as a designation of its first.
+
+**A bare `ilvC` still refuses, and that is the half that erodes.** It is not narrowed, is reported
+*ambiguous at KARI* exactly as before, and the defence is written into the clause text rather than
+left implicit: four parts carry the symbol and differ on cofactor preference, so the symbol
+identifies nothing, and resolving it would **silently pick a cofactor** — the one property the
+programme cares most about, on a route that would then score, rank and export looking exactly like
+one somebody had checked. `test_a_bare_ilvc_is_still_not_narrowed_and_it_is_the_half_that_erodes`
+pins it, and pins the near-misses with it: `ilvCP2D1` names a designation the alias table even
+knows, no part carries `P2D1`, and it stays ambiguous rather than being rounded to the part whose
+designation merely *starts* that way.
+
+**The safeguard, which is the price of the clause.** Uniqueness is a fact about the catalog as it
+is now. `test_a_second_part_with_the_same_symbol_and_variant_turns_the_match_into_a_refusal`
+inserts a second part carrying `ilvC` and `6E6` and asserts the flip: a `matched` verdict becomes
+`variant_designation_ambiguous`, `not_evaluable`, with **both** colliding part ids named, the role
+left **unfilled** rather than half-filled, and the refusal not reappearing as a match through
+`recall_report`.
+
+*Why that refusal is harsher than a bare `ilvC`'s ambiguity, which looks backwards until you read
+what the record claimed.* A bare `ilvC` claims nothing about the cofactor, so reporting it as
+"matched, ambiguous at KARI" concedes exactly what the record conceded. A record that wrote `6E6`
+**did** name the cofactor; falling back to an ambiguous match would average over NADPH and NADH —
+the one property it was careful to state. So the clause refuses instead of degrading.
+
+**Reported, not pooled.** `RecallReport` now exposes `matched_by_gene_symbol`,
+`matched_by_variant_designation` and `matched_by_source_organism`, and the headline block prints
+all three, so a reader can see how much of any recall figure rests on variant-resolution versus
+exact gene-symbol match versus role-plus-organism. `matched_by_gene_symbol` is defined as the
+*complement* of the other two, because one configuration can name an organism at one role and a
+variant at another and three overlapping counts would exceed the total.
+
+| test (`tests/test_recall.py`) | what it pins |
+|---|---|
+| `test_a_variant_designation_identifies_the_part_a_bare_symbol_cannot` | the ruling, in the spellings the papers use — `ilvC6E6`, `ilvC 6E6`, `ilvC-6E6`, `IlvC^6E6`, `ilvC P2D1-A1`, `Ec_ilvC(P2D1-A1)` — each reaching one part, with both match kinds recorded at that role |
+| `test_a_bare_ilvc_is_still_not_narrowed_and_it_is_the_half_that_erodes` | the half that erodes: `ilvC` stays four-way ambiguous, and so do the near-misses `ilvCP2D1` and `ilvC 9X9` |
+| `test_a_second_part_with_the_same_symbol_and_variant_turns_the_match_into_a_refusal` | the safeguard, broken on purpose: `matched` → `variant_designation_ambiguous`, both parts named, role unfilled, and no leak back into the figure |
+| `test_a_variant_designation_can_only_narrow_and_never_fill` | the containment — `6E6` alone fills nothing, `ilvZ6E6` is still a catalog gap, a designation cannot cross entries |
+| `test_only_a_declared_variant_part_carries_a_designation` | the catalog side — only `variant_of` parts carry one, and `ilvc_nadh_variant` carries none |
+| `test_the_report_counts_the_three_kinds_of_match_apart` | **rewritten** from `..._two_kinds_...`: three counts, three printed, and the per-configuration line naming which |
+| `test_every_clause_of_the_rule_is_reachable` | **extended**: nine clauses, and the two refusals each reached with their colliding fixture part |
 
 ### Running it, once the rows exist
 
@@ -819,13 +948,37 @@ re-discovered by a yeast enumeration would be a false recall of the plainest kin
 alternative is to give the enumerator a real host axis, which is a phase-3 build, not a test fix.
 Until then the recall figure speaks for yeast builds only, and `coverage` says how many that was.
 
-**D3 — does a paper's named KARI variant equal a catalog part?**
-`ENZYME_ALIASES` maps reported spellings to **gene symbols**, never to part ids. So `ilvC6E6`
-resolves to all four `ilvC` parts and the match is flagged ambiguous. Asserting that the paper's
-`ilvC6E6` *is* `ilvc6e6_ecoli` rather than plain `ilvc_ecoli` is a claim about cofactor
-specificity, and it is the claim the DUET question turns on. A curator can settle it — by adding
-`variant_of` / sequence identity to the catalog so the match has something to key on — but the
-harness must not settle it silently.
+**D3 — does a paper's named KARI variant equal a catalog part? SETTLED by the owner, 2026-09-22.**
+
+> **Variant designations identify.** Treat `6E6`, `P2D1A1` and the like as distinguishing — they
+> **are** the identification and they are what the papers use. **A bare `ilvC` with no variant
+> stays ambiguous and still refuses.**
+
+The question was: `ENZYME_ALIASES` maps reported spellings to **gene symbols**, never to part ids,
+so `ilvC6E6` resolved to all four `ilvC` parts and the match was flagged ambiguous. Asserting that
+the paper's `ilvC6E6` *is* `ilvc6e6_ecoli` rather than plain `ilvc_ecoli` is a claim about
+cofactor specificity, and it is the claim the DUET question turns on. This entry said a curator
+could settle it "by adding `variant_of` / sequence identity to the catalog so the match has
+something to key on".
+
+**That is what happened, and the ruling is the other half of it.** All three `ilvC` variants now
+declare `variant_of: ilvc_ecoli`, so the catalog itself says which parts are variants; the rule
+reads the designation from the part id **only for a part that declares it**, and resolves a
+reported designation to it where exactly one part carries the pair. The alias table still maps to
+gene symbols and never to part ids — an alias that named a part would be the cofactor claim made
+in a lookup table, which is the one place nobody would look for it.
+
+**The half that was not conceded.** A bare `ilvC` is still not narrowed, still reported *ambiguous
+at KARI*, and the reason is now written into the clause rather than assumed: four parts share the
+symbol and differ on cofactor preference, so it identifies nothing and resolving it would silently
+pick a cofactor. **Uniqueness is the price**, exactly as for D5: two parts carrying the same symbol
+and the same designation is a named refusal (`variant_designation_ambiguous`, `not_evaluable`,
+both parts named), never a pick.
+
+Implemented 2026-09-22. **The recall figure did not move** — no published configuration in the
+atlas names a KARI variant today — and that is recorded as the outcome rather than dressed up; see
+the C1 ruling section for the before/after, the containment argument for splitting a token at all,
+and the collision test.
 
 **D5 — is `ROLE from ORGANISM` an enzyme identification? SETTLED by the owner, 2026-09-22.**
 

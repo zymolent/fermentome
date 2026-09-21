@@ -56,6 +56,13 @@ TABLE_ORDER: tuple[str, ...] = (
     "evidence_item",
     "conflict",
     "conflict_member",
+    # Last, and deliberately. `curation_event` declares no foreign key at all -- `target_id` is
+    # polymorphic, so it can name a row in any table above it -- which means "after everything it
+    # can reference" is the end of the list rather than any particular slot. It is also the reason
+    # it was missed: nothing in the schema forced it into this tuple, so PLAN.md J.5's third arm
+    # (curator -> date -> rationale) had no file to load from and every fixture assertion resolved
+    # to nobody. `fermdb query traceability` over the fixture is what found that.
+    "curation_event",
 )
 
 __all__ = ["TABLE_ORDER", "FixtureError", "load_fixture"]

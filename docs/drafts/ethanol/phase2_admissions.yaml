@@ -23,6 +23,19 @@ meta:
     note: Three quotes occur more than once in their source (repeated data-availability statements); they
       are exact but not positionally unique, and the recorded offset is the first occurrence. occurrences_in_source
       records this per span.
+    what_the_63_is_made_of: >-
+      ADDED 2026-09-22 to stop a recurring conflation. 63 = 53 spans under `records` + 10 basis
+      spans under `retagging_E5`. The installed layer
+      `data/literature/ethanol_admissions.yaml` carries only the admissions themselves, so it
+      holds 53 spans and its header correctly states `spans_in_this_file: 53,
+      re_resolved_exact: 53`. The 10 re-tagging basis quotes stay in this draft because nothing
+      is re-tagged by installing the admissions. BOTH HEADERS ARE CORRECT AND ALWAYS WERE — 63
+      and 53 are counts of two different things, not two counts of one thing. Earlier reporting
+      cited "63 of 63" against the data/ file, which is the only error here, and it is in the
+      reporting rather than in either file. Re-counted 2026-09-22 by walking both documents for
+      objects carrying `quote` + `char_start` + `char_end`: this file 63 (53 records + 10
+      retagging_E5), the data/ file 53 (all under records). `retagging_other` carries 8 entries
+      and no spans, which is why it adds nothing to either total.
   caps:
     publication_cap: 150
     measurement_study_cap: 60
