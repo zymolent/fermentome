@@ -23,6 +23,38 @@ would be discovered late and expensively.
 
 ---
 
+## Why the atlas's own ranker says something else, and why that is not a contradiction
+
+`fermdb atlas routes` returns **`B_cytosolic_relocalization`** in its top five. This recommendation
+says **C**. Both are correct, because they answer different questions, and the difference is
+recorded in the code rather than papered over:
+
+* `rank(objective="easiest")` — the default — orders by transport gaps, then cofactor risks, then
+  **feasibility**, and B beats C there on a technique-difficulty constant (0.80 against 0.60). It
+  answers *what would be least trouble to build*. B genuinely is easier, and that is real
+  information, not an artifact.
+* This recommendation answers *what should be built for DUET*, which technique difficulty cannot
+  reach.
+
+**Three independent lines now agree on C**, which is worth stating because only one of them is new:
+
+1. `DUET_TARGET.md` §4, written before any of this curation: *"**DUET is strategy C** — mitochondrial
+   targeting of the Ehrlich pathway by nuclear-encoded, presequence-targeted enzymes."*
+2. `MITOCHONDRIAL_PROGRAM.md` §1's standing advice, which recommends running C **first**, for the
+   same stated reason — it avoids the cytosolic Fe-S maturation problem and has precedent.
+3. The corpus evidence assembled here (Q2 below), which says C's failure mode is unlikely to fire.
+
+So the recommendation is not the atlas overruling itself. It is the atlas being asked the question
+it was built to answer, rather than the one its default sort answers.
+
+**The reconciliation, as of 2026-09-22.** `rank(objective="programme")` consults `programme_fit`
+before feasibility. The owner's ruling is to **favour C while retaining everything on B**, so that
+B stays available as data accumulates. `programme_fit` is a **sort key and never a filter**, so no
+B route is dropped, hidden or down-weighted out of view — the ordering changes and the population
+does not. `--objective easiest` continues to give the unbiased view, byte for byte.
+
+---
+
 ## The five answers
 
 ### Q1 — Is matrix co-localization beneficial at all? *Provisionally yes, and it is now testable.*
