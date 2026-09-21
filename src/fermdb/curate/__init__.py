@@ -30,10 +30,44 @@ Typical curator::
     for task in peek(conn, limit=5):
         print(task.summary())
     accept(conn, task_id, curator=Curator("k.saikia"), reason="checked against table 2")
+
+Accepting is not the end of the pipeline and neither is promotion. :mod:`fermdb.curate.promote`
+turns a resolved task into a row -- a `strain`, a `measurement`, a `bottleneck` -- and
+:mod:`fermdb.curate.assertions` turns those rows into the thing PLAN.md C.1 calls the unit of
+knowledge: an `assertion` with `evidence_item`s under it, whose L1-L5 level is read from the
+`assertion_level` view and never written anywhere::
+
+    from fermdb.curate import build_assertion, from_measurement, level_of
+    request = from_measurement(
+        conn, "YAA:MEAS:...", predicate="affects_production_of",
+        evidence_type="direct_perturbation", direction="increases",
+        independent_group="atsumi-lab", publication_id="doi:10.1186/...",
+        control_strain_id="YAA:STRAIN:...",
+    )
+    result = build_assertion(conn, request, curator=Curator("k.saikia"), reason="table 2")
+    result.level.display     # 'L1', read back out of the view
 """
 
 from __future__ import annotations
 
+from .assertions import (
+    DIRECT_TYPES,
+    EVIDENCE_TYPES,
+    AssertionPlan,
+    AssertionRequest,
+    AssertionResult,
+    EvidenceRequest,
+    NotAssertable,
+    attach_evidence,
+    build_assertion,
+    from_bottleneck,
+    from_measurement,
+    from_modification,
+    level_of,
+    plan_assertion,
+    plan_many,
+    with_evidence,
+)
 from .queue import (
     ACTOR_KINDS,
     DEFAULT_LEASE_SECONDS,
@@ -70,30 +104,46 @@ __all__ = [
     "ACTOR_KINDS",
     "DEFAULT_LEASE_SECONDS",
     "DEFAULT_PRIORITY",
+    "DIRECT_TYPES",
+    "EVIDENCE_TYPES",
     "OPEN_STATUSES",
     "QUEUE_ACTOR",
     "STALLED_ATTEMPTS",
     "TASK_STATUSES",
     "TERMINAL_STATUSES",
+    "AssertionPlan",
+    "AssertionRequest",
+    "AssertionResult",
     "CurationError",
     "Curator",
+    "EvidenceRequest",
     "LeaseLost",
+    "NotAssertable",
     "PromotionRefused",
     "QueueStats",
     "RepeatSignal",
     "Task",
     "TaskNotFound",
     "accept",
+    "attach_evidence",
+    "build_assertion",
     "claim_next",
     "edit",
     "enqueue_extraction",
     "enqueue_pending_extractions",
+    "from_bottleneck",
+    "from_measurement",
+    "from_modification",
     "get_task",
     "heartbeat",
+    "level_of",
     "peek",
+    "plan_assertion",
+    "plan_many",
     "proposal_hash",
     "queue_stats",
     "reject",
     "release",
     "repeat_offenders",
+    "with_evidence",
 ]
