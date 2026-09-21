@@ -292,6 +292,77 @@ narrower per-record-kind prompt is a far cheaper thing to fix than the routing.
 
 ---
 
+## 3b. The schema experiment — and it overturns §3a's verdict
+
+§3a closed with a caveat: *"the 42,000-character payload schema may be the defect rather than the
+model."* That experiment has now been run, and the caveat was right in a way sharper than it was
+stated. **The configured extraction model was never tested, because the schema made it impossible
+to run.**
+
+### 3b.1 What narrowing buys, measured
+
+`payload_schema(vocabulary, kinds=[...])` and `extract run --only-kind` now narrow the ask to a
+subset of record kinds. On this vocabulary:
+
+| | chars | ~tokens |
+|---|---|---|
+| prompt template | 4,818 | 1,377 |
+| full schema, compact | 18,188 | 5,197 |
+| **fixed overhead, all seven kinds** | **23,006** | **6,573** |
+| worst single kind (`co_reported_higher_alcohols`) | 9,253 | 2,644 |
+| **reduction** | | **−60%** |
+
+That overhead is paid in **every window of every paper**. At the default `num_ctx` of 8,192 the
+all-kinds ask leaves **−429 tokens** for the excerpt — which is the real reason local extraction
+was impossible at the default, and it is a much narrower miss than §3a's ~4,300-token figure
+implied. One kind leaves ~3,500 tokens, about 12,000 characters of paper.
+
+*(A correction to §3a while here: the schema is ~18,200 compact characters, not ~42,000. The
+larger figure is the whole rendered prompt including the excerpt, or a pretty-printed schema. The
+conclusion it supported — that the schema is a second context floor and binds before the excerpt
+does — survives the correction.)*
+
+### 3b.2 The result that matters
+
+The narrowing does something §3a could not: it lets `qwen3.6:27b` run **at `num_ctx` 8,192**, the
+same window as an already-resident instance. The whole reason the calibration could not test the
+configured model was that a different `num_ctx` needed a *second* 16 GB instance that did not fit,
+and Ollama blocked indefinitely rather than erroring. At one kind, no second instance is needed.
+
+Against `doi:10.1016/j.jbc.2026.113228`, where the capable tier found 36 records:
+
+| tier | schema | strains found | note |
+|---|---|---|---|
+| Opus 5 (capable) | all kinds | 3 | the ground truth |
+| `qwen2.5:7b-instruct` | **one kind** | **0** | 0 records on *all seven* kinds, 0 validation failures |
+| **`qwen3.6:27b`** (configured) | **one kind** | **4** | all span-verified; 375 s, 100% GPU |
+
+Two conclusions, and they point in opposite directions from each other:
+
+* **Narrowing does not rescue the 7B.** It returns well-formed empty arrays for every kind — it is
+  not failing, it is declining. §3a's recall verdict stands *for the model it actually tested*.
+* **But §3a tested the wrong model, and said so.** The 7B is the *triage* model. The configured
+  extraction model produces records in the right range the moment it can be run at all. **The
+  calibration's 0.3% is not a measurement of the local tier; it is a measurement of the triage
+  model doing a job it was never assigned.**
+
+So the routing question is **re-opened, not settled**. What is settled is that the schema was
+blocking the experiment that would answer it.
+
+### 3b.3 The cheap consequence for the capable tier
+
+Narrowing pays there too, immediately. Bastian 2011 at all seven kinds cost **82,273 tokens** for
+87 records. A three-kind slice of `doi:10.1016/j.jbiotec.2022.09.012` cost **11,032 tokens** for 36
+records, in 104 seconds. Different papers, so not a clean ratio — but the direction is large, and
+it is the difference between a corpus-scale run being affordable and not.
+
+**A narrowed run makes no claim about the kinds it did not ask for**, so the subset is recorded in
+`prompt_version` (`…+kinds:strains,pathway_configurations,measurements`) and is therefore part of
+the cache key. Two runs over different subsets cannot share a cache entry, and a stored
+`extraction` row cannot claim a coverage it never had.
+
+---
+
 ## 4a. The benchmark set: S.5's headline number was unobtainable, not merely unmeasured
 
 `data/benchmarks/known_positives.yaml` is what PLAN.md S.5 calls *"the headline number for whether
