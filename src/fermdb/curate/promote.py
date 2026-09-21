@@ -712,26 +712,374 @@ def _write_bottleneck(
     return conn.total_changes > before
 
 
+#: The companion a co-reported higher alcohol must have been measured beside.
+#:
+#: PLAN.md B.1 admits the adjacent tier on one condition, and states the condition as the reason
+#: for the tier's existence: these products are captured **"only when measured in the same
+#: experiment as isobutanol -- they are the by-products of the same promiscuous ketoacid
+#: decarboxylases and their ratios are diagnostic of where flux is leaking."** A lone isoamyl
+#: alcohol titer is not diagnostic of anything; it is the *ratio* that measures decarboxylase
+#: specificity, and a ratio needs both terms.
+_ADJACENT_COMPANION: Final[str] = "YAA:PRODUCT:isobutanol"
+
+
+def _plan_higher_alcohol(
+    conn: sqlite3.Connection, task: Task, supplied: Mapping[str, Any]
+) -> PromotionPlan:
+    """An adjacent-tier alcohol becomes a `measurement`, if B.1's companion rule is satisfied.
+
+    The record is shaped like a measurement and becomes one: same table, same id derivation, a
+    different `product_id`. What is not shared is admission. B.1 lets this product in only when it
+    was measured alongside isobutanol, so the companion is checked here rather than assumed -- and
+    checked against the database, which is the only place that can answer it.
+
+    **Scope of the check, stated because it is weaker than B.1's words.** B.1 says "the same
+    experiment". `experiment` has no rows and no sample links to a publication yet, so the
+    strongest available scope is the same *strain*, which these payloads do name. That is a real
+    weakening: one paper can measure a strain under conditions that never appeared in the same run.
+    It is recorded here rather than papered over, and tightens to the experiment the moment
+    `experiment` is populated -- at which point this constant becomes a join, not a lookup.
+    """
+    payload = _payload_of(task)
+    missing: list[Requirement] = []
+    blockers: list[str] = []
+
+    value = payload.get("value")
+    unit = payload.get("unit") or payload.get("unit_canonical")
+    kind = str(payload.get("quantity_kind") or "").strip()
+    if not isinstance(value, int | float):
+        missing.append(Requirement("value_as_reported", "the record carries no numeric value"))
+    if not unit:
+        missing.append(Requirement("unit_as_reported", "the record carries no unit"))
+    if not kind:
+        missing.append(Requirement("quantity_kind", "the record does not say what was measured"))
+
+    # The product must exist *and* be adjacent-tier. Promoting an isobutanol titer through this
+    # planner would bypass nothing, but promoting an ethanol one would file a reference-layer
+    # number as an isobutanol by-product, which is a scope error the tier column now catches.
+    reported_product = str(payload.get("product_as_reported") or "").strip()
+    product_id = payload.get("product_id") or supplied.get("product_id")
+    if not product_id:
+        missing.append(
+            Requirement(
+                "product_id",
+                f"the record names {reported_product or 'a higher alcohol'} and no product id; "
+                "a curator maps it to one of the adjacent-tier products in products.tsv",
+            )
+        )
+    else:
+        row = conn.execute(
+            "SELECT tier FROM product WHERE id = ?", (product_id,)
+        ).fetchone()
+        if row is None:
+            missing.append(
+                Requirement(
+                    "product_id", f"no product with id {product_id!r}; load the vocabularies"
+                )
+            )
+        elif row["tier"] is None:
+            blockers.append(
+                f"{product_id} has no tier; re-run `fermdb db vocabularies` so B.1's admission "
+                "rule has something to read (schema v10 added the column)"
+            )
+        elif row["tier"] != "adjacent":
+            missing.append(
+                Requirement(
+                    "product_id",
+                    f"{product_id} is {row['tier']}-tier, and this record kind carries B.1's "
+                    "adjacent-tier admission rule. A primary or reference product measured in "
+                    "this paper is an ordinary `measurements` proposal, not a co-reported one",
+                )
+            )
+
+    strain_name = str(payload.get("strain_name_as_reported") or "").strip()
+    strain_id: str | None = supplied.get("strain_id")
+    if strain_id is None and strain_name:
+        candidate = _strain_id(strain_name)
+        row = conn.execute("SELECT id FROM strain WHERE id = ?", (candidate,)).fetchone()
+        if row is not None:
+            strain_id = str(row["id"])
+        else:
+            blockers.append(
+                f"strain {strain_name!r} is not promoted yet (would be {candidate}); "
+                "promote the strain proposals from this publication first"
+            )
+    if strain_id is None and not strain_name:
+        missing.append(
+            Requirement(
+                "strain_id",
+                "`measurement` needs a sample, strain or experiment and the record names none",
+            )
+        )
+
+    # B.1's companion rule.
+    if strain_id is not None:
+        companion = conn.execute(
+            "SELECT 1 FROM measurement WHERE strain_id = ? AND product_id = ?",
+            (strain_id, _ADJACENT_COMPANION),
+        ).fetchone()
+        if companion is None:
+            blockers.append(
+                f"no isobutanol measurement is promoted for {strain_id}. PLAN.md B.1 admits an "
+                "adjacent-tier alcohol only when it was measured alongside isobutanol, because "
+                "the ratio is the diagnostic and a ratio needs both terms. Promote that "
+                "publication's isobutanol measurements first"
+            )
+
+    row_id = _measurement_id(task)
+    existing = conn.execute("SELECT id FROM measurement WHERE id = ?", (row_id,)).fetchone()
+    return PromotionPlan(
+        task_id=task.id,
+        record_kind=task.record_kind,
+        target_table="measurement",
+        row={
+            "id": row_id,
+            "strain_id": strain_id,
+            "quantity_kind": kind,
+            "product_id": product_id,
+            "value_as_reported": value,
+            "unit_as_reported": unit,
+            "basis": payload.get("basis") or supplied.get("basis"),
+            "source_locator": str(payload.get("source_locator") or "text"),
+            "is_below_lod": 1 if payload.get("is_below_lod") else 0,
+            "is_upper_bound": 1 if payload.get("is_upper_bound") else 0,
+            # Carried into `evidence` by the writer. See its docstring for why it cannot go
+            # anywhere better yet.
+            "substrate": str(payload.get("substrate") or "").strip(),
+            "product_as_reported": reported_product,
+        },
+        missing=tuple(missing),
+        blockers=tuple(blockers),
+        already=str(existing["id"]) if existing is not None else None,
+    )
+
+
+def _write_higher_alcohol(
+    conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
+) -> bool:
+    """Write the measurement, with the substrate in the evidence because it has nowhere else.
+
+    The three 2-methyl-1-butanol titers this promoter was written against are the same strain, the
+    same product and the same quantity kind, differing **only** by carbon source -- 0.91 on xylose,
+    0.68 on glucose, 0.93 on galactose. The substrate is what distinguishes them, and it belongs in
+    `condition_context`, which `PROMOTERS` deliberately cannot write because grouping facets into a
+    context is a curation decision (see that mapping's docstring).
+
+    Dropping it would leave three rows that are indistinguishable except by id -- the exact shape
+    of the "recorded and never wired up" loss this module keeps finding. So it travels in
+    `evidence`, which is prose and queryable only by LIKE, and is therefore a holding position and
+    not a home. When a context exists for these measurements, the substrate moves to it.
+    """
+    before = conn.total_changes
+    detail = evidence
+    if plan.row.get("product_as_reported"):
+        detail += f"; product as reported: {plan.row['product_as_reported']}"
+    if plan.row.get("substrate"):
+        detail += (
+            f"; substrate as reported: {plan.row['substrate']} "
+            "(no condition_context yet; this is what distinguishes it from its siblings)"
+        )
+    conn.execute(
+        "INSERT INTO measurement (id, strain_id, quantity_kind, product_id, value_as_reported, "
+        "unit_as_reported, basis, source_locator, is_below_lod, is_upper_bound, zone, evidence, "
+        "confidence) VALUES (?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        (
+            plan.row["id"],
+            plan.row["strain_id"],
+            plan.row["quantity_kind"],
+            plan.row["product_id"],
+            plan.row["value_as_reported"],
+            plan.row["unit_as_reported"],
+            plan.row["basis"],
+            plan.row["source_locator"],
+            plan.row["is_below_lod"],
+            plan.row["is_upper_bound"],
+            detail,
+            confidence,
+        ),
+    )
+    return conn.total_changes > before
+
+
+def _configuration_description(payload: Mapping[str, Any]) -> str:
+    """The enzyme set and the localization claim, in the paper's own terms.
+
+    `localization_as_reported` is where a curator's correction lands -- the one proposal this was
+    written against carries a note that the enzymes are the bacterial valine *degradation* route
+    and not the Ehrlich pathway the strategy is named for. That note is the most valuable thing in
+    the record and it must not be dropped on the way into a row.
+    """
+    bits: list[str] = []
+    enzymes = payload.get("enzymes_as_reported")
+    if isinstance(enzymes, list | tuple) and enzymes:
+        bits.append("enzymes as reported: " + ", ".join(str(e) for e in enzymes))
+    localization = str(payload.get("localization_as_reported") or "").strip()
+    if localization:
+        bits.append(f"localization as reported: {localization}")
+    return "; ".join(bits)
+
+
+def _plan_configuration(
+    conn: sqlite3.Connection, task: Task, supplied: Mapping[str, Any]
+) -> PromotionPlan:
+    """A published build becomes a `pathway_configuration`.
+
+    This is phase 1's headline deliverable -- PLAN.md Q phase 1 asks for "every published microbial
+    isobutanol production strain, any host, as a `pathway_configuration`" -- and phase 3's
+    acceptance test is recall of the route enumerator *against these rows*. With no promoter the
+    table stayed empty, so 600 enumerated routes had nothing to be scored against and phase 3 could
+    not be tested even in principle.
+
+    Two columns a payload cannot supply, refused rather than guessed, in the manner of
+    `strain.organism_id` and `bottleneck.observation_type`:
+
+    * `host_strain_id` -- the extraction schema has no host field. The configuration's host is the
+      difference between a yeast build and an *E. coli* one, and inferring it from whichever strain
+      the paper mentions most is the cross-paper guessing CONVENTIONS.md forbids.
+    * `product_id` -- likewise absent. A configuration is *for* a product, and defaulting it to
+      isobutanol because this is an isobutanol atlas would file a 3-HP or n-butanol build as an
+      isobutanol one.
+
+    `name` is derived rather than demanded: a configuration's name is a label, not a claim, and a
+    deterministic one built from the strategy and the publication is reproducible and collides with
+    nothing. A curator may override it.
+    """
+    payload = _payload_of(task)
+    missing: list[Requirement] = []
+    blockers: list[str] = []
+
+    strategy = str(payload.get("compartment_strategy") or "").strip()
+    strategy_id: str | None = supplied.get("compartment_strategy_id") or (strategy or None)
+    if not strategy:
+        missing.append(
+            Requirement(
+                "compartment_strategy_id",
+                "the record does not say which compartment strategy the build used, and the "
+                "strategy is what a configuration is grouped and compared by (PLAN.md B.5)",
+            )
+        )
+    elif (
+        conn.execute(
+            "SELECT 1 FROM compartment_strategy WHERE id = ?", (strategy_id,)
+        ).fetchone()
+        is None
+    ):
+        missing.append(
+            Requirement(
+                "compartment_strategy_id",
+                f"{strategy_id!r} is not a seeded compartment strategy; the vocabulary is "
+                "`compartment_strategy` and adding a strategy is a data change a curator makes",
+            )
+        )
+
+    host_strain_id: str | None = supplied.get("host_strain_id")
+    if host_strain_id is None:
+        missing.append(
+            Requirement(
+                "host_strain_id",
+                "the extraction schema carries no host field, and the host is what makes a "
+                "configuration comparable to another one. A curator names the strain",
+            )
+        )
+    elif (
+        conn.execute("SELECT 1 FROM strain WHERE id = ?", (host_strain_id,)).fetchone() is None
+    ):
+        blockers.append(
+            f"host strain {host_strain_id!r} is not promoted yet; promote that strain first"
+        )
+
+    product_id: str | None = supplied.get("product_id")
+    if product_id is None:
+        missing.append(
+            Requirement(
+                "product_id",
+                "a configuration is a route *to* something, and the record does not say to what. "
+                "Defaulting to isobutanol would file any other build as an isobutanol one",
+            )
+        )
+    elif conn.execute("SELECT 1 FROM product WHERE id = ?", (product_id,)).fetchone() is None:
+        missing.append(
+            Requirement("product_id", f"no product with id {product_id!r}; load the vocabularies")
+        )
+
+    row_id = f"YAA:PCFG:{task.proposal_hash[:16]}"
+    name = str(
+        supplied.get("name")
+        or (f"{strategy} configuration from {task.publication_id}" if strategy else row_id)
+    )
+    existing = conn.execute(
+        "SELECT id FROM pathway_configuration WHERE id = ?", (row_id,)
+    ).fetchone()
+    return PromotionPlan(
+        task_id=task.id,
+        record_kind=task.record_kind,
+        target_table="pathway_configuration",
+        row={
+            "id": row_id,
+            "name": name,
+            "pathway_id": supplied.get("pathway_id"),
+            "product_id": product_id,
+            "compartment_strategy_id": strategy_id,
+            "host_strain_id": host_strain_id,
+            "description": _configuration_description(payload),
+        },
+        missing=tuple(missing),
+        blockers=tuple(blockers),
+        already=str(existing["id"]) if existing is not None else None,
+    )
+
+
+def _write_configuration(
+    conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
+) -> bool:
+    before = conn.total_changes
+    conn.execute(
+        "INSERT INTO pathway_configuration (id, name, pathway_id, product_id, "
+        "compartment_strategy_id, host_strain_id, description, zone, evidence, confidence) "
+        "VALUES (?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        (
+            plan.row["id"],
+            plan.row["name"],
+            plan.row["pathway_id"],
+            plan.row["product_id"],
+            plan.row["compartment_strategy_id"],
+            plan.row["host_strain_id"],
+            plan.row["description"],
+            evidence,
+            confidence,
+        ),
+    )
+    return conn.total_changes > before
+
+
 Planner = Callable[[sqlite3.Connection, Task, Mapping[str, Any]], PromotionPlan]
 Writer = Callable[..., bool]
 
 #: Record kinds that can become rows today, with the functions that do it.
 #:
-#: The two still absent are listed nowhere on purpose. :func:`plan_promotion` reports "no promoter
-#: for this kind yet" rather than succeeding quietly, so a batch run cannot look complete while
-#: skipping proposals.
+#: :func:`plan_promotion` reports "no promoter for this kind yet" rather than succeeding quietly,
+#: so a batch run cannot look complete while skipping proposals.
 #:
-#: `conditions` is absent for a reason worth stating: the extraction emits **one record per
-#: facet** ("carbon_sources: 2% glucose or galactose"), while `condition_context` is one immutable
-#: row per *whole context*, deduplicated by a hash over its facets. Turning N facet records into
-#: one context means deciding which facets belong together, and nothing in a payload says --
-#: grouping by strain is a guess, and a wrong grouping produces a context that never existed and
-#: that measurements would then be compared across. That is a curation decision, not a mapping.
+#: `co_reported_higher_alcohols` and `pathway_configurations` were the two absent ones until they
+#: were added here. Both had an extraction schema, a coverage mapping and a table, and no way to
+#: cross the gap between them -- so accepted proposals sat resolved and unwritable, and
+#: `pathway_configuration` read zero while being *phase 1's headline deliverable* and the thing
+#: phase 3's acceptance test measures recall against.
+#:
+#: `conditions` is still absent, and for a reason worth stating: the extraction emits **one record
+#: per facet** ("carbon_sources: 2% glucose or galactose"), while `condition_context` is one
+#: immutable row per *whole context*, deduplicated by a hash over its facets. Turning N facet
+#: records into one context means deciding which facets belong together, and nothing in a payload
+#: says -- grouping by strain is a guess, and a wrong grouping produces a context that never
+#: existed and that measurements would then be compared across. That is a curation decision, not a
+#: mapping, and it stays open deliberately.
 PROMOTERS: Final[Mapping[str, tuple[Planner, Writer]]] = {
     "strains": (_plan_strain, _write_strain),
     "measurements": (_plan_measurement, _write_measurement),
     "modifications": (_plan_modification, _write_modification),
     "bottlenecks": (_plan_bottleneck, _write_bottleneck),
+    "co_reported_higher_alcohols": (_plan_higher_alcohol, _write_higher_alcohol),
+    "pathway_configurations": (_plan_configuration, _write_configuration),
 }
 
 PROMOTABLE_KINDS: Final[tuple[str, ...]] = tuple(PROMOTERS)

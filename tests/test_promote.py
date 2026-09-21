@@ -351,3 +351,185 @@ def test_an_edited_payload_is_what_gets_promoted(atlas: sqlite3.Connection) -> N
 def test_the_slug_matches_the_convention(atlas: sqlite3.Connection) -> None:
     """CONVENTIONS.md writes the example id as YAA:STRAIN:cen-pk113-7d."""
     assert P._strain_id("CEN.PK113-7D") == "YAA:STRAIN:cen-pk113-7d"
+
+
+# ------------------------------------------------- the adjacent tier and the configuration row
+
+
+def _adjacent_task(
+    conn: sqlite3.Connection,
+    task_id: str,
+    *,
+    substrate: str = "xylose",
+    value: float = 0.91,
+) -> None:
+    """One `co_reported_higher_alcohols` proposal, accepted, against the shared fixture span."""
+    payload = {
+        "product_id": "YAA:PRODUCT:2-methyl-1-butanol",
+        "product_as_reported": "2-methyl-1-butanol",
+        "quantity_kind": "titer",
+        "strain_name_as_reported": "BSW191",
+        "value": value,
+        "unit": "g/L",
+        "substrate": substrate,
+        "source_locator": "text",
+        "zone": "I",
+        "confidence": "unverified",
+        "span": {"quote": QUOTE, "char_start": START, "char_end": END, "section": "results"},
+    }
+    conn.execute(
+        "INSERT INTO curation_task (id, extraction_id, publication_id, record_path, "
+        "record_kind, payload, status, priority, attempt_count, proposal_hash, curator, "
+        "curator_kind, resolved_at, resolution_reason, zone) "
+        "VALUES (?, 'YAA:EXTR:test', 'YAA:PUB:test', 'co_reported_higher_alcohols[0]', "
+        "'co_reported_higher_alcohols', ?, 'accepted', 1, 0, ?, 'kangkon', 'human', "
+        "'2026-09-20T00:00:00Z', 'checked', 'I')",
+        (task_id, json.dumps(payload), f"hash-{task_id}"),
+    )
+
+
+def _seed_adjacent_product(conn: sqlite3.Connection, tier: str = "adjacent") -> None:
+    conn.execute(
+        "INSERT INTO product (id, name, tier, zone, evidence, confidence) "
+        "VALUES ('YAA:PRODUCT:2-methyl-1-butanol', '2-methyl-1-butanol', ?, 'R', 'test', 'high') "
+        "ON CONFLICT(id) DO UPDATE SET tier = excluded.tier",
+        (tier,),
+    )
+
+
+def _promote_the_host(conn: sqlite3.Connection) -> P.PromotionResult:
+    return P.promote(
+        conn,
+        "YAA:CTASK:strain",
+        curator=HUMAN,
+        reason="the host",
+        supplied={"organism_id": "YAA:ORG:scer"},
+    )
+
+
+def test_a_higher_alcohol_needs_its_isobutanol_companion(atlas: sqlite3.Connection) -> None:
+    """PLAN.md B.1's admission rule, enforced rather than assumed.
+
+    The adjacent tier exists because the *ratio* to isobutanol is diagnostic of where flux leaks.
+    A lone 2-methyl-1-butanol titer measures nothing, so it is refused until the companion exists.
+    """
+    _seed_adjacent_product(atlas)
+    _adjacent_task(atlas, "YAA:CTASK:adj")
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:adj")
+    assert plan.target_table == "measurement"
+    assert any("no isobutanol measurement is promoted" in b for b in plan.blockers)
+
+
+def test_the_companion_rule_clears_once_isobutanol_is_promoted(atlas: sqlite3.Connection) -> None:
+    _seed_adjacent_product(atlas)
+    _adjacent_task(atlas, "YAA:CTASK:adj")
+    _promote_the_host(atlas)
+    P.promote(atlas, "YAA:CTASK:meas", curator=HUMAN, reason="the companion")
+
+    result = P.promote(atlas, "YAA:CTASK:adj", curator=HUMAN, reason="co-reported")
+    row = atlas.execute(
+        "SELECT product_id, value_as_reported, zone FROM measurement WHERE id = ?",
+        (result.row_id,),
+    ).fetchone()
+    assert row["product_id"] == "YAA:PRODUCT:2-methyl-1-butanol"
+    assert row["value_as_reported"] == 0.91
+    assert row["zone"] == "R"
+
+
+def test_the_substrate_survives_promotion(atlas: sqlite3.Connection) -> None:
+    """Three siblings differ only by carbon source; dropping it makes them indistinguishable.
+
+    `condition_context` is deliberately unpromotable, so the substrate rides in `evidence`. This
+    test exists to fail if that holding position is ever quietly removed.
+    """
+    _seed_adjacent_product(atlas)
+    _adjacent_task(atlas, "YAA:CTASK:adj", substrate="galactose", value=0.93)
+    _promote_the_host(atlas)
+    P.promote(atlas, "YAA:CTASK:meas", curator=HUMAN, reason="the companion")
+
+    result = P.promote(atlas, "YAA:CTASK:adj", curator=HUMAN, reason="co-reported")
+    evidence = atlas.execute(
+        "SELECT evidence FROM measurement WHERE id = ?", (result.row_id,)
+    ).fetchone()["evidence"]
+    assert "galactose" in evidence
+
+
+def test_a_primary_tier_product_is_refused_by_the_adjacent_promoter(
+    atlas: sqlite3.Connection,
+) -> None:
+    """An isobutanol titer is an ordinary measurement; filing it here would bypass the tier."""
+    _seed_adjacent_product(atlas, tier="primary")
+    _adjacent_task(atlas, "YAA:CTASK:adj")
+    plan = _plan(atlas, "YAA:CTASK:adj")
+    assert any("primary-tier" in str(m) for m in plan.missing)
+
+
+def _configuration_task(conn: sqlite3.Connection, task_id: str, strategy: str) -> None:
+    payload = {
+        "compartment_strategy": strategy,
+        "enzymes_as_reported": ["alsS", "ilvC", "ilvD"],
+        "localization_as_reported": "mitochondrial matrix via the Su9 leader peptide",
+        "zone": "I",
+        "confidence": "unverified",
+        "span": {"quote": QUOTE, "char_start": START, "char_end": END, "section": "results"},
+    }
+    conn.execute(
+        "INSERT INTO curation_task (id, extraction_id, publication_id, record_path, "
+        "record_kind, payload, status, priority, attempt_count, proposal_hash, curator, "
+        "curator_kind, resolved_at, resolution_reason, zone) "
+        "VALUES (?, 'YAA:EXTR:test', 'YAA:PUB:test', 'pathway_configurations[0]', "
+        "'pathway_configurations', ?, 'accepted', 1, 0, ?, 'kangkon', 'human', "
+        "'2026-09-20T00:00:00Z', 'checked', 'I')",
+        (task_id, json.dumps(payload), f"hash-{task_id}"),
+    )
+
+
+def test_a_configuration_refuses_to_guess_its_host_and_product(
+    atlas: sqlite3.Connection,
+) -> None:
+    """Both are absent from the extraction schema, and both change what the row means."""
+    _configuration_task(atlas, "YAA:CTASK:cfg", "C_mitochondrial_ehrlich")
+    plan = _plan(atlas, "YAA:CTASK:cfg")
+    assert plan.target_table == "pathway_configuration"
+    fields = {m.field for m in plan.missing}
+    assert "host_strain_id" in fields
+    assert "product_id" in fields
+
+
+def test_an_unseeded_strategy_is_refused(atlas: sqlite3.Connection) -> None:
+    _configuration_task(atlas, "YAA:CTASK:cfg", "Z_invented_strategy")
+    plan = _plan(atlas, "YAA:CTASK:cfg")
+    assert any(m.field == "compartment_strategy_id" for m in plan.missing)
+
+
+def test_a_configuration_promotes_and_keeps_the_curators_note(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The localization note is where a curator correction lands; it must reach the row."""
+    # `compartment_strategy` is seeded by the schema itself -- the five strategies of
+    # ISOBUTANOL_PROGRAM.md section 2 are vocabulary, not test data.
+    _configuration_task(atlas, "YAA:CTASK:cfg", "C_mitochondrial_ehrlich")
+    strain = _promote_the_host(atlas)
+
+    result = P.promote(
+        atlas,
+        "YAA:CTASK:cfg",
+        curator=HUMAN,
+        reason="the published build",
+        supplied={
+            "host_strain_id": strain.row_id,
+            "product_id": "YAA:PRODUCT:isobutanol",
+        },
+    )
+    row = atlas.execute(
+        "SELECT name, host_strain_id, compartment_strategy_id, description, zone "
+        "FROM pathway_configuration WHERE id = ?",
+        (result.row_id,),
+    ).fetchone()
+    assert row["host_strain_id"] == "YAA:STRAIN:bsw191"
+    assert row["compartment_strategy_id"] == "C_mitochondrial_ehrlich"
+    assert "Su9 leader peptide" in row["description"]
+    assert "alsS" in row["description"]
+    assert row["zone"] == "R"

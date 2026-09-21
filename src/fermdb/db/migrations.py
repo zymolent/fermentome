@@ -241,8 +241,46 @@ _V8_TO_V9: Final[Migration] = Migration(
     ),
 )
 
+#: v9 -> v10. `product.tier` and `product.mw_g_mol` -- two curated columns that were read from the
+#: vocabulary file and thrown away on the way in.
+#:
+#: Why this exists. PLAN.md B.1 opens the priority model with a claim about mechanism, not about
+#: intent: *"the tier is a stored property of `product` that drives the acquisition policy in code.
+#: It is not an informal understanding."* `data/vocabularies/products.tsv` honoured that -- `tier`
+#: is its first column -- and `load_products` then folded it into an evidence sentence
+#: (`f"{PRODUCTS_FILE}, tier={row.get('tier', '?')}"`) and wrote no column. The result is that the
+#: sentence B.1 wrote to forbid an informal understanding described one: the tier survived only as
+#: prose, nothing could filter on it, and no admission rule could consult it.
+#:
+#: `mw_g_mol` was dropped by the same INSERT. That one costs a number rather than a policy: B.6.7's
+#: load-bearing claim is that isobutanol is more growth-inhibitory than ethanol **on a molar
+#: basis**, and no g/L measurement can be moved onto a molar axis without it.
+#:
+#: This is the seventh and eighth instance of the failure mode the 2026-09-21 handover names.
+#: Both are ADD COLUMN on an existing table with no backfill here -- `fermdb db vocabularies`
+#: rewrites every product row from the TSV, which is where the values come from.
+_V9_TO_V10: Final[Migration] = Migration(
+    from_version=9,
+    to_version=10,
+    summary="product.tier + product.mw_g_mol -- the curated columns the loader was discarding",
+    statements=(
+        # SQLite cannot add a CHECK to an existing table via ALTER, so the constraint that the
+        # rebuilt schema.sql carries is not enforced on a migrated database until it is rebuilt.
+        # The loader validates the value against the same four tiers on the way in, which is where
+        # a bad tier would actually come from.
+        "ALTER TABLE product ADD COLUMN tier TEXT",
+        "ALTER TABLE product ADD COLUMN mw_g_mol REAL",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
-MIGRATIONS: Final[tuple[Migration, ...]] = (_V5_TO_V6, _V6_TO_V7, _V7_TO_V8, _V8_TO_V9)
+MIGRATIONS: Final[tuple[Migration, ...]] = (
+    _V5_TO_V6,
+    _V6_TO_V7,
+    _V7_TO_V8,
+    _V8_TO_V9,
+    _V9_TO_V10,
+)
 
 
 def pending(conn: sqlite3.Connection, *, to: int = SCHEMA_VERSION) -> tuple[Migration, ...]:

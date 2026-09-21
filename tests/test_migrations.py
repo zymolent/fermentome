@@ -54,6 +54,18 @@ CREATE TABLE reaction (
     evidence       TEXT NOT NULL,
     confidence     TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
 );
+CREATE TABLE product (
+    id             TEXT PRIMARY KEY,
+    name           TEXT NOT NULL,
+    inchikey       TEXT,
+    chebi_id       TEXT,
+    formula        TEXT,
+    carbon_number  INTEGER,
+    canonical_unit TEXT,
+    zone           TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence       TEXT NOT NULL,
+    confidence     TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
+);
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 INSERT INTO meta VALUES ('schema_version', '5');
 """
@@ -84,7 +96,7 @@ def fresh() -> sqlite3.Connection:
 # --------------------------------------------------------------------- the drift-catching test
 
 
-@pytest.mark.parametrize("table", ["reaction", "metabolite"])
+@pytest.mark.parametrize("table", ["reaction", "metabolite", "product"])
 def test_migrated_tables_match_freshly_created_ones(fresh: sqlite3.Connection, table: str) -> None:
     """The invariant the whole module rests on: two routes, one schema."""
     old = _v5()

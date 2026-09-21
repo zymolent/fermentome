@@ -391,9 +391,27 @@ CREATE TABLE gene (
 -- 5. Chemistry and products
 -- ---------------------------------------------------------------------------------------------
 
+-- v10. `tier` and `mw_g_mol` are columns because PLAN.md B.1 says the first one is: "the tier is a
+-- stored property of `product` that drives the acquisition policy in code. It is not an informal
+-- understanding." Until v10 it was exactly an informal understanding -- `products.tsv` has carried
+-- `tier` as its FIRST column since the vocabulary was written, and `load_products` interpolated it
+-- into a prose evidence sentence and dropped it. Nothing could filter on it, so no admission policy
+-- could be enforced in code, which is the one thing B.1 asks of it.
+--
+-- `mw_g_mol` went the same way, and its loss is quantitative rather than procedural: B.6.7 rests on
+-- isobutanol being more growth-inhibitory than ethanol *on a molar basis*, and a g/L titer cannot
+-- be put on a molar axis without the molecular weight. The value was curated in
+-- `products.tsv.product_mw_g_mol` and never landed, so every molar comparison would have had to
+-- recompute it from the formula -- which is how a "computed from standard atomic weights,
+-- unverified" number becomes indistinguishable from a cited one.
 CREATE TABLE product (
     id             TEXT PRIMARY KEY,
     name           TEXT NOT NULL,
+    -- B.1's four tiers. NOT a free-text column: `adjacent` carries an admission rule that
+    -- `curate.promote` enforces, and `reserved` marks the rows that prove the schema is
+    -- product-generic (PLAN.md section U) and are expected to stay empty.
+    tier           TEXT CHECK (tier IN ('primary', 'reference', 'adjacent', 'reserved')),
+    mw_g_mol       REAL CHECK (mw_g_mol IS NULL OR mw_g_mol > 0),
     inchikey       TEXT,
     chebi_id       TEXT,
     formula        TEXT,

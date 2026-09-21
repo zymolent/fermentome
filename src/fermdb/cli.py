@@ -532,7 +532,18 @@ def cmd_curate_promote(args: argparse.Namespace) -> int:
 
     settings = Settings.load()
     conn = open_db(settings.db_file)
-    supplied = {k: v for k, v in (("organism_id", args.organism), ("basis", args.basis)) if v}
+    supplied = {
+        k: v
+        for k, v in (
+            ("organism_id", args.organism),
+            ("basis", args.basis),
+            ("host_strain_id", args.host_strain_id),
+            ("product_id", args.product_id),
+            ("pathway_id", args.pathway_id),
+            ("name", args.name),
+        )
+        if v
+    }
     curator = Curator(name=args.curator, kind="human")
     try:
         if args.task:
@@ -859,6 +870,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--organism", help="organism id for strains; the extraction schema has no organism field"
     )
     p_cu_promote.add_argument("--basis", help="'consumed' or 'supplied', for a yield")
+    # A `pathway_configuration` needs both, and the extraction schema carries neither. They are
+    # refused rather than guessed (see `curate.promote._plan_configuration`), so these flags are
+    # how a curator answers.
+    p_cu_promote.add_argument(
+        "--host-strain",
+        dest="host_strain_id",
+        help="host strain id for a pathway configuration; the extraction schema has no host field",
+    )
+    p_cu_promote.add_argument(
+        "--product",
+        dest="product_id",
+        help="product id for a pathway configuration; a route is a route *to* something",
+    )
+    p_cu_promote.add_argument(
+        "--pathway", dest="pathway_id", help="pathway id for a pathway configuration (optional)"
+    )
+    p_cu_promote.add_argument(
+        "--name", dest="name", help="override the derived name of a pathway configuration"
+    )
     p_cu_promote.add_argument(
         "--dry-run", action="store_true", help="show what would be written and change nothing"
     )

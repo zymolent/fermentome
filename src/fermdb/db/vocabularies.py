@@ -74,8 +74,23 @@ def _number(value: str | None) -> float | None:
         return None
 
 
+#: B.1's four priority tiers, as `products.tsv` spells them. A value outside this set is refused
+#: rather than stored, because `tier` is not descriptive: `curate.promote` consults 'adjacent' to
+#: decide whether a co-reported higher alcohol may become a row at all, and a typo that reached the
+#: column would silently disable that rule for one product.
+_PRODUCT_TIERS: Final[frozenset[str]] = frozenset(
+    {"primary", "reference", "adjacent", "reserved"}
+)
+
+
 def load_products(conn: sqlite3.Connection, settings: Settings) -> int:
-    """Write one ``product`` row per line of ``products.tsv``. Idempotent."""
+    """Write one ``product`` row per line of ``products.tsv``. Idempotent.
+
+    ``tier`` and ``mw_g_mol`` land in columns as of schema v10. Before that they were read from the
+    file and discarded -- ``tier`` into an evidence sentence, ``mw_g_mol`` nowhere at all -- which
+    left PLAN.md B.1's "stored property ... not an informal understanding" as prose that no query
+    could reach. Both are updated on conflict, so correcting the TSV and re-running is enough.
+    """
     written = 0
     for row in read_tsv(_vocabularies_dir(settings) / PRODUCTS_FILE):
         identifier = _text(row.get("id"))
@@ -83,19 +98,29 @@ def load_products(conn: sqlite3.Connection, settings: Settings) -> int:
         if identifier is None or name is None:
             raise VocabularyError(f"{PRODUCTS_FILE}: a row has no id or no name: {row}")
         carbon = row.get("carbon_number", "").strip()
+        tier = _text(row.get("tier"))
+        if tier is not None and tier not in _PRODUCT_TIERS:
+            raise VocabularyError(
+                f"{PRODUCTS_FILE}: {identifier} has tier {tier!r}, which is not one of "
+                f"{sorted(_PRODUCT_TIERS)}. The tier drives an admission rule in "
+                "`curate.promote`, so an unrecognised one is refused rather than stored."
+            )
         conn.execute(
-            "INSERT INTO product (id, name, chebi_id, formula, carbon_number, canonical_unit, "
-            "zone, evidence, confidence) VALUES (?,?,?,?,?,?,'R',?,?) "
-            "ON CONFLICT(id) DO UPDATE SET name=excluded.name, formula=excluded.formula, "
+            "INSERT INTO product (id, name, tier, mw_g_mol, chebi_id, formula, carbon_number, "
+            "canonical_unit, zone, evidence, confidence) VALUES (?,?,?,?,?,?,?,?,'R',?,?) "
+            "ON CONFLICT(id) DO UPDATE SET name=excluded.name, tier=excluded.tier, "
+            "mw_g_mol=excluded.mw_g_mol, formula=excluded.formula, "
             "evidence=excluded.evidence, confidence=excluded.confidence",
             (
                 identifier,
                 name,
+                tier,
+                _number(row.get("product_mw_g_mol")),
                 _text(row.get("chebi_id")),
                 _text(row.get("formula")),
                 int(carbon) if carbon.isdigit() else None,
                 _text(row.get("canonical_unit")),
-                _text(row.get("evidence")) or f"{PRODUCTS_FILE}, tier={row.get('tier', '?')}",
+                _text(row.get("evidence")) or f"{PRODUCTS_FILE}, tier={tier or '?'}",
                 _text(row.get("confidence")) or "unverified",
             ),
         )
