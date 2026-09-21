@@ -506,6 +506,57 @@ def cmd_omics_load(_args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_omics_experiments(args: argparse.Namespace) -> int:
+    """Derive one `experiment` per SRA study from recorded metadata, and link each sample to it.
+
+    The derivation always runs and always prints, including under `--dry-run`: it is the report of
+    how much of `experiment` is recoverable at all, and it is what a reader needs in front of them
+    before deciding to write. The rows written are exactly the rows printed -- `load_experiments`
+    is handed the derivation this command already reported, rather than re-deriving inside the
+    writer, so the summary cannot describe a different set of rows from the ones that landed.
+    """
+    from . import experiments as experiments_mod
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        report = experiments_mod.derive_experiments(conn)
+        print(report.summary())
+        print()
+        print(f"{'experiment':<30}{'study':<12}{'bioproject':<14}{'samples':>8}")
+        for experiment in report.experiments:
+            print(
+                f"{experiment.id:<30}{experiment.accession or '-':<12}"
+                f"{experiment.bioproject or '-':<14}{experiment.sample_count:>8}"
+            )
+        if report.orphan_sample_ids:
+            print()
+            print(f"no dataset, so no experiment: {', '.join(report.orphan_sample_ids)}")
+        print()
+        # Printed on every run, not only the first: the NULL `publication_id` is this module's
+        # finding, and a curator who later fills it in should be overruling a stated reason.
+        print(experiments_mod.PUBLICATION_LINK_REFUSAL)
+        if args.dry_run:
+            print()
+            print("dry run: nothing written")
+            return 0
+        written = experiments_mod.load_experiments(conn, experiments=report.experiments)
+        linked = conn.execute(
+            "SELECT COUNT(*) FROM sample WHERE experiment_id IS NOT NULL"
+        ).fetchone()[0]
+        unlinked = conn.execute(
+            "SELECT COUNT(*) FROM sample WHERE experiment_id IS NULL"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    print()
+    print(f"{'experiment':<26}{written['experiment']:>7}")
+    print(f"{'sample.experiment_id':<26}{linked:>7}")
+    print(f"{'sample (still unlinked)':<26}{unlinked:>7}")
+    return 0
+
+
 def cmd_omics_genes(_args: argparse.Namespace) -> int:
     """Resolve the DUET gene set from the transcript FASTA and verify it against the matrix."""
     from . import genes as genes_mod
@@ -619,6 +670,18 @@ def add_omics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "load", help="load the reference genomes, SRA runs and matrices already on disk"
     )
     p_load.set_defaults(func=cmd_omics_load)
+
+    p_experiments = omics_sub.add_parser(
+        "experiments",
+        help="derive one experiment per SRA study and link each sample to it (no publication link)",
+    )
+    p_experiments.add_argument(
+        "--dry-run",
+        dest="dry_run",
+        action="store_true",
+        help="report what would be written and change nothing",
+    )
+    p_experiments.set_defaults(func=cmd_omics_experiments)
 
     p_genes = omics_sub.add_parser(
         "genes", help="resolve the DUET gene set and cross-check it against the expression matrix"

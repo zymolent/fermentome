@@ -17,7 +17,14 @@ See `src/fermdb/cli.py`'s `literature discover` / `literature status` subcommand
 
 from __future__ import annotations
 
-from .discovery import FamilyRunResult, Hit, canonical_publication_id, normalize_title, run_family
+from .discovery import (
+    FamilyRunResult,
+    Hit,
+    canonical_publication_id,
+    normalize_publication_id,
+    normalize_title,
+    run_family,
+)
 from .eutils import EsearchResult, EutilsClient, EutilsError, Transport, UrllibTransport
 from .queries import (
     FamilyStatus,
@@ -49,6 +56,7 @@ __all__ = [
     "family_status",
     "load_query_families",
     "needs_full_text",
+    "normalize_publication_id",
     "normalize_title",
     "run_family",
 ]

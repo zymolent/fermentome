@@ -47,6 +47,7 @@ from pathlib import Path
 from typing import Any, Final
 
 from ..config import Settings
+from ..literature.discovery import canonical_publication_id, normalize_publication_id
 from ..llm import (
     LlmConfig,
     Provider,
@@ -1068,12 +1069,18 @@ def extract_publication(
             stored: a payload where only some records validated is not a smaller good extraction,
             it is an extraction whose failures have been hidden.
     """
-    if _publication_row(conn, publication_id) is None:
+    existing = _publication_row(conn, publication_id)
+    if existing is None:
         raise ExtractionError(
             f"no publication row for {publication_id!r}. Extraction will not create one: a "
             f"publication record is Zone R and no agent may write there (PLAN.md L.5). Run "
             f"`fermdb literature discover` first."
         )
+    # Carry the id forward in the spelling the `publication` row actually uses, not the caller's.
+    # Every `extraction`/`extraction_span` FK points at `publication(id)`, so writing a
+    # publisher-cased DOI id here would fail the foreign key — or, in a build with enforcement
+    # off, store a row that no join ever finds again.
+    publication_id = str(existing["id"])
 
     document = source_text
     excerpt = build_excerpt(document, split_sections(document), sections)
@@ -1209,8 +1216,15 @@ def _utc_now_iso(now: datetime | None = None) -> str:
 
 
 def _publication_row(conn: sqlite3.Connection, publication_id: str) -> sqlite3.Row | None:
+    """Does a `publication` row exist for this id, in whatever casing the caller spelled it?
+
+    Folds through :func:`normalize_publication_id` first. `publication.id` is stored lowercased
+    for a DOI key while `publication.doi` keeps the publisher's casing (see that function for the
+    invariant and the measurement), so a bare `=` against an id a caller typed from a paper's
+    front matter misses one DOI-keyed row in eight.
+    """
     row: sqlite3.Row | None = conn.execute(
-        "SELECT id FROM publication WHERE id = ?", (publication_id,)
+        "SELECT id FROM publication WHERE id = ?", (normalize_publication_id(publication_id),)
     ).fetchone()
     return row
 
@@ -1218,20 +1232,61 @@ def _publication_row(conn: sqlite3.Connection, publication_id: str) -> sqlite3.R
 def find_publication(
     conn: sqlite3.Connection, *, pmid: str | None = None, doi: str | None = None
 ) -> sqlite3.Row | None:
-    """Look a publication up by PMID or DOI, preferring the PMID when both are given."""
+    """Look a publication up by PMID or DOI, preferring the PMID when both are given.
+
+    The `id` half of each lookup is built with :func:`canonical_publication_id`, not by pasting
+    the caller's string after a scheme prefix: `publication.id` holds the *lowercased* DOI, so
+    `'doi:' || <publisher-cased DOI>` matches nothing. The `doi = ?` half still compares verbatim,
+    which is what finds a row whose stored `doi` carries that same publisher casing.
+    """
     if pmid:
         row = conn.execute(
-            "SELECT * FROM publication WHERE pmid = ? OR id = ?", (pmid, f"pmid:{pmid}")
+            "SELECT * FROM publication WHERE pmid = ? OR id = ?",
+            (pmid, canonical_publication_id(doi=None, pmid=pmid)),
         ).fetchone()
         if row is not None:
             return row  # type: ignore[no-any-return]
     if doi:
         row = conn.execute(
-            "SELECT * FROM publication WHERE doi = ? OR id = ?", (doi, f"doi:{doi}")
+            "SELECT * FROM publication WHERE doi = ? OR id = ?",
+            (doi, canonical_publication_id(doi=doi, pmid=None)),
         ).fetchone()
         if row is not None:
             return row  # type: ignore[no-any-return]
     return None
+
+
+def _no_source_text_error(
+    conn: sqlite3.Connection, *, requested: str, canonical: str
+) -> SourceTextError:
+    """Say which of the three things actually went wrong.
+
+    Until this function existed, all three produced the same sentence -- "not open access or never
+    fetched" -- including the two cases where that sentence is false. A misleading diagnosis is
+    worse than a vague one: it sends the reader to the manual download queue for a publication
+    that is not in the atlas at all, or for an id they merely mis-cased.
+    """
+    folded = canonical != requested
+    if _publication_row(conn, canonical) is None:
+        also = f" (nor for {canonical!r}, its case-folded form)" if folded else ""
+        return SourceTextError(
+            f"no publication row for {requested!r}{also}. Extraction will not create one: a "
+            f"publication record is Zone R and no agent may write there (PLAN.md L.5). Run "
+            f"`fermdb literature discover` first, or pass --text-file to extract from a local "
+            f"copy."
+        )
+    if folded:
+        return SourceTextError(
+            f"{requested} is stored as {canonical} (publication ids are case-folded; only the "
+            f"`doi` column keeps the publisher's casing), and that publication has no stored full "
+            f"text. Either it is not open access (see `fermdb literature manual-queue export`) or "
+            f"it was never fetched. Pass --text-file to extract from a local copy instead."
+        )
+    return SourceTextError(
+        f"no stored full text for {canonical}. The publication row exists, so this is an "
+        f"acquisition gap: either it is not open access (see `fermdb literature manual-queue "
+        f"export`) or it was never fetched. Pass --text-file to extract from a local copy instead."
+    )
 
 
 def load_source_text(
@@ -1243,27 +1298,29 @@ def load_source_text(
     rather than guessing: there is no PDF text extractor in this build's dependencies, and a PDF
     decoded as UTF-8 with errors replaced would produce a document full of plausible-looking
     garbage for a model to quote from.
+
+    The id is case-folded on the way in (:func:`normalize_publication_id`), because
+    ``--publication-id`` reaches here verbatim from the CLI and a DOI copied off a paper carries
+    the publisher's casing -- ``10.1128/AEM.00588-21``, say, against a stored id of
+    ``doi:10.1128/aem.00588-21``.
     """
+    canonical = normalize_publication_id(publication_id)
     row = conn.execute(
         "SELECT content_path, media_type FROM fulltext_asset "
         "WHERE publication_id = ? AND storage_state = 'stored_fulltext' "
         "ORDER BY retrieved_at DESC LIMIT 1",
-        (publication_id,),
+        (canonical,),
     ).fetchone()
     if row is None:
-        raise SourceTextError(
-            f"no stored full text for {publication_id}. Either it is not open access (see "
-            f"`fermdb literature manual-queue export`) or it was never fetched. Pass "
-            f"--text-file to extract from a local copy instead."
-        )
+        raise _no_source_text_error(conn, requested=publication_id, canonical=canonical)
     path = settings.data_dir / str(row["content_path"])
     if not path.is_file():
         raise SourceTextError(
-            f"{publication_id}: fulltext_asset points at {path}, which does not exist. The "
+            f"{canonical}: fulltext_asset points at {path}, which does not exist. The "
             f"derived tier may have been rebuilt without re-acquiring."
         )
     media_type = (row["media_type"] or "").split(";", 1)[0].strip().lower()
-    return _decode_text(path, media_type, publication_id), str(path)
+    return _decode_text(path, media_type, canonical), str(path)
 
 
 def _decode_text(path: Path, media_type: str, publication_id: str) -> str:

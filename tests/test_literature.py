@@ -19,7 +19,12 @@ import pytest
 from fermdb import cli
 from fermdb.db import IN_MEMORY, open_db
 from fermdb.literature import eutils as eutils_module
-from fermdb.literature.discovery import canonical_publication_id, normalize_title, run_family
+from fermdb.literature.discovery import (
+    canonical_publication_id,
+    normalize_publication_id,
+    normalize_title,
+    run_family,
+)
 from fermdb.literature.eutils import EutilsClient, EutilsError
 from fermdb.literature.queries import (
     QueryFamilies,
@@ -544,6 +549,36 @@ def test_canonical_publication_id_prefers_doi_over_pmid() -> None:
     assert canonical_publication_id(doi="10.1/X", pmid="123") == "doi:10.1/x"
     assert canonical_publication_id(doi=None, pmid="123") == "pmid:123"
     assert canonical_publication_id(doi=None, pmid=None) is None
+
+
+def test_minting_and_reading_fold_a_doi_the_same_way() -> None:
+    """The invariant `id == 'doi:' || lower(doi)` had exactly one enforcer — the minting path —
+    and no reader. Pinning both against the same function is what stops them drifting again: if
+    `canonical_publication_id` ever stopped delegating, this is the test that notices."""
+    assert canonical_publication_id(doi="10.1128/AEM.00588-21", pmid=None) == (
+        normalize_publication_id("doi:10.1128/AEM.00588-21")
+    )
+    assert normalize_publication_id("doi:10.1128/AEM.00588-21") == "doi:10.1128/aem.00588-21"
+
+
+def test_the_scheme_prefix_is_folded_as_well_as_the_doi() -> None:
+    """`DOI:10.1/X` is a spelling people type. Folding the suffix but not the prefix would leave
+    a second, less obvious casing trap behind the one being fixed."""
+    assert normalize_publication_id("DOI:10.1/X") == "doi:10.1/x"
+    assert normalize_publication_id("PMID:123") == "pmid:123"
+
+
+def test_a_pmid_keeps_its_digits_verbatim() -> None:
+    """A PMID is digits, so there is nothing to fold below the scheme prefix. Lowercasing the
+    whole string would be harmless today and would silently mangle a malformed id — which should
+    stay visibly malformed in the error that reports it."""
+    assert normalize_publication_id("  pmid:11112222  ") == "pmid:11112222"
+
+
+def test_an_id_with_no_scheme_prefix_is_left_alone() -> None:
+    """Nothing has been measured about the casing of `YAA:PUB:...` ids, and folding a key on no
+    evidence is how you turn a lookup miss into a lookup that finds the wrong row."""
+    assert normalize_publication_id("YAA:PUB:pdf") == "YAA:PUB:pdf"
 
 
 def _isobutanol_mitochondria_family() -> QueryFamily:

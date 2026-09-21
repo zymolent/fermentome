@@ -43,6 +43,7 @@ from fermdb.extract import (
     SchemaBuildError,
     Section,
     SectioningError,
+    SourceTextError,
     build_excerpt,
     extract_publication,
     find_publication,
@@ -884,6 +885,126 @@ def test_load_source_text_says_what_to_do_when_there_is_none(
 def test_find_publication_matches_by_pmid_and_by_doi(conn: sqlite3.Connection) -> None:
     assert find_publication(conn, pmid="11112222")["id"] == PUBLICATION_ID
     assert find_publication(conn, pmid="404") is None
+
+
+# ------------------------------------------------------- the case trap on the read side
+#
+# `publication.id` is stored as 'doi:' || lower(doi); `publication.doi` keeps the publisher's
+# own casing. Measured on the live atlas 2026-09-22: 0 of 5,164 ids are non-lowercase, while
+# 625 of the 4,864 DOI-keyed rows (12.9%) have a non-lowercase `doi`. Minting folded; reading
+# did not, so one DOI in eight, typed off the paper it came from, resolved to nothing — and
+# said so by blaming a cause ("not open access / never fetched") that was not among the
+# options.
+
+AEM_DOI = "10.1128/AEM.00588-21"  # a real, publisher-cased DOI from this atlas
+AEM_ID = "doi:10.1128/aem.00588-21"
+
+
+def _publisher_cased_publication(conn: sqlite3.Connection, *, with_fulltext: Path | None) -> None:
+    """One publication stored the way the atlas stores them: lowercased id, publisher-cased doi."""
+    conn.execute(
+        "INSERT INTO publication (id, doi, title, year, zone, evidence, confidence) "
+        "VALUES (?, ?, 'Publisher-cased paper', 2021, 'R', 'test fixture', 'unverified')",
+        (AEM_ID, AEM_DOI),
+    )
+    if with_fulltext is not None:
+        conn.execute(
+            "INSERT INTO fulltext_asset (id, publication_id, doi, oa_status, resolved_via, "
+            "storage_state, content_path, checksum_sha256, media_type, source_url, retrieved_at, "
+            "zone) VALUES ('YAA:FTA:aem', ?, ?, 'gold', 'pmc', 'stored_fulltext', ?, 'cafe', "
+            "'text/plain', 'https://example.invalid/aem', '2026-01-01T00:00:00+00:00', 'R')",
+            (AEM_ID, AEM_DOI, str(with_fulltext)),
+        )
+    conn.commit()
+
+
+def test_a_publisher_cased_doi_resolves_to_its_stored_full_text(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """The headline fix. `10.1128/AEM.00588-21` is how this DOI is printed on the paper and how a
+    caller types it into `--publication-id`; `doi:10.1128/aem.00588-21` is how the atlas stores
+    it. Before the fold, that one keystroke difference was reported as the paper not being open
+    access."""
+    relative = Path("fulltext") / "aem" / "aem.txt"
+    target = settings.data_dir / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    # write_bytes, not write_text: the latter translates newlines on Windows and the assertion
+    # below is an exact round-trip of the stored bytes.
+    target.write_bytes(DOCUMENT.encode("utf-8"))
+    _publisher_cased_publication(conn, with_fulltext=relative)
+
+    text, origin = load_source_text(conn, settings, publication_id=f"doi:{AEM_DOI}")
+    assert text == DOCUMENT
+    assert origin.endswith("aem.txt")
+
+
+def test_the_fold_reaches_the_same_row_from_either_casing(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """Both spellings are the same publication, so both must reach the same asset — otherwise the
+    fold has merely moved which casing is the broken one."""
+    relative = Path("fulltext") / "aem" / "aem.txt"
+    target = settings.data_dir / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    # write_bytes, not write_text: the latter translates newlines on Windows and the assertion
+    # below is an exact round-trip of the stored bytes.
+    target.write_bytes(DOCUMENT.encode("utf-8"))
+    _publisher_cased_publication(conn, with_fulltext=relative)
+
+    upper = load_source_text(conn, settings, publication_id=f"DOI:{AEM_DOI}")
+    lower = load_source_text(conn, settings, publication_id=AEM_ID)
+    assert upper == lower
+
+
+def test_an_unknown_publication_is_not_blamed_on_open_access(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """Case one of three. Nothing in the atlas has this id in any casing, so the remedy is
+    discovery, not the manual download queue — and extraction must not create the row itself."""
+    with pytest.raises(SourceTextError) as excinfo:
+        load_source_text(conn, settings, publication_id="doi:10.9999/nobody.1")
+    message = str(excinfo.value)
+    assert "no publication row" in message
+    assert "literature discover" in message
+    assert "manual-queue" not in message
+
+
+def test_a_known_publication_with_no_asset_says_the_row_exists(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """Case two of three, and the only one the old message was ever right about. It now says the
+    publication row exists, so the reader knows the gap is acquisition and not discovery."""
+    with pytest.raises(SourceTextError) as excinfo:
+        load_source_text(conn, settings, publication_id=PUBLICATION_ID)
+    message = str(excinfo.value)
+    assert "manual-queue" in message
+    assert "publication row exists" in message
+
+
+def test_a_mis_cased_id_that_still_has_no_full_text_says_the_casing_was_not_the_problem(
+    conn: sqlite3.Connection, settings: Settings
+) -> None:
+    """Case three of three, and the one that keeps the fix honest. The caller's id was mis-cased
+    *and* there is no stored text. Reporting only the acquisition gap would leave them wondering
+    whether their casing was the real fault; reporting only the casing would send them chasing a
+    spelling that had already been resolved."""
+    _publisher_cased_publication(conn, with_fulltext=None)
+    with pytest.raises(SourceTextError) as excinfo:
+        load_source_text(conn, settings, publication_id=f"doi:{AEM_DOI}")
+    message = str(excinfo.value)
+    assert AEM_ID in message
+    assert "case-folded" in message
+    assert "manual-queue" in message
+
+
+def test_find_publication_matches_a_doi_in_the_other_casing(conn: sqlite3.Connection) -> None:
+    """`--doi` reaches `find_publication`, which built its id term by pasting the caller's string
+    after 'doi:'. For a row whose stored `doi` is publisher-cased, a caller passing the lowercase
+    form matched neither column."""
+    _publisher_cased_publication(conn, with_fulltext=None)
+    assert find_publication(conn, doi=AEM_DOI)["id"] == AEM_ID
+    assert find_publication(conn, doi=AEM_DOI.lower())["id"] == AEM_ID
+    assert find_publication(conn, doi="10.9999/nobody.1") is None
 
 
 # ------------------------------------------------------------------------------------------- cli

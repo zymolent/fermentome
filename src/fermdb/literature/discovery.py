@@ -67,13 +67,53 @@ def normalize_title(title: str | None) -> str | None:
     return collapsed or None
 
 
+def normalize_publication_id(publication_id: str) -> str:
+    """Fold a publication id to the spelling `publication.id` is actually stored in.
+
+    **The invariant, which was undocumented until this function existed:**
+
+        publication.id == 'doi:' || lower(publication.doi)    -- for a DOI-keyed row
+        publication.id == 'pmid:' || publication.pmid         -- for a PMID-keyed row
+
+    Measured against the live atlas on 2026-09-22: `publication.id` is never uppercase (0 of
+    5,164 rows), while 625 of the 4,864 DOI-keyed rows (12.9%) store a `doi` in the publisher's
+    own casing -- `10.1128/AEM.00588-21` is a real one. So `id` and `doi` are deliberately *not*
+    the same string, and a lookup that compares a caller's DOI against `id` with a bare `=` finds
+    nothing for one DOI in eight.
+
+    This is the one home of that fold. Minting goes through :func:`canonical_publication_id`,
+    which calls this; reading goes through it directly, in
+    :mod:`fermdb.extract.harness` (`load_source_text`, `find_publication`, `_publication_row`).
+    One function rather than a `.lower()` at each call site, because a fold sprinkled across call
+    sites is a fold the next call site forgets -- which is exactly how the read side came to be
+    missing it while the write side had it.
+
+    An id with neither scheme prefix (`YAA:PUB:...`, say) is returned stripped but otherwise
+    untouched: nothing has been measured about its casing, so folding it would be a guess.
+    """
+    text = publication_id.strip()
+    if text.lower().startswith("doi:"):
+        # A DOI's prefix and suffix are both case-insensitive per the DOI handbook, and the atlas
+        # resolves that by storing the whole id lowercased.
+        return text.lower()
+    if text.lower().startswith("pmid:"):
+        # A PMID is digits, so only the scheme prefix can carry case; the number is left verbatim
+        # rather than lowercased, so a malformed id stays visibly malformed in the error message.
+        return "pmid:" + text[len("pmid:") :].strip()
+    return text
+
+
 def canonical_publication_id(*, doi: str | None, pmid: str | None) -> str | None:
     """DOI wins over PMID, matching `publication.id`'s own documented convention ('doi:...' or
-    'pmid:...'). Returns None if neither is present."""
+    'pmid:...'). Returns None if neither is present.
+
+    The casing fold lives in :func:`normalize_publication_id`, which this delegates to, so that
+    minting and reading cannot drift apart.
+    """
     if doi:
-        return f"doi:{doi.strip().lower()}"
+        return normalize_publication_id(f"doi:{doi}")
     if pmid:
-        return f"pmid:{pmid.strip()}"
+        return normalize_publication_id(f"pmid:{pmid}")
     return None
 
 

@@ -247,3 +247,134 @@ def test_the_written_row_leaves_publication_id_null(atlas: sqlite3.Connection) -
     E.load_experiments(atlas)
     rows = atlas.execute("SELECT publication_id FROM experiment").fetchall()
     assert rows and all(row[0] is None for row in rows)
+
+
+# ------------------------------------------------------------------------------ the CLI wiring
+
+
+def _cli_atlas(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point `Settings.load()` at a throwaway database holding two studies and five runs."""
+    for key, value in {
+        "FERMDB_REPO_ROOT": str(REPO_ROOT),
+        "FERMDB_DATA_DIR": str(tmp_path / "derived"),
+        "FERMDB_SOURCE_ROOT": str(tmp_path / "source"),
+    }.items():
+        monkeypatch.setenv(key, value)
+    from fermdb.config import Settings
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    try:
+        _dataset(conn, "srp321884", "SRP321884", "PRJNA733673")
+        _dataset(conn, "srp003312", "SRP003312", None)
+        for run in ("SRR1", "SRR2", "SRR3"):
+            _sample(conn, run, "srp321884")
+        for run in ("SRR9", "SRR8"):
+            _sample(conn, run, "srp003312")
+        conn.commit()
+    finally:
+        conn.close()
+    return Path(settings.db_file)
+
+
+def test_the_experiment_loader_is_reachable_from_the_cli_at_all() -> None:
+    """The whole module was written, tested and called by nothing — `experiment` read 0 while
+    `sample` read 172. A loader with no caller is a loader that has never run."""
+    from fermdb import cli
+    from fermdb import omics as omics_mod
+
+    args = cli.build_parser().parse_args(["omics", "experiments"])
+    assert args.func is omics_mod.cmd_omics_experiments
+    assert args.dry_run is False
+
+
+def test_a_dry_run_reports_every_derivable_experiment_and_writes_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`--dry-run` exists so the decision to write can be made from the report rather than from
+    the docstring. If it wrote anything, it would not be the thing you run first."""
+    from fermdb import cli
+    from fermdb.omics import cmd_omics_experiments
+
+    db_file = _cli_atlas(tmp_path, monkeypatch)
+    args = cli.build_parser().parse_args(["omics", "experiments", "--dry-run"])
+    assert cmd_omics_experiments(args) == 0
+
+    out = capsys.readouterr().out
+    assert "YAA:EXPERIMENT:srp321884" in out
+    assert "nothing written" in out
+    conn = open_db(db_file)
+    try:
+        assert conn.execute("SELECT COUNT(*) FROM experiment").fetchone()[0] == 0
+        assert (
+            conn.execute("SELECT COUNT(*) FROM sample WHERE experiment_id IS NOT NULL").fetchone()[
+                0
+            ]
+            == 0
+        )
+    finally:
+        conn.close()
+
+
+def test_the_cli_run_writes_the_experiments_and_backfills_every_sample(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The command's two effects, which are one decision: an `experiment` row is only useful if
+    `sample.experiment_id` points at it, so a run that wrote the rows and left the backfill undone
+    would report success and leave `measurement` with no study-level anchor to reach for."""
+    from fermdb import cli
+    from fermdb.omics import cmd_omics_experiments
+
+    db_file = _cli_atlas(tmp_path, monkeypatch)
+    args = cli.build_parser().parse_args(["omics", "experiments"])
+    assert cmd_omics_experiments(args) == 0
+    assert "nothing written" not in capsys.readouterr().out
+
+    conn = open_db(db_file)
+    try:
+        assert conn.execute("SELECT COUNT(*) FROM experiment").fetchone()[0] == 2
+        assert (
+            conn.execute("SELECT COUNT(*) FROM sample WHERE experiment_id IS NULL").fetchone()[0]
+            == 0
+        )
+    finally:
+        conn.close()
+
+
+def test_the_cli_prints_the_refusal_rather_than_only_the_counts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A run that printed "15 experiments written" and nothing else would leave the operator
+    believing `publication_id` was simply not populated yet. It was refused, on stated evidence,
+    and the operator is the person most likely to go and fill it in."""
+    from fermdb import cli
+    from fermdb.omics import cmd_omics_experiments
+
+    _cli_atlas(tmp_path, monkeypatch)
+    args = cli.build_parser().parse_args(["omics", "experiments", "--dry-run"])
+    cmd_omics_experiments(args)
+    assert E.PUBLICATION_LINK_REFUSAL in capsys.readouterr().out
+
+
+def test_the_cli_writes_exactly_the_rows_it_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The command hands `load_experiments` the derivation it already printed instead of letting
+    the writer re-derive. A second derivation inside the writer could read a database that changed
+    between the two, and the summary would then describe rows that were never written."""
+    from fermdb import cli
+    from fermdb.omics import cmd_omics_experiments
+
+    db_file = _cli_atlas(tmp_path, monkeypatch)
+    cmd_omics_experiments(cli.build_parser().parse_args(["omics", "experiments"]))
+    printed = {
+        line.split()[0]
+        for line in capsys.readouterr().out.splitlines()
+        if "YAA:EXPERIMENT:" in line
+    }
+    conn = open_db(db_file)
+    try:
+        stored = {str(r[0]) for r in conn.execute("SELECT id FROM experiment").fetchall()}
+    finally:
+        conn.close()
+    assert printed == stored
