@@ -533,3 +533,249 @@ def test_a_configuration_promotes_and_keeps_the_curators_note(
     assert "Su9 leader peptide" in row["description"]
     assert "alsS" in row["description"]
     assert row["zone"] == "R"
+
+
+# ------------------------------------------------------ the parts catalog's expression records
+
+
+PART_ID = "YAA:PART:als-s-bacillus"
+
+
+def _seed_part(conn: sqlite3.Connection, part_id: str = PART_ID) -> str:
+    """One catalog entry. Zone I, like every row `metabolic.curated.write_parts` writes."""
+    conn.execute(
+        "INSERT INTO part (id, step_role_id, zone, evidence, confidence) "
+        "VALUES (?, 'AHAS', 'I', 'test fixture', 'unverified') ON CONFLICT(id) DO NOTHING",
+        (part_id,),
+    )
+    return part_id
+
+
+def _expression_task(conn: sqlite3.Connection, task_id: str, **overrides: object) -> None:
+    """One accepted `part_expression_records` proposal against the shared fixture span."""
+    payload: dict[str, object] = {
+        "part_as_reported": "alsS from Bacillus subtilis",
+        "host_as_reported": "BSW191",
+        "compartment": "cytosol",
+        "compartment_as_reported": "expressed in the cytosol",
+        "encoding_genome": "unknown",
+        "codon_optimized": "unknown",
+        "promoter_as_reported": "TDH3",
+        "expressed_ok": "yes",
+        "activity_measured": "no",
+        "outcome_as_reported": "a band at the expected size",
+        "zone": "I",
+        "confidence": "unverified",
+        "span": {"quote": QUOTE, "char_start": START, "char_end": END, "section": "results"},
+    }
+    payload.update(overrides)
+    conn.execute(
+        "INSERT INTO curation_task (id, extraction_id, publication_id, record_path, "
+        "record_kind, payload, status, priority, attempt_count, proposal_hash, curator, "
+        "curator_kind, resolved_at, resolution_reason, zone) "
+        "VALUES (?, 'YAA:EXTR:test', 'YAA:PUB:test', 'part_expression_records[0]', "
+        "'part_expression_records', ?, 'accepted', 1, 0, ?, 'kangkon', 'human', "
+        "'2026-09-20T00:00:00Z', 'checked', 'I')",
+        (task_id, json.dumps(payload), f"hash-{task_id}"),
+    )
+
+
+def test_a_part_expression_refuses_to_pick_a_catalog_part_for_the_curator(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The payload carries the paper's wording; `part_id` is a resolution onto a Zone I catalog.
+
+    Guessing it is the identifier error CONVENTIONS.md forbids by name -- the catalog is 16
+    unverified entries covering the isobutanol step roles, and "alsS from Bacillus subtilis"
+    matching one of them is a judgement a person makes and can be wrong about.
+    """
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp")
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:pexp")
+    assert plan.target_table == "part_expression_record"
+    requirement = next(m for m in plan.missing if m.field == "part_id")
+    assert "alsS from Bacillus subtilis" in requirement.why
+
+
+def test_a_part_id_outside_the_catalog_is_refused(atlas: sqlite3.Connection) -> None:
+    """A part that is not in `part` cannot be the subject of an expression record."""
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp")
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:pexp", part_id="YAA:PART:not-in-the-catalog")
+    assert any("no part with id" in m.why for m in plan.missing)
+
+
+def test_an_unpromoted_host_blocks_its_expression_record(atlas: sqlite3.Connection) -> None:
+    """'Works in E. coli' is only a fact once the host is a row; a NULL host merges two claims."""
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp")
+
+    plan = _plan(atlas, "YAA:CTASK:pexp", part_id=PART_ID)
+    assert any("is not promoted as a strain yet" in b for b in plan.blockers)
+
+
+def test_the_matrix_refuses_a_record_that_does_not_say_which_genome_carried_the_gene(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The compound FK's whole reason for existing, enforced at the one place data enters.
+
+    "Expressed in the matrix" is two different experiments: a presequence-targeted nuclear
+    construct that needs no recoding, and a gene placed on mtDNA that reads under NCBI table 3
+    and does. Choosing the common case would put recoding advice into Zone R that nobody checked.
+    """
+    _seed_part(atlas)
+    _expression_task(
+        atlas,
+        "YAA:CTASK:pexp",
+        compartment="mitochondrial_matrix",
+        compartment_as_reported="targeted to the matrix",
+    )
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:pexp", part_id=PART_ID)
+    requirement = next(m for m in plan.missing if m.field == "encoding_genome")
+    assert "both genomes" in requirement.why
+
+
+def test_an_unambiguous_compartment_derives_its_genome_and_records_that_it_derived_it(
+    atlas: sqlite3.Connection,
+) -> None:
+    """There is no mitochondrially-encoded cytosolic protein, so one value is not a choice.
+
+    Refusing here would make a curator retype the only storable answer; filling it in silently
+    would let the row read as though the paper had stated it. So it is derived from
+    `compartment_encoding_genome` and the evidence string says that is where it came from.
+    """
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp")
+    _promote_the_host(atlas)
+
+    result = P.promote(
+        atlas,
+        "YAA:CTASK:pexp",
+        curator=HUMAN,
+        reason="the demonstrated host",
+        supplied={"part_id": PART_ID},
+    )
+    row = atlas.execute(
+        "SELECT encoding_genome, evidence FROM part_expression_record WHERE id = ?",
+        (result.row_id,),
+    ).fetchone()
+    assert row["encoding_genome"] == "nuclear"
+    assert "derived from compartment_encoding_genome" in row["evidence"]
+
+
+def test_a_compartment_and_genome_pair_that_cannot_exist_is_refused(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The pairing table is the authority, and a row it has no entry for is unstorable anyway."""
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp", encoding_genome="mitochondrial")
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:pexp", part_id=PART_ID)
+    assert any("mitochondrial genome" in m.why for m in plan.missing)
+
+
+def test_codon_optimized_is_refused_without_the_code_it_was_optimized_for(
+    atlas: sqlite3.Connection,
+) -> None:
+    """`part_expression_record`'s own comment: optimized for which code?
+
+    Tables 1 and 3 differ at six codons, so a 1 in this column with no genome beside it is a
+    claim a bench scientist cannot act on -- and it is exactly the claim they would act on.
+    """
+    _seed_part(atlas)
+    _expression_task(
+        atlas,
+        "YAA:CTASK:pexp",
+        compartment="unknown",
+        codon_optimized="yes",
+    )
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:pexp", part_id=PART_ID)
+    assert any(m.field == "encoding_genome" and "which code" in m.why for m in plan.missing)
+
+
+def test_not_applicable_is_refused_rather_than_stored_as_something_else(
+    atlas: sqlite3.Connection,
+) -> None:
+    """'NA' is a real answer the extraction schema can produce and the column cannot hold.
+
+    NULL would say the paper never mentioned it and 'unknown' would say it did and could not be
+    resolved. Both are claims the record does not make, so the promoter says the column cannot
+    take the value and leaves the choice to a person.
+    """
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp", expressed_ok="NA")
+    _promote_the_host(atlas)
+
+    plan = _plan(atlas, "YAA:CTASK:pexp", part_id=PART_ID)
+    requirement = next(m for m in plan.missing if m.field == "expressed_ok")
+    assert "CHECK accepts only" in requirement.why
+
+
+def test_an_outcome_measurement_that_is_not_promoted_blocks(atlas: sqlite3.Connection) -> None:
+    """A dangling outcome would point the catalog at a number that does not exist."""
+    _seed_part(atlas)
+    _expression_task(atlas, "YAA:CTASK:pexp")
+    _promote_the_host(atlas)
+
+    plan = _plan(
+        atlas,
+        "YAA:CTASK:pexp",
+        part_id=PART_ID,
+        outcome_measurement_id="YAA:MEAS:nothing",
+    )
+    assert any("is not promoted yet" in b for b in plan.blockers)
+
+
+def test_a_part_expression_promotes_into_zone_r_with_the_papers_wording_kept(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The row phase 1 asks for, with the two outcomes kept apart and the targeting preserved.
+
+    `expressed_ok='yes'` beside `activity_measured='no'` is the honest reading of a band on a gel,
+    and it is the distinction the whole record kind exists to make. The presequence lives only in
+    `compartment_as_reported`, so its survival into the row is checked too.
+    """
+    _seed_part(atlas)
+    _expression_task(
+        atlas,
+        "YAA:CTASK:pexp",
+        compartment="mitochondrial_matrix",
+        compartment_as_reported="targeted to the matrix with the Su9 presequence",
+        encoding_genome="nuclear",
+    )
+    _promote_the_host(atlas)
+
+    result = P.promote(
+        atlas,
+        "YAA:CTASK:pexp",
+        curator=HUMAN,
+        reason="the demonstrated host",
+        supplied={"part_id": PART_ID},
+    )
+    row = atlas.execute(
+        "SELECT part_id, host_strain_id, compartment_id, encoding_genome, codon_optimized, "
+        "promoter, expressed_ok, activity_measured, outcome_measurement_id, publication_id, "
+        "zone, evidence, confidence FROM part_expression_record WHERE id = ?",
+        (result.row_id,),
+    ).fetchone()
+    assert row["part_id"] == PART_ID
+    assert row["host_strain_id"] == "YAA:STRAIN:bsw191"
+    assert (row["compartment_id"], row["encoding_genome"]) == ("mitochondrial_matrix", "nuclear")
+    # 'unknown' is not 0: the paper did not say, and a 0 would say they chose not to optimize.
+    assert row["codon_optimized"] is None
+    assert row["promoter"] == "TDH3"
+    assert (row["expressed_ok"], row["activity_measured"]) == ("yes", "no")
+    assert row["outcome_measurement_id"] is None
+    assert row["publication_id"] == "YAA:PUB:test"
+    assert row["zone"] == "R"
+    assert "Su9 presequence" in row["evidence"]
+    assert "alsS from Bacillus subtilis" in row["evidence"]

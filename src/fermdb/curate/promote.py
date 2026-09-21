@@ -60,6 +60,7 @@ from datetime import UTC, datetime
 from typing import Any, Final
 
 from ..config import Settings
+from ..extract.schemas import MISSING_CHOICES
 from .genotype import parse_genotype
 from .queue import CurationError, Curator, Task, get_task
 
@@ -1046,6 +1047,350 @@ def _write_configuration(
     return conn.total_changes > before
 
 
+#: The two closed sets `part_expression_record` uses, copied from its CHECK constraints.
+#:
+#: They are deliberately different: `expressed_ok` has 'partial' and `activity_measured` does not,
+#: because a protein can appear in a truncated or partly-soluble form while "we assayed what it
+#: does" has no half-way. The extraction section offers exactly these choices for the same reason.
+#:
+#: **Neither has room for 'NA'**, and that is the table's gap rather than the payload's.
+#: `extract.schemas._choice` appends both recorded-missing answers to every enum, so a model can
+#: legitimately answer 'NA' to either -- and there is nowhere to put it. See
+#: :func:`_closed_outcome` for what happens then, and why it is a refusal and not a NULL.
+_EXPRESSED_OK: Final[frozenset[str]] = frozenset({"yes", "no", "partial", "unknown"})
+_ACTIVITY_MEASURED: Final[frozenset[str]] = frozenset({"yes", "no", "unknown"})
+
+
+def _vocabulary_value(raw: Any) -> str | None:
+    """A controlled payload answer, or None where it names no value at all.
+
+    'NA' and 'unknown' collapse to None **only for columns that are foreign keys**, where there
+    is no row to point at for either. What is lost is recovered in the evidence string by the
+    caller -- CONVENTIONS.md forbids collapsing the three missing states into each other, and a
+    silent NULL here would turn "the paper said the compartment and we could not resolve it" into
+    "the paper never said".
+    """
+    value = str(raw or "").strip()
+    return value if value and value not in MISSING_CHOICES else None
+
+
+def _closed_outcome(
+    raw: Any, allowed: frozenset[str], column: str
+) -> tuple[str | None, str | None]:
+    """Map one payload answer onto a closed column, returning ``(value, why_not)``.
+
+    Absent is NULL: the source never said, which the column expresses. 'unknown' passes straight
+    through because both CHECKs accept it and it means precisely what CONVENTIONS.md says.
+
+    'NA' is refused. Writing NULL instead would collapse "recorded as not applicable" into "never
+    recorded", and the two are different claims about the paper; writing 'unknown' would collapse
+    it the other way. The honest answer is that this column cannot hold the value, which a curator
+    can act on -- by correcting the record if 'NA' was a model error, or by asking for the CHECK to
+    be widened if it was not. Silently storing something else is how the distinction dies.
+    """
+    value = str(raw or "").strip()
+    if not value:
+        return None, None
+    if value in allowed:
+        return value, None
+    if value == "NA":
+        return None, (
+            f"the record answers 'NA' and `part_expression_record.{column}`'s CHECK accepts only "
+            f"{sorted(allowed)}. Storing NULL would say the paper never mentioned it and "
+            "'unknown' would say it did and could not be resolved -- both are claims the record "
+            "does not make. Either the record is wrong and a curator should edit it, or the "
+            "column needs widening, which is a migration and an owner's decision"
+        )
+    return None, f"{value!r} is not one of {sorted(allowed)}"
+
+
+def _part_expression_detail(payload: Mapping[str, Any], derived_genome: str | None) -> str:
+    """Everything true of this record that has no column of its own.
+
+    Three things ride here. The part and the host **as reported** (the row holds a curator's
+    resolution of each, and the paper's own wording is Zone R and not rebuildable from the id);
+    the paper's phrasing of the localization, which is where the targeting method lives -- "via
+    the Su9 presequence" is the difference between a construct that needs recoding and one that
+    does not, and no column holds it; and, where it happened, the fact that `encoding_genome` was
+    **derived from the pairing table rather than read from the paper**, so the row does not look
+    like it is quoting a source that never said it.
+    """
+    bits: list[str] = []
+    for key, label in (
+        ("part_as_reported", "part as reported"),
+        ("host_as_reported", "host as reported"),
+        ("compartment_as_reported", "compartment as reported"),
+        ("promoter_as_reported", "promoter as reported"),
+        ("outcome_as_reported", "outcome as reported"),
+    ):
+        value = str(payload.get(key) or "").strip()
+        if value:
+            bits.append(f"{label}: {value}")
+    # 'unknown'/'NA' never reach a FK column, so say so here rather than lose it.
+    stated = str(payload.get("compartment") or "").strip()
+    if stated in MISSING_CHOICES:
+        bits.append(f"compartment answered {stated!r}, which is not a compartment row")
+    if derived_genome is not None:
+        bits.append(
+            f"encoding_genome {derived_genome!r} derived from compartment_encoding_genome, not "
+            "stated by the paper: it is the only genome that can encode a protein in this "
+            "compartment"
+        )
+    return "; ".join(bits)
+
+
+def _plan_part_expression(
+    conn: sqlite3.Connection, task: Task, supplied: Mapping[str, Any]
+) -> PromotionPlan:
+    """A demonstrated host x compartment becomes a `part_expression_record`.
+
+    PLAN.md G.6 calls the expression records *"the field that makes the catalog worth having"*:
+    `part` can say an enzyme exists, and only these rows can say whether anyone has ever got it to
+    work, where, and whether they measured activity or only saw a band. Phase 1 asks for the
+    catalog *with* them, and the table had zero rows.
+
+    Two columns are refused rather than guessed, in the manner of `strain.organism_id` and
+    `pathway_configuration.host_strain_id`:
+
+    * `part_id` -- the payload names the enzyme in the paper's words and the catalog is 16 curated
+      entries whose every identity claim is `unverified` background knowledge. Matching one to the
+      other is a resolution, and CONVENTIONS.md is explicit that an identifier which cannot be
+      resolved is recorded as unresolved and never mapped to the nearest plausible match.
+    * `host_strain_id` -- stricter than the table, which allows NULL. G.6 is *one row per
+      demonstrated host/compartment combination*; a row with neither is not an expression record,
+      it is a claim that some enzyme was expressed somewhere. The strain is resolved from the
+      paper's own host name where that strain has been promoted, exactly as a measurement's
+      subject is, and blocks rather than inventing one where it has not.
+
+    And one pair is refused **together**, which is the real point of this promoter.
+    `(compartment_id, encoding_genome)` is a compound foreign key into `compartment_encoding_genome`
+    because the mitochondrial matrix and inner membrane hold proteins from both genomes. "Expressed
+    in the matrix" is therefore two different experiments -- a presequence-targeted nuclear
+    construct that needs no recoding, or a gene physically placed on mtDNA that reads under NCBI
+    table 3 -- and the pair is what tells them apart. Where the compartment admits only one genome
+    the value is *derived* from that table and recorded as derived; where it admits two and the
+    paper did not say, promotion refuses. Filling in the common case would put a fact in Zone R
+    that would tell a bench scientist to recode a construct that must not be recoded, which is the
+    single thing CONVENTIONS.md says this project has been wrong about before.
+    """
+    payload = _payload_of(task)
+    missing: list[Requirement] = []
+    blockers: list[str] = []
+
+    part_as_reported = str(payload.get("part_as_reported") or "").strip()
+    part_id: str | None = supplied.get("part_id")
+    if not part_as_reported:
+        missing.append(
+            Requirement("part_id", "the record names no part, so there is nothing to resolve")
+        )
+    if not part_id:
+        missing.append(
+            Requirement(
+                "part_id",
+                f"NOT NULL on `part_expression_record`, and the extraction schema deliberately "
+                f"carries no catalog id -- the record says {part_as_reported or 'nothing'!r}, "
+                "which is the paper's wording and not an atlas identifier. A curator maps it to "
+                "an entry in data/pathways/parts_catalog.yaml, or adds one",
+            )
+        )
+    elif conn.execute("SELECT 1 FROM part WHERE id = ?", (part_id,)).fetchone() is None:
+        missing.append(
+            Requirement(
+                "part_id",
+                f"no part with id {part_id!r}; the catalog is data/pathways/parts_catalog.yaml "
+                "and `fermdb atlas pathways` loads it",
+            )
+        )
+
+    host_as_reported = str(payload.get("host_as_reported") or "").strip()
+    host_strain_id: str | None = supplied.get("host_strain_id")
+    if host_strain_id is not None:
+        if conn.execute("SELECT 1 FROM strain WHERE id = ?", (host_strain_id,)).fetchone() is None:
+            blockers.append(
+                f"host strain {host_strain_id!r} is not promoted yet; promote that strain first"
+            )
+    elif host_as_reported:
+        candidate = _strain_id(host_as_reported)
+        row = conn.execute("SELECT id FROM strain WHERE id = ?", (candidate,)).fetchone()
+        if row is not None:
+            host_strain_id = str(row["id"])
+        else:
+            blockers.append(
+                f"host {host_as_reported!r} is not promoted as a strain yet (would be "
+                f"{candidate}); promote this publication's strain proposals first, or name the "
+                "host with --host-strain"
+            )
+    else:
+        missing.append(
+            Requirement(
+                "host_strain_id",
+                "PLAN.md G.6 is one row per demonstrated host and compartment, and the record "
+                "names no host. 'Worked in E. coli' and 'works in the yeast mitochondrial "
+                "matrix' are different facts and this column is the whole of what keeps them "
+                "apart",
+            )
+        )
+
+    compartment_id = _vocabulary_value(payload.get("compartment"))
+    encoding_genome = _vocabulary_value(payload.get("encoding_genome"))
+    derived_genome: str | None = None
+    if compartment_id is not None:
+        genomes = tuple(
+            str(row["encoding_genome"])
+            for row in conn.execute(
+                "SELECT encoding_genome FROM compartment_encoding_genome "
+                "WHERE compartment_id = ? ORDER BY encoding_genome",
+                (compartment_id,),
+            ).fetchall()
+        )
+        if not genomes:
+            missing.append(
+                Requirement(
+                    "compartment_id",
+                    f"{compartment_id!r} has no row in `compartment_encoding_genome`, so the "
+                    "compound foreign key has nothing to point at. Either it is not a compartment "
+                    "this atlas models or the vocabularies have not been loaded",
+                )
+            )
+        elif encoding_genome is None and len(genomes) == 1:
+            # Derivation, not a guess: there is exactly one genome that can encode a protein
+            # found here, so any other value would be unstorable. Recorded as derived in the
+            # evidence string, because the paper did not say it.
+            encoding_genome = derived_genome = genomes[0]
+        elif encoding_genome is None:
+            missing.append(
+                Requirement(
+                    "encoding_genome",
+                    f"{compartment_id} holds proteins from both genomes ({', '.join(genomes)}), "
+                    "so the compartment alone does not say which experiment this was, and the "
+                    "compound foreign key (compartment_id, encoding_genome) has no row to point "
+                    "at. A presequence-targeted construct is nuclear and needs no recoding; a "
+                    "gene placed on mtDNA reads under NCBI table 3 and does. The record says "
+                    "neither, and picking the common case would put the recoding advice in Zone R "
+                    "for a construct nobody checked",
+                )
+            )
+        elif encoding_genome not in genomes:
+            missing.append(
+                Requirement(
+                    "encoding_genome",
+                    f"nothing in {compartment_id} is encoded by the {encoding_genome} genome "
+                    f"(the pairing table allows {', '.join(genomes)}), so this row is unstorable "
+                    "and the pairing it claims does not exist",
+                )
+            )
+
+    codon_optimized = _vocabulary_value(payload.get("codon_optimized"))
+    if codon_optimized is not None and codon_optimized not in {"yes", "no"}:
+        missing.append(Requirement("codon_optimized", f"{codon_optimized!r} is not 'yes' or 'no'"))
+    elif codon_optimized == "yes" and encoding_genome is None:
+        # The table's own comment: `codon_optimized` is unreadable without the genome --
+        # optimized for which code? A 1 in this column with no genome beside it is a fact that
+        # cannot be acted on, and the two codes differ at six codons.
+        missing.append(
+            Requirement(
+                "encoding_genome",
+                "the record says the sequence was codon-optimized and does not say for which "
+                "genome. Optimized for which code? Table 1 and table 3 differ at six codons, so "
+                "the claim is unreadable on its own -- and it is the claim a bench scientist "
+                "would act on",
+            )
+        )
+
+    expressed_ok, expressed_why = _closed_outcome(
+        payload.get("expressed_ok"), _EXPRESSED_OK, "expressed_ok"
+    )
+    if expressed_why is not None:
+        missing.append(Requirement("expressed_ok", expressed_why))
+    activity_measured, activity_why = _closed_outcome(
+        payload.get("activity_measured"), _ACTIVITY_MEASURED, "activity_measured"
+    )
+    if activity_why is not None:
+        missing.append(Requirement("activity_measured", activity_why))
+
+    # Nullable and left NULL when nobody supplies it, with no refusal: a part can be demonstrated
+    # qualitatively, and `expressed_ok` / `activity_measured` exist precisely so that such a row
+    # can be honest about having no number behind it. Demanding a measurement would make the
+    # commonest kind of expression record unstorable.
+    outcome_measurement_id: str | None = supplied.get("outcome_measurement_id")
+    if outcome_measurement_id is not None and (
+        conn.execute("SELECT 1 FROM measurement WHERE id = ?", (outcome_measurement_id,)).fetchone()
+        is None
+    ):
+        blockers.append(
+            f"outcome measurement {outcome_measurement_id!r} is not promoted yet; promote the "
+            "measurement this record points at first"
+        )
+
+    row_id = f"YAA:PEXP:{task.proposal_hash[:16]}"
+    existing = conn.execute(
+        "SELECT id FROM part_expression_record WHERE id = ?", (row_id,)
+    ).fetchone()
+    return PromotionPlan(
+        task_id=task.id,
+        record_kind=task.record_kind,
+        target_table="part_expression_record",
+        row={
+            "id": row_id,
+            "part_id": part_id,
+            "host_strain_id": host_strain_id,
+            "compartment_id": compartment_id,
+            "encoding_genome": encoding_genome,
+            "codon_optimized": {"yes": 1, "no": 0}.get(codon_optimized or ""),
+            "promoter": str(payload.get("promoter_as_reported") or "").strip() or None,
+            "expressed_ok": expressed_ok,
+            "activity_measured": activity_measured,
+            "outcome_measurement_id": outcome_measurement_id,
+            "publication_id": task.publication_id,
+            "detail": _part_expression_detail(payload, derived_genome),
+        },
+        missing=tuple(missing),
+        blockers=tuple(blockers),
+        already=str(existing["id"]) if existing is not None else None,
+    )
+
+
+def _write_part_expression(
+    conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
+) -> bool:
+    """Write the expression record, Zone R, with what has no column in the evidence string.
+
+    **A Zone R row pointing at a Zone I one.** `part` is written by `metabolic.curated.write_parts`
+    as Zone I throughout -- the catalog says of itself that every functional and identity claim in
+    it is background knowledge never checked against a source. This row is Zone R because its
+    content is what the paper stated, and `part_id` is a curator's resolution onto that catalog.
+    That is the right filing and it is worth saying out loud: the *expression* is reported, the
+    *identity of the part it is an expression of* is only as good as the catalog entry, and
+    tightening the catalog is a separate piece of work from promoting these rows.
+    """
+    before = conn.total_changes
+    detail = evidence
+    if plan.row["detail"]:
+        detail += f"; {plan.row['detail']}"
+    conn.execute(
+        "INSERT INTO part_expression_record (id, part_id, host_strain_id, compartment_id, "
+        "encoding_genome, codon_optimized, promoter, expressed_ok, activity_measured, "
+        "outcome_measurement_id, publication_id, zone, evidence, confidence) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        (
+            plan.row["id"],
+            plan.row["part_id"],
+            plan.row["host_strain_id"],
+            plan.row["compartment_id"],
+            plan.row["encoding_genome"],
+            plan.row["codon_optimized"],
+            plan.row["promoter"],
+            plan.row["expressed_ok"],
+            plan.row["activity_measured"],
+            plan.row["outcome_measurement_id"],
+            plan.row["publication_id"],
+            detail,
+            confidence,
+        ),
+    )
+    return conn.total_changes > before
+
+
 Planner = Callable[[sqlite3.Connection, Task, Mapping[str, Any]], PromotionPlan]
 Writer = Callable[..., bool]
 
@@ -1059,6 +1404,11 @@ Writer = Callable[..., bool]
 #: cross the gap between them -- so accepted proposals sat resolved and unwritable, and
 #: `pathway_configuration` read zero while being *phase 1's headline deliverable* and the thing
 #: phase 3's acceptance test measures recall against.
+#:
+#: `part_expression_records` was the third, and was absent one level deeper than those two: there
+#: was no extraction section either, so no proposal of that kind could exist to be stuck. G.6 calls
+#: these rows "the field that makes the catalog worth having", and the catalog had 16 parts and no
+#: record of any of them ever having been expressed anywhere.
 #:
 #: `conditions` is still absent, and for a reason worth stating: the extraction emits **one record
 #: per facet** ("carbon_sources: 2% glucose or galactose"), while `condition_context` is one
@@ -1074,6 +1424,7 @@ PROMOTERS: Final[Mapping[str, tuple[Planner, Writer]]] = {
     "bottlenecks": (_plan_bottleneck, _write_bottleneck),
     "co_reported_higher_alcohols": (_plan_higher_alcohol, _write_higher_alcohol),
     "pathway_configurations": (_plan_configuration, _write_configuration),
+    "part_expression_records": (_plan_part_expression, _write_part_expression),
 }
 
 PROMOTABLE_KINDS: Final[tuple[str, ...]] = tuple(PROMOTERS)

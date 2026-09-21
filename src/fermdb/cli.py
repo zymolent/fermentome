@@ -563,6 +563,8 @@ def cmd_curate_promote(args: argparse.Namespace) -> int:
             ("product_id", args.product_id),
             ("pathway_id", args.pathway_id),
             ("name", args.name),
+            ("part_id", args.part_id),
+            ("outcome_measurement_id", args.outcome_measurement_id),
         )
         if v
     }
@@ -911,10 +913,16 @@ def build_parser() -> argparse.ArgumentParser:
     # A `pathway_configuration` needs both, and the extraction schema carries neither. They are
     # refused rather than guessed (see `curate.promote._plan_configuration`), so these flags are
     # how a curator answers.
+    # `--host-strain` serves a part expression record too, and deliberately shares the flag: a
+    # configuration's host and an expression record's host are the same question about the same
+    # table, and two flags would invite a curator to answer it twice, differently. The expression
+    # promoter resolves the host from the paper's own wording where it can, so this flag is the
+    # override rather than the usual path.
     p_cu_promote.add_argument(
         "--host-strain",
         dest="host_strain_id",
-        help="host strain id for a pathway configuration; the extraction schema has no host field",
+        help="host strain id for a pathway configuration or a part expression record; the "
+        "extraction schema has no host field",
     )
     p_cu_promote.add_argument(
         "--product",
@@ -926,6 +934,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_cu_promote.add_argument(
         "--name", dest="name", help="override the derived name of a pathway configuration"
+    )
+    # A part expression record's two curator-supplied columns. `--part` is not optional in
+    # practice: `part_expression_record.part_id` is NOT NULL and the extraction schema has no
+    # catalog id, on purpose (see `extract.schemas._part_expression_fields`).
+    p_cu_promote.add_argument(
+        "--part",
+        dest="part_id",
+        help="part id for a part expression record, from data/pathways/parts_catalog.yaml; the "
+        "extraction schema carries the paper's wording, not a catalog id",
+    )
+    p_cu_promote.add_argument(
+        "--outcome-measurement",
+        dest="outcome_measurement_id",
+        help="measurement id an expression record's outcome is recorded as (optional; a part can "
+        "be demonstrated with no number behind it)",
     )
     p_cu_promote.add_argument(
         "--dry-run", action="store_true", help="show what would be written and change nothing"

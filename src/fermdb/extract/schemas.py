@@ -2,8 +2,14 @@
 
 PLAN.md H.5 names seven things an extraction must be able to say about a paper — strains,
 modifications, pathway configurations, measurements, conditions, bottlenecks, and the higher
-alcohols co-reported alongside isobutanol. This module is the single definition of all seven, in
-three synchronized forms:
+alcohols co-reported alongside isobutanol. An eighth was added: ``part_expression_records``, for
+PLAN.md G.6's *"one row per demonstrated host/compartment combination"*. It is not an H.5 kind and
+is not pretending to be one — it exists because `part` had 16 rows and `part_expression_record`
+had none, and G.6 is explicit that the expression records are **"the field that makes the catalog
+worth having"**: without them the catalog can say an enzyme exists and not whether anyone has ever
+got it to work anywhere. Nothing could propose one while this module had no such section, so the
+gap was not a curation backlog; it was unreachable. This module is the single definition of all
+eight, in three synchronized forms:
 
 * a :class:`SectionSpec` per payload section, which is the authority;
 * a JSON Schema generated from those specs, used twice — as a decoding constraint for a backend
@@ -65,6 +71,7 @@ __all__ = [
     "FieldSpec",
     "MeasurementRecord",
     "ModificationRecord",
+    "PartExpressionRecord",
     "PathwayConfigurationRecord",
     "PayloadVocabulary",
     "SchemaBuildError",
@@ -573,6 +580,150 @@ def _bottleneck_fields() -> tuple[FieldSpec, ...]:
     )
 
 
+def _part_expression_fields(vocabulary: PayloadVocabulary) -> tuple[FieldSpec, ...]:
+    """One demonstrated host × compartment for one part, per PLAN.md G.6.
+
+    The fields are G.6's own list — ``{host, compartment, codon_optimized, promoter,
+    expressed_ok, activity_measured, outcome_measurement_id}`` — minus the one a model cannot
+    supply and plus the two shadows this module's rules require.
+
+    ``outcome_measurement_id`` is **absent on purpose**. It is a foreign key into `measurement`,
+    and a row id is not something that can be read out of a paper; the same sentence that reports
+    the outcome is already a `measurements` proposal, and asking the model to also name the row it
+    will become would be asking it to mint an identifier. `curate.promote` takes it from a curator
+    instead. ``outcome_as_reported`` is what the paper actually says about how it went, which is a
+    different thing and is storable from the text alone.
+
+    ``part_as_reported`` is free text rather than a choice over the `part` table, which is the one
+    real judgement call here. The alternative — loading the 16 catalog ids into
+    :class:`PayloadVocabulary` beside ``compartment_strategies`` and having the model select one —
+    was rejected twice over. First, `part` is *curated data that grows*, not a seeded vocabulary:
+    `compartment_strategy` is seeded by schema.sql and is the same on every machine, while `part`
+    is empty until `fermdb atlas pathways` runs, so the schema would refuse to build on a database
+    that is otherwise perfectly able to extract. Second, every identity claim in that catalog is
+    Zone I and `unverified`, and it covers only the isobutanol step roles; a model shown 16 ids
+    and a paper about a 17th enzyme is being invited to pick the closest-looking one, which is the
+    resolution error CONVENTIONS.md's identifier rules forbid by name. Mapping the paper's words
+    onto a catalog part is a curator's act, and `curate.promote` refuses until one does it.
+    """
+    return (
+        FieldSpec(
+            "part_as_reported",
+            _text(
+                "The enzyme, gene or construct that was expressed, exactly as the paper names it "
+                "-- 'alsS from Bacillus subtilis', 'kivd', 'Ll-KivD'. One part per record: a "
+                "paper expressing alsS, ilvC and ilvD in the same host gives three records, not "
+                "one naming three."
+            ),
+            required=True,
+        ),
+        FieldSpec(
+            "host_as_reported",
+            _text(
+                "The organism or strain it was expressed IN, as written -- 'E. coli BL21(DE3)', "
+                "'S. cerevisiae CEN.PK113-5D'. 'Worked in E. coli' and 'works in the yeast "
+                "mitochondrial matrix' are different facts, so a record with no host states "
+                "nothing. Where the paper names only a species, copy the species."
+            ),
+            required=True,
+        ),
+        FieldSpec(
+            "compartment",
+            _choice(
+                vocabulary.compartments,
+                description=(
+                    "Where in the cell the part was expressed or shown to act, from the list. "
+                    "Answer 'unknown' unless the paper localizes it -- do not fill this in from "
+                    "where the enzyme normally lives, because relocalizing it is often the whole "
+                    "experiment."
+                ),
+                nullable=True,
+            ),
+        ),
+        FieldSpec(
+            "compartment_as_reported",
+            _text(
+                "The paper's own words for where it was put -- 'targeted to the mitochondrial "
+                "matrix with the Su9 presequence', 'cytosolic'. Kept even when the field above "
+                "resolved, because the targeting method is in this string and nowhere else.",
+                nullable=True,
+            ),
+        ),
+        FieldSpec(
+            "encoding_genome",
+            _choice(
+                ("nuclear", "mitochondrial"),
+                description=(
+                    "Which genome physically carried the gene in THIS experiment. Not the "
+                    "compartment: a nuclear gene whose product is imported into the matrix is "
+                    "'nuclear'. It decides the genetic code, and so it also decides what "
+                    "'codon optimized' below can possibly mean -- optimized for which code? "
+                    "Answer 'unknown' unless the paper is explicit."
+                ),
+                nullable=True,
+            ),
+        ),
+        FieldSpec(
+            "codon_optimized",
+            _choice(
+                ("yes", "no"),
+                description=(
+                    "Did they codon-optimize the sequence for the host? 'yes' or 'no' only where "
+                    "the paper says so; omit the field entirely if it never mentions it. 'The "
+                    "paper did not say' and 'the paper says they did not' are different answers "
+                    "and the atlas stores them differently."
+                ),
+                nullable=True,
+            ),
+        ),
+        FieldSpec(
+            "promoter_as_reported",
+            _text(
+                "What drove expression, as written -- 'TDH3', 'pGAL1', 'T7'. Free text, because "
+                "this is a promoter name from the paper and not a controlled value.",
+                nullable=True,
+            ),
+        ),
+        FieldSpec(
+            "expressed_ok",
+            _choice(
+                ("yes", "no", "partial"),
+                description=(
+                    "Did the protein actually appear? 'partial' covers a low, truncated, "
+                    "insoluble or partly-processed product the paper reports as such. 'unknown' "
+                    "if they expressed it and never say whether it worked -- which is common, "
+                    "and is a real answer here."
+                ),
+            ),
+            required=True,
+        ),
+        FieldSpec(
+            "activity_measured",
+            _choice(
+                ("yes", "no"),
+                description=(
+                    "Did they measure catalytic ACTIVITY, as opposed to the presence of the "
+                    "protein? A band on a gel, a Western blot or a fluorescence signal is not "
+                    "activity: answer 'no' for those. 'yes' means an assay of what the enzyme "
+                    "does -- a specific activity, a rate, a product formed in vitro."
+                ),
+            ),
+            required=True,
+        ),
+        FieldSpec(
+            "outcome_as_reported",
+            _text(
+                "What the paper says came of it, in its own words -- '3.5-fold higher DHAD "
+                "specific activity', 'no detectable protein', 'active but only 12% of the "
+                "cytosolic control'. Where a number is attached, it also belongs in "
+                "'measurements' as its own record.",
+                nullable=True,
+                maximum=600,
+            ),
+        ),
+    )
+
+
 def payload_sections(vocabulary: PayloadVocabulary) -> tuple[SectionSpec, ...]:
     measurement_fields = _measurement_fields(vocabulary)
     return (
@@ -642,6 +793,22 @@ def payload_sections(vocabulary: PayloadVocabulary) -> tuple[SectionSpec, ...]:
             ),
             fields=measurement_fields,
         ),
+        # Appended rather than filed next to `pathway_configurations`, where it belongs by
+        # subject. Section order is the order the model is asked in, and moving an existing
+        # section would reorder every future payload's keys against every stored one for no gain;
+        # growth by addition keeps old and new payloads diffable.
+        SectionSpec(
+            key="part_expression_records",
+            title="Part expression records",
+            guidance=(
+                "One record per part per host it was expressed in, and per compartment within "
+                "that host. PLAN.md G.6: the same enzyme behaves differently in different hosts "
+                "and compartments, so 'alsS in E. coli' and 'alsS in the yeast mitochondrial "
+                "matrix' are two records and never one. Only parts THIS paper expressed -- an "
+                "enzyme it cites someone else for is not an expression record here."
+            ),
+            fields=_part_expression_fields(vocabulary),
+        ),
     )
 
 
@@ -654,23 +821,27 @@ RECORD_KINDS: Final[tuple[str, ...]] = (
     "conditions",
     "bottlenecks",
     "co_reported_higher_alcohols",
+    "part_expression_records",
 )
 
 
 def payload_schema(
     vocabulary: PayloadVocabulary, *, kinds: Sequence[str] | None = None
 ) -> JsonSchema:
-    """The whole-payload JSON Schema: seven arrays plus the model's self-report.
+    """The whole-payload JSON Schema: one array per record kind, plus the model's self-report.
 
     Every array is ``required``, even though any of them may be empty. An omitted key is
     ambiguous between "this paper has none" and "I did not look", and those are different answers
     to a question the atlas asks later.
 
     ``kinds`` narrows the schema to a subset of :data:`RECORD_KINDS`, for asking a model about one
-    record kind at a time. The whole schema is ~19,100 compact characters and the largest single
-    section is ~4,200, so a one-kind ask cuts the fixed per-call overhead by roughly three
-    quarters -- which matters because that overhead is repeated in **every window of every paper**
-    and, on a local model, is most of the context budget.
+    record kind at a time. The whole schema is ~23,300 compact characters and the largest single
+    section is ~5,100, so a one-kind ask cuts the fixed per-call overhead by roughly four
+    fifths -- which matters because that overhead is repeated in **every window of every paper**
+    and, on a local model, is most of the context budget. Those figures were ~19,100 and ~4,200
+    before ``part_expression_records`` was added: an eighth section is ~4,200 characters every
+    unnarrowed call now pays on every window, which is the argument for narrowing getting stronger
+    with each kind the atlas learns to ask about, not weaker.
 
     The ambiguity note above still holds *within* a call: the keys that are asked for stay
     required. What changes is that a narrowed call makes no claim at all about the kinds it did
@@ -959,6 +1130,50 @@ class ConditionRecord:
             facet=_require_str(data, "facet"),
             value_as_reported=_require_str(data, "value_as_reported"),
             strain_name_as_reported=_optional_str(data, "strain_name_as_reported"),
+            span=_span_of(data),
+        )
+
+
+@dataclass(frozen=True)
+class PartExpressionRecord:
+    """One part, one host, one compartment, and whether it worked there.
+
+    ``expressed_ok`` and ``activity_measured`` are separate fields and not one, for the reason
+    `part_expression_record`'s own schema comment gives: *a band on a gel is not activity*. A
+    single "did it work" field would let the commonest evidence in this literature — a Western
+    blot showing the protein is present — stand in for the rarest and most valuable one, an assay
+    showing it does anything.
+    """
+
+    part_as_reported: str
+    host_as_reported: str
+    compartment: str | None
+    compartment_as_reported: str | None
+    encoding_genome: str | None
+    codon_optimized: str | None
+    promoter_as_reported: str | None
+    expressed_ok: str
+    activity_measured: str
+    outcome_as_reported: str | None
+    span: ExtractedSpan
+
+    @classmethod
+    def from_mapping(cls, data: Mapping[str, Any]) -> PartExpressionRecord:
+        """Build from one validated payload record."""
+        return cls(
+            part_as_reported=_require_str(data, "part_as_reported"),
+            host_as_reported=_require_str(data, "host_as_reported"),
+            compartment=_optional_str(data, "compartment"),
+            compartment_as_reported=_optional_str(data, "compartment_as_reported"),
+            encoding_genome=_optional_str(data, "encoding_genome"),
+            # Deliberately a string and not a bool: 'yes' / 'no' / 'unknown' / absent are four
+            # answers and Python's bool holds two. The promoter is what narrows it to the
+            # column's 0/1/NULL, and it refuses rather than defaulting.
+            codon_optimized=_optional_str(data, "codon_optimized"),
+            promoter_as_reported=_optional_str(data, "promoter_as_reported"),
+            expressed_ok=_require_str(data, "expressed_ok"),
+            activity_measured=_require_str(data, "activity_measured"),
+            outcome_as_reported=_optional_str(data, "outcome_as_reported"),
             span=_span_of(data),
         )
 

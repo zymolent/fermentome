@@ -500,6 +500,87 @@ def test_section_specs_and_record_kinds_stay_in_step(vocabulary: PayloadVocabula
     assert tuple(section.key for section in payload_sections(vocabulary)) == RECORD_KINDS
 
 
+def _section(vocabulary: PayloadVocabulary, key: str) -> Any:
+    return {section.key: section for section in payload_sections(vocabulary)}[key]
+
+
+def _expression_record(**overrides: Any) -> dict[str, Any]:
+    record: dict[str, Any] = {
+        "part_as_reported": "alsS from Bacillus subtilis",
+        "host_as_reported": "E. coli BL21(DE3)",
+        "expressed_ok": "yes",
+        "activity_measured": "no",
+        "span": {"quote": "x", "char_start": 0, "char_end": 1},
+    }
+    record.update(overrides)
+    return record
+
+
+def test_a_part_expression_record_must_name_its_part_its_host_and_both_outcomes(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    """PLAN.md G.6 is one row per demonstrated host/compartment, and these four fields are the row.
+
+    Each omission is a different claim rather than a weaker one. Without a host the record says
+    only that somebody expressed something somewhere, which is the merge G.6 exists to refuse;
+    without `activity_measured` a Western blot stands in for an assay.
+    """
+    section = _section(vocabulary, "part_expression_records")
+    assert set(section.record_schema()["required"]) == {
+        "part_as_reported",
+        "host_as_reported",
+        "expressed_ok",
+        "activity_measured",
+        "span",
+    }
+    payload = empty_payload()
+    payload["part_expression_records"] = [_expression_record()]
+    assert check_json_schema(payload, payload_schema(vocabulary)) == []
+
+    payload["part_expression_records"] = [
+        {k: v for k, v in _expression_record().items() if k != "host_as_reported"}
+    ]
+    assert check_json_schema(payload, payload_schema(vocabulary))
+
+
+def test_a_band_on_a_gel_cannot_be_reported_as_partial_activity(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    """`expressed_ok` and `activity_measured` take different answers because they are different
+    questions.
+
+    A protein can be truncated, insoluble or partly processed, so expression has a 'partial'.
+    "Did you assay what it does" has no half-way, and `part_expression_record`'s CHECK agrees --
+    so a model offered 'partial' for activity would be offered a value the table cannot store.
+    """
+    fields = {
+        field.name: field.schema for field in _section(vocabulary, "part_expression_records").fields
+    }
+    assert "partial" in fields["expressed_ok"]["enum"]
+    assert "partial" not in fields["activity_measured"]["enum"]
+
+    payload = empty_payload()
+    payload["part_expression_records"] = [_expression_record(activity_measured="partial")]
+    assert check_json_schema(payload, payload_schema(vocabulary))
+
+
+def test_the_part_expression_section_never_asks_the_model_for_a_catalog_id(
+    vocabulary: PayloadVocabulary,
+) -> None:
+    """The model reports the paper's words; resolving them onto a `part` row is a curator's act.
+
+    PLAN.md L.1.2 has the model select wherever the atlas can enumerate, and this is the case
+    where it must not: `part` is curated data that grows and is empty until `fermdb atlas
+    pathways` runs, and every identity claim in it is Zone I and 'unverified'. An enum over it
+    would make the schema unbuildable on a database that can otherwise extract perfectly well,
+    and would invite the closest-looking match for a paper about a seventeenth enzyme.
+    """
+    names = _section(vocabulary, "part_expression_records").field_names
+    assert "part_id" not in names
+    assert "outcome_measurement_id" not in names
+    assert "part_as_reported" in names
+
+
 def test_record_path_is_the_address_used_everywhere() -> None:
     assert record_path("measurements", 3) == "measurements[3]"
     with pytest.raises(KeyError):

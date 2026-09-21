@@ -62,6 +62,7 @@ DESTINATION_TABLE: Final[Mapping[str, str]] = {
     "conditions": "condition_context",
     "bottlenecks": "bottleneck",
     "co_reported_higher_alcohols": "measurement",
+    "part_expression_records": "part_expression_record",
 }
 
 #: The entities PLAN.md P.2 names for the dashboard, with the label the interface shows.
