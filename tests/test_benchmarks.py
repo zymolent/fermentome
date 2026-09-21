@@ -56,10 +56,38 @@ REQUIRED_FIELDS = (
 # assertion never checked against a source — distinct from 'low' (checked, weak).
 EXPECTED_CONFIDENCE_VALUES = frozenset({"unverified", "low", "medium", "high"})
 
-# Every entry in this file is, today, written from memory with no source consulted. `evidence`
-# must say that plainly rather than leaving the honesty work to `confidence` alone (this is the
-# one curated file the evidence+confidence convention originally missed).
+# `evidence` must carry the honesty rather than leaving it to `confidence` alone (this is the one
+# curated file the evidence+confidence convention originally missed).
+#
+# There are **three** states, not two, and the third was discovered by producing it. The file was
+# written when every entry was memory with nothing consulted, so the rule was simply "say so". The
+# 2026-09-21 verification wave then read the corpus for all 41 entries and quoted a real source for
+# each -- without promoting any of them, because flipping `verified` and setting `confidence` is a
+# curator act that PLAN.md L.5 forbids an agent. That output is neither "nobody looked" nor
+# "curator-promoted": it is **read, quoted, and awaiting a curator**.
+#
+# With only two states, such an entry could pass this test only by continuing to claim no source
+# was consulted, which would be a lie in the one field that exists to prevent one. So an unverified
+# entry must now say *either* that nothing was consulted *or* carry a source it can be checked
+# against.
 _UNCONSULTED_EVIDENCE_MARKER = "no source consulted"
+
+#: What a quoted-but-unpromoted entry must show instead: something a reader can go and check.
+#: A DOI is the cheapest sufficient marker -- every quote the wave recorded carries one.
+_CONSULTED_SOURCE_MARKERS = ("doi:", "10.")
+
+#: And a fourth state, which only negative controls can be in.
+#:
+#: A negative control asserts that something is **absent** from the corpus. It can never name a
+#: source, because there is none to name -- that is the whole claim. Demanding a DOI from one is a
+#: category error, and the entry would then have to fall back on "no source consulted", which is
+#: the opposite of what happened: the corpus *was* searched, exhaustively, and came back empty.
+#:
+#: So a negative control satisfies the honesty rule by recording the search instead of a source.
+#: The marker is deliberately about the act, not the outcome, so that an "uncertain" verdict is as
+#: acceptable as a "holds" one -- BM-NEG-006 is uncertain about its own testability, and hiding
+#: that behind a confident-sounding word would be the failure this test exists to catch.
+_CORPUS_SEARCH_MARKER = "corpus"
 
 # Categories the task fixes for this set. The file also declares them; both must agree, so that
 # neither the file nor the test can quietly widen the vocabulary alone.
@@ -186,15 +214,24 @@ def test_unverified_entries_say_no_source_was_consulted(entries: list[dict[str, 
     the actual (if minimal) evidence for an unverified claim - "nobody has looked yet" is itself
     something a curator recorded, not an empty field waiting to be filled in later.
     """
-    dishonest = [
-        e["id"]
-        for e in entries
-        if e["confidence"] == "unverified"
-        and _UNCONSULTED_EVIDENCE_MARKER not in str(e["evidence"]).lower()
-    ]
+    dishonest = []
+    for entry in entries:
+        if entry["confidence"] != "unverified":
+            continue
+        evidence = str(entry["evidence"]).lower()
+        says_nothing_consulted = _UNCONSULTED_EVIDENCE_MARKER in evidence
+        names_a_source = any(marker in evidence for marker in _CONSULTED_SOURCE_MARKERS)
+        records_a_search = (
+            entry["category"] == "negative_control" and _CORPUS_SEARCH_MARKER in evidence
+        )
+        if not (says_nothing_consulted or names_a_source or records_a_search):
+            dishonest.append(entry["id"])
     assert not dishonest, (
-        "an entry with confidence: unverified must have an evidence value that says no source "
-        f"was consulted yet; offenders: {dishonest}"
+        "an entry with confidence: unverified must do one of three things: say no source was "
+        "consulted yet, name a source a reader can check it against, or -- for a negative "
+        "control, which asserts an absence and so has no source to name -- record the corpus "
+        f"search that came back empty. An entry doing none of them shows nothing; "
+        f"offenders: {dishonest}"
     )
 
 
