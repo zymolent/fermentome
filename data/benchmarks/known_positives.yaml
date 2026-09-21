@@ -73,10 +73,34 @@ entries:
       SGD locus page for ILV2 (systematic name recalled as YMR108W - confirm), GO cellular
       component annotation and its evidence code; cross-check ILV6 (recalled YCL009C) as the
       regulatory subunit. Any yeast branched-chain amino acid biosynthesis review.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Both clauses covered. [1] gives the reaction (two pyruvate condensed to one acetolactate)
+      and the Ilv2-catalytic / Ilv6-regulatory split, so Ilv6 is a subunit and not a second
+      catalytic step; it says "the mitochondria", and the matrix-level compartment comes from [2].
+      NOT REACHABLE FROM THE CORPUS: the systematic names YMR108W and YCL009C appear nowhere, and
+      no GO cellular-component annotation or evidence code appears anywhere in 1,309 full texts -
+      that is an SGD lookup, so the L2 level this entry asks for is not attainable from the corpus
+      alone.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.btre.2026.e00959 chars [3615, 3938):
+      In the natural process, pyruvates are subsequent to transport into the mitochondria, two pyruvate molecules are condensed into one molecule of acetolactate by acetohydroxyacid synthase [AHAS (Ilv2/Ilv6), with the catalytic subunit Ilv2 (encoded by the ILV2 gene) and the regulatory subunit Ilv6 (encoded by the ILV6 gene)].
+
+      [2] doi:10.1038/s41598-019-40631-5 chars [3389, 3535):
+      and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -98,24 +122,55 @@ entries:
       SGD locus page for ILV5 (recalled YLR355C - confirm); Ilv5 is also reported to have a
       moonlighting role in mtDNA nucleoid stability, which a curator should check separately
       because it changes what an ilv5 deletion phenotype means.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Reaction, gene and the explicit NADPH cofactor term BM-COF-001 wants, all from [1]; matrix
+      compartment from [2]. The source_hint's moonlighting caveat is real and separately attested
+      in the corpus: Ilv5 is reported in mtDNA nucleoid maintenance, and the same paper that
+      reports it failed to reproduce the petite phenotype in its own ilv5 mutants. Consequence for
+      the atlas: an ilv5 deletion phenotype is not a clean readout of the KARI step.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.meteno.2016.01.002 chars [6946, 7237):
+      the set of native S. cerevisiae reactions that forms the basis for previous academic studies is not in itself redox balanced due to the use of an NADPH-dependent acetohydroxyacid reductoisomerase (AHAR, encoded by ILV5) to catalyse the conversion of acetolactate to 2,3-dihydroxyisovalerate.
+
+      [2] doi:10.1038/s41598-019-40631-5 chars [3389, 3535):
+      and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-PATH-003
     category: pathway_compartment
     statement: >-
-      Dihydroxyacid dehydratase Ilv3 is localized to the mitochondrial matrix, carries a
-      [4Fe-4S] cluster, and converts 2,3-dihydroxyisovalerate to 2-ketoisovalerate.
+      Dihydroxyacid dehydratase Ilv3 is localized to the mitochondrial matrix, requires an
+      iron-sulfur cluster, and converts 2,3-dihydroxyisovalerate to 2-ketoisovalerate. The cluster
+      type is disputed inside the consulted literature - one source assigns [4Fe-4S] to
+      dihydroxyacid dehydratases as a family, another assigns 2Fe-2S to yeast ILV3 specifically,
+      and a third records that every solved crystal structure in the ilvD/EDD family so far
+      carries [2Fe-2S] - so the requirement is recorded without a stoichiometry.
     query_shape: >-
       reaction(product=2-ketoisovalerate) -> enzyme -> gene_group(ILV3), read
       reaction.compartment and any cofactor/prosthetic-group annotation
     expected_outcome: >-
       compartment = mitochondrial_matrix; an iron-sulfur cluster requirement is recorded as a
-      property of the enzyme, because it is what makes cytosolic relocalization hard (BM-PATH-010).
+      property of the enzyme, because it is what makes cytosolic relocalization hard
+      (BM-PATH-010). The requirement is recorded WITHOUT a cluster stoichiometry, or with the
+      stoichiometry marked disputed and both citations attached; a single asserted [4Fe-4S] or
+      [2Fe-2S] fails this entry. Oxygen lability is asserted in the corpus only as a general
+      contrast between the two cluster types and never for yeast Ilv3, so it must not be returned
+      as a property of Ilv3.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
@@ -123,10 +178,47 @@ entries:
       SGD locus page for ILV3 (recalled YJR016C - confirm); a structural or biochemical paper on
       dihydroxyacid dehydratase Fe-S cluster type and oxygen lability. The oxygen lability claim
       in particular is recalled, not read.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: matrix localization [1,2], an Fe-S cluster requirement and its dependence on
+      cluster biogenesis for in vivo activity [1], and the reaction itself [5]. NOT SUPPORTED AS
+      WRITTEN: the [4Fe-4S] stoichiometry. THE CLUSTER TYPE IS DISPUTED INSIDE THE CORPUS. [1]
+      assigns 4Fe-4S to dihydroxyacid dehydratases as a FAMILY; [3] assigns 2Fe-2S to yeast ILV3
+      SPECIFICALLY and repeats it in its conclusions; [4] explains the split - the ilvD/EDD family
+      spans both types and every solved crystal structure so far is [2Fe-2S]. A fourth corpus
+      paper hedges to "[Fe-S] cluster containing" with no type at all. The statement is narrowed
+      to record the requirement WITHOUT a stoichiometry. The oxygen-lability sub-claim source_hint
+      flags as recalled is asserted in [4] only as a general contrast between the two cluster
+      types, never for yeast Ilv3.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.meteno.2016.01.002 chars [49545, 49938):
+      Prokaryotic and eukaryotic dihydroxyacid dehydratases contain iron–sulphur (4Fe–4S) clusters and require iron–sulphur cluster biogenesis and assembly mechanisms for in vivo activity (, , , ). In S. cerevisiae, iron–sulphur cluster biogenesis and assembly into mature proteins occurs predominantly in the mitochondrial matrix (), the location of the native yeast dihydroxyacid dehydratase Ilv3.
+
+      [2] doi:10.1038/s41598-019-40631-5 chars [3389, 3535):
+      and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix.
+
+      [3] doi:10.1016/j.synbio.2022.02.007 chars [2912, 3224):
+      The first half of the pathway converts pyruvate to α-ketoisovalerate (KIV) by mitochondria-localized ILV enzymes: acetolactate synthase (ALS, encoded by ILV2), a NADPH-dependent ketol-acid reductoisomerase (KARI, encoded by ILV5), and a 2Fe–2S cluster-requiring dihydroxyacid dehydratase (DHAD, encoded by ILV3).
+
+      [4] doi:10.1002/chem.202203140 chars [6069, 6444):
+      They all contain Fe−S clusters in their active sites of the type [2Fe−2S][, , ] or [4Fe−4S],[, , ] with the latter being more sensitive to oxygen than the former. A divalent metal ion (generally a Mg2+) is also essential for the catalytic activity of these enzymes.[, , ] Only a few crystal structures of ilvD/EDD dehydratases have been reported, all with a [2Fe−2S] cluster.
+
+      [5] doi:10.1080/21655979.2021.1978189 chars [22810, 22928):
+      2,3-dihydroxyisovalerate is then dehydrated to form 2 ketoisovalerate which is catalyzed by dihydroxyacid dehydratase.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -150,10 +242,36 @@ entries:
     source_hint: >-
       KEGG map00290 (valine, leucine and isoleucine biosynthesis) and MetaCyc's
       L-valine biosynthesis pathway; confirm the map identifiers.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      [1] gives the two fates of KIV in one run of text - transamination to valine inside
+      mitochondria by Bat1, or translocation to the cytosol and decarboxylation to
+      isobutyraldehyde - which covers both halves of the claim. [2] gives the third consuming
+      reaction the expected outcome asks for, the leucine branch, and places it in EITHER
+      compartment, which a compartment-aware schema has to represent. Worth knowing for a
+      literal-string recovery test: NO corpus paper uses the phrase "branch point" for KIV. The
+      claim is a fair paraphrase of what several papers describe, not a sentence anyone wrote.
+      KEGG map00290 and the MetaCyc identifier named in source_hint do not appear in the corpus
+      and cannot be confirmed from it.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.btre.2026.e00959 chars [4188, 4707):
+      KIV, the key intermediate, is either transformed into valine in mitochondria by branched-chain amino acid aminotransferase (BCAT): Bat1 (encoded by the BAT1 gene) or translocated into the cytosol. KIV is also synthesized in cytosol by the Ehrlich degradation of the amino acid valine (Val), commencing with a transamination conversion of Val to KIV mediated by cytosolic BCAT: Bat2, which is encoded by the BAT2 gene. KIV undergoes further decarboxylation to form isobutyraldehyde via α-keto acid decarboxylases (KDCs).
+
+      [2] doi:10.1038/s41467-021-27852-x chars [2573, 2720):
+      Next, α-KIV is acetylated in either mitochondria or the cytosol by α-isopropylmalate (α-IPM) synthases (encoded by LEU4 and LEU9) to produce α-IPM.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -174,34 +292,92 @@ entries:
     source_hint: >-
       Hazelwood et al., Appl Environ Microbiol 2008, the Ehrlich pathway review (author/year
       recalled - confirm); SGD locus page for ARO10 (recalled YDR380W).
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Every clause of the statement is covered by this one passage: the Ehrlich decarboxylation
+      runs in the cytosol, KIV is the substrate and isobutyraldehyde the product, and
+      PDC1/PDC5/PDC6 and ARO10 are named. The source adds THI3 as a fifth candidate the statement
+      omits - worth adding to the gene group. Hazelwood et al. 2008, the review source_hint points
+      at, is NOT in the corpus, so this is a secondary statement in a review rather than a
+      primary; a curator wanting an L1 source for which decarboxylase actually carries flux should
+      use the corpus's dedicated comparative kinetic assessment of the native and heterologous
+      2-oxo acid decarboxylases instead.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1080/21655979.2021.1978189 chars [23037, 23378):
+      The proceeding reaction of Ehrlich pathway for isobutanol occurs in cytosol. BAT 2 present in cytosol by its transaminase activity convert valine to 2 ketoisovalerate (KIV). 2-ketoisovalerate in cytosol gets converted to isobutyraldehyde by pyruvate decarboxylase. Genes responsible for this conversion include PDC1, PDC5, PDC6, ARO10, THI3.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-PATH-006
     category: pathway_compartment
     statement: >-
-      The final reduction of isobutyraldehyde to isobutanol is catalysed in the cytosol by
-      alcohol dehydrogenases, with Adh1-Adh7 and Adh6 among the candidates.
+      The final reduction of isobutyraldehyde to isobutanol is catalysed in the cytosol by alcohol
+      dehydrogenases, of which more than one is a candidate: the sources consulted name ADH1-ADH5
+      as a group for this step, and ADH6 and ADH7 separately. Cofactor preference is not uniform
+      across the candidates and is disputed in the literature for this step, so it must be
+      recorded per candidate and never on a merged 'ADH' row.
     query_shape: >-
       reaction(substrate=isobutyraldehyde, product=isobutanol) -> enzyme candidates,
       read compartment and cofactor preference for each
     expected_outcome: >-
       compartment = cytosol; more than one candidate ADH returned, each with its own cofactor
-      annotation rather than one merged "ADH" row.
+      annotation rather than one merged "ADH" row. Because the consulted sources disagree with one
+      another about the cofactor for this step, an atlas that returns a single cofactor on a
+      generic ADH step role fails this entry even when the value it returns is one that a paper
+      states.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
     source_hint: >-
       SGD locus pages for ADH1 (recalled YOL086C) and ADH6 (recalled YMR318C); Hazelwood 2008
       for which ADH actually carries Ehrlich-pathway flux, which a curator should not assume.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: the cytosolic compartment for the final reduction and that more than one ADH is a
+      candidate [1]. NOT SUPPORTED AS WRITTEN, on two counts. (a) The roster is malformed:
+      "Adh1-Adh7 and Adh6" names Adh6 twice, because Adh6 falls inside the range - and [1] gives
+      ADH1-5, not Adh1-Adh7. Adh6 is separately attested as a cytosolic Ehrlich-pathway candidate
+      [2]. (b) THE COFACTOR IS DISPUTED IN THE CORPUS: [1] says NADH-dependent for ADH1-5, [3]
+      says the step requires NADPH, and a third corpus paper notes the reported NADPH dependence
+      of Sc-Adh7. That spread is exactly why the expected outcome's demand for a per-candidate
+      cofactor annotation is the right schema call - and it also means no single source will
+      satisfy this entry.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.synbio.2022.02.007 chars [3225, 3537):
+      The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5) (a).
+
+      [2] doi:10.1186/1475-2859-12-119 chars [3758, 3958):
+      have been developed following a bacterial strategy by construction of the Ehrlich pathway in the cytosol through expression of the kivd gene from Lactococcus lactis and ADH6 gene from S. cerevisiae[].
+
+      [3] doi:10.1080/21655979.2021.1978189 chars [23379, 23495):
+      Formed isobutyraldehyde is reduced to isobutanol by alcohol dehydrogenase enzyme which require NADPH as cofactor [].
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -209,24 +385,61 @@ entries:
     category: pathway_compartment
     statement: >-
       In the native (unengineered) configuration the isobutanol route crosses the mitochondrial
-      inner membrane exactly once, between 2-ketoisovalerate production in the matrix and its
-      decarboxylation in the cytosol.
+      inner membrane exactly twice: cytosolic pyruvate is imported into the matrix through the
+      mitochondrial pyruvate carrier, and the 2-ketoisovalerate made there is exported back to the
+      cytosol for decarboxylation. Counted from cytosolic pyruvate the route is cytosol -> matrix
+      -> cytosol.
     query_shape: >-
       enumerate pathway_route(product=isobutanol, compartment_strategy='A_native_split'),
       count compartment transitions along the ordered steps
     expected_outcome: >-
-      Exactly one compartment transition, at the 2-ketoisovalerate step. A route returned with
-      zero transitions means compartment is being dropped somewhere in the join.
+      Exactly two compartment transitions along a route whose start compartment is cytosolic
+      pyruvate - pyruvate in at the carrier step, 2-ketoisovalerate out at the branch-point step -
+      returned as two distinct transport steps rather than one. A route returned with one
+      transition has dropped the pyruvate import step, which is the error this entry was rewritten
+      to catch; a route returned with zero transitions means compartment is being dropped
+      somewhere in the join. The count returned here must agree with BM-PATH-011, which names the
+      first of the two transitions.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
     source_hint: >-
       Derivable from BM-PATH-001 to BM-PATH-006 once each is verified; also stated in
       docs/design/ISOBUTANOL_PROGRAM.md section 1, which is itself unverified.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: contradicted.
+
+      CONTRADICTED AS WRITTEN, AND CORRECTED. [1] is the corpus's own end-to-end description of
+      the native compartment split and it names TWO inner-membrane transport events in consecutive
+      clauses: cytosolic pyruvate imported via the MPC complex, and matrix 2-KIV exported to the
+      cytosol. It does support the transition the old statement pointed at (the KIV step, matrix
+      to cytosol); it contradicts the words "exactly once". [2] independently starts the route at
+      glycolytic pyruvate in the cytosol, so no consulted source draws the route boundary at
+      matrix pyruvate - which is the only reading under which "exactly once" would be true. WHY
+      THIS IS THE FINDING THAT MATTERS MOST: the old expected_outcome demanded an exact count of
+      one, so an atlas that correctly returned both transitions scored as a FAILURE, and
+      BM-PATH-011 of this same file asserts the pyruvate import step, so the set contradicted
+      itself and could not be passed. Statement and expected_outcome are rewritten to two
+      transitions, with the route's start compartment made explicit, and made mutually consistent
+      with BM-PATH-011.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1038/s41598-019-40631-5 chars [3268, 3689):
+      In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex, and then pyruvate is converted to 2-KIV by sequential catalytic reactions of Ilv2 (ALS), Ilv5 (KARI), and Ilv3 (DHAD) in the mitochondrial matrix. The mitochondrial 2-KIV is then exported to the cytosol, and finally converted to isobutanol through Ehrlich pathway, involving endogenous KDCs and ADHs.
+
+      [2] doi:10.1080/21655979.2021.1978189 chars [22483, 22604):
+      Pyruvate produced through glycolysis are transferred into the mitochondria through the mitochondrial pyruvate complex [].
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -249,10 +462,38 @@ entries:
       Search for a review of mitochondrial carrier family (MCF) substrate assignments in yeast
       and confirm that no member is assigned to 2-ketoisovalerate; check whether any isobutanol
       engineering paper asserts a carrier in passing.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Directly supported, and framed as an open limitation rather than a settled negative - which
+      is the knowledge_gap framing the statement asks for. [2] goes further and gives the missing
+      entity a placeholder name (KIVC), building a whole pathway designation on it, which is good
+      evidence for a gap row that names the routes depending on it. CAUTION FOR THE EXTRACTOR:
+      another corpus paper writes that transport of KIV across the mitochondrial membrane "is
+      known", which means the transport is known to OCCUR, not that a carrier gene is known - the
+      most likely false positive for BM-NEG-004 in this corpus. NOT DISCHARGEABLE HERE: no
+      mitochondrial carrier family (MCF) substrate-assignment review is in the corpus, so the
+      "confirm no MCF member is assigned to KIV" half of source_hint cannot be met from these
+      1,309 texts. [1] also does not distinguish inner from outer membrane and bundles valine
+      transport into the same sentence.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.synbio.2024.12.010 chars [5177, 5381):
+      However, mitochondrial transport proteins involving α-KIV and valine remain unidentified [,], significantly limiting the use of compartmentalization strategies in constructing efficient cell factories [].
+
+      [2] doi:10.1016/j.btre.2026.e00959 chars [4934, 5294):
+      KIV, the key intermediate, follows the isobutanol production route by being transported into the cytosol using the unidentified mitochondrial KIV carrier (KIVC), where it is further converted to isobutanol by KDCs and ADHs, respectively. This isobutanol production route, which requires the transport of KIV via KIVC, was designated the KIVC-dependent pathway.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -277,10 +518,46 @@ entries:
     source_hint: >-
       Avalos, Fink and Stephanopoulos, Nature Biotechnology 2013, on compartmentalizing the
       isobutanol pathway in mitochondria (author/year/journal recalled - confirm before citing).
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Author, year, journal and DOI from source_hint all confirm: Avalos, Fink and Stephanopoulos,
+      Nature Biotechnology 2013. [1] gives the strategy, the quantitative comparison against the
+      matched cytoplasmic arrangement in the same study (+260 percent mitochondrial versus +10
+      percent cytoplasmic over the same upstream-only control), and subcellular fractionation as
+      the localization check. [2] gives the N-terminal CoxIV presequence as the targeting
+      mechanism, so verification_method must be recorded as subcellular fractionation plus western
+      blot, NOT none_reported. TWO FAIR-COMPARISON DETAILS to carry into the configuration row:
+      the control is a strain overexpressing only the upstream ILV genes, and the two arms were
+      built from identical constructs differing only in targeting. DO NOT record 260 percent as a
+      mitochondrial-versus- cytosolic fold change - both percentages are increases over the shared
+      control. Both quotes are PDF-extracted and carry hard line breaks, reproduced here exactly
+      as stored.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1038/nbt.2509 chars [4400, 4881):
+      Compartmentalization of the 
+      Ehrlich pathway into mitochondria increased isobutanol production by 260%, whereas overexpression of the same pathway in 
+      the cytoplasm only improved yields by 10%, compared with a strain overproducing enzymes involved in only the first three steps 
+      of the biosynthetic pathway. Subcellular fractionation of engineered strains revealed that targeting the enzymes of the Ehrlich 
+      pathway to the mitochondria achieves greater local enzyme concentrations.
+
+      [2] doi:10.1038/nbt.2509 chars [23626, 23831):
+      We 
+      detected all enzymes fused to the CoxIV mitochondrial localization 
+      signal in the mitochondrial fractions, whereas we detected enzymes 
+      lacking the CoxIV signal only in cytoplasmic fractions ( Fig. 5).
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -303,36 +580,104 @@ entries:
       Brat, Boles and colleagues on cytosolic relocalization of the valine pathway in yeast
       (recalled - confirm authors and year); separately, a review of the cytosolic iron-sulfur
       assembly (CIA) machinery for the maturation claim.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Authors and year from source_hint confirm: Brat, Boles and colleagues, Biotechnol Biofuels
+      2012. [1] establishes the cytosolic-relocalization strategy exactly as the statement
+      describes it. The second clause - cytosolic Fe-S maturation for Ilv3 as a recognized
+      difficulty - is supported by [2] and belongs on the DHAD step as a bottleneck row rather
+      than as narrative text. IMPORTANT NUANCE: [3] is the same relocalization paper reporting the
+      OPPOSITE outcome in its own hands - the cytosolic CIA machinery did load their Ilv3. Record
+      this as a CONTESTED bottleneck carrying both sides, not as a settled fact. A third corpus
+      paper adds a quantitative framing (cytosolic ISC assembly has much lower capacity than the
+      mitochondrial system). No dedicated review of the CIA machinery is in the corpus, so the
+      maturation half of source_hint is covered only incidentally.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/1754-6834-5-65 chars [673, 1013):
+      Isobutanol production could be improved by re-locating the valine biosynthesis enzymes Ilv2, Ilv5 and Ilv3 from the mitochondrial matrix into the cytosol. To prevent the import of the three enzymes into yeast mitochondria, N-terminally shortened Ilv2, Ilv5 and Ilv3 versions were constructed lacking their mitochondrial targeting sequences.
+
+      [2] doi:10.1016/j.synbio.2022.02.007 chars [1286, 1513):
+      Functional genomic analyses suggested that the poor performances of the cytosolic pathway strains were in part due to a shortage in cytosolic Fe–S clusters, which are required cofactors for the dihydroxyacid dehydratase enzyme.
+
+      [3] doi:10.1186/1754-6834-5-65 chars [37532, 37672):
+      It seems that for the cytosolic Ilv3 version the loading with iron-sulphur can also be accomplished by the cytosolic assembly machinery CIA.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-PATH-011
     category: pathway_compartment
     statement: >-
-      Pyruvate reaches the mitochondrial matrix through the mitochondrial pyruvate carrier, so
-      the matrix branch of the route depends on a transport step that is itself engineerable.
+      Cytosolic pyruvate reaches the mitochondrial matrix through the mitochondrial pyruvate
+      carrier (MPC) complex, encoded by MPC1, MPC2 and MPC3 with MPC1 required for function. This
+      is the first of the two inner-membrane crossings the native route makes (BM-PATH-007), and
+      it is itself engineerable: overexpressing mpc1 together with mpc3 is reported to improve
+      isobutanol production.
     query_shape: >-
       transport_reaction(substrate=pyruvate, membrane=mitochondrial_inner) -> enzyme ->
       gene_group, read evidence level
     expected_outcome: >-
-      A named carrier complex returned (MPC1 with MPC2/MPC3 as the recalled subunit names),
-      distinguishing it clearly from the unidentified 2-ketoisovalerate carrier of BM-PATH-008.
-      The contrast between these two entries is the point: the atlas must return a name for one
-      and a gap for the other.
+      A named carrier complex returned, resolving to the MPC1/MPC2/MPC3 gene group, distinguishing
+      it clearly from the unidentified 2-ketoisovalerate carrier of BM-PATH-008. The contrast
+      between these two entries is the point: the atlas must return a name for one and a gap for
+      the other. This transition must also be counted by BM-PATH-007; an atlas that names the
+      carrier here and reports one transition there is internally inconsistent and fails both. The
+      sources consulted say pyruvate is imported 'into the mitochondria' and do not name the inner
+      membrane, so a row asserting the specific membrane needs a source beyond those in evidence.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
     source_hint: >-
       Herzig et al. and Bricker et al., both Science 2012, identifying the mitochondrial
       pyruvate carrier (recalled - confirm); SGD locus pages for MPC1/MPC2/MPC3.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: that cytosolic pyruvate reaches the mitochondria via the mitochondrial pyruvate
+      carrier complex [1], the MPC1/MPC2/MPC3 composition with MPC1 crucial for function [2], and
+      the "itself engineerable" clause [3]. NOT SUPPORTED: "mitochondrial inner membrane". A
+      targeted search returned zero corpus texts pairing MPC with "inner membrane", so the
+      statement now says the matrix and the expected_outcome flags the membrane as needing a
+      source from outside this corpus. EVIDENCE-LEVELLING NOTE: Herzig et al. and Bricker et al.,
+      Science 2012, are not in the corpus as full texts - they appear only as citations inside two
+      corpus papers - so within this corpus the identification is attested by citation and the
+      expected_evidence_level of L2 is not reachable from the corpus alone. THIS ENTRY WAS RIGHT
+      AND BM-PATH-007 WAS WRONG: the transport step it names is the first of the two crossings,
+      and the two entries are now mutually consistent.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1038/s41598-019-40631-5 chars [3268, 3388):
+      In S. cerevisiae, cytosolic pyruvate is imported into the mitochondria via mitochondrial pyruvate carrier (MPC) complex,
+
+      [2] doi:10.18632/oncotarget.7174 chars [18445, 18613):
+      There are three genes in yeast taking part in encoding the mitochondrial pyruvate carrier, i.e., MPC1, MPC2 and MPC3, with the first one being crucial for its function.
+
+      [3] doi:10.1080/21655979.2021.1978189 chars [26037, 26218):
+      Mitochondrial pyruvate carriers (MPC) which include mpc1, mpc2, and mpc3 were overexpressed in various combinations. Overexpression of mpc1 and mpc 3 improved isobutanol production.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -352,10 +697,33 @@ entries:
     expected_evidence_level: L2
     source_hint: >-
       BRENDA EC 1.1.1.86 cofactor specificity; UniProt entry for S. cerevisiae Ilv5.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      All three things the expected outcome asks for, in one passage: the enzyme (Ilv5, the KARI
+      step), the cofactor identity as NADPH SPECIFICALLY rather than "NAD(P)H", and the
+      compartment. It does NOT give a numeric signed stoichiometric coefficient - "requires"
+      implies consumption but no coefficient is printed; another corpus paper comes closer,
+      writing that NADPH is used as redox cofactor and oxidized to NADP+, and may be the better
+      row if the atlas wants directionality. The least contested statement in its category: no
+      statement anywhere in the corpus contradicts NADPH specificity for wild-type Ilv5. ONE
+      CAVEAT TO KEEP SEPARATE: engineered KARI variants are deliberately NADH-preferring, so a row
+      keyed on the step role "KARI" must not inherit NADPH from Ilv5 (BM-COF-004).
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-019-1486-8 chars [5533, 5805):
+      In the native pathway, after transport into mitochondria, two molecules of pyruvate are condensed to one molecule of 2-acetolactate (ALAC) by the Ilv2Ilv6 complex. Reduction and isomerization of ALAC to 2,3-dihydroxyisovalerate (DIV) by Ilv5 requires redox cofactor NADPH.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -379,10 +747,41 @@ entries:
     source_hint: >-
       BRENDA EC 1.1.1.1 for yeast Adh1 cofactor preference; check Adh6 separately, which is
       recalled as NADPH-preferring and would change the balance.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      [1] carries the whole arithmetic the entry wants to survive summation, and names the residue
+      as a species-resolved pair of non-zero terms - "an NADPH shortage and NADH excess" - which
+      is exactly what must not collapse into a single "reducing equivalents" total. [2] supplies
+      the "cannot close on its own" clause: S. cerevisiae lacks transhydrogenases. IMPORTANT SCOPE
+      QUALIFICATION that the statement's wording hides and the corpus confirms: "the alcohol
+      dehydrogenase step that finishes isobutanol" is not one enzyme in yeast. [3] records Adh6
+      and Adh7 as NADPH-dependent, and several corpus builds deliberately overexpress ADH6 - in
+      which case the route demands two NADPH rather than one NADPH plus one NADH and the imbalance
+      is LARGER, not absent. The direction of the claim is unchanged, so the statement stands; but
+      this is a per-part fact, not a per-pathway fact, and a flattened generic "ADH" step role
+      would get it wrong.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.synbio.2022.02.007 chars [8016, 8287):
+      the redox cofactor-imbalance that exists between glycolysis and isobutanol fermentation; glycolysis produces two NADH per molecule of glucose, while isobutanol fermentation consumes one NADPH by ILV5 and one NADH by ADH. This results in an NADPH shortage and NADH excess.
+
+      [2] doi:10.1186/1754-6834-5-65 chars [41976, 42175):
+      Ilv5 in the isobutanol pathway exclusively uses NADPH. As S. cerevisiae lacks transhydrogenases to transfer hydride-ions from NADH to NADP+, the cofactor levels within the cell will be imbalanced [].
+
+      [3] doi:10.3389/fmicb.2025.1753983 chars [5576, 5717):
+      The yeast alcohol dehydrogenase Adh2 is NADH-dependent, while the bacterial aldehyde reductase YqhD, yeast Adh6, and Adh7 are NADPH-dependent
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -407,26 +806,59 @@ entries:
       shuttles are actually established in this organism, since the textbook
       malate-aspartate account is not straightforwardly transferable. Check the external
       NADH dehydrogenases NDE1/NDE2 and the internal NDI1 as the recalled route.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      [1] establishes the NAD(H) half outright - the inner membrane is impermeable to NADH and
+      NAD+, so respiratory reoxidation is "strictly compartmentalized" - and confirms
+      source_hint's recalled route by naming Ndi as the matrix-facing dehydrogenase. It does NOT
+      cover NADPH; [2] supplies that half. No single paper found in this corpus states both in one
+      sentence, so a curator may prefer to split this entry into one row per cofactor species. The
+      corpus also supplies direct experimental support for the harder implicit claim, that matrix
+      NADH cannot simply be shuttled out, but in Kluyveromyces lactis rather than S. cerevisiae.
+      Bakker et al., FEMS Microbiology Reviews 2001, the review named in source_hint, was NOT
+      found in the corpus.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1128/aem.00362-26 chars [5908, 6247):
+      Because the yeast inner mitochondrial membrane is impermeable to NADH and NAD+, respiratory reoxidation of NADH is strictly compartmentalized (). In the model yeast Saccharomyces cerevisiae, oxidation of NADH generated in the mitochondrial matrix is coupled to respiration by a simple, non-proton-translocating NADH dehydrogenase (Ndi) ().
+
+      [2] doi:10.1371/journal.pone.0333299 chars [4669, 4779):
+      The presence of a cytosolic malic enzyme is important as NADPH cannot freely cross the mitochondrial membrane.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-COF-004
     category: cofactor_redox
     statement: >-
-      Engineering an NADH-preferring KARI variant was the change that enabled near-theoretical
-      anaerobic isobutanol production in Escherichia coli, which makes cofactor preference the
-      single highest-leverage part choice in the catalog.
+      Switching ketol-acid reductoisomerase cofactor preference from NADPH to NADH, TOGETHER WITH
+      an NADH-dependent alcohol dehydrogenase (L. lactis AdhA-RE1), enabled anaerobic isobutanol
+      production at 100 percent of theoretical maximum yield (13.4 g/L) in Escherichia coli. Two
+      enzymes were cofactor-swapped in that build, not one. The outcome does not transfer to
+      yeast: NADH-preferring KARI variants in S. cerevisiae did not outperform the wild-type
+      NADPH-dependent enzyme, and in a head-to-head comparison the larger lever was pathway
+      localization.
     query_shape: >-
       part(step_role='KARI') filtered to engineered variants, with cofactor_preference and the
       measured outcome of the host build that used it
     expected_outcome: >-
-      At least one engineered IlvC variant returned with a recorded cofactor switch and an
-      E. coli host record; the yeast rows for the same part role must be returned separately
-      and must not inherit the E. coli outcome.
+      At least one engineered IlvC variant returned with a recorded cofactor switch and an E. coli
+      host record, returned TOGETHER WITH the engineered AdhA the same build carried, because
+      attributing the anaerobic result to either part alone is the error this entry was rewritten
+      to catch; the yeast rows for the same part role must be returned separately and must not
+      inherit the E. coli outcome. A ranking that puts cofactor preference above localization for
+      the yeast catalog is a false positive here.
     organism: Escherichia coli
     product: isobutanol
     expected_evidence_level: L1
@@ -434,25 +866,65 @@ entries:
       Bastian et al., Metabolic Engineering 2011, on engineered NADH-dependent KARI and
       anaerobic isobutanol in E. coli (recalled - confirm); also Atsumi/Liao 2008 for the
       original E. coli isobutanol build.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      OVERSTATED IN TWO SEPARATE WAYS, and both are corrected in the statement. (1) ATTRIBUTION.
+      [1] confirms the factual core - an engineered NADH-preferring IlvC variant exists, it was
+      used in E. coli, and the strain reached 13.4 g/L isobutanol at 100 percent of theoretical
+      anaerobically - but it names the strain as carrying BOTH AdhA-RE1 and IlvC6E6, and [2]
+      independently describes the same work as a pair of changes. The KARI switch was not "the
+      change" on its own. (2) "THE SINGLE HIGHEST-LEVERAGE PART CHOICE IN THE CATALOG" is not
+      supported and is actively countered for yeast by [3], where NADH-dependent KARI variants did
+      not outperform the wild-type NADPH enzyme, the authors attributing it to reduced specific
+      activity; the corpus's own yeast head-to-head found pathway LOCALIZATION the larger lever at
+      3.8-fold. The catalog is a yeast catalog, so the clause is DROPPED rather than softened.
+      This exercises the entry's own warning that yeast rows "must not inherit the E. coli
+      outcome" - the outcome really does not transfer. Note "met als" with the interior space in
+      [1] is a PDF-extraction artefact present in the source, reproduced verbatim.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.3389/fmicb.2012.00196 chars [34017, 34542):
+      To overcome this cofactor imbalance issue, constructed an NADH-dependent pathway by engineering a ketol-acid reductoisomerase IlvC (E. coli) and ADH AdhA (L. lactis). Directed evolution approaches () were applied to IlvC and AdhA to switch cofactor dependence from NADPH to NADH. In an anaerobic, fully NADH-dependent strain containing AdhARE1 and IlvC6E6-his6, 13.4 g/L isobutanol at 100% theoretical maximum yield was produced in M9 media supplemented with glucose, yeast extract, and trace met als (hereafter modified M9).
+
+      [2] doi:10.1007/s10295-020-02319-y chars [4316, 4482):
+      In a mutated form of ilvC, the cofactor was exchanged from NADPH to NADH. These mutations enabled anaerobic isobutanol production at 100% of the theoretical yield [].
+
+      [3] doi:10.3389/fbioe.2022.1080024 chars [38849, 39028):
+      Strains sFVG612 and sFVG613, containing either of the NADH-dependent KARI variants, LbIlvC DD and LbIlvC DDV, did not outperform sJD107 with the wild-type, NADPH-dependent LbIlvC.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-COF-005
     category: cofactor_redox
     statement: >-
-      Matrix NADPH supply under production conditions is not quantified, and is an open gap for
-      any configuration that runs the KARI step in the mitochondrial matrix.
+      The enzymes supplying mitochondrial-matrix NADPH in S. cerevisiae are qualitatively known -
+      Pos5, Ald4/Ald5, Idp1 and Mae1, with Pos5 regarded as the main source - but no
+      compartment-resolved matrix NADPH concentration, NADPH/NADP+ ratio or supply flux under
+      fermentative or production conditions is recorded anywhere in the consulted corpus. The
+      quantity, not the identity of the sources, is the open gap, and it is an open gap for any
+      configuration that runs the KARI step in the mitochondrial matrix.
     query_shape: >-
       knowledge_gap(kind='quantitative_value_missing') filtered to cofactor supply,
       compartment=mitochondrial_matrix
     expected_outcome: >-
-      One open gap row returned, linked to the KARI step and to the configurations it blocks.
-      A numeric matrix NADPH concentration returned with high confidence would be a false
-      positive worth investigating.
+      One open gap row returned, of kind 'quantitative_value_missing' rather than an
+      identity-unknown kind, linked to the KARI step and to the configurations it blocks, and
+      returned alongside the known qualitative sources (Pos5, Ald4/Ald5, Idp1, Mae1) rather than
+      as an empty result. A numeric matrix NADPH concentration returned with high confidence would
+      be a false positive worth investigating; an empty enzyme list would be a false negative.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L5
@@ -460,10 +932,38 @@ entries:
       Search for quantitative measurements of compartment-resolved NADPH/NADP+ ratios in yeast,
       for example with genetically encoded biosensors; record whether any exist under
       fermentative conditions.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      THE GAP IS REAL BUT NARROWER THAN STATED, and the statement now says which kind of "not
+      quantified" it means. [1] shows matrix NADPH supply is known QUALITATIVELY - Pos5,
+      Ald4/Ald5, Idp1, Mae1, with Pos5 "considered as the main source" - so identity is not the
+      gap. Searches for compartment-resolved NADPH concentrations, NADPH/NADP+ ratios and
+      genetically encoded NADPH biosensors returned no S. cerevisiae matrix measurement under any
+      condition in 1,309 texts. TWO FACTS TO CARRY INTO ANY Pos5 ROW: Pos5 is the main source, not
+      the sole source; and Pos5 is ATP-coupled, so matrix NADPH is bought with ATP and with NADH
+      that respiration would otherwise use. EMPIRICAL EVIDENCE THAT THE GAP BITES: one corpus
+      paper tried to raise matrix NADPH for the Ilv5 step by overexpressing mitochondrial Mae1 and
+      isobutanol went DOWN; another reports the same overexpression raising isobutanol to 139
+      mg/L. The two outcomes disagree, which is itself the argument that matrix NADPH supply under
+      production conditions is unquantified rather than merely unrecorded. "mitochondriona" in [1]
+      is the source's own typo, reproduced verbatim.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-023-02309-z chars [6868, 7525):
+      While the cytosolic NADPH is mainly derived from the reactions catalyzed by glucose-6-phosphate dehydrogenase Zwf1, acetaldehyde dehydrogenase Ald6 and isocitrate dehydrogenase Idp2, the mitochondrial NADPH is relying on the reactions catalyzed by NAD+/NADH kinase Pos5 and NADP+ dependent enzymes, including acetaldehyde dehydrogenases Ald4 and Ald5, isocitrate dehydrogenase Idp1, and malic enzyme Mae1 [, ]. Pos5 is considered as the main source of mitochondrial NADPH and possesses higher NADH kinase activity than NAD kinase activity [, ], suggesting active NADPH synthesis from NADH with ATP consumed, both of which are abundant in the mitochondriona.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -487,36 +987,101 @@ entries:
     source_hint: >-
       SGD locus pages for PDC1 (recalled YLR044C), PDC5, PDC6; a review of pyruvate branch-point
       control in S. cerevisiae.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      [1] establishes the three isozymes and that they are explicitly NOT equivalent under
+      fermentative conditions: Pdc1 dominant and very highly expressed, Pdc5 active only when Pdc1
+      protein is absent, PDC6 untranscribed on glucose. It is a 2025 REVIEW STATEMENT, not an own
+      result, and every clause carries a citation to earlier work; no own-result paper in the
+      corpus establishes isozyme dominance directly. FRAMING CORRECTION WITH REAL CONSEQUENCES,
+      from [2]: in the isobutanol context Pdc1 and Pdc5 are NOT purely competing. Deleting both
+      stopped isobutanol production completely, because they also convert KIV to isobutyraldehyde.
+      Storing PDC1/5/6 with role='competing' alone would misrepresent the corpus - they are
+      dual-role at this node. The ethanol-sink half has an own-result corroboration in the same
+      paper, where deleting PDC1 plus PDC5 collapsed ethanol from about 13 g/L to 0.01 g/L.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1093/femsyr/foaf014 chars [8710, 9303):
+      Pdc1, Pdc5, and Pdc6 are three isoenzymes. Pdc1 plays a major role and has a very high expression level. Pdc5 is only active when there is no Pdc1 protein expression, because its promoter is inhibited by Pdc1 protein (Eberhardt et al. ). Pdc2 is not a direct PDC gene, but a transcription factor (Iosue et al. ). It regulates the expression of Pdc1 and Pdc5, and is important for their functions (Mojzita and Hohmann , Nosaka et al. ). With a nonfermentable carbon source, Pdc6 is activated under sulfur limitation. When glucose is the carbon source, PDC6 cannot be transcribed (Boer et al. ).
+
+      [2] doi:10.1186/s13068-019-1486-8 chars [18689, 18903):
+      This confirmed the results of Choo et al. [], Brat et al. [] and Milne et al. [], indicating that Pdc1 and Pdc5 significantly contribute also in the conversion of KIV to isobutyraldehyde within the Ehrlich pathway.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-CMP-002
     category: competing_pathway
     statement: >-
-      Deletion of PDC1 reduces ethanol formation, and deletion of all three PDC isozymes
-      abolishes fermentative ethanol production and produces a strain that cannot grow on
-      glucose as sole carbon source without a C2 supplement.
+      Deletion of PDC1 alone has only a minor effect on ethanol formation, because PDC5 is
+      derepressed in its absence - 12.6 g/L against 13 g/L for the wild type in one own-result
+      measurement. Deleting PDC1 together with PDC5 is what abolishes fermentative ethanol
+      production (0.01 g/L), PDC6 not normally being expressed on glucose. Pdc-negative strains
+      cannot grow on high glucose concentrations and require a C2 compound - ethanol or acetate -
+      for growth at low glucose.
     query_shape: >-
       genotype(pdc1 deletion) and genotype(pdc1 pdc5 pdc6 deletion) joined to
       measurement(product=ethanol) and to growth phenotype under matched condition_context
     expected_outcome: >-
-      A reduction in ethanol for the single deletion and an abolition plus a C2-auxotrophy
-      phenotype for the triple, each with its condition context attached. The growth phenotype
-      must not be stored as a zero yield.
+      Only a minor reduction in ethanol for the single PDC1 deletion, an abolition for the pdc1
+      pdc5 double deletion, and a C2-requirement growth phenotype for Pdc-negative strains, each
+      with its condition context attached. The growth phenotype must not be stored as a zero
+      yield. An atlas that returns the single PDC1 deletion as a substantial ethanol reduction has
+      taken the direction of the effect for its size, which is the error this entry was rewritten
+      to catch.
     organism: Saccharomyces cerevisiae
     product: ethanol
     expected_evidence_level: L2
     source_hint: >-
       Flikweert et al. on Pdc-negative S. cerevisiae and the C2 requirement (recalled - confirm
       authors and year); van Maris et al. on evolved Pdc-negative strains.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      THREE CORRECTIONS, all folded into the statement. (1) "Deletion of PDC1 reduces ethanol
+      formation" is contradicted as a MEANINGFUL effect by [1], an own-result measurement: 12.6
+      g/L against 13 g/L for the wild type, which the authors themselves call only minor. A second
+      own-result paper reports little impact of the same deletion anaerobically in an industrial
+      wine strain. The corpus reason is autoregulation - PDC5 is derepressed when Pdc1 is absent.
+      (2) "All three PDC isozymes" is more than the corpus requires: [2] states PDC1 together with
+      PDC5 was sufficient, PDC6 not normally being expressed. (3) The C2/glucose-growth half is
+      supported [3] but in the corpus only as a background premise repeated across several papers;
+      the Flikweert and van Maris primaries named in source_hint are cited by them and are not
+      themselves in the corpus. [1] says nothing about growth on glucose or about a C2 supplement,
+      which is why [3] is carried alongside it.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-019-1486-8 chars [22396, 22754):
+      Compared to the wt strain CEN.PK113-7D (13 g/L), JWY0 (13.8 g/L) and JWY04 (13.4 g/L), single deletion strains JWY14 (∆pdc1) and JWY15 (∆pdc5) showed only minor effects in ethanol production, resulting in ethanol titers of 12.6 g/L and 12.3 g/L, respectively, whereas the pdc1/5 double deletion strain JWY13 showed an ethanol titer of only 0.01 g/L (Fig. c).
+
+      [2] doi:10.1186/s13068-019-1486-8 chars [14520, 14644):
+      Since PDC6 normally is not expressed [], deletions of PDC1 together with PDC5 were sufficient to block ethanol biosynthesis.
+
+      [3] doi:10.1186/1475-2859-11-131 chars [510, 733):
+      However, Pdc- strains cannot grow on high glucose concentrations and require C2-compounds (ethanol or acetate) for growth under conditions with low glucose concentrations, which hitherto has limited application in industry.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -539,35 +1104,97 @@ entries:
     source_hint: >-
       Bjorkqvist/Ansell et al. on GPD1 GPD2 double mutants and anaerobic growth (recalled -
       confirm); SGD phenotype annotations for gpd1 gpd2.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      [1] carries both the anaerobic growth phenotype of the gpd1 gpd2 double deletion and the
+      mechanistic reason the claim gives; [2] adds the quantitative anaerobic statement. NO SINGLE
+      CORPUS PAPER REPORTS BOTH HALVES AS ITS OWN RESULT, so the evidence must be split.
+      CONDITION- CONTEXT HAZARD, which is precisely what this entry's expected outcome exists to
+      test: the corpus's own-result glycerol measurement for a gpd1 gpd2 double deletion in an
+      isobutanol background comes from AEROBIC fermentations and carries no anaerobic facet at
+      all. The paralogues also differ - a gpd1 deletion gives an osmosensitive strain while gpd2
+      cells are impaired anaerobically, and the corpus's own single-deletion glycerol titers
+      differ between them - so treating the double deletion as one unit hides that.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.synbio.2021.12.010 chars [19799, 19985):
+      In contrast, due to the essential role of glycerol formation in NADH redox-cofactor balancing in non-respiratory cultures, double deletion of GPD1 and GPD2 prevents anaerobic growth [,].
+
+      [2] doi:10.1186/1475-2859-9-36 chars [5706, 5883):
+      The double deletion mutant was not able to grow under anaerobic conditions and showed a 12.7% yield improvement, but also a 29% reduction in biomass yield in aerobic conditions.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-CMP-004
     category: competing_pathway
     statement: >-
-      The branched-chain aminotransferases Bat1 and Bat2 drain 2-ketoisovalerate to valine, and
-      they differ in compartment - Bat1 mitochondrial, Bat2 cytosolic - so deleting one is not
-      equivalent to deleting the other.
+      The branched-chain aminotransferases Bat1 and Bat2 catalyse the reaction between
+      2-ketoisovalerate and valine and differ in compartment - Bat1 in the mitochondrial matrix,
+      Bat2 in the cytosol - so deleting one is not equivalent to deleting the other. The
+      compartment difference is attested in the consulted corpus only as background statement,
+      never as anyone's own localization experiment. The measured deletion consequence is known
+      for BAT1 and is background-dependent: deleting BAT1 raised isobutanol 2.5-fold in one strain
+      and was reported harmful in another.
     query_shape: >-
       reactions consuming 2-ketoisovalerate with role='competing' in the isobutanol context,
       grouped by compartment
     expected_outcome: >-
       Two distinct rows with different compartments, not one merged "BAT" row. The compartment
-      difference must be retrievable, because it determines which strategy each deletion helps.
+      difference must be retrievable, because it determines which strategy each deletion helps -
+      and the evidence level behind it must be retrievable too, because in this corpus it rests on
+      background statements rather than on a localization measurement. A deletion consequence
+      returned without its strain background misrepresents a result whose sign changes with it.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
     source_hint: >-
       SGD locus pages for BAT1 (recalled YHR208W) and BAT2 (recalled YJR148W) with their GO
       cellular component annotations; the compartment split is recalled and must be confirmed.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED by an own deletion experiment, but only for Bat1 [1]: BAT1 encodes the
+      mitochondrial branched-chain aminotransferase, converts the alpha-KIV precursor to valine
+      exclusively in mitochondria, and deleting it raised isobutanol 2.5-fold to 358 mg/L. NOT
+      SUPPORTED BY ANY OWN RESULT: the Bat2 half - neither its cytosolic localization nor that a
+      bat2 deletion behaves differently. The compartment split is asserted often in the corpus [2]
+      but never as anyone's own localization experiment; one corpus paper reproduces the GO
+      annotations (Bat1 GO:0005739, Bat2 GO:0005829, both IDA from one PMID), and that PMID is the
+      primary the claim actually needs and is NOT in the corpus. COUNTER-EVIDENCE WORTH STORING:
+      in a different strain background, deleting only BAT1 or only BAT2 had NEGATIVE effects on
+      growth and isobutanol. The sign of the effect is background-dependent, which if anything
+      strengthens this entry's point that the two deletions must not be merged into one row.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-019-1560-2 chars [15812, 16370):
+      We also explored the effect of deleting the mitochondrial branched-chain amino acid transaminase encoded by BAT1, which converts the α-KIV precursor to valine exclusively in mitochondria (Fig. a). We found that deleting BAT1 in YZy165 results in a strain (YZy173, Table ) that produces 358 ± 13 mg/L isobutanol (from 15% xylose in 72 h high cell-density fermentations), which is a substantial improvement relative to deletions of PHO13 (YZy178) or ALD6 (YZy183) alone, and 2.5-times higher than the isobutanol produced by the parental YZy165 strain (Fig. a).
+
+      [2] doi:10.1186/1754-6834-4-21 chars [6319, 6530):
+      The bidirectional reaction between 2-ketoisovalerate and valine is catalysed by the branched-chain amino-acid aminotransferases (Bat1 and Bat2, present in the mitochondrial matrix and the cytosol, respectively).
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -589,10 +1216,38 @@ entries:
       SGD locus pages for LEU4 (recalled YNL104C) and LEU9 (recalled YOR108W); KEGG map00290
       for the leucine branch. Whether Leu4 is partly mitochondrial is recalled and disputed -
       flag it for a curator.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      [1] is own fermentation data giving exactly the deletion consequence the query shape asks
+      for - deleting LEU4 and LEU9 together raised isobutanol to 0.50 g/L (12.31 mg/g glucose) -
+      so NO never_attempted gap is needed for the pair. [2] gives the biochemistry, as background
+      in the same paper's introduction. The pair is deleted as one unit, so no corpus measurement
+      separates LEU4 from LEU9 against isobutanol titer; that single-gene gap is real. The
+      trailing sentence of [1] is included deliberately: ECM31, the pantothenate drain at the same
+      branch point, was deleted in the same series and had no statistically significant effect,
+      which belongs next to this row. ON THE FLAGGED Leu4 LOCALIZATION QUESTION the corpus does
+      not settle it and disagrees with itself - one paper calls Leu4/Leu9 mitochondrially located,
+      another puts the reaction in either compartment, both as background. Leave the compartment
+      open.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-019-1486-8 chars [16859, 17228):
+      Further suppression of leucine biosynthesis by deletion of LEU4/9 (strain JWY02) had an additional large effect on isobutanol levels and resulted in a titer of 0.50 g/L (12.31 mg/g glucose). Further blocking of pantothenate biosynthesis by deletion of ECM31 (strain JWY03) had no statistically significant effect on isobutanol production (0.52 g/L, 12.69 mg/g glucose).
+
+      [2] doi:10.1186/s13068-019-1486-8 chars [7511, 7636):
+      Within leucine biosynthesis, 2-isopropylmalate synthases Leu4 and Leu9 catalyze the first step from KIV to 2-isopropylmalate.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -614,10 +1269,48 @@ entries:
     source_hint: >-
       Hazelwood et al. 2008 Ehrlich pathway review for substrate promiscuity; any KivD substrate
       specificity paper for the quantitative spread.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Own result, supporting the mechanistic core precisely: the alpha-ketoacid precursors of
+      isopentanol and 2-methyl-1-butanol are suitable substrates for the overexpressed alpha-KDCs,
+      and the KDC homologs differ in BIAS - Ll-kivd toward isopentanol, Sc-aro10 toward
+      2-methyl-1-butanol, Sc-kid1 with no detectable activity. That difference in bias is what
+      makes the ratio between the alcohols an informative readout of the configuration rather than
+      a contaminant. The quote does not carry the titers; those are in Table 1 of the same paper,
+      where one S. cerevisiae configuration co-reports isobutanol, isopentanol and
+      2-methyl-1-butanol, so the ratios are computable from a single row. THIS FILE IS
+      PDF-EXTRACTED: the quote carries hard line breaks and soft hyphens (U+00AD) inside
+      hyphenated words such as 2-<shy>methyl-<shy>1-<shy>butanol. Reproduced exactly as stored;
+      must not be normalised before comparison.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1038/nbt.2509 chars [26576, 27520):
+      Isopentanol and 2-­methyl-­1-­butanol titers also increased in strains 
+      containing mitochondrial isobutanol pathways. These increased titers 
+      are likely due to (i) overexpression of the upstream ILV gene products 
+      (ILV2, ILV3 and ILV5), also involved in the biosynthetic pathways 
+      of leucine and isoleucine, resulting in the production of the rele -­
+      vant α-­ketoacids ( α-­ketoisocaproate and α-­keto-­3-­methylvalerate,  
+      respectively; Fig. 4c); (ii) the two α-­ketoacid precursors to these alco-­
+      hols being suitable substrates for the overexpressed α-­KDCs, with 
+      Ll-­kivd having a bias for isopentanol production, Sc -­aro10 having 
+      higher activity for 2 -­methyl-­1-­butanol production and Sc -­kid1 with 
+      no detectable activity; and (iii) the aldehydes they produce being 
+      potential substrates for the three overexpressed ADHs, which have 
+      no apparent preference for the production of either alcohol ( Fig. 4 
+      and Supplementary Table 4).
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -640,50 +1333,142 @@ entries:
     source_hint: >-
       NCBI translation table 3 (Yeast Mitochondrial Code) on the NCBI taxonomy genetic codes
       page - a primary, citable source, unlike most rows in this file.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      The corpus independently states the UGA=Trp reassignment for S. cerevisiae mitochondria, and
+      relies on it in practice: TGG codons were deliberately swapped to UGA so that a Cas9 gene
+      would be translated only inside mitochondria. So the wiring check this entry doubles as has
+      a real source behind it and does not rest only on src/fermdb/genetic_code.py. It does NOT
+      name "NCBI translation table 3" or cite the NCBI page, so the table-number wording of the
+      statement is not what this sentence supplies. Two other corpus papers tie the name
+      "translation table 3" to S. cerevisiae without restating UGA=Trp. CAUTION: one of those
+      papers also discusses UGA(Trp) in its results, but that passage is about Candida species,
+      not S. cerevisiae - do not reuse it as an S. cerevisiae source. No corpus text cites the
+      NCBI taxonomy genetic-codes page itself.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.7717/peerj.8362 chars [44172, 44329):
+      Also, a number of TGG were replaced with UGA, which is a stop codon in the universal codon system but is translated into tryptophan in yeast mitochondria ().
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-MIT-002
     category: mitochondrial_genetics
     statement: >-
-      In translation table 3 the entire CUN codon family reads as threonine rather than leucine,
-      which is the most dangerous difference for anyone moving a gene into mtDNA because a
-      leucine-rich sequence mistranslates extensively while still looking like a sensible gene.
+      In the S. cerevisiae mitochondrial genetic code (NCBI translation table 3) the CUN codon
+      family reads as threonine rather than leucine, decoded by an abnormal tRNA-Thr with an
+      8-nucleotide anticodon loop that S. cerevisiae carries and some other yeasts lack. A
+      leucine-rich sequence moved into mtDNA therefore mistranslates extensively while still
+      reading as a sensible gene - that consequence is an inference from the reassignment, not a
+      statement any consulted source makes.
     query_shape: >-
       diff_tables(table_1, table_3) -> codons whose assignment differs, filtered to the CUN block
     expected_outcome: >-
       All four of CUU, CUC, CUA, CUG returned with standard='L' and mitochondrial='T'. Returning
-      fewer than four is a partial-table bug.
+      fewer than four is a partial-table bug. Note that no consulted source enumerates the four
+      codons individually, so the four-codon expectation is a property of the table the recoder
+      implements: this entry tests the query layer and src/fermdb/genetic_code.py against each
+      other and against the NCBI table, not against the corpus.
     organism: Saccharomyces cerevisiae
     product: 'NA'
     expected_evidence_level: L2
     source_hint: NCBI translation table 3, as above.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: CUN reads as threonine as a property of S. cerevisiae, decoded by the abnormal
+      tRNA-Thr with an 8-nt anticodon loop. READ THE QUOTE CAREFULLY BEFORE REUSING IT - its main
+      clause is about the Candida species the paper studies, which LACK the S. cerevisiae homolog
+      of that tRNA and therefore read CUN as leucine; only the parenthetical carries the S.
+      cerevisiae-relevant CUN=Thr fact, and the sentence's logic makes S. cerevisiae the reference
+      organism that carries the tRNA. A curator may reasonably want a cleaner source. NOT
+      SUPPORTED: the enumeration CUU/CUC/CUA/CUG - nothing in the corpus lists all four, so the
+      expected outcome's four-codon demand cannot be checked against a corpus source and is
+      instead a check of the recoder against the NCBI table; the phrase "translation table 3" in
+      the same sentence; and the "most dangerous difference" clause, which is an editorial
+      judgement with no corpus support and is not testable by the stated query shape. The
+      statement now marks that consequence as an inference rather than a sourced finding.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1093/nar/gkq1345 chars [30195, 30460):
+      The presence of tRNATrp with an UCA anticodon, and the absence of an S. cerevisiae homolog of the abnormal tRNAThr1 with 8-nt in the anticodon loop (decoding CUN as threonine), indicate that UGA and CUN codons are recognized as tryptophan and leucine, respectively.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-MIT-003
     category: mitochondrial_genetics
     statement: >-
-      In translation table 3 the codon AUA reads as methionine rather than isoleucine.
+      In the S. cerevisiae mitochondrial genetic code (NCBI translation table 3) the codon AUA
+      reads as methionine rather than isoleucine. The consulted corpus establishes that table 3 is
+      the yeast mitochondrial code, originally based on S. cerevisiae, and that AUA is one of the
+      two codons it reassigns relative to the fungal code (table 4) - but no consulted source
+      states the destination amino acid, so the methionine assignment is reachable only from the
+      NCBI genetic-codes page named in source_hint. The same source notes that in many
+      Saccharomycetales the AUA reassignment is not supported and the tRNA required for it is
+      absent, which makes this the shakiest leg of table 3.
     query_shape: >-
       diff_tables(table_1, table_3) -> codons whose assignment differs, filtered to AUA
-    expected_outcome: AUA returned with standard='I' and mitochondrial='M'.
+    expected_outcome: >-
+      AUA returned with standard='I' and mitochondrial='M', sourced to the NCBI table rather than
+      to a corpus paper, because no corpus paper states the destination amino acid.
     organism: Saccharomyces cerevisiae
     product: 'NA'
     expected_evidence_level: L2
     source_hint: NCBI translation table 3, as above.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: that NCBI translation table 3 is the yeast mitochondrial code, originally based
+      on S. cerevisiae, and that AUA is one of the two codons reassigned in it relative to the
+      fungal code (table 4, in which AUA is isoleucine). NOT SUPPORTED: what AUA is reassigned TO.
+      NO CORPUS DOCUMENT ANYWHERE STATES AUA = Met; the only corpus sentences naming AUA as
+      reassigned in table 3 are this one and the identical text in its own bioRxiv preprint. A
+      corpus statement that AUA = isoleucine does exist but is about Candida subhashii under the
+      FUNGAL code, so it is NOT a contradiction of the S. cerevisiae claim and must not be read as
+      one. WORTH FLAGGING, and now in the statement: the same passage continues that in many
+      Saccharomycetales the AUA reassignment is not supported by codetta and the modified tRNA
+      required for it is not present, which makes the AUA leg the shakiest part of table 3 even in
+      the published literature.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.3389/fmicb.2023.1268944 chars [39742, 40226):
+      Yeast mitochondrial translation tables fall into either the Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code (NCBI table 4, hereafter referred to as the fungal code), which is consistent with other fungi, or the yeast mitochondrial code (NCBI table 3, originally based on S. cerevisiae, hereafter referred to as the Saccharomyces code) based on additional reassignments of AUA and CUN codons, which typically define the order Saccharomycetales.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -707,54 +1492,121 @@ entries:
       Fox and colleagues on mitochondrial translational activators in yeast (recalled - confirm);
       SGD locus pages for PET111, PET309, MSS51. The full activator-to-gene map in
       docs/design/MITOCHONDRIAL_PROGRAM.md section 2.1 is itself unverified.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Covers both halves of the statement in one passage: that S. cerevisiae mitochondrial
+      translational activators bind the 5' UTRs of their own cognate mRNAs, so translation is
+      gene-specific rather than generic, and both named examples the statement uses - Pet111 for
+      COX2 and Pet309 with Mss51 for COX1. It adds Pet54/Pet122/Pet494 for COX3 and Cbp3/Cbp6 for
+      CYTB. THE BEST-COVERED ENTRY IN THE SET: several independent corpus papers say the same
+      thing, one of them stating the design consequence that actually matters here - a reporter
+      inserted into mtDNA was deliberately placed under the COX2 5' UTR because mitochondrial
+      translation requires activators that interact with the UTRs. ONE CONSEQUENCE FOR THE
+      EXPECTED OUTCOME: another corpus paper writes "one or more" dedicated activators per gene,
+      so a per-locus activator_required field must permit MULTIPLE activators per gene, not
+      exactly one. It says nothing about insertion-site design or displaced genes.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1093/nar/gkx127 chars [4163, 4514):
+      Indeed, the S. cerevisiae mitochondrial translational activators can bind to the 5΄-UTRs of their respective cognate mRNAs (–). In S. cerevisiae, translation of COX1, COX2, COX3 and CYTB mRNAs requires specific nuclear-encoded proteins: Pet309/Mss51/Mam33 for COX1 (,–), Pet111 for COX2 (,), Pet54/Pet122/Pet494 for COX3 (–) and Cbp3/Cbp6 for CYTB ().
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-MIT-005
     category: mitochondrial_genetics
     statement: >-
-      The recoded ARG8m marker, inserted at the COX3 or COX2 locus and driven by that gene's
-      5' leader, is the established precedent for expressing a soluble matrix enzyme from mtDNA
-      in yeast, and it is therefore the correct feasibility anchor for any proposal to encode a
-      pathway enzyme in the mitochondrial genome.
+      The recoded ARG8m marker, inserted in place of a resident mitochondrial ORF and translated
+      under that gene's untranslated regions, is the established precedent for expressing a
+      soluble matrix enzyme from mtDNA in yeast, and is therefore the correct feasibility anchor
+      for any proposal to encode a pathway enzyme in the mitochondrial genome. The locus is not
+      restricted to COX3 or COX2: ARG8m has been used at COX1, COX2, COX3, COB, VAR1, ATP6 and
+      ATP9. Displacing the resident gene carries a respiration cost - a strain with ATP9 replaced
+      by ARG8m grows on glucose without arginine but not on glycerol.
     query_shape: >-
       modification(type='mtdna_edit') with recoded_for_table_3=true, ordered by demonstrated
       precedent, restricted to soluble matrix proteins
     expected_outcome: >-
-      ARG8m returned as the precedent, with the locus used, the displaced gene and the
-      respiration consequence recorded, and a feasibility_rating of 'specialist' or 'frontier'
-      rather than 'routine'.
+      ARG8m returned as the precedent, with the locus used, the displaced gene and the respiration
+      consequence recorded, and a feasibility_rating of 'specialist' or 'frontier' rather than
+      'routine'. More than one locus must be returnable; an atlas that offers only COX3 or only
+      COX2 has inherited this entry's original, too-narrow wording. The feasibility rating itself
+      has no source in the consulted corpus and remains a curator's judgement.
     organism: Saccharomyces cerevisiae
     product: 'NA'
     expected_evidence_level: L1
     source_hint: >-
       Steele, Fox and colleagues on ARG8m as a mitochondrial reporter (recalled - confirm
       authors, year and which locus was used in the original construct).
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: ARG8m is a recoded version of the nuclear ARG8 gene encoding a matrix-localized
+      (hence soluble) biosynthetic enzyme, expressed from mtDNA in place of a mitochondrial ORF,
+      with its translation dependent on the replaced gene's untranslated regions - exactly the
+      mechanism the statement describes. NOT SUPPORTED: the locus restriction. The locus here is
+      COX1, not COX3 or COX2, and across the corpus ARG8m has been used at COX1, COX2, COX3, COB,
+      VAR1, ATP6 and ATP9. The clause is WIDENED rather than curated as written. THE RESPIRATION
+      CONSEQUENCE the expected outcome asks for IS attested elsewhere in the corpus - a strain
+      with ATP9 replaced by ARG8m grows on glucose without arginine but cannot grow on glycerol -
+      and is now in the statement. ON PROVENANCE: two corpus papers credit Steele, Butler and Fox
+      1996 (PNAS 93:5253-5257), so source_hint's recalled authors and year check out, but that
+      primary is NOT in the corpus and the locus its original construct used is stated nowhere in
+      it. Nothing in the corpus rates feasibility as routine, specialist or frontier; that part of
+      the expected outcome has no source and remains a curator's judgement call.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1093/nar/gkx426 chars [26918, 27596):
+      The strains are deleted for the nuclear ARG8 gene, and the reporter is a recoded version of ARG8, termed ARG8m, that encodes a matrix-localized biosynthetic enzyme, which allows us to look directly at mitochondrial translation by scoring the growth of yeast in the absence of arginine and accumulation of the reporter protein. In the strain XPM10b, the COX1 coding sequence was completely replaced by ARG8m (Δcox1::ARG8m) (Figure ) and in the strain XPM78a, ARG8m was introduced at the end of the 512-nt long intronless COX1 coding sequence [COX1 (1–512)::ARG8m] (Figure ). In these strains, ARG8 mRNA translation is dependent on the COX1 5΄- and 3΄-untranslated regions (UTRs).
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-MIT-006
     category: mitochondrial_genetics
     statement: >-
-      There is no established CRISPR-Cas route for editing yeast mtDNA, because import of guide
-      RNA into the matrix is unsolved; the established routes are biolistic transformation into
-      a rho-zero recipient, and nuclease-based heteroplasmy shifting, which deletes rather than
-      inserts.
+      As of 2020 a CRISPR-Cas route for editing yeast mtDNA has been demonstrated: donor DNA was
+      inserted at Cas9/gRNA-induced target sites in S. cerevisiae mitochondria, with Cas9 and the
+      guides expressed from a plasmid delivered biolistically into the organelle rather than
+      imported across the inner membrane. Import of guide RNA and donor DNA into the matrix
+      remains unsolved and editing efficiency remains insufficient as of a 2023 review, so the
+      route is demonstrated but not routine. The long-established insertion route is biolistic
+      transformation into a rho-zero recipient. No yeast mitoTALEN or mitoZFN result is held in
+      this corpus - the only mitoTALEN source is about plant mitochondria - so this entry asserts
+      nothing about what those techniques do in S. cerevisiae.
     query_shape: >-
       technique maturity query - modification(type='mtdna_edit') grouped by technique, with
       feasibility_rating and whether the technique can insert
     expected_outcome: >-
-      CRISPR returned with feasibility_rating='not_demonstrated_in_organism' (or absent with a
-      never_attempted gap), and mitoTALEN/mitoZFN marked as destructive selection rather than
-      insertion. Ranking a CRISPR mtDNA route as routine is the specific error this catches.
+      CRISPR returned for S. cerevisiae mtDNA as demonstrated-but-not-routine, carrying its 2020
+      date and the biolistic-delivery caveat, with the guide-RNA import problem recorded as an
+      open gap rather than as a reason the technique does not exist. Biolistic transformation into
+      a rho-zero recipient returned as the established insertion route. mitoTALEN and mitoZFN must
+      return feasibility_rating='not_demonstrated_in_organism' for S. cerevisiae rather than
+      inheriting a plant or mammalian result. Ranking a CRISPR mtDNA route as routine is still the
+      specific error this catches; asserting that no such route exists is now the second.
     organism: Saccharomyces cerevisiae
     product: 'NA'
     expected_evidence_level: L3
@@ -762,10 +1614,55 @@ entries:
       A recent review of mitochondrial genome editing covering mitoTALEN, DdCBE and the gRNA
       import problem; check whether the negative claim about CRISPR is still accurate at the
       time of curation, because this is the row most likely to go stale.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: contradicted.
+
+      CONTRADICTED AS WRITTEN, AND CORRECTED. [1] supports the PREMISE the row rests on -
+      organelles have been considered off-limits to CRISPR because of their impermeability to most
+      RNA and DNA - but [2] and [3] report donor-DNA insertion at Cas9/gRNA-induced target sites
+      in yeast mitochondria and call it the first demonstration of CRISPR-mediated genome editing
+      in mitochondria. The headline is false, and the demonstrated technique INSERTS rather than
+      deletes. THE PAPER SIDESTEPS IMPORT RATHER THAN SOLVING IT: Cas9 and the guides are
+      expressed from a plasmid delivered biolistically that then replicates inside the organelle.
+      So the row's PREMISE survives, restated by a 2023 review [4,5]; its HEADLINE does not. (The
+      three spans from the 2020 paper are three SEPARATE, independently re-resolved spans, not one
+      spliced quote - an earlier draft joined them with a literal ellipsis and disclosed the
+      splice; a spliced quote cannot be re-resolved at an offset however honest the splice, so
+      they are kept apart here.) THE ROW IS ALSO COMPOUND - four separable claims behind one
+      verdict, only one of them false - and its mitoTALEN/mitoZFN leg has NO yeast support in this
+      corpus at all: the only mitoTALEN paper held is about PLANT mitochondria, and DdCBE/TALED
+      are tabulated for mammalian cells only. That leg is therefore WITHDRAWN rather than
+      restated. The biolistic-into-rho-zero route is well attested across at least five corpus
+      papers. A curator should split this id per technique and date-stamp the CRISPR leg, which
+      per data/benchmarks/README.md means retiring the id and writing new ones; this
+      reconciliation does not invent ids.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.7717/peerj.8362 chars [176, 360):
+      Organelles have been considered off-limits to CRISPR due to their impermeability to most RNA and DNA. This has prevented applications of Cas9/gRNA-mediated genome editing in organelles
+
+      [2] doi:10.7717/peerj.8362 chars [1464, 1653):
+      We confirmed donor DNA insertion at the target sites facilitated by homologous recombination only in the presence of Cas9/gRNA activity in yeast mitochondria and Chlamydomonas chloroplasts.
+
+      [3] doi:10.7717/peerj.8362 chars [2178, 2317):
+      This is the first demonstration of CRISPR-mediated genome editing in both mitochondria and chloroplasts in two distantly related organisms.
+
+      [4] doi:10.3390/microorganisms11041040 chars [31491, 31704):
+      Despite these demands, the genome editing of mtDNA, particularly using the CRISPR-Cas9 system, remains highly challenging because of the difficulties in transporting gRNA and donor DNA into the mitochondria [] ().
+
+      [5] doi:10.3390/microorganisms11041040 chars [41358, 41490):
+      the established successful example of modifying mtDNA sequences using Cas9/gRNA complexes remains insufficient in editing efficiency
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -774,65 +1671,158 @@ entries:
   - id: BM-ETH-001
     category: ethanol_reference
     statement: >-
-      The theoretical mass yield of ethanol from glucose is 0.511 g/g, and every reported
-      ethanol yield in the atlas is expressible as a fraction of it.
+      The theoretical mass yield of ethanol from glucose is 0.511 g/g (2 x 46.07 / 180.156 =
+      0.51142) and the substrate must be stored with it. Most of the consulted literature rounds
+      to 0.51 g/g, and a substantial number of papers apply that same 0.51 g/g figure to XYLOSE
+      rather than glucose, so the number alone does not identify the substrate. That every
+      reported ethanol yield in the atlas is expressible as a fraction of this ceiling is a
+      property of the atlas's own unit handling, not a claim any paper makes, and is tested
+      against stored rows rather than looked up.
     query_shape: >-
       product(ethanol).theoretical_yield_per_substrate(glucose), then
       measurement(product=ethanol).value_si / that ceiling
     expected_outcome: >-
       0.511 g/g returned as a stored product property with its substrate named, and no stored
-      measurement exceeding it after unit conversion. Any measurement above the ceiling is a
-      unit or basis error and must be flagged, not clipped.
+      measurement exceeding it after unit conversion. Any measurement above the ceiling is a unit
+      or basis error and must be flagged, not clipped. A row reported against a paper's rounded
+      0.51 g/g must not be recorded as exceeding the ceiling in the third significant figure, and
+      a stored yield whose substrate is absent is not comparable against this ceiling at all.
     organism: Saccharomyces cerevisiae
     product: ethanol
     expected_evidence_level: L2
     source_hint: >-
       Stoichiometry: 1 glucose -> 2 ethanol + 2 CO2; 2 x 46.07 / 180.16. Arithmetic, but confirm
       the molar masses and that the atlas states the substrate basis.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      FIRST HALF SUPPORTED exactly as written [1]: the ceiling is 0.511 g/g, the substrate is
+      named (glucose), the organism is named, and the basis is named (EMP pathway stoichiometry).
+      ARITHMETIC independently confirmed in the corpus [2], which writes out the molar masses: 2 x
+      46.07 / 180.156 = 0.51142, so 0.511 is the correctly rounded value and source_hint's molar
+      masses check out. NOT SUPPORTED: that every ethanol yield in the atlas is expressible as a
+      fraction of it - a property of the atlas's own data model and unit handling, not a claim any
+      paper makes; it must be tested against stored rows. PRECISION HAZARD: 0.511 is the MINORITY
+      spelling in this corpus - four files write it, seventeen round to 0.51 - so an atlas storing
+      0.511 and comparing against papers that print 0.51 will show spurious over-100-percent rows
+      in the third significant figure. SUBSTRATE- BASIS HAZARD, the more serious point: a large
+      number of corpus papers apply the SAME 0.51 g/g to XYLOSE. "0.51 g/g" in a paper does not
+      imply glucose, so the requirement that the substrate be named is doing real work.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1093/femsyr/foag024 chars [22331, 22613):
+      Notably, while the theoretical maximum mass yield of ethanol from glucose in S. cerevisiae is 0.511 g/g (based on EMP pathway stoichiometry), the experimentally achieved yields remain below this thermodynamic limit due to metabolic constraints and cellular maintenance requirements.
+
+      [2] doi:10.1186/s13068-021-01903-3 chars [58597, 58779):
+      =0.51 g/g, where molecular weights of ethanol and glucose are 46.07 and 180.156 g/mol, respectively, and one molecule of glucose stoichiometrically produces two molecules of ethanol.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-ETH-002
     category: ethanol_reference
     statement: >-
-      The theoretical mass yield of isobutanol from glucose is 0.411 g/g, materially lower than
-      the ethanol ceiling, so isobutanol and ethanol yields are never comparable as raw g/g.
+      The theoretical mass yield of isobutanol from glucose is 0.411 g/g (74.12 / 180.156 =
+      0.41142), materially lower than the ethanol ceiling of 0.511 g/g, so isobutanol and ethanol
+      yields are never comparable as raw g/g. The consulted literature almost always rounds this
+      to 0.41 g/g; the one source giving three significant figures writes 410 mg/g for glucose and
+      411 mg/g for xylose, which is a rounding difference and NOT a substrate difference - the
+      isobutanol mass yield from xylose (5 isobutanol per 6 xylose) is 0.41142 g/g, the same
+      number to five places, because the carbon balance per carbon is identical.
     query_shape: >-
       compare product(isobutanol).theoretical_yield_per_substrate(glucose) against
       product(ethanol).theoretical_yield_per_substrate(glucose)
     expected_outcome: >-
-      Two different ceilings returned from data, with no code branch on product identity. If
-      the comparison requires an if-product test anywhere, the product-specific-behaviour rule
-      in CONVENTIONS.md has been broken.
+      Two different ceilings returned from data, with no code branch on product identity. If the
+      comparison requires an if-product test anywhere, the product-specific-behaviour rule in
+      CONVENTIONS.md has been broken. The isobutanol ceiling must carry its substrate, and the
+      glucose and xylose rows must both read 0.411 g/g rather than either being treated as a
+      transcription error for the other. No single consulted paper states the ethanol and
+      isobutanol ceilings side by side, so the comparison is assembled from two stored rows.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
     source_hint: >-
       Stoichiometry: 1 glucose -> 1 isobutanol + 2 CO2 + H2O; 74.12 / 180.16. Confirm the
       arithmetic and the assumed stoichiometry independently.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      STOICHIOMETRY AND MASS RATIO independently confirmed [1], as source_hint demanded. PRECISION
+      MISMATCH: not one corpus file writes 0.411 for glucose; the corpus consistently writes 0.41.
+      The 0.411 is arithmetically right (74.12 / 180.156 = 0.41142), so this is precision, not an
+      error of fact. THE VERIFICATION WAVE PROPOSED A SUBSTRATE MIX-UP HERE AND THE INFERENCE IS
+      WRONG. [2] is the one corpus source giving three significant figures and it writes 410 mg/g
+      for glucose and 411 mg/g for xylose, which looks like the benchmark pinned a xylose ceiling
+      onto glucose. Run the arithmetic: isobutanol from glucose is 1 : 1 and from xylose is 5 : 6,
+      and BOTH give 0.41142 g/g to five places, because the carbon balance per carbon is identical
+      (1 C6 -> 1 C4 + 2 CO2; 6 C5 -> 5 C4 + 10 CO2). The paper's "410" for glucose is the rounding
+      that is slightly off, not the "411". PLAN.md's 0.411 g/g phase-1b acceptance bound is
+      CORRECT and the bound check stands. For DUET this is useful rather than neutral: the
+      programme's substrate partition is C5 to isobutanol, and the mass-yield ceiling from xylose
+      is identical to glucose, so whatever the case for the xylose route is, it is not a yield
+      penalty. SECOND HALF NOT FOUND: no corpus file states the two ceilings side by side, which
+      is exactly the two-stored-rows comparison the expected outcome demands. [1] is an E. coli
+      paper; the ceiling is pure stoichiometry and organism-independent, but note the host if
+      provenance matters.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s12934-015-0232-6 chars [38733, 38854):
+      Glucose
+
+      C6H12O6 → C4H10O + 2 CO2 + H2O
+
+      Stoichiometric conversion gives the following ratio: 0.41 g isobutanol/g glucose
+
+      [2] doi:10.1093/femsyr/foae006 chars [5152, 5261):
+      the theoretical yields of 410 mg isobutanol/g glucose (Generoso et al. ), or 411 mg/g xylose (Zhang et al. ).
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-ETH-003
     category: ethanol_reference
     statement: >-
-      Wild-type S. cerevisiae under anaerobic glucose fermentation reaches ethanol yields in the
-      region of 90 percent of theoretical, with the remainder going substantially to biomass,
-      glycerol and CO2 - a baseline against which any isobutanol yield should be read.
+      Wild-type S. cerevisiae anaerobic ethanol yield is not one number and is not a constant.
+      Industrial first-generation processes are reported above 90 percent of theoretical - 92
+      percent for Brazilian sugar-cane ethanol against a 0.51 g/g hexose basis - while a
+      laboratory reference strain in anaerobic sugar-limited chemostat at D = 0.05 h-1 gives 1.56
+      mol ethanol per mol sugar, which is 78 percent of the 2 mol/mol ceiling. The yield rises as
+      specific growth rate falls and approaches theoretical only at near-zero growth rate, so a
+      stored row is unusable without its dilution rate or specific growth rate alongside its
+      basis. The remainder goes to biomass, CO2 and by-products, glycerol taking up to 4 percent
+      of the substrate in industrial processes.
     query_shape: >-
       measurement(product=ethanol, strain=wild_type_reference) expressed as
       basis='theoretical_max_pct', grouped by condition_context
     expected_outcome: >-
-      A fraction in [0, 1] with basis recorded. Rows whose basis is NULL must be returned as
-      not usable for cross-study comparison rather than silently averaged in.
+      A fraction in [0, 1] with basis recorded AND with a specific growth rate or dilution rate
+      recorded. Rows whose basis is NULL must be returned as not usable for cross-study comparison
+      rather than silently averaged in, and an industrial process figure must not be returned as,
+      or averaged with, a laboratory wild-type physiology figure. An atlas that returns a single
+      number for this claim has failed it.
     organism: Saccharomyces cerevisiae
     product: ethanol
     expected_evidence_level: L2
@@ -841,10 +1831,54 @@ entries:
       balances for S. cerevisiae CEN.PK (authors recalled, no year - confirm). The 90 percent
       figure here is recalled and approximate and must be replaced with a cited number, its
       strain and its condition context before use.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      CONFLATION, and the direction of the error matters. [1] is the only corpus passage carrying
+      a quantitative fraction-of-theoretical against a named ceiling and substrate basis - but 92
+      percent is a figure for first-generation INDUSTRIAL sugar-cane bioethanol in Brazil, a
+      process number, not a measurement of wild-type S. cerevisiae under defined anaerobic glucose
+      fermentation, and its condition context is not one the atlas can match a lab row against.
+      Two other corpus papers put industrial yields above 90 percent, clustering just above the
+      benchmark's figure. THE LABORATORY WILD-TYPE REFERENCE NUMBER IS MATERIALLY LOWER: [2]
+      identifies the isogenic reference strain IMU032 in anaerobic sugar-limited chemostat at D =
+      0.05 h-1, and [3] is that table's ethanol row, 1.56 mol/mol - against the 2 mol/mol ceiling,
+      78 percent, not 90. Record both with their condition contexts; do not average them. THE
+      DEEPER PROBLEM, which the atlas must model or this entry is unanswerable: the wild-type
+      anaerobic ethanol yield is not a constant but a function of specific growth rate [4],
+      approaching theoretical only at near-zero growth rate [5]. A stored row is unusable without
+      its dilution rate or specific growth rate alongside the basis the entry already requires.
+      THE source_hint PRIMARY WAS NOT FOUND: the recalled Verduyn / van Dijken / Pronk anaerobic
+      chemostat carbon-balance paper is not in this corpus; only the Pronk-lineage secondary
+      literature citing it is.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-017-1001-z chars [3599, 3732):
+      For example, sugar-cane-based bioethanol production in Brazil often approaches 92% of the theoretical maximum of 0.51 g ghexose−1 [].
+
+      [2] doi:10.1186/1754-6834-6-125 chars [11135, 11422):
+      Physiological analysis ofS. cerevisiaeIMU033 expressingPRKand Rubisco and the isogenic reference strain IMU032 in anaerobic chemostat cultures, grown at a dilution rate of 0.05 h-1on a synthetic medium (pH 5) supplemented with 12.5 g l-1glucose and 12.5 g l-1galactose as carbon sources#
+
+      [3] doi:10.1186/1754-6834-6-125 chars [11890, 11984):
+      Ethanol yield on sugar (mol mol-1) | 1.56 ± 0.03c | 1.56 ± 0.02d | 1.73 ± 0.02c | 1.73 ± 0.01d
+
+      [4] doi:10.1016/j.synbio.2021.12.010 chars [7313, 7433):
+      The fraction of the consumed sugar that is fermented to ethanol therefore increases with decreasing specific growth rate
+
+      [5] doi:10.1016/j.synbio.2021.12.010 chars [48433, 48620):
+      Even in anaerobic glucose-limited cultures of wild-type S. cerevisiae, ethanol yields on glucose approach the theoretical maximum of 2 mol ethanol/mol glucose at near-zero growth rates []
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -867,10 +1901,39 @@ entries:
     source_hint: >-
       Any review of the Crabtree effect and overflow metabolism in S. cerevisiae; confirm the
       critical dilution rate / glucose threshold rather than asserting the effect qualitatively.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: supported.
+
+      Supplies the quantitative anchor source_hint asked for instead of a qualitative assertion: a
+      measured critical dilution rate for the onset of aerobic ethanol formation, Dc = 0.24 h-1,
+      in S. cerevisiae CEN.PK 113-7D in an aerobic glucose-limited accelerostat, with the onset
+      operationally defined (rise in ethanol production plus fall in biomass yield). It
+      establishes that oxygen availability alone does not determine whether the ethanol sink is
+      active - the glucose feeding regime does. NO NUMERIC MISMATCH: the statement asserted no
+      number and the corpus supplies one. CAVEAT ON STORING Dc AS A CONSTANT: it is strain- and
+      condition-dependent, not a species constant - the same paper reports genetic backgrounds
+      shifting it and warns that industrial strains may differ widely, and another corpus paper
+      warns that a Dc measured in carbon-limited chemostat may be irrelevant to batch. Dc must be
+      stored with its strain and cultivation mode and must not be used to predict batch behaviour.
+      THE LITERATURE DISTINGUISHES FOUR AEROBIC CONTEXTS, not two - glucose-excess
+      batch/fed-batch, glucose-limited chemostat above Dc, glucose-limited chemostat below Dc, and
+      a glucose pulse below Dc - so a condition model carrying only an aerobic/anaerobic flag, or
+      even only aerobic-batch versus aerobic-glucose-limited, is too coarse for this question.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/1475-2859-12-83 chars [10208, 10570):
+      The onset of the transition from respiratory to oxido-reductive metabolism, corresponding to the Dc, was characterized by the increase in the ethanol production and the decrease in the biomass yield (Yx/s). This happened at 0.24 h-1 on sole glucose (Figure A) but the presence of oleic acid in the fermentation broth led to an 8% increase at 0.26 h-1 (Figure B).
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -879,15 +1942,25 @@ entries:
   - id: BM-TOL-001
     category: tolerance
     statement: >-
-      Isobutanol is substantially more growth-inhibitory than ethanol on a molar basis.
+      Isobutanol is substantially more growth-inhibitory than ethanol on a molar basis -
+      isobutanol inhibits S. cerevisiae growth above roughly 190 mM, against roughly 40 g/L
+      (roughly 870 mM) of ethanol for 50 percent growth inhibition. The DIRECTION is supported;
+      the matched comparison is not. No consulted source measures both alcohols in one strain
+      background under one assay, so those two figures come from different papers, strains, media
+      and protocols - and by this entry's own expected outcome such a pairing is what the atlas
+      must refuse rather than return.
     query_shape: >-
       tolerance_measurement(assay_type='max_specific_growth_rate') for isobutanol and for
       ethanol, in the same strain background, with concentration expressed in the same molar
       unit
     expected_outcome: >-
       A lower inhibitory concentration for isobutanol than for ethanol at matched effect size,
-      with both rows carrying assay_type='max_specific_growth_rate'. A comparison assembled
-      across different assay types must be refused by the atlas, not returned with a caveat.
+      with both rows carrying assay_type='max_specific_growth_rate'. A comparison assembled across
+      different assay types must be refused by the atlas, not returned with a caveat - and on the
+      corpus as it stands the correct behaviour is a refusal plus a not_in_corpus gap for the
+      matched pair, not a returned comparison. The isobutanol row must also carry whether its
+      concentration was w/v or v/v: the source consulted is internally inconsistent between the
+      two, a 25 percent spread.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L2
@@ -896,26 +1969,64 @@ entries:
       several alcohols in one S. cerevisiae background - the isobutanol tolerance work from the
       Alper or Liao groups is the recalled starting point. Confirm whether the comparison was
       made on a molar or a volumetric basis, because the direction of the claim can depend on it.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED: the isobutanol half, in S. cerevisiae, on a MOLAR basis (approximately 190 mM),
+      with a growth endpoint [1] - precisely what the query shape requires and what most corpus
+      statements on this point lack. NOT SUPPORTED: the comparison itself. The ethanol counterpart
+      [2] is a DIFFERENT publication, strain, medium and protocol, and is given in g/L - 40 g/L is
+      868 mM by the curator's arithmetic at 46.07 g/mol, NOT a corpus figure. Set side by side at
+      a nominally matched endpoint the DIRECTION holds, isobutanol roughly 4-5x more inhibitory on
+      a molar basis; but by this entry's own expected outcome a comparison assembled that way is
+      exactly what the atlas must REFUSE rather than return with a caveat. Treat the direction as
+      supported and the matched-pair row as not_in_corpus. SEPARATE HAZARD: [1] is internally
+      inconsistent between w/v and v/v - 1.4 percent w/v is 14 g/L = 189 mM, 1.4 percent v/v is
+      11.2 g/L = 151 mM, a 25 percent spread - so the unit reading must be stored per row. Several
+      corpus papers assert isobutanol is more toxic than ethanol with NO endpoint definition at
+      all and must not be admitted as measurements. The Alper-group and Liao-group yeast
+      growth-rate inhibition curves named in source_hint were NOT found in this corpus.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.jbc.2026.113228 chars [4937, 5226):
+      In particular, the concentration of isobutanol that inhibits growth (>1.4% w/v, approximately 190 mM) is much higher than the typical concentrations at which specific protein-ligand interactions occur, indicating that the binding affinity of isobutanol for its targets is likely to be low.
+
+      [2] doi:10.1186/s12934-025-02663-7 chars [4379, 4548):
+      Although S. cerevisiae can tolerate up to 120 g/L of ethanol, a concentration of around 40 g/L can cause 50% growth inhibition, thereby limiting ethanol production [, ].
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
   - id: BM-TOL-002
     category: tolerance
     statement: >-
-      Isobutanol tolerance is reported through at least five non-interconvertible assay types -
-      maximum specific growth rate at a stated concentration, viability after acute shock,
-      IC50 or MIC, lag-phase extension, and long-term adapted growth - and values from
-      different assay types may not be aggregated.
+      Isobutanol tolerance is reported through several non-interconvertible assay types and values
+      from different assay types may not be aggregated. Five are attested for S. cerevisiae in the
+      consulted corpus: growth or OD600 at a stated concentration, viability or survival after
+      exposure, colony size on solid medium, recovery or lag-phase extension, and long-term
+      adapted growth after laboratory evolution. IC50 and MIC are NOT attested for isobutanol in
+      S. cerevisiae there - MIC appears only in a bacterial paper - and that emptiness is a
+      finding about the literature, not a gap in the search. Non-interconvertibility is
+      demonstrated rather than asserted: in one paper two assay types invert the strain ranking.
     query_shape: >-
       tolerance_measurement(product=isobutanol) grouped by assay_type, then an attempted
       aggregate across assay types
     expected_outcome: >-
       At least three distinct assay types present in the data, and the cross-type aggregate
-      refused rather than computed. The refusal is the pass condition.
+      refused rather than computed. The refusal is the pass condition. An IC50 or MIC slot
+      populated from S. cerevisiae isobutanol rows would be a false positive, because no such
+      measurement was found in the consulted corpus.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L3
@@ -923,10 +2034,41 @@ entries:
       Survey the assay types actually used across five isobutanol tolerance papers and record
       the real distribution; the list of five here is recalled from the shape of the literature,
       not counted from it.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      THE COUNT DOES NOT HOLD AS WRITTEN FOR S. CEREVISIAE, though the expected outcome's weaker
+      demand for three assay types is met comfortably. Five assay types ARE attested for
+      isobutanol in S. cerevisiae in this corpus - growth/OD600 at a stated concentration,
+      viability or survival after exposure, colony size on solid medium in a genome-scale screen
+      format, recovery or lag extension, and long-term adapted growth after laboratory evolution -
+      but they are not the five the statement named. IC50 AND MIC ARE NOT ATTESTED for isobutanol
+      in S. cerevisiae anywhere in the corpus; MIC appears only in a bacterial paper. If the atlas
+      expects an assay_type enum with an IC50/MIC slot populated from yeast rows, that slot will
+      be empty, and the emptiness is a real finding about the isobutanol-tolerance literature, not
+      a gap in the search. The statement is rewritten to the five that exist.
+      NON-INTERCONVERTIBILITY IS DEMONSTRATED HERE, NOT MERELY ASSERTED, and it is the most useful
+      thing in the quote: the two tryptophan-pathway mutants are the WORSE performers on the
+      growth assay and the BETTER performers on the recovery assay - the two assay types INVERT
+      the strain ranking. SEPARATE HAZARD not to be conflated with assay type: concentration units
+      vary across these rows (percent v/v, percent w/v, g/L). Unit normalisation and assay-type
+      segregation are two different guards and both are needed.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1186/s13068-021-02048-z chars [15300, 15852):
+      Growth assay was applied to two pentose phosphate pathway (PPP) defective strains (Sc1 and Sc3). The two mutant strains showed more sensitive to isobutanol (1%) compared to the wild type. b, c Two PPP-defective strains (Sc1 and Sc3) and two tryptophan pathway defective strains (Sc7 and Sc12) were used in recovery assays and the two tryptophan pathway defective strains were recovered earlier (b) than the two PPP-defective strains (c). d All defective strains were recovered at 70 h. The recovery assays was performed at 200 μg/ml tryptophan addition
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -935,14 +2077,25 @@ entries:
     statement: >-
       A tolerance mechanism demonstrated for ethanol is, for isobutanol, a hypothesis and not a
       finding, and must be capped at evidence level L3 unless directly demonstrated for
-      isobutanol.
+      isobutanol. The cap is project policy, not a literature finding. What the literature
+      supplies is the reason for it - longer-chain alcohol cytotoxicity is reported to be unlike
+      ethanol cytotoxicity - and a case in which the 'unless' clause is load-bearing: a
+      tryptophan/membrane mechanism reasoned from the ethanol literature and then demonstrated
+      directly for isobutanol in S. cerevisiae, which an automatic cap keyed on 'the origin was
+      ethanol' would under-rate. transfer_rationale must therefore record whether a direct
+      isobutanol demonstration was sought and found, not merely that the mechanism originated in
+      the ethanol literature.
     query_shape: >-
       assertions about isobutanol tolerance whose supporting evidence is an ethanol-tolerance
       record carrying a transfer_rationale, read the derived evidence level
     expected_outcome: >-
       Every such assertion returned at L3 or weaker, with the transfer_rationale present and
-      displayed. An ethanol-derived mechanism surfacing at L1 or L2 for isobutanol is a
-      benchmark failure and, in practice, a route-design error.
+      displayed, AND with the cap lifted where a direct isobutanol demonstration exists. An
+      ethanol-derived mechanism surfacing at L1 or L2 for isobutanol is a benchmark failure and,
+      in practice, a route-design error; a demonstrated isobutanol mechanism held down at L3
+      because its origin was ethanol is the opposite failure. Testing with one case exercises only
+      one branch of the rule and will pass a broken implementation - use both a mechanism whose
+      transfer was demonstrated and one whose transfer was not.
     organism: Saccharomyces cerevisiae
     product: isobutanol
     expected_evidence_level: L3
@@ -950,10 +2103,50 @@ entries:
       Pick one concrete case to test with - for example a membrane-composition or heat-shock
       mechanism reported for ethanol tolerance - and check whether an isobutanol demonstration
       exists. Assay types differ between the two literatures and must be recorded per row.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus:
+      partially_supported.
+
+      SUPPORTED AS A PRINCIPLE, NOT AS A FINDING. [1] is a concrete in-corpus instance of the
+      epistemic situation the entry describes: an S. cerevisiae isobutanol-tolerance mechanism
+      proposed from genomic evidence alone and explicitly self-labelled hypothetical by its own
+      authors. The strongest justification for the cap is [2], and it is BACTERIAL, so it
+      transfers to yeast as an argument and not as a finding - which is itself the point the entry
+      is making. NO source states the L3 capping rule; it is project policy, not a literature
+      finding, and the statement now says so. THE COUNTEREXAMPLE A CURATOR MUST SEE BEFORE
+      ADOPTING A BLANKET CAP: one corpus paper reasons from the ethanol literature to a
+      tryptophan/membrane mechanism [3] and then TESTS it directly on isobutanol with TRP2 and
+      TRP5 deletion mutants plus exogenous tryptophan rescue. For that mechanism a direct
+      isobutanol demonstration EXISTS, and an automatic L3 cap keyed on "the origin was ethanol"
+      would UNDER-rate it. CONSEQUENCE FOR THE DATA MODEL: transfer_rationale must record whether
+      a direct isobutanol demonstration was SOUGHT and FOUND, not merely that the mechanism
+      originated in the ethanol literature - which makes the statement's existing "unless directly
+      demonstrated" clause load-bearing rather than decorative. The heat-shock test case
+      source_hint suggests has NO isobutanol demonstration in S. cerevisiae in this corpus, so it
+      exercises the other branch of the rule; use both, because a single test case will pass a
+      broken implementation. ASSAY TYPES DIFFER BETWEEN THE TWO LITERATURES exactly as source_hint
+      warned, so per-row assay_type is mandatory or they are silently pooled.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.btre.2026.e00959 chars [48658, 49102):
+      In conclusion, this preliminary genomic characterization of the IbOH-1 strain indicates that the synergistic accumulation of mutations across the HOG, CWI, and NCR pathways, as well as in genes related to ion homeostasis and amino acid biosynthesis, could confer robust isobutanol tolerance to the IbOH-1 strain. However, it is important to note that the proposed mechanisms remain hypothetical, as they are derived from genomic analysis alone.
+
+      [2] doi:10.1038/msb.2010.98 chars [3877, 4051):
+      These results indicate that the cytotoxicity of longer chain alcohols is unlike ethanol cytotoxicity, despite the fact that these alcohols commonly disrupt the cell membrane.
+
+      [3] doi:10.1186/s13068-021-02048-z chars [10092, 10191):
+      Isobutanol is more hydrophobic than ethanol and is more toxic to cells by disrupting cell membrane.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -984,10 +2177,41 @@ entries:
       machinery; the point is that the presequence acts after cytosolic translation. Verify from
       a textbook rather than from this repository's own design docs, which assert the same thing
       unverified.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: holds.
+
+      HOLDS. NOT ONE document in the corpus asserts that a nuclear-encoded, MTS-targeted protein
+      requires codon recoding. Every recoding statement found is about crossing a GENOME BOUNDARY,
+      and in both directions it is the DESTINATION GENOME that sets the requirement, exactly as
+      this control says: going mtDNA to nucleus, corpus papers describe ATP8 "recoded for
+      expression on cytoplasmic ribosomes" and VAR1 recoded for cytosolic translation and fused to
+      a COX4 targeting sequence; going nucleus to mtDNA, [1] states it flatly. Plain MTS targeting
+      with no recoding is described mechanistically in two further corpus papers. The search was
+      broad and found the mechanism stated positively and the confusion stated nowhere. THE TRAP,
+      and the single most likely path to a false positive here: the corpus is full of
+      "codon-optimized" isobutanol-pathway genes that have nothing to do with translation table 3
+      - one paper expresses codon-optimized, N-terminally shortened Ilv2, Ilv5 and Ilv3 LACKING
+      their mitochondrial targeting sequences, i.e. codon optimization for expression level in a
+      strain where the MTS was REMOVED. A pipeline keying on "codon" plus "mitochondrial
+      targeting" in the same sentence will manufacture precisely the error this control guards
+      against, and it is a text-matching artefact, not biology. SCOPE LIMIT: a corpus search can
+      show the claim is nowhere contradicted and is repeatedly presupposed; it cannot substitute
+      for the textbook citation source_hint still requires.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.xpro.2022.101359 chars [4864, 4994):
+      To express the reporter gene from mitochondrial DNA, its nucleotide sequence has to be recoded to match mitochondrial codon usage.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -1015,10 +2239,33 @@ entries:
       (recalled - confirm). A curator should confirm each of the four is genuinely
       condition-insensitive under fermentative conditions before this control is trusted; if one
       is not, replace it and record why in a comment.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: holds.
+
+      HOLDS, cleanly. ABSENCE IS THE RESULT HERE, so this entry carries no quote by design. The
+      bare gene regex for ALG9/TAF10/UBC6/TFC1 matches 27 corpus documents; adding a requirement
+      that "isobutanol" appear in the same window drops it to ZERO - in the whole corpus there is
+      not one passage in which any of the four genes appears near the word isobutanol. Restricting
+      instead to flux/titer/yield/fusel language leaves three documents, all of which were opened:
+      in every one the four genes appear ONLY as qPCR normalizers, never as an intervention, a
+      bottleneck or a measured effect. Two incidental UBC6 hits elsewhere are a ubc6 deletion
+      strain in a ubiquitin-ligase study and UBC6 used for qPCR normalization; neither touches
+      higher-alcohol metabolism. THE TRAP, and the sharpest co-occurrence risk in the corpus: one
+      document tabulates all four control genes together, each cited to Teste et al., in a
+      wine-fermentation paper whose introduction names isobutanol among the higher alcohols it
+      measures. DOCUMENT-level co-occurrence would join these four genes to isobutanol through
+      that paper; WINDOW-level co-occurrence does not. If the atlas returns an association here,
+      that document is almost certainly where it came from, and the recovery rate on the positive
+      entries must be discounted accordingly. STILL OWED: that same document partially
+      corroborates source_hint by citing Teste et al. as the primer source, but nothing in the
+      corpus confirms the second half of the hint - that each of the four is condition-insensitive
+      under fermentative conditions. That check has not been done.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -1043,10 +2290,41 @@ entries:
       mtDNA, rho-zero and biolistic; record the exact search string, the database and the date,
       because this is a negative claim about the literature and only a recorded search makes it
       auditable or re-checkable later.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: holds.
+
+      HOLDS. ABSENCE IS THE RESULT HERE, so this entry carries no quote by design. Four
+      independent lines converge. (1) WINDOW CO-OCCURRENCE: searching mtDNA / mitochondrial-genome
+      terms with "isobutanol" required in the same window returns exactly ONE corpus document, and
+      its only mtDNA sentence is about the petite phenotype of ilv5 mutants - a nuclear gene
+      affecting mtDNA stability, not a gene placed in mtDNA. (2) WHOLE-CORPUS DOCUMENT-LEVEL SCAN
+      across all 1,309 files: only four documents carry three or more hits of BOTH an
+      isobutanol-pathway vocabulary and an mtDNA-engineering vocabulary, and all four are false
+      joins (a fungal mito/nuclear exchange study, a ubiquitin-ligase study, a genetic-instability
+      review, and a rho0 fitness study whose ILV/ARO hits are transcriptome gene lists). No
+      document in this corpus does both things. (3) THE mtDNA-ENGINEERING LITERATURE THAT IS HELD
+      shows what the payloads actually are - nanoluciferase, split-GFP, ARG8m as a marker,
+      allotopic or mtDNA-relocated COX2, COX6, ATP8 and ATP9 - and not one metabolic or biofuel
+      enzyme. One of those papers is explicit that the method is for reporters and that any
+      payload must first be recoded and delivered biolistically into a COX2-deleted mtDNA
+      recipient, which is the cost structure this control says the atlas must surface as a
+      never_attempted gap. (4) RECORDED LIVE PubMed SEARCH, 2026-09-21, strings preserved in
+      docs/drafts/benchmarks/negative_control.yaml: isobutanol x mtDNA returns 5 records, all five
+      read and all irrelevant (an industrial isobutanol strain whose only mitochondrial content is
+      BAT1, an alcohol-tolerance network study, an ILV5 brewing strain, and two papers where mtDNA
+      is merely a strain-TYPING marker); the biolistic / rho-zero / heteroplasmy query returns 0.
+      HONEST LIMIT: this is a claim about the ENTIRE published literature and a 1,309-paper corpus
+      can only ever give weak evidence for it. STILL OUTSTANDING AGAINST source_hint: Google
+      Scholar was NOT searched - no Scholar tool was available in that session - and preprint
+      servers were not searched. The PubMed half is auditable and re-runnable; the Scholar half is
+      not yet discharged, so this control is not fully curated even though it holds on everything
+      that was run.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -1069,10 +2347,51 @@ entries:
     source_hint: >-
       Same search as BM-PATH-008; the two entries must be curated together, since verifying one
       verifies the other.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: holds.
+
+      HOLDS, but ON A NARROW MARGIN and NOT from this corpus alone. No corpus document names a
+      gene as the mitochondrial inner-membrane 2-ketoisovalerate carrier, and the corpus states
+      the opposite outright [1]. Where the corpus does invoke KIV transport it is deliberately
+      anonymous - "the high activity of the mitochondrial alpha-KIV carrier", "the bottleneck of
+      exporting alpha-KIV to the cytoplasm" - with no gene attached, and every NAMED mitochondrial
+      carrier in the corpus is attached to a different substrate (OAC1 to alpha-isopropylmalate,
+      MPC1/2/3 to pyruvate). THE THREE DECISIVE PAPERS ARE ABSENT FROM THE 1,309-DOCUMENT CORPUS
+      and were found only by live search on 2026-09-21; the following are summaries of their
+      abstracts, deliberately NOT quoted, because a quote that cannot be re-resolved in a stored
+      document is not evidence in this project. (a) NEAR- MISS, RIGHT MEMBRANE, NO GENE: a 1991
+      study purified and reconstituted the yeast mitochondrial pyruvate (monocarboxylate) carrier
+      and reports that it also transports 2-oxoisovalerate, which is 2-ketoisovalerate. That
+      DEMONSTRATES the transport activity in proteoliposomes, but the paper predates the
+      identification of MPC1/MPC2/MPC3 by two decades and characterises only two polypeptides by
+      apparent mass, so it establishes no gene. THE CONTROL SURVIVES ON THE "SPECIFIC GENE HAS
+      BEEN ESTABLISHED" CLAUSE ALONE. (b) NEAR-MISS, NAMED GENE, WRONG MEMBRANE: a 2017 study
+      reports that the lactate transporter Jen1 transports 2-ketoisovalerate. JEN1 is a
+      plasma-membrane permease and so fails the membrane=mitochondrial_inner term of the query
+      shape - AN ATLAS THAT DROPS THE MEMBRANE QUALIFIER WILL RETURN JEN1 AND BE WRONG, and this
+      is the most likely false-positive route for this control. (c) EXPLICIT NEGATIVE FOR THE
+      OBVIOUS CANDIDATE: a 2008 study reports that alpha-ketoisovalerate was neither inhibited nor
+      transported by Oac1p. Two further records report the absence of such a transporter in
+      related yeasts. COVERAGE FINDING: for this control the corpus is not merely weak evidence,
+      it is MISSING THE PAPERS THAT MATTER, and the control cannot be curated from the corpus
+      alone. If a candidate is recorded under knowledge_gap.candidates as BM-PATH-008 permits, the
+      1991 paper is the strongest thing to attach, with its lack of gene assignment stated in the
+      same breath.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1016/j.synbio.2024.12.010 chars [5177, 5381):
+      However, mitochondrial transport proteins involving α-KIV and valine remain unidentified [,], significantly limiting the use of compartmentalization strategies in constructing efficient cell factories [].
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -1095,10 +2414,40 @@ entries:
       Hazelwood et al. 2008 Ehrlich pathway review, amino-acid-to-fusel-alcohol correspondence
       table; confirm the valine/leucine/isoleucine to isobutanol/isoamyl
       alcohol/2-methyl-1-butanol mapping explicitly.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: holds.
+
+      HOLDS, cleanly, and this is a biochemical-fact control so a corpus is an appropriate place
+      to test it. Fifteen documents put "leucine" within 120 characters of "isobutanol" and the
+      mapping was checked in each: EVERY ONE assigns valine to isobutanol and leucine to isoamyl
+      alcohol, or treats leucine biosynthesis as a COMPETING drain on the KIV pool rather than as
+      a source. [1] is the cleanest statement and is exactly the Hazelwood-style correspondence
+      table source_hint asks for - though Hazelwood et al. 2008 itself is NOT in the corpus, so
+      the hint's named reference remains unconfirmed. The competing-pathway framing is everywhere:
+      three corpus papers DELETE leucine-pathway genes (LEU2, LEU4, LEU9) in order to RAISE
+      isobutanol, which is the strongest possible refutation of a leucine-to-isobutanol route, and
+      a fourth treats isobutanol as the byproduct to suppress when making leucine-derived
+      3-methyl-1-butanol. No corpus document routes leucine to isobutanol. THE TRAP: two documents
+      state the correct mapping in a parallel "A and B from X and Y" construction that a naive
+      extractor will invert. Read pairwise it is correct (isoamyl alcohol from leucine, isobutanol
+      from valine); read as adjacency it yields "isobutanol ... from leucine". One of the two has
+      an explicit "respectively" to disambiguate and the other does not. If the atlas ever returns
+      a leucine-to-isobutanol route, that construction is where to look.
+
+      Source spans. Each was re-resolved at its own offsets in the real stored full text before
+      entering this field, using fermdb.llm.validate.verify_span - exact comparison, no whitespace
+      normalisation, no fuzzy match. Offsets are 0-based half-open [char_start, char_end) into the
+      text that fermdb.extract.harness.load_source_text returns for that publication. Every quote
+      below is one contiguous slice; none is spliced.
+
+      [1] doi:10.1128/aem.00557-22 chars [3263, 3398):
+      valine [Val] degradation products to form isobutanol, leucine [Leu] into isoamyl alcohol, and isoleucine [Ile] into active amyl alcohol
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
 
@@ -1121,9 +2470,35 @@ entries:
     source_hint: >-
       No external source needed: this is a check on the atlas's own join behaviour, verifiable
       against the parts catalog once BM-COF-004 is curated.
-    evidence: >-
-      Background knowledge, no source consulted. Written from an AI assistant's memory in phase
-      0, before any source document was ingested; see source_hint for what a curator must check
-      before this entry may carry a real evidence value.
+    evidence: |-
+      Corpus evidence pass and reconciliation, 2026-09-21
+      (docs/drafts/benchmarks/RECONCILIATION.md). Verdict against the stored corpus: uncertain.
+
+      UNCERTAIN - AND THE UNCERTAINTY IS ABOUT TESTABILITY, NOT ABOUT EVIDENCE FOUND AGAINST THE
+      CLAIM. No corpus document could constitute a counterexample to this control, so it carries
+      no quote and no counterexample block. THIS CORPUS STRUCTURALLY CANNOT TEST IT, and that is
+      stated plainly here rather than dressed up as a pass. BM-NEG-006 is not a claim about the
+      literature at all; its own source_hint says so. What it forbids is the atlas emitting a part
+      as yeast-demonstrated when that part's only expression_record has host=E. coli. No paper can
+      be evidence for or against that - only the atlas's own query output can - so marking this
+      "holds" on the strength of a corpus search would be the exact category error the control
+      exists to catch. WHAT WOULD SETTLE IT, precisely: (i) curate BM-COF-004 first, so the parts
+      catalog holds the E. coli expression records for IlvC6E6 and AdhA-RE1; (ii) run the part
+      ranking for host=S. cerevisiae directly against the parts catalog; (iii) assert that every
+      part whose ONLY expression_record is host=E. coli comes back flagged untested-in-target-host
+      rather than ranked as demonstrated. That is a unit test over the atlas's join and it should
+      live next to the join, in tests/, not as a row to be verified in this file. ONE THING TO
+      WATCH when BM-COF-004 is curated: adhA is exactly the part where host matters, because the
+      yeast literature uses engineered VARIANTS of it - if the catalog stores the E. coli parent
+      and the yeast variant under one part id, the join will look correct while being wrong. The
+      corpus does hold the raw material for a bad join (the origin E. coli paper plus 11 documents
+      mentioning those part names in a yeast context) and it also models the correct behaviour,
+      one yeast paper re-testing a specific engineered AdhA variant in CEN.PK rather than
+      importing the E. coli result - but it cannot certify that the atlas reproduces it.
+
+      NOT A CURATION ACT. No confidence value was set and no verified flag was flipped by this
+      pass: confidence stays 'unverified' and verified stays false. data/benchmarks/README.md
+      steps 1-5, PLAN.md L.5 and decision D2 reserve both for a human curator. This field records
+      what was read, not a promotion.
     confidence: unverified
     verified: false
