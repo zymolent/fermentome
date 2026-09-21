@@ -615,6 +615,112 @@ def cmd_omics_baseline(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_omics_limits(args: argparse.Namespace) -> int:
+    """Print what this corpus can and cannot detect (PLAN.md phase 4's fifth acceptance clause).
+
+    The numbers behind `docs/drafts/omics/STATISTICAL_LIMITS.md`. Re-run it rather than trusting
+    the document: the document is a snapshot and this is the measurement.
+    """
+    from .limits import (
+        DEFAULT_ALPHA,
+        bonferroni_alpha,
+        build_limits,
+        min_detectable_log2_fold_change,
+        sign_test_p,
+        studies_needed_for_unanimous_direction,
+    )
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        report = build_limits(conn, settings)
+    finally:
+        conn.close()
+
+    print(report.summary())
+    for matrix in report.matrices:
+        tight, loose = matrix.sigma_bracket
+        print()
+        print(
+            f"{matrix.reference}: {matrix.genes} genes x {matrix.samples} samples, "
+            f"{matrix.independent_studies} independent stud(ies); "
+            f"residual sd bracket {tight:.3f}-{loose:.3f} log2 units"
+        )
+        print(f"  {'study':<14}{'n':>4}{'expressed':>11}{'within-sd':>11}{'pair-sd':>9}")
+        for dispersion in matrix.dispersions:
+            pair = (
+                "-" if dispersion.closest_pair_sd is None else f"{dispersion.closest_pair_sd:.3f}"
+            )
+            print(
+                f"  {dispersion.study_accession:<14}{dispersion.samples:>4}"
+                f"{dispersion.expressed_genes:>11}{dispersion.within_study_sd:>11.3f}{pair:>9}"
+            )
+        corrected = bonferroni_alpha(DEFAULT_ALPHA, matrix.genes)
+        print(f"  minimum detectable log2FC at 80% power (alpha={DEFAULT_ALPHA}, and Bonferroni")
+        print(f"  over {matrix.genes} genes = {corrected:.2e}):")
+        print(f"    {'n/group':>8}" + "".join(f"{label:>14}" for label in ("tight", "loose")))
+        for n in args.group_sizes:
+            if n < 2:
+                continue
+            cells = []
+            for sigma in (tight, loose):
+                nominal = min_detectable_log2_fold_change(sigma=sigma, n_per_group=n)
+                strict = min_detectable_log2_fold_change(
+                    sigma=sigma, n_per_group=n, alpha=corrected
+                )
+                cells.append(f"{nominal:.2f} / {strict:.2f}")
+            print(f"    {n:>8}" + "".join(f"{cell:>14}" for cell in cells))
+        k = matrix.independent_studies
+        print(
+            f"  direction concordance: all {k} stud(ies) agreeing has p={sign_test_p(k):.3f}; "
+            f"{studies_needed_for_unanimous_direction()} stud(ies) are needed at "
+            f"alpha={DEFAULT_ALPHA}, and "
+            f"{studies_needed_for_unanimous_direction(n_tests=matrix.genes)} across "
+            f"{matrix.genes} genes"
+        )
+    return 0
+
+
+def cmd_omics_tnseq(_args: argparse.Namespace) -> int:
+    """Report how the Tn-Seq fitness screens are represented, and what they still need."""
+    from . import tnseq as tnseq_mod
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        report = tnseq_mod.build_report(conn, settings)
+    finally:
+        conn.close()
+
+    print(report.summary())
+    print()
+    print(f"{'study':<12}{'bioproject':<14}{'runs':>5}{'reference':>17}  organism")
+    for screen in report.screens:
+        print(
+            f"{screen.study_accession:<12}{screen.bioproject or '-':<14}{screen.run_count:>5}"
+            f"{screen.reference_assembly or '-':>17}  {screen.organism or '-'}"
+        )
+        if screen.misranked_runs:
+            print(
+                f"  priority_rank disagrees with sra.priority_rank_for for "
+                f"{len(screen.misranked_runs)} run(s): {', '.join(screen.misranked_runs)}"
+            )
+    if report.unclassified_candidates:
+        print()
+        print("in neither the perturbation nor the expression layer (library_strategy is a")
+        print("catch-all, and the organism has screens) -- a curation question, not a state:")
+        for run in report.unclassified_candidates:
+            print(
+                f"  {run.run_accession:<14}{run.library_strategy or '-':<10}"
+                f"{run.study_accession or '-':<12}{run.organism or '-'}"
+            )
+    print()
+    print(report.refusal)
+    return 0
+
+
 def add_omics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add `fermdb omics ...` to an existing top-level subparsers action.
 
@@ -695,3 +801,20 @@ def add_omics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--limit", type=int, default=0, help="show only the N highest-expressed genes"
     )
     p_baseline.set_defaults(func=cmd_omics_baseline)
+
+    p_limits = omics_sub.add_parser(
+        "limits", help="what this corpus can and cannot detect (PLAN.md phase 4 acceptance)"
+    )
+    p_limits.add_argument(
+        "--group-sizes",
+        type=int,
+        nargs="+",
+        default=[3, 4, 6, 8, 12],
+        help="samples per group to report a minimum detectable effect for",
+    )
+    p_limits.set_defaults(func=cmd_omics_limits)
+
+    p_tnseq = omics_sub.add_parser(
+        "tnseq", help="how the Tn-Seq fitness screens are represented, and what they still need"
+    )
+    p_tnseq.set_defaults(func=cmd_omics_tnseq)

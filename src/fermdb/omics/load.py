@@ -39,6 +39,7 @@ from typing import Any, Final
 
 from ..config import Settings
 from . import references as references_mod
+from . import sra as sra_mod
 
 __all__ = [
     "DROPPED_RUNS",
@@ -288,6 +289,14 @@ def load_sra_runs(conn: sqlite3.Connection, settings: Settings) -> dict[str, int
       plain "Saccharomyces cerevisiae" run resolves to the S288C anchor as ``species_exact`` and
       never silently to CEN.PK. ``unmapped_fraction`` stays NULL: nobody has computed it per run
       in this database, and NULL says that where 0 would claim a perfect mapping.
+
+    ``priority_rank`` comes from ``sra.priority_rank_for``, the one place the rule is computed.
+    This function used to write a literal ``0`` for every run, which was not a neutral default: it
+    flattened the one distinction the codebase already drew between a Tn-Seq fitness screen and an
+    expression run (DATA_VOLUME.md section 2 and PLAN.md phase 4 -- a screen is perturbation
+    evidence, L1/L2, and per run the most informative data in the corpus), so ``ORDER BY
+    priority_rank`` returned the corpus in accession order and nothing said otherwise. The rule
+    had a unit test the whole time; it was simply never reached by the loader.
     """
     directory = omics_dir(settings)
     catalog = references_mod.load_reference_genomes(references_mod.reference_genomes_path(settings))
@@ -376,7 +385,7 @@ def load_sra_runs(conn: sqlite3.Connection, settings: Settings) -> dict[str, int
                     # 'discovered' is the only state a metadata harvest may write. That a run's
                     # bytes reached S3 is an object fact and lives in raw_object, not here.
                     "excluded" if drop is not None else "discovered",
-                    0,
+                    sra_mod.priority_rank_for(_text_or_none(row.get("LibraryStrategy")) or ""),
                     retrieved_at,
                     evidence,
                     selection.assembly_accession,

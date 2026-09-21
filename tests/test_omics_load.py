@@ -282,6 +282,92 @@ def test_a_measurement_can_attach_to_a_loaded_sample(settings: Settings) -> None
         connection.close()
 
 
+# ---------------------------------------------------------------------------------------------
+# priority_rank.
+#
+# DATA_VOLUME.md section 2 and PLAN.md phase 4: a Tn-Seq run is perturbation evidence (L1/L2) and
+# per run the most informative data in the corpus, so `ORDER BY priority_rank` must surface the
+# screens first. `sra.priority_rank_for` has implemented that rule, with its own unit test, the
+# whole time -- and this loader wrote a literal 0 for every row, so the rule never reached the
+# database and the corpus came back in accession order with nothing saying otherwise.
+# ---------------------------------------------------------------------------------------------
+
+
+_RUNINFO_HEADER = (
+    "Run,Experiment,SRAStudy,BioProject,BioSample,ScientificName,TaxID,LibraryStrategy,"
+    "LibraryLayout,Platform,Model,spots,bases,size_MB,download_path,Study_Pubmed_id\n"
+)
+
+
+def _mini_corpus(repo_root: Path) -> None:
+    """A two-run runinfo export plus the manifests `load_sra_runs` reads, under a tmp repo tier.
+
+    The reference catalog is copied from the real repo rather than invented: the loader resolves a
+    run's reference through it, and a hand-written stand-in would be testing a different catalog
+    from the one that ships.
+    """
+    omics = repo_root / "data" / "omics"
+    omics.mkdir(parents=True, exist_ok=True)
+    (omics / "reference_genomes.yaml").write_text(
+        (REPO_ROOT / L.OMICS_DIR / "reference_genomes.yaml").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    (omics / L.DROPPED_RUNS).write_text(json.dumps({"dropped": []}), encoding="utf-8")
+    (omics / L.STAGING_MANIFEST).write_text(
+        json.dumps(
+            {
+                "staged_at_utc": "2026-01-01T00:00:00Z",
+                "source": "s3://sra-pub-run-odp/sra/",
+                "destination": "s3://bucket/raw/sra/",
+                "results": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (omics / L.RUNINFO_CSV).write_text(
+        _RUNINFO_HEADER + "SRR33767555,SRX1,SRP588897,PRJNA1270032,SAMN1,"
+        "Zymomonas mobilis subsp. mobilis ZM4 = ATCC 31821,264203,Tn-Seq,SINGLE,ILLUMINA,"
+        "NextSeq 500,100,1000,400.0,https://example.invalid/SRR33767555,\n"
+        "SRR14687229,SRX2,SRP321884,PRJNA733673,SAMN2,Saccharomyces cerevisiae S288C,559292,"
+        "RNA-Seq,SINGLE,ILLUMINA,NextSeq 500,100,1000,143.5,"
+        "https://example.invalid/SRR14687229,\n",
+        encoding="utf-8",
+    )
+
+
+def test_a_loaded_tn_seq_run_carries_the_rank_the_rule_gives_it(tmp_path: Path) -> None:
+    """The regression. A screen must sort ahead of an expression run after a load, not merely in
+    the function nothing called."""
+    from fermdb.omics.sra import priority_rank_for
+
+    repo_root = tmp_path / "repo"
+    _mini_corpus(repo_root)
+    settings = Settings.load(
+        paths_file=PATHS_FILE,
+        env={
+            "FERMDB_REPO_ROOT": str(repo_root),
+            "FERMDB_DATA_DIR": str(tmp_path / "derived"),
+            "FERMDB_SOURCE_ROOT": str(tmp_path / "source"),
+        },
+    )
+    connection = open_db(IN_MEMORY)
+    try:
+        assert L.load_sra_runs(connection, settings)["sra_run"] == 2
+        ordered = connection.execute(
+            "SELECT run_accession, library_strategy, priority_rank FROM sra_run "
+            "ORDER BY priority_rank, run_accession"
+        ).fetchall()
+    finally:
+        connection.close()
+
+    assert [row["library_strategy"] for row in ordered] == ["Tn-Seq", "RNA-Seq"]
+    assert [row["priority_rank"] for row in ordered] == [
+        priority_rank_for("Tn-Seq"),
+        priority_rank_for("RNA-Seq"),
+    ]
+    assert ordered[0]["priority_rank"] < ordered[1]["priority_rank"]
+
+
 @pytest.mark.skipif(
     not Path(os.path.expanduser("~/fermdb-data/genomes/nc_001224.gb")).is_file(),
     reason="the mitochondrial GenBank record lives in the derived tier",
