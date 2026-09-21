@@ -24,11 +24,23 @@
 #                        wrong about before. It is recorded per part, never inferred from the
 #                        compartment the enzyme works in.
 #
-# CONFIDENCE. Every functional claim here -- which cofactor an enzyme prefers, whether it is
-# oxygen-sensitive, whether a variant works in yeast -- is `unverified`: asserted from background
-# knowledge and never checked against a source in this session. Identity claims (that kivD is
-# from Lactococcus lactis) are equally unverified. Nothing in this file may support an assertion
+# CONFIDENCE. Almost every functional claim here -- which cofactor an enzyme prefers, whether it
+# is oxygen-sensitive, whether a variant works in yeast -- is `unverified`: asserted from
+# background knowledge and never checked against a source. Identity claims (that kivD is from
+# Lactococcus lactis) are equally unverified. Nothing marked `unverified` may support an assertion
 # until it is checked against primary literature, which is what the literature layer is for.
+#
+# `adh7_native` is the first exception and is marked `medium`. It was written by reading the
+# stored full text of the paper that used it and quoting what that paper says, so it is not
+# background knowledge and must not be filed as though it were -- a file where a checked entry and
+# an unchecked one carry the same confidence has thrown away the distinction it exists to record.
+# Two obligations come with that exception, and both are visible in the entry:
+#
+#   * a field the source does not support is left `unknown`, never completed from memory. Adh7's
+#     cofactor preference is exactly such a field, and 'unknown' is a real answer here: the route
+#     enumerator skips it rather than scoring a demand nobody has checked.
+#   * `medium`, not `high`. One paper's report of its own construction, quoted, and confirmed by
+#     nothing else.
 
 version: 1
 zone: I
@@ -235,6 +247,53 @@ parts:
       already has NADPH available in the same compartment -- and the mismatched one for a route
       relying on cytosolic NADH.
     confidence: unverified
+
+  # THE ONE ENTRY IN THIS FILE THAT WAS READ RATHER THAN RECALLED. Everything the paper does not
+  # say is left 'unknown' instead of being filled in from background knowledge, and the confidence
+  # is 'medium' rather than 'unverified' -- see the CONFIDENCE note in the header for why both
+  # halves of that matter.
+  - id: adh7_native
+    step_role: ADH
+    source_organism: "Saccharomyces cerevisiae"
+    genes: [ADH7]
+    native_compartment: cytosol
+    sequence_encoding_genome: nuclear
+    cofactor_preference: unknown
+    oxygen_sensitivity: unknown
+    evidence: >-
+      READ FROM THE STORED FULL TEXT of 10.1016/j.cels.2019.10.006 (Kuroda et al., Cell Systems
+      9:534-547) -- the paper whose two published configurations the recall harness reported as
+      catalog gaps, because no part carried 'ADH7'. Its Methods describe the five-gene plasmid:
+      "The 2 m plasmid introduced, pJA184 (Avalos et al., 2013), contains ILV2, ILV3, ILV5, with
+      their gene products targeted to mitochondria; and an a-ketoacid decarboxylase (KDC) from
+      Lactococcus lactis (LlKivD) and an alcohol dehydrogenase (ADH7), with their gene products
+      targeted to the cytosol." The Results name the organism: "we overexpressed five genes in the
+      isobutanol biosynthetic pathway, ILV2, ILV3, ILV5, and ADH7 from S. cerevisiae and
+      2-ketoacid decarboxylase (KDC) from Lactococcus lactis". So ADH7 is this build's ADH step,
+      it is the yeast gene, it sits downstream of LlKivD, and the strain carrying it reaches
+      809 +/- 27 mg/L isobutanol. (Quotations are from the stored PDF text layer, which renders
+      the Greek alpha as 'a' and "2 um" as "2 m".)
+
+      native_compartment is the paper's own word, not an inference: pJA184 is used "for expression
+      of the five genes in their natural compartments", and the sentence above says ADH7's gene
+      product goes to the cytosol. sequence_encoding_genome is nuclear because the gene is carried
+      on a 2 um URA3 plasmid -- replicated and read in the nucleus, under NCBI table 1. Nothing in
+      this build is mtDNA-encoded.
+
+      NOT RECORDED, DELIBERATELY. cofactor_preference and oxygen_sensitivity are 'unknown' because
+      this paper states neither. It does measure intracellular NADPH/NADP+, but only for the
+      tolerance screen, and it makes no claim about which cofactor Adh7 uses; writing 'NADPH' here
+      from memory would hide an unchecked claim inside a checked entry, which is the one thing
+      this entry exists not to do. 'unknown' is also the value the enumerator handles correctly:
+      routes.py skips it in both the cofactor gate and the per-compartment demand tally, so this
+      part asserts no redox demand nobody has checked.
+
+      CONFIDENCE 'medium', not 'high': every claim above is one paper's own report of its own
+      construction, quoted from the corpus copy, and none of it has been confirmed against a
+      second source or a measurement. The `zone` this part is stored under is still 'I', because
+      `write_parts` stamps the whole catalog that way; that is a property of the loader, not a
+      statement that this entry is unchecked.
+    confidence: medium
 
   - id: adha_lactococcus
     step_role: ADH

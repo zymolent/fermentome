@@ -25,13 +25,15 @@ import pytest
 
 from fermdb.config import Settings
 from fermdb.db import IN_MEMORY, open_db
-from fermdb.metabolic import load_parts, write_parts
+from fermdb.metabolic import load_parts, load_pathways, write_parts
 from fermdb.metabolic.routes import (
     STEP_ORDER,
     STRATEGY_PLANS,
     enumerate_routes,
     explain,
+    pathway_for_routes,
     rank,
+    redox_balance,
     write_routes,
 )
 
@@ -47,13 +49,30 @@ def _db(parts: tuple) -> sqlite3.Connection:
 
 
 @pytest.fixture(scope="module")
-def parts() -> tuple:
-    return load_parts(Settings.load(paths_file=PATHS_FILE, env={}))
+def settings() -> Settings:
+    return Settings.load(paths_file=PATHS_FILE, env={})
 
 
 @pytest.fixture(scope="module")
-def routes(parts: tuple) -> list:
-    return enumerate_routes(parts)
+def parts(settings: Settings) -> tuple:
+    return load_parts(settings)
+
+
+@pytest.fixture(scope="module")
+def pathway(settings: Settings):  # noqa: ANN201 - a CuratedPathway
+    """The curated stoichiometry the per-compartment redox balance is summed from.
+
+    Picked by product, not by pooling every curated reaction with a matching `step_role`:
+    `ethanol_reference.yaml` declares a KDC and two ADHs of its own, one of them written in the
+    oxidative direction, and pooling them would give the ADH step two contradictory
+    stoichiometries.
+    """
+    return pathway_for_routes(load_pathways(settings))
+
+
+@pytest.fixture(scope="module")
+def routes(parts: tuple, pathway) -> list:  # noqa: ANN001 - a CuratedPathway
+    return enumerate_routes(parts, pathway=pathway)
 
 
 # ------------------------------------------------------------------------------- enumeration
@@ -241,29 +260,301 @@ def test_the_chassis_term_is_printed_because_the_ranker_uses_it(parts: tuple) ->
 
 # ----------------------------------------- PLAN.md phase 3: per-compartment redox balance
 #
-# THIS CLAUSE DOES NOT PASS, and these tests pin the honest state rather than dressing it up.
-# `cofactor_demand` computes the per-compartment demand the clause turns on, and NOTHING acts on
-# it: `balance_status` is the constant 'pass' and the only exclusions that exist come from the
-# chassis. See docs/drafts/phase3/ACCEPTANCE.md, decision D1 — whether an unverified compartment
-# cofactor map may exclude a route is the owner's call, not this module's.
+# DECISION D1 WAS SETTLED BY THE OWNER ON 2026-09-22: **flag, do not exclude**. A route whose
+# per-compartment redox balance does not close is marked, with the imbalance named, and keeps its
+# place in the enumeration and in the ranking. Nothing is dropped on an unchecked premise.
+#
+# These tests used to pin the ABSENCE of the feature. They now pin the contract: flagged, named,
+# still present — and `unknown` reported as `unknown`, never rounded to `balanced`.
+# See docs/drafts/phase3/ACCEPTANCE.md, clause C2 and decision D1.
 
 
-def test_no_route_is_excluded_for_a_redox_reason_and_that_is_unimplemented_not_clean(
+def test_a_redox_imbalance_is_flagged_and_named_and_the_route_is_not_excluded(
     routes: list,
 ) -> None:
-    """The per-compartment redox gate of G.7's table is not built. Every exclusion reachable
-    today comes from `chassis.gates_for`, and `balance_status` is a literal.
+    """The owner's ruling, as three assertions.
 
-    This is deliberately written as an assertion so it fails the day somebody implements the gate
-    and forgets to come back and revise the acceptance note."""
-    assert all(r.balance_status == "pass" for r in routes)
+    *Flagged*: the verdict is one of three states and is computed, not the old literal 'pass'.
+    *Named*: an unbalanced route says which cofactor is short by how much in WHICH compartment —
+    "unbalanced: true" is not an artifact anybody can act on.
+    *Not excluded*: every flagged route is still viable and still enumerated.
+    """
+    unbalanced = [r for r in routes if r.redox_balance.status == "unbalanced"]
+    assert unbalanced, "the pathway consumes reducing power and no route regenerates it"
+
+    for route in unbalanced:
+        assert route.redox_balance.imbalances, route.id
+        for line in route.redox_balance.imbalances:
+            assert "short by" in line or "in surplus by" in line, line
+            compartment = line.rsplit(" in ", 1)[1]
+            assert compartment in {step.compartment for step in route.steps}, line
+            assert line.split(" ", 1)[0] in {"NADH", "NADPH"}, line
+
+    assert all(r.viable for r in unbalanced), "flag, do not exclude"
     assert all(not r.excluded_because for r in routes)
 
 
+def test_a_route_with_a_known_imbalance_survives_enumeration_and_ranking(routes: list) -> None:
+    """The specific thing the ruling protects. The published yeast route run in the matrix wants
+    2 NADPH there — the imbalance the atlas most wants to talk about — and the route that carries
+    it must be in the enumeration AND in the ranked list, not filtered out of either.
+
+    A gate that removed it would delete exactly the option the atlas exists to surface, and the
+    reader would never learn the imbalance existed.
+    """
+    flagged = next(
+        r
+        for r in routes
+        if r.strategy == "C_mitochondrial_ehrlich"
+        and any(s.part.id == "adh6_native" for s in r.steps)
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+    )
+    assert flagged.redox_balance.status == "unbalanced"
+    assert flagged.redox_balance.imbalances == ("NADPH short by 2 in mitochondrial_matrix",)
+    assert flagged.redox_balance.net[("mitochondrial_matrix", "NADPH")] == -2
+
+    assert flagged in routes
+    assert flagged.id in {r.id for r in rank(routes)}
+    assert flagged.id in {r.id for r in rank(routes, objective="programme")}
+
+
+def test_the_balance_is_summed_per_compartment_and_never_across_them(routes: list) -> None:
+    """PLAN.md B.6.4: a route split across membranes must balance in each compartment separately.
+
+    The native split consumes one NADPH in the matrix and one NADH in the cytosol. A global sum
+    would report "2 reducing equivalents short" and lose the fact that they are short in different
+    compartments on either side of a membrane that passes neither — which is the entire content of
+    the clause.
+    """
+    native = next(
+        r
+        for r in routes
+        if r.strategy == "A_native_split"
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+        and any(s.part.id == "adh1_native" for s in r.steps)
+    )
+    assert native.redox_balance.net == {
+        ("mitochondrial_matrix", "NADPH"): -1,
+        ("cytosol", "NADH"): -1,
+    }
+    assert set(native.redox_balance.imbalances) == {
+        "NADPH short by 1 in mitochondrial_matrix",
+        "NADH short by 1 in cytosol",
+    }
+
+    # The same two parts with every step in one compartment: same total, one bucket, different
+    # engineering problem. If the sum were global these two routes would be indistinguishable.
+    cytosolic = next(
+        r
+        for r in routes
+        if r.strategy == "B_cytosolic_relocalization"
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+        and any(s.part.id == "adh1_native" for s in r.steps)
+    )
+    assert cytosolic.redox_balance.net == {
+        ("cytosol", "NADPH"): -1,
+        ("cytosol", "NADH"): -1,
+    }
+    assert cytosolic.redox_balance.net != native.redox_balance.net
+
+
+def test_a_missing_stoichiometry_is_unknown_and_never_balanced(parts: tuple, routes: list) -> None:
+    """The distinction the hard rule turns on. Where the reaction/cofactor data does not say what
+    a step does to the redox pools, the answer is `unknown` — a state of its own, reported as
+    such, and never quietly rounded to `balanced`.
+
+    Two ways to get there, both real:
+
+    * no curated pathway supplied at all, which is what `enumerate_routes(parts)` does; and
+    * a part whose `cofactor_preference` is the literal 'unknown'. `adh7_native` is exactly that:
+      it was read out of a paper that does not state the cofactor, and the catalog left it unknown
+      rather than filling it in from background knowledge.
+    """
+    unchecked = enumerate_routes(parts, strategies=["A_native_split"])
+    assert all(r.redox_balance.status == "unknown" for r in unchecked)
+    assert all(not r.redox_balance.net for r in unchecked)
+    assert all("never be read as 'balanced'" in r.redox_balance.unknowns[0] for r in unchecked)
+    assert all(r.balance_status == "not_evaluated" for r in unchecked)
+
+    undeclared = [
+        r for r in routes if any(s.part.cofactor_preference == "unknown" for s in r.steps)
+    ]
+    if undeclared:  # only while the catalog carries such a part; it carries adh7_native today
+        route = undeclared[0]
+        assert route.redox_balance.status == "unknown"
+        assert route.redox_balance.unknowns
+        assert "cofactor_preference" in route.redox_balance.unknowns[0]
+        # and the part that IS known is still reported, rather than the whole route going dark
+        assert route.redox_balance.imbalances
+        assert route.viable, "an unevaluated balance is not a reason to drop a route either"
+
+
+def test_every_route_carries_one_of_exactly_three_verdicts(routes: list) -> None:
+    """No fourth state, and no None. A route with no verdict would be read as a passing one."""
+    verdicts = {r.redox_balance.status for r in routes}
+    assert verdicts <= {"balanced", "unbalanced", "unknown"}
+    assert all(r.balance_status in {"pass", "fail", "not_evaluated"} for r in routes), (
+        "the stored word must stay inside pathway_route.balance_status's CHECK"
+    )
+
+
+def test_a_route_of_non_redox_steps_balances_which_is_how_balanced_is_reachable(
+    routes: list, pathway
+) -> None:  # noqa: ANN001 - a CuratedPathway
+    """`balanced` is not dead code, it is merely unreached by the current catalog.
+
+    No route comes back balanced today and that is a finding, not a bug: the five catalytic steps
+    consume reducing power and none of them regenerates it, so closure would need a
+    `cofactor_cycle` part and STEP_ORDER has no slot for one. Substitute non-redox parts into the
+    two redox steps and the same function returns `balanced` — which is what makes the three-state
+    verdict a measurement rather than a constant.
+    """
+    assert not [r for r in routes if r.redox_balance.status == "balanced"]
+
+    route = next(r for r in routes if r.strategy == "B_cytosolic_relocalization")
+    inert = tuple(
+        replace(step, part=replace(step.part, cofactor_preference="NA")) for step in route.steps
+    )
+    balance = redox_balance(inert, pathway)
+    assert balance.status == "unknown", (
+        "a part claiming no cofactor against a reaction that turns one over is a disagreement "
+        "between two curated files, and this module must not pick a winner"
+    )
+
+    # Whereas a route whose reactions genuinely have no redox participant does close.
+    no_redox = replace(
+        pathway,
+        reactions=tuple(
+            replace(r, participants=tuple(p for p in r.participants if "nad" not in p.metabolite))
+            for r in pathway.reactions
+        ),
+    )
+    all_na = tuple(
+        replace(step, part=replace(step.part, cofactor_preference="NA")) for step in route.steps
+    )
+    closed = redox_balance(all_na, no_redox)
+    assert closed.status == "balanced"
+    assert closed.imbalances == ()
+    assert closed.db_status == "pass"
+
+
+def test_the_pool_is_taken_from_the_part_and_the_substitution_is_named(routes: list) -> None:
+    """The one inference this calculation makes, and it is recorded rather than applied silently.
+
+    The curated `adh_isobutanol` reaction is written for the Adh1 type, on NADH. `adh6_native` is
+    NADPH-preferring, and no reaction is curated for it. The coefficient is kept and the pool is
+    taken from the part — which is what lets the atlas reason about a cofactor-switched enzyme at
+    all — and the record says so by name, so a reader can see where the number came from.
+    """
+    swapped = next(
+        r
+        for r in routes
+        if r.strategy == "B_cytosolic_relocalization"
+        and any(s.part.id == "adh6_native" for s in r.steps)
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+    )
+    assert swapped.redox_balance.substitutions
+    note = swapped.redox_balance.substitutions[0]
+    assert "adh6_native" in note and "adh_isobutanol" in note
+    assert "written for NADH" in note and "declares NADPH" in note
+
+    # and where part and reaction agree, nothing is substituted and nothing is claimed
+    agreeing = next(
+        r
+        for r in routes
+        if r.strategy == "B_cytosolic_relocalization"
+        and any(s.part.id == "adh1_native" for s in r.steps)
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+    )
+    assert agreeing.redox_balance.substitutions == ()
+
+
+def test_the_redox_flag_does_not_reorder_the_ranking(parts: tuple, routes: list, pathway) -> None:  # noqa: ANN001
+    """The judgement made in `rank`, pinned: the flag is reported and is NOT a sort key.
+
+    A flag that silently reorders is a gate wearing a disguise. Ranking on it would also require
+    an exchange rate between a matrix NADPH and a cytosolic NADH in order to compare two routes,
+    and the reason the atlas has no such rate is that the pools are not interconvertible — the
+    claim the whole DUET argument rests on.
+
+    So: enumerate the same routes with and without the stoichiometry that produces the flag, and
+    require the two rankings to be identical under both objectives.
+    """
+    unchecked = enumerate_routes(parts)
+    assert {r.redox_balance.status for r in unchecked} == {"unknown"}
+    assert {r.redox_balance.status for r in routes} != {"unknown"}, (
+        "if the flagged routes were all unknown too this test would prove nothing"
+    )
+    for objective in ("easiest", "programme"):
+        assert [r.id for r in rank(routes, objective=objective)] == [
+            r.id for r in rank(unchecked, objective=objective)
+        ]
+
+
+def test_explain_prints_the_redox_flag_and_names_the_imbalance(routes: list) -> None:
+    """Clause C4 says every rank is explainable term by term, and the flag is printed even though
+    it is not a rank term — a stated property of the route rather than a hidden reason for its
+    position. It must print the NAME, not just the verdict."""
+    flagged = next(
+        r
+        for r in routes
+        if r.strategy == "C_mitochondrial_ehrlich"
+        and any(s.part.id == "adh6_native" for s in r.steps)
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+    )
+    reason = explain(flagged)
+    assert "redox=unbalanced" in reason
+    assert "NADPH short by 2 in mitochondrial_matrix" in reason
+
+    unknown = next(r for r in routes if r.redox_balance.status == "unknown")
+    assert "redox=unknown" in explain(unknown)
+
+    # and on an excluded route too: a reader asking why it was dropped is exactly the reader who
+    # needs to know it also does not close.
+    dead = replace(flagged, excluded_because=("a chassis gate stands in the way",))
+    assert explain(dead).startswith("EXCLUDED:")
+    assert "redox=unbalanced" in explain(dead)
+
+
+def test_the_named_imbalance_is_stored_as_a_gap_with_its_compartment(
+    parts: tuple, routes: list
+) -> None:
+    """`balance_status` can now say 'fail'. A 'fail' with nothing beside it naming which pool in
+    which compartment is short is the boolean the ruling rejects, so the named imbalance is a
+    `knowledge_gap` row with the compartment in its own column — queryable, not a string search."""
+    flagged = next(
+        r
+        for r in routes
+        if r.strategy == "C_mitochondrial_ehrlich"
+        and any(s.part.id == "adh6_native" for s in r.steps)
+        and any(s.part.id == "ilv5_native" for s in r.steps)
+    )
+    connection = _db(parts)
+    try:
+        write_routes(connection, [flagged])
+        status = connection.execute("SELECT balance_status FROM pathway_route").fetchone()[0]
+        assert status == "fail"
+        rows = connection.execute(
+            "SELECT compartment_id, description FROM knowledge_gap "
+            "WHERE description LIKE 'per-compartment redox:%'"
+        ).fetchall()
+        assert len(rows) == 1
+        assert rows[0][0] == "mitochondrial_matrix"
+        assert "NADPH short by 2" in rows[0][1]
+        # and the route it hangs off is still there, flagged rather than absent
+        assert connection.execute("SELECT COUNT(*) FROM pathway_route").fetchone()[0] == 1
+    finally:
+        connection.close()
+
+
 def test_the_per_compartment_demand_that_the_gate_would_need_is_computed(routes: list) -> None:
-    """Half of the clause DOES exist: the demand is tallied per (compartment, cofactor), which is
-    the quantity a redox gate would test. What is missing is a supply figure to test it against —
-    COFACTOR_POOLS says which cofactors a compartment has, never how much."""
+    """Still a different question from the balance, and still worth its own test.
+
+    `cofactor_demand` counts how many STEPS want a pool in a compartment; `redox_balance` sums the
+    curated STOICHIOMETRY and says what does not close there. They agree today because every redox
+    step turns over one equivalent, and they would stop agreeing the moment a curated reaction had
+    a coefficient of 2 — at which point the demand tally would be the wrong number to reason with
+    and the balance would be the right one."""
     matrix_routes = [r for r in routes if r.strategy == "C_mitochondrial_ehrlich"]
     assert any(
         count >= 2
@@ -274,9 +565,10 @@ def test_the_per_compartment_demand_that_the_gate_would_need_is_computed(routes:
 
 
 def test_an_exclusion_names_its_cause_wherever_one_can_occur(parts: tuple) -> None:
-    """The clause says a violating route is 'excluded with the imbalance named'. No redox
-    exclusion exists to test, but the exclusion MECHANISM is testable: `excluded_because` carries
-    sentences, and `explain` leads with them rather than printing a rank for a dead route."""
+    """The clause no longer excludes for a redox reason — it flags — but exclusion still exists
+    for a stoichiometric impossibility and for a chassis disqualification, and the MECHANISM is
+    testable: `excluded_because` carries sentences, and `explain` leads with them rather than
+    printing a rank for a dead route."""
     from fermdb.metabolic.chassis import ChassisGate
     from fermdb.metabolic.routes import Route
 
@@ -336,14 +628,50 @@ def test_the_default_objective_reproduces_the_historical_order_exactly(routes: l
     assert [r.id for r in rank(routes)] == [r.id for r in rank(routes, objective="easiest")]
 
 
-def test_programme_objective_changes_nothing_while_fit_is_unrecorded(routes: list) -> None:
-    """Seeded `None` everywhere, so the two objectives agree. That is intended, not a stub.
+def test_the_recorded_programme_fit_puts_c_first_without_dropping_b(routes: list) -> None:
+    """The owner filled PROGRAMME_FIT on 2026-09-22, so the mechanism is no longer inert.
 
-    The mechanism ships inert: the owner supplies the values, because they encode design intent
-    and MITOCHONDRIAL_PROGRAM.md §4 is explicit that the atlas costs a technique rather than
-    deciding what the programme wants.
+    This replaces `test_programme_objective_changes_nothing_while_fit_is_unrecorded`, which pinned
+    the seeded-None state and was written to fail the day values arrived.
+
+    The ruling was "favour C, and retain everything on B", and both halves are asserted here
+    because the second is the one a future change could quietly break. Programme fit is a **sort
+    key and never a filter**: the two objectives must return the same *set* of routes and differ
+    only in order. A version that scored B down by removing it would satisfy "favour C" and betray
+    the instruction.
     """
-    assert [r.id for r in rank(routes)] == [r.id for r in rank(routes, objective="programme")]
+    easiest = rank(routes)
+    programme = rank(routes, objective="programme")
+
+    # Same population, different order. Not one route fewer.
+    assert {r.id for r in easiest} == {r.id for r in programme}
+    assert [r.id for r in easiest] != [r.id for r in programme]
+
+    assert programme[0].strategy == "C_mitochondrial_ehrlich"
+    assert easiest[0].strategy == "B_cytosolic_relocalization"
+
+    # And B is still reachable and ranked, not buried past the end of a listing.
+    assert any(r.strategy == "B_cytosolic_relocalization" for r in programme)
+
+
+def test_hard_constraints_still_outrank_the_programme_preference(routes: list) -> None:
+    """Transport gaps and cofactor risks are consulted before programme fit, deliberately.
+
+    A C route with a missing carrier must still sort below a clean B route: the preference says
+    what the programme wants, not what is buildable, and a lexicographic key is what keeps the two
+    from trading against each other. Asserted on the key itself rather than on an ordering, so it
+    holds whatever the catalog happens to contain.
+    """
+    gapped_c = [r for r in routes if r.strategy == "C_mitochondrial_ehrlich" and r.transport_gaps]
+    clean_b = [
+        r
+        for r in routes
+        if r.strategy == "B_cytosolic_relocalization" and not r.transport_gaps and r.viable
+    ]
+    if not gapped_c or not clean_b:
+        pytest.skip("catalog has no gapped C route or no clean B route to contrast")
+    ordered = rank(gapped_c + clean_b, objective="programme")
+    assert ordered[0].strategy == "B_cytosolic_relocalization"
 
 
 def test_a_recorded_programme_fit_can_outrank_feasibility(routes: list) -> None:
@@ -385,7 +713,10 @@ def test_explain_names_the_objective_it_answered(routes: list) -> None:
     best = rank(routes)[0]
     assert "objective=easiest" in explain(best)
     assert "objective=programme" in explain(best, objective="programme")
-    assert "programme_fit=unrecorded" in explain(best)
+    # The fit is printed as a number now that the owner has recorded one. `unrecorded` is still
+    # reachable and still means "not recorded" -- F_single_compartment_host carries None, because
+    # a host with one cytoplasm makes no compartment decision for a fit to be measured against.
+    assert "programme_fit=0.70" in explain(best)
 
 
 def test_an_unknown_objective_is_refused_rather_than_guessed(routes: list) -> None:

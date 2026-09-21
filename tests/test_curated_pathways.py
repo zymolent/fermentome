@@ -261,13 +261,46 @@ def test_every_part_declares_the_genome_its_sequence_would_be_carried_on() -> No
 
 
 def test_the_whole_catalog_is_zone_i() -> None:
-    """Every functional claim in it is background knowledge never checked against a source."""
+    """`write_parts` stamps zone 'I' on every row, whatever the entry's own confidence says.
+
+    The zone is a property of the loader, not of the claim, so it stays uniform even now that one
+    entry was read from a source rather than recalled.
+    """
     connection = open_db(IN_MEMORY)
     try:
         C.write_parts(connection, C.load_parts(_settings()))
         zones = {row[0] for row in connection.execute("SELECT DISTINCT zone FROM part")}
         assert zones == {"I"}
-        confidences = {row[0] for row in connection.execute("SELECT DISTINCT confidence FROM part")}
-        assert confidences == {"unverified"}
     finally:
         connection.close()
+
+
+def test_only_the_entries_that_cite_a_source_are_better_than_unverified() -> None:
+    """A catalog that files a checked claim beside an unchecked one at the same confidence has
+    thrown away the distinction confidence exists to record.
+
+    The default is `unverified` and the file's header says why: almost everything in it is
+    background knowledge. `adh7_native` is the exception -- written by reading the stored full text
+    of 10.1016/j.cels.2019.10.006 and quoting it -- so it carries `medium`, and its evidence has to
+    name the source that earns it. `high` is not available to this file at all: one paper's report
+    of its own construction, unconfirmed by anything else, is not a verified fact.
+    """
+    for part in C.load_parts(_settings()):
+        assert part.confidence in {"unverified", "medium"}, part.id
+        if part.confidence != "unverified":
+            assert "10.1016/j.cels.2019.10.006" in part.evidence, part.id
+
+
+def test_a_field_the_source_does_not_support_is_left_unknown() -> None:
+    """The obligation that comes with citing a source: the citation must not leak into the fields
+    the source is silent about.
+
+    10.1016/j.cels.2019.10.006 says which step Adh7 runs and where, and says nothing at all about
+    which cofactor it uses. 'NADPH' from background knowledge would look exactly as trustworthy as
+    the quoted fields beside it. 'unknown' is also the value the enumerator handles correctly: it
+    is skipped by both the cofactor gate and the per-compartment demand tally, so the part cannot
+    contribute a redox demand nobody has checked.
+    """
+    adh7 = {p.id: p for p in C.load_parts(_settings())}["adh7_native"]
+    assert adh7.cofactor_preference == "unknown"
+    assert adh7.oxygen_sensitivity == "unknown"

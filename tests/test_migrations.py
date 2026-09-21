@@ -66,6 +66,23 @@ CREATE TABLE product (
     evidence       TEXT NOT NULL,
     confidence     TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high'))
 );
+CREATE TABLE compartment_strategy (
+    id         TEXT PRIMARY KEY,
+    label      TEXT NOT NULL,
+    definition TEXT,
+    source     TEXT NOT NULL
+);
+INSERT INTO compartment_strategy (id, label, source) VALUES
+    ('A_native_split', 'Native split: Ilv in matrix, Ehrlich in cytosol',
+     'docs/design/ISOBUTANOL_PROGRAM.md section 2'),
+    ('B_cytosolic_relocalization', 'Ilv enzymes relocalized to the cytosol',
+     'docs/design/ISOBUTANOL_PROGRAM.md section 2'),
+    ('C_mitochondrial_ehrlich', 'Ehrlich pathway targeted to the matrix',
+     'docs/design/ISOBUTANOL_PROGRAM.md section 2'),
+    ('D_alternative_compartment', 'Peroxisomal or other-organelle assembly',
+     'docs/design/ISOBUTANOL_PROGRAM.md section 2'),
+    ('E_mtdna_encoded', 'Recoded Ehrlich enzymes encoded in mtDNA',
+     'docs/design/MITOCHONDRIAL_PROGRAM.md section 4');
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 INSERT INTO meta VALUES ('schema_version', '5');
 """
@@ -125,6 +142,32 @@ def test_the_new_table_matches_too(fresh: sqlite3.Connection) -> None:
             )
         }
         assert migrated_indexes == fresh_indexes
+    finally:
+        old.close()
+
+
+def test_the_seeded_vocabulary_matches_too(fresh: sqlite3.Connection) -> None:
+    """Drift is not only a column problem.
+
+    `compartment_strategy` is seeded by `schema.sql` rather than loaded from a TSV, so extending it
+    means writing the same row twice -- once in the seed and once in a migration -- and nothing but
+    this test makes the two agree. `PRAGMA table_info` cannot see a row, so the shape comparison
+    above would pass a migration that added the strategy with a different id, a different label or
+    no definition, and the two databases would then disagree about what a stored
+    `compartment_strategy_id` is allowed to be.
+
+    Compared in full rather than by id: the label and the definition are the vocabulary, not
+    decoration, and a migration that inserted the right id with the wrong meaning would be the
+    harder bug to find.
+    """
+    old = _v5()
+    try:
+        M.migrate(old)
+        query = "SELECT id, label, definition, source FROM compartment_strategy ORDER BY id"
+        migrated = [tuple(r) for r in old.execute(query)]
+        created = [tuple(r) for r in fresh.execute(query)]
+        assert migrated == created
+        assert "F_single_compartment_host" in {row[0] for row in created}
     finally:
         old.close()
 

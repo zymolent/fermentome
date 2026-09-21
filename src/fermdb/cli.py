@@ -60,14 +60,20 @@ from .extract import (
 from .genetic_code import AMBIGUOUS_CODONS, TABLE_1, TABLE_3
 from .literature.discovery import FamilyRunResult, run_family
 from .literature.ethanol import (
+    ADMISSIONS_FILE,
     CRITERION_BUDGET,
     PLAN_ACCEPTANCE_DISAGREES,
     PUBLICATION_CAP,
     SLOTS,
+    AdmissionsFileError,
     admit,
     budget_status,
+    install_admissions,
+    load_admissions,
+    load_layer_gaps,
     readable_candidates,
     unspent_report,
+    verify_record_spans,
 )
 from .literature.eutils import EutilsClient, EutilsError
 from .literature.manual_queue import IngestReport, export_queue, ingest_directory
@@ -300,6 +306,60 @@ def cmd_literature_ethanol_admit(args: argparse.Namespace) -> int:
     for problem in problems:
         print(f"  {problem.code}: {problem.detail}", file=sys.stderr)
     return 1
+
+
+def cmd_literature_ethanol_install(args: argparse.Namespace) -> int:
+    """Install `data/literature/ethanol_admissions.yaml` — the curated layer — into the database.
+
+    `--dry-run` loads the file, re-resolves every quote against the stored full text and prints
+    what would happen, without writing. It is the form to run first: the offsets are into the
+    `fulltext_asset` store, and a derived tier rebuilt without re-acquiring will fail the check
+    rather than install a criterion backed by a quote nobody can re-read.
+    """
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        try:
+            records = load_admissions(settings)
+            gaps = load_layer_gaps(settings)
+        except AdmissionsFileError as exc:
+            print(f"{ADMISSIONS_FILE}: {exc}", file=sys.stderr)
+            return 1
+
+        if args.dry_run:
+            checks = verify_record_spans(conn, settings, records)
+            failed = [check for check in checks if not check.ok]
+            print(f"{len(records)} records, {len(gaps)} gap(s)")
+            print(f"spans: {len(checks) - len(failed)} of {len(checks)} re-resolved exact")
+            for check in failed:
+                print(
+                    f"  FAIL {check.publication_id} evidence[{check.index}] {check.code}: "
+                    f"{check.detail}",
+                    file=sys.stderr,
+                )
+            return 1 if failed else 0
+
+        report = install_admissions(conn, settings)
+    finally:
+        conn.close()
+
+    print(
+        f"spans: {report.spans_checked - len(report.span_failures)} of {report.spans_checked} "
+        f"re-resolved exact"
+    )
+    print(f"admitted: {len(report.admitted)} of {len(records)}")
+    print(f"knowledge_gap rows written: {report.gaps_written}")
+    for check in report.span_failures:
+        print(
+            f"  SPAN {check.publication_id} evidence[{check.index}] {check.code}: {check.detail}",
+            file=sys.stderr,
+        )
+    for publication_id, problem in report.refused:
+        print(
+            f"  NOT admitted {publication_id} — {problem.code}: {problem.detail}", file=sys.stderr
+        )
+    return 1 if report.refused else 0
 
 
 def cmd_literature_manual_queue_export(args: argparse.Namespace) -> int:
@@ -744,6 +804,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_eth_admit.add_argument("--criterion", required=True, choices=sorted(CRITERION_BUDGET))
     p_eth_admit.add_argument("--slot", type=int, default=None, help="cross-check the slot")
     p_eth_admit.set_defaults(func=cmd_literature_ethanol_admit)
+
+    p_eth_install = eth_sub.add_parser(
+        "install",
+        help=f"install the curated layer from data/literature/{ADMISSIONS_FILE}",
+    )
+    p_eth_install.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="re-resolve every quote and report, without writing anything",
+    )
+    p_eth_install.set_defaults(func=cmd_literature_ethanol_install)
 
     p_lit_manual_queue = lit_sub.add_parser(
         "manual-queue", help="the manual full-text download queue (export / ingest)"

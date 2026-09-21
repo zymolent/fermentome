@@ -129,6 +129,36 @@ INSERT INTO compartment_strategy (id, label, source) VALUES
     ('E_mtdna_encoded', 'Recoded Ehrlich enzymes encoded in mtDNA',
      'docs/design/MITOCHONDRIAL_PROGRAM.md section 4');
 
+-- v11. The sixth row, and the only one that is not a compartment.
+--
+-- A-E are answers to "which compartment does each step run in", and every one of them presupposes
+-- a eukaryotic host with organelles to choose between. A prokaryote has no such choice: there is
+-- one cytoplasm and the whole route runs in it. Before this row the only storable answers for
+-- such a build were NULL ("not recorded") and the extractor's 'NA' -- both of which say the
+-- record is incomplete, when in fact it is complete and the question does not apply. PLAN.md
+-- phase 1 curates "every published microbial isobutanol production strain, in any host", so those
+-- builds are in scope by the plan and were unrepresentable by the vocabulary.
+--
+-- WHY THIS NAME. Not 'F_no_compartmentalization': that reads as a sixth compartmentalization
+-- choice -- the decision to leave the pathway uncompartmented -- and it is not a decision at all.
+-- Not 'F_prokaryotic_cytoplasm' or 'F_bacterial': naming a taxon or a compartment would make the
+-- row mean "the bacterial one" rather than "the one where the question does not arise", and the
+-- id has to still read correctly for the C. glutamicum and B. subtilis configurations that phase
+-- 1 will bring. 'single_compartment_host' names the property of the HOST that removes the choice,
+-- which is the thing all of those builds actually have in common. A host that does have internal
+-- compartments and a build that declines to use them is NOT this row: that is a real decision and
+-- would need its own.
+INSERT INTO compartment_strategy (id, label, definition, source) VALUES
+    ('F_single_compartment_host', 'Single-compartment host: no compartment choice to make',
+     'The host has no internal compartment a pathway step could be placed in, so the whole route '
+     || 'runs in its single cytoplasm and strategies A-E do not apply. This is the absence of a '
+     || 'compartmentalization decision, not a sixth compartment. Distinct from NULL (not '
+     || 'recorded) and from the extractor''s ''NA''/''unknown'' (the paper does not say): here '
+     || 'the record is complete and the question does not arise.',
+     'PLAN.md phase 1 scope, ''any host''; first required by doi:10.1016/j.jbiotec.2022.09.012, '
+     || 'which states ''The isobutanol producing strain E. coli HM501 was used in this work as a '
+     || 'host strain''.');
+
 
 -- ---------------------------------------------------------------------------------------------
 -- 2. Biological entities

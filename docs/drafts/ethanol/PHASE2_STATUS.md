@@ -1,6 +1,17 @@
 # Phase 2 — the ethanol reference layer: what was admitted, and what the budget cannot buy
 
-2026-09-21. **DRAFT.** Nothing was written to the database and nothing under `data/`. No `confidence`
+> **INSTALLED 2026-09-22, on the owner's authorisation.** The 23 records below now live in
+> `data/literature/ethanol_admissions.yaml` (committed, repo tier) and in `screening_record`
+> (`review_state='accepted'`, `admitted_criterion` set), put there by
+> `fermdb literature ethanol install`. Every span was re-resolved against the `fulltext_asset`
+> store before installing — **63 of 63 exact** — and `validate_admission` returns no problems on
+> all 23. `verified` is still false and `confidence` still `unverified` on every record; §5's
+> re-tagging proposals beyond the admissions themselves are still unapplied, and §7 is still the
+> owner's. The §3a finding is now a `never_attempted` `knowledge_gap` row
+> (`YAA:GAP:ethanol-0-matrix-nad-p-h-pool-size-and-nad-p-h-nad`) rather than a paragraph.
+
+2026-09-21. **DRAFT** (as first written; see the note above for what has since been installed).
+Nothing was written to the database and nothing under `data/`. No `confidence`
 value is set anywhere; no record is marked `verified`. `fermdb extract` was not run. Project rule L.5,
 decision D2. The machine-readable record set is `phase2_admissions.yaml` beside this file.
 

@@ -2438,6 +2438,46 @@ admitted under E5 with no `ADH3`/`POS5`/shuttle/matrix-cofactor content fails va
 deleting *PDC* in the model returns its measured physiological consequences **and is rendered as
 the counterfactual it is, not as the chassis**; no admitted record lacks a criterion.
 
+**AMENDMENT 2026-09-22 — phase 2, measured. The E5 ceiling is the literature's, not the plan's,
+and the quantitative anchor is an experiment.**
+
+*What this replaces:* the 2026-09-20 amendment's "**`ADH3` and `POS5` records are a phase-2
+blocker**", and the *Revised acceptance* sentence "**the criterion set the loader accepts is
+E1–E5**".
+
+*Why:* the curation pass ran and measured the pool rather than assuming it. Against B.3.5's
+admitted list — `ADH3` localization and directionality, `pos5Δ` and `POS5` overexpression, and the
+respiratory/diauxic-shift physiology of ethanol as a carbon source — the readable literature
+supports roughly **5–8 qualitative records, not 45**. Against the narrower thing the blocker was
+written to secure, a *measurement* of matrix redox, it supports **none**: four independent passes
+agree that **no paper measures a matrix NAD(P)H pool or ratio in living *S. cerevisiae* under a
+named condition**. The nearest compartment-targeted live-cell method in the corpus
+(`10.1016/j.xpro.2020.100160`) reports glutathione redox potential, not the NAD(P)H pool. So the
+blocker as written was unmeetable by reading, and **a phase cannot be gated on a paper that does
+not exist.** Separately, the "E1–E5" sentence predates criterion E6, which was accepted on
+2026-09-20 with a 25-publication budget and which the `screening_record` CHECK already permits;
+enforcing E1–E5 would reject its records and make the phase unpassable for a second, unrelated
+reason.
+
+*Revised:* E5 is still curated **first** within phase 2. The `ADH3`/`POS5` requirement becomes what
+the literature can support: **at least one qualitative `ADH3`/`POS5`/shuttle record admitted under
+E5, against a realistic ceiling of about 5–8** — and the number admitted, whatever it is, is
+**reported with its reason**, because an unspent share is a finding about the literature and not
+slack to consume. The **quantitative** matrix-redox anchor is removed from phase 2's acceptance and
+recorded instead as a `knowledge_gap` of kind `never_attempted`, naming the sensor, the backgrounds
+and the conditions in enough detail to be costed and run (§2.3). Commissioning that measurement is
+an owner decision at the phase 3.5 checkpoint; **it is not a phase-2 deliverable, and its absence
+is not a phase-2 failure.** The E5 sub-budget of 45 stays as a ceiling and is expected to report a
+large unspent share.
+
+*Revised acceptance:* at or under cap (≤150 publications, ≤60 measurement studies); every record
+names its admission criterion; **the criterion set the loader accepts is E1–E6**; **a record
+admitted under E5 with no `ADH3`/`POS5`/shuttle/matrix-cofactor content fails validation**; **the
+absence of a quantitative matrix-redox measurement is recorded as a `never_attempted`
+`knowledge_gap` citing the passes that establish it, not left as silence and not counted as a
+failure**; deleting *PDC* in the model returns its measured physiological consequences **and is
+rendered as the counterfactual it is, not as the chassis**; no admitted record lacks a criterion.
+
 ### Phase 3 — Route enumeration and ranking (4–5 weeks)
 
 The generative route model, the six gates of G.7, component-wise explainable scoring, and
@@ -2449,6 +2489,40 @@ least one enumerated-but-never-built route survives inspection as scientifically
 rank is explainable term by term; strategy E routes are ranked as *reachable but costly* rather
 than either dropped or flattered, and each names its locus, leader, displaced gene and recoding
 requirement.
+
+**AMENDMENT 2026-09-22 — owner direction. A route that does not balance is flagged, not excluded.**
+
+*What this replaces:* in the phase-3 acceptance criterion above, "routes violating
+**per-compartment** redox balance are **excluded** with the imbalance named"; and, in G.7's gate
+table, the Stoichiometric row's effect, "Fails → excluded, with the imbalance named".
+
+*The replacement:* "every route's **per-compartment** redox balance is computed and **flagged with
+the imbalance named** — which cofactor is short by how much in which compartment — and a route that
+does not balance **stays in the enumeration and in the ranking**; where the curated stoichiometry
+does not determine a step's contribution the balance is reported `unknown`, never `balanced`".
+
+*Why:* **the supply side of the comparison does not exist.** `compartment_cofactor_pool` and
+`COFACTOR_POOLS` record *which* cofactors a compartment holds and never *how much*, and both are
+`unverified`. Excluding on that premise would delete around 56 routes — including the
+cofactor-switched ones the DUET question turns on — on a claim nobody has checked, which is exactly
+the option-destroying move the atlas exists to prevent. Naming the imbalance was always the
+load-bearing half of the clause; dropping the route is the half that cannot be justified until a
+measured per-compartment supply figure is curated. Exclusion stays reserved for a genuine
+stoichiometric impossibility and for a chassis disqualification.
+
+*What the first run of it found, recorded because it changes what the clause means:* of 800 routes,
+**0 balanced, 600 unbalanced, 200 unknown.** That is structural rather than a defect — the five
+catalytic steps all consume reducing power and none regenerates it, so no route could close. The
+owner's response was to add a **`cofactor_cycle` step role** so `POS5`, `ADH3` and `GPD` can exist
+as parts, which is what DUET's architecture actually is (B.3.5). Until that lands, "unbalanced"
+should be read as *per-compartment demand*, and the useful content is the 13 distinct named
+shortfalls — `NADPH short by 2 in mitochondrial_matrix` for the published matrix build against
+`NADH short by 1 in cytosol; NADPH short by 1 in mitochondrial_matrix` for the native split. A
+global sum would collapse the second and lose the only thing worth knowing.
+
+*If a measured supply figure is ever curated,* the right addition is a demand-against-supply term
+**per compartment**, printed in `explain` as its own term — not a pooled shortfall magnitude, which
+would add a matrix NADPH to a cytosolic NADH as though the inner membrane passed either.
 
 ### Phase 3.5 — The decision checkpoint (1 week)
 

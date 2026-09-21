@@ -273,6 +273,63 @@ _V9_TO_V10: Final[Migration] = Migration(
     ),
 )
 
+#: v10 -> v11. A sixth `compartment_strategy`, for hosts that have no compartment to choose.
+#:
+#: The first migration in this module that adds a ROW rather than a column, which is worth saying
+#: out loud: `compartment_strategy` is seeded by `schema.sql` itself because the five strategies of
+#: ISOBUTANOL_PROGRAM.md §2 are vocabulary and not data, and a closed vocabulary that the schema
+#: defines can only be extended the same way the schema is -- with a version bump and a reviewable
+#: statement. `fermdb db vocabularies` cannot do it, because it reads TSVs and this list is not one.
+#:
+#: Why the row exists. A-E all answer "which compartment does each step run in", and all five
+#: presuppose a eukaryotic host that has compartments to choose between. A prokaryote does not:
+#: there is one cytoplasm and the route runs in it. The best-evidenced configuration waiting in
+#: `curation_task` is `doi:10.1016/j.jbiotec.2022.09.012` -- *"The isobutanol producing strain
+#: E. coli HM501 was used in this work as a host strain"* -- and its extracted
+#: `compartment_strategy` is 'NA', which is the honest answer to a question that does not apply
+#: and is also unstorable, because `pathway_configuration.compartment_strategy_id` is a foreign
+#: key into this table. So a build that PLAN.md phase 1 puts in scope by name ("every published
+#: microbial isobutanol production strain, in any host") was blocked by the vocabulary rather than
+#: by its evidence. That is the kind of gap a data change fixes.
+#:
+#: Why this name and not a shorter one. 'F_no_compartmentalization' reads as a sixth CHOICE -- the
+#: decision to leave the pathway uncompartmented -- and this is not a decision at all; a name that
+#: implies one would eventually be scored against A-E as though the builder had weighed it.
+#: 'F_prokaryotic_cytoplasm' fixes the row to a taxon and to a compartment, and the row has to keep
+#: reading correctly when the C. glutamicum and B. subtilis configurations arrive, where the
+#: cytoplasm is a different one and the reason it is the only option is the same.
+#: 'F_single_compartment_host' names the property of the HOST that removes the choice, which is
+#: what all of those builds share. The corollary is deliberate: a host that HAS compartments and a
+#: build that declines to use them is not this row, because declining is a decision and needs its
+#: own.
+#:
+#: This row is an INSERT and not an ALTER, so the module's "may add, may not destroy" rule holds in
+#: the plainest possible way: nothing in a v10 database changes, and one value that could not be
+#: stored becomes storable. `tests/test_migrations.py` compares the migrated vocabulary against the
+#: freshly created one row for row, because a seeded row is exactly as prone to drifting away from
+#: `schema.sql` as a column is, and has no `PRAGMA` to catch it.
+_V10_TO_V11: Final[Migration] = Migration(
+    from_version=10,
+    to_version=11,
+    summary=(
+        "compartment_strategy gains F_single_compartment_host -- a prokaryotic host has no "
+        "compartment decision to record, and A-E all assume one"
+    ),
+    statements=(
+        "INSERT INTO compartment_strategy (id, label, definition, source) VALUES ("
+        "'F_single_compartment_host', "
+        "'Single-compartment host: no compartment choice to make', "
+        "'The host has no internal compartment a pathway step could be placed in, so the whole "
+        "route runs in its single cytoplasm and strategies A-E do not apply. This is the absence "
+        "of a compartmentalization decision, not a sixth compartment. Distinct from NULL (not "
+        "recorded) and from the extractor''s ''NA''/''unknown'' (the paper does not say): here "
+        "the record is complete and the question does not arise.', "
+        "'PLAN.md phase 1 scope, ''any host''; first required by "
+        "doi:10.1016/j.jbiotec.2022.09.012, which states ''The isobutanol producing strain "
+        "E. coli HM501 was used in this work as a host strain''.')",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -280,6 +337,7 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V7_TO_V8,
     _V8_TO_V9,
     _V9_TO_V10,
+    _V10_TO_V11,
 )
 
 

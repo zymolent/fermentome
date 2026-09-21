@@ -85,7 +85,14 @@ from typing import Final
 #:    `fermdb db migrate` applies it after taking a timestamped backup. Before v6 the only route
 #:    past a bump was to delete and rebuild, which stopped being reasonable once the same file
 #:    held 5,164 publications and 55 pending curation tasks.
-SCHEMA_VERSION: Final[int] = 10
+#: 11: a sixth `compartment_strategy`, `F_single_compartment_host`. The five seeded strategies are
+#:     all answers to "which compartment does each step run in" and all five presuppose a host with
+#:     compartments to choose between; a prokaryote has one cytoplasm and no choice, so its honest
+#:     `compartment_strategy` was 'NA' -- which is not a foreign key into this vocabulary and so
+#:     could not be stored. PLAN.md phase 1 curates "any host", so those builds were in scope by
+#:     the plan and unrepresentable by the schema. The first migration that adds a ROW: this list
+#:     is seeded by `schema.sql` rather than loaded from a TSV, so extending it is a version bump.
+SCHEMA_VERSION: Final[int] = 11
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

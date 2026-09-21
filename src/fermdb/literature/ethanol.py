@@ -32,23 +32,40 @@ import re
 import sqlite3
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Final
+from pathlib import Path
+from typing import Any, Final
 
 from ..config import Settings
 
 __all__ = [
+    "ADMISSIONS_FILE",
     "CRITERION_BUDGET",
+    "GAP_KINDS",
+    "GAP_STATUSES",
     "MEASUREMENT_STUDY_CAP",
+    "MAX_CURATED_CONFIDENCE",
     "PLAN_ACCEPTANCE_DISAGREES",
     "PUBLICATION_CAP",
     "SLOTS",
     "AdmissionProblem",
+    "AdmittedRecord",
+    "AdmissionsFileError",
     "BudgetLine",
     "EthanolAdmissionError",
+    "InstallReport",
+    "LayerGap",
+    "QuotedSpan",
     "Slot",
+    "SpanCheck",
     "admit",
     "budget_status",
+    "install_admissions",
+    "load_admissions",
+    "load_layer_gaps",
+    "unspent_report",
     "validate_admission",
+    "verify_record_spans",
+    "write_layer_gaps",
 ]
 
 #: PLAN.md phase 2 says E1-E5; the schema, the slots document and the owner's accepted budget all
@@ -339,9 +356,19 @@ def admit(
             ),
         )
 
+    # `AND product_tier = 'ethanol'` is load-bearing, and its absence was a real defect. A
+    # publication carries one screening row per query family it matched, and 103 of them carry
+    # BOTH tiers; `validate_admission` was fixed for that case and this writer was not. The
+    # unfiltered UPDATE tried to set `admitted_criterion` on the isobutanol rows too and died on
+    # the schema's own CHECK -- `admitted_criterion IS NULL OR product_tier = 'ethanol'` -- so
+    # every dual-tier paper was unadmittable, with a sqlite3.IntegrityError rather than an
+    # AdmissionProblem to explain it. Four of the 23 phase-2 admissions are dual-tier. The filter
+    # is also right on its own terms: an ethanol admission is not a verdict on an isobutanol row's
+    # triage, and flipping that row to 'included' would overwrite a judgement this call never made.
     conn.execute(
         "UPDATE screening_record SET review_state = 'accepted', triage_state = 'included', "
-        "admitted_criterion = ?, updated_at = datetime('now') WHERE publication_id = ?",
+        "admitted_criterion = ?, updated_at = datetime('now') "
+        "WHERE publication_id = ? AND product_tier = 'ethanol'",
         (criterion, publication_id),
     )
     conn.commit()
@@ -380,3 +407,524 @@ def readable_candidates(conn: sqlite3.Connection, criterion: str) -> Sequence[sq
         "WHERE s.admitted_criterion = ? ORDER BY p.year DESC",
         (criterion,),
     ).fetchall()
+
+
+# ---------------------------------------------------------------------------------------------
+# The curated layer: data/literature/ethanol_admissions.yaml
+#
+# The database holds exactly ONE fact per admitted record -- `screening_record.admitted_criterion`
+# -- and that column is where the criterion is enforced, by the two CHECK constraints the schema
+# puts on it. Everything else an admission consists of has no column anywhere: the verbatim quote
+# and its offsets, why this criterion and not another, what the study lacks, B.3.4's required
+# `transfer_rationale` and the `evidence_ceiling` that goes with it.
+#
+# So the layer lives in two places on purpose, and the split follows the tiers CONVENTIONS.md
+# already draws. The committed YAML is repo tier: curated, reviewable in a diff, and the source of
+# truth. The database is derived tier and rebuildable, so a criterion that lived only there would
+# not survive a rebuild -- which is the whole reason this file exists rather than a one-off script
+# that UPDATEs 23 rows.
+# ---------------------------------------------------------------------------------------------
+
+#: The curated admission set, under `settings.literature_dir`.
+ADMISSIONS_FILE: Final[str] = "ethanol_admissions.yaml"
+
+#: The `knowledge_gap` vocabularies, mirrored from the schema's CHECK constraints. A curated gap
+#: naming anything else is a typo, and a typo that reaches the INSERT is an IntegrityError with no
+#: line number in it.
+GAP_KINDS: Final[frozenset[str]] = frozenset(
+    {
+        "transport_carrier_unknown",
+        "enzyme_unidentified",
+        "mechanism_unknown",
+        "quantitative_value_missing",
+        "never_attempted",
+    }
+)
+GAP_STATUSES: Final[frozenset[str]] = frozenset({"open", "candidate_proposed", "resolved"})
+
+#: What a curated-but-unverified row may claim. 'high' is never writable from memory
+#: (CONVENTIONS.md, Curation), and promoting an admission past this is a curator act under
+#: PLAN.md L.5 -- so the loader refuses it rather than trusting the file.
+MAX_CURATED_CONFIDENCE: Final[frozenset[str]] = frozenset({"unverified", "low", "medium"})
+
+
+class AdmissionsFileError(RuntimeError):
+    """`ethanol_admissions.yaml` is missing, malformed, or internally inconsistent."""
+
+
+@dataclass(frozen=True)
+class QuotedSpan:
+    """A verbatim quote and where it sits in the stored full text.
+
+    0-based half-open ``[char_start, char_end)``, the same convention as the ``span`` table and
+    `fermdb.llm.validate.Span`, which is what re-resolves it.
+    """
+
+    quote: str
+    char_start: int
+    char_end: int
+    occurrences_in_source: int
+
+
+@dataclass(frozen=True)
+class AdmittedRecord:
+    """One publication admitted under one criterion, with what justifies it."""
+
+    publication_id: str
+    criterion: str
+    slots: tuple[int, ...]
+    slot_label: str
+    title: str
+    measurement_bearing: bool
+    verified: bool
+    confidence: str
+    transfer_rationale: str | None
+    evidence_ceiling: str | None
+    spans: tuple[QuotedSpan, ...]
+
+
+@dataclass(frozen=True)
+class LayerGap:
+    """A `knowledge_gap` the ethanol layer establishes by finding nothing.
+
+    Not a property of a proposed route -- `metabolic.routes` emits those -- but a property of the
+    field, reached by reading the corpus. So it carries no ``route_id``, and it is Zone I because
+    it is inferred from an absence.
+    """
+
+    id: str
+    kind: str
+    compartment_id: str | None
+    description: str
+    why_it_matters: str
+    status: str
+    evidence: str
+    confidence: str
+
+
+@dataclass(frozen=True)
+class SpanCheck:
+    """One span re-resolved against the stored full text, or the reason it could not be."""
+
+    publication_id: str
+    index: int
+    ok: bool
+    code: str | None = None
+    detail: str | None = None
+
+
+@dataclass(frozen=True)
+class InstallReport:
+    """What an install actually did. Never a bare count: the refusals are the useful part."""
+
+    admitted: tuple[str, ...]
+    refused: tuple[tuple[str, AdmissionProblem], ...]
+    spans_checked: int
+    span_failures: tuple[SpanCheck, ...]
+    gaps_written: int
+
+
+def _admissions_path(settings: Settings, path: Path | None) -> Path:
+    source = settings.literature_dir / ADMISSIONS_FILE if path is None else path
+    if not source.is_file():
+        raise AdmissionsFileError(
+            f"no admission set at {source}; it is curated and committed, not generated."
+        )
+    return source
+
+
+def _read_yaml(source: Path) -> dict[str, Any]:
+    try:
+        import yaml
+    except ImportError as exc:  # pragma: no cover - declared in pyproject
+        raise AdmissionsFileError("PyYAML is required to read the admission set") from exc
+    document = yaml.safe_load(source.read_text(encoding="utf-8"))
+    if not isinstance(document, dict):
+        raise AdmissionsFileError(f"{source}: the top level is not a mapping")
+    return document
+
+
+def _require_str(source: Path, where: str, value: object, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise AdmissionsFileError(f"{source}: {where} has no '{field}'")
+    return value
+
+
+def _slots_from(source: Path, where: str, value: object, criterion: str) -> tuple[int, ...]:
+    """Slot numbers out of ``2``, ``'3 and 4'`` or ``'slot 1'``, cross-checked against E1-E6.
+
+    One record legitimately fills two slots -- `doi:10.1186/s13068-024-02503-7` serves acute shock
+    and adapted growth -- so this is a tuple and not an int.
+    """
+    label = str(value)
+    numbers = tuple(int(match) for match in re.findall(r"\d+", label))
+    if not numbers:
+        raise AdmissionsFileError(f"{source}: {where} names no slot")
+    carried = {slot.number for slot in _slots_for(criterion)}
+    wrong = sorted(number for number in numbers if number not in carried)
+    if wrong:
+        raise AdmissionsFileError(
+            f"{source}: {where} is admitted under {criterion} but names slot(s) {wrong}; "
+            f"{criterion} covers {sorted(carried)}."
+        )
+    return numbers
+
+
+def _spans_from(source: Path, where: str, rows: object) -> tuple[QuotedSpan, ...]:
+    if not isinstance(rows, list) or not rows:
+        raise AdmissionsFileError(
+            f"{source}: {where} carries no 'evidence'. An admission with no quote is an opinion "
+            f"about a paper, and the layer records judgements that can be re-read."
+        )
+    spans: list[QuotedSpan] = []
+    for index, row in enumerate(rows):
+        at = f"{where} evidence[{index}]"
+        if not isinstance(row, dict):
+            raise AdmissionsFileError(f"{source}: {at} is not a mapping")
+        quote = _require_str(source, at, row.get("quote"), "quote")
+        start, end = row.get("char_start"), row.get("char_end")
+        if not isinstance(start, int) or isinstance(start, bool):
+            raise AdmissionsFileError(f"{source}: {at} char_start is not an integer")
+        if not isinstance(end, int) or isinstance(end, bool):
+            raise AdmissionsFileError(f"{source}: {at} char_end is not an integer")
+        if start < 0 or end <= start:
+            raise AdmissionsFileError(
+                f"{source}: {at} has offsets [{start}, {end}), which is not a non-empty half-open "
+                f"interval"
+            )
+        if end - start != len(quote):
+            raise AdmissionsFileError(
+                f"{source}: {at} spans {end - start} characters but its quote is {len(quote)}. "
+                f"The offsets and the quote disagree before any source has been consulted."
+            )
+        occurrences = row.get("occurrences_in_source", 1)
+        if not isinstance(occurrences, int) or isinstance(occurrences, bool) or occurrences < 1:
+            raise AdmissionsFileError(f"{source}: {at} occurrences_in_source is not a count")
+        spans.append(QuotedSpan(quote, start, end, occurrences))
+    return tuple(spans)
+
+
+def load_admissions(settings: Settings, *, path: Path | None = None) -> tuple[AdmittedRecord, ...]:
+    """The curated admission set, validated against everything that can be checked offline.
+
+    What it refuses, and why each one is a refusal rather than a warning:
+
+    * **A record with no criterion, or one outside E1-E6.** PLAN.md phase 2's acceptance is
+      "no admitted record lacks a criterion", and the schema's CHECK says which six.
+    * **A slot that does not carry the record's criterion.** Admitting an E2 paper "into slot 6"
+      is a curator slip, and the file is where it would go unnoticed.
+    * **`verified: true`, or a confidence above `medium`.** Promotion is a curator act (PLAN.md
+      L.5, decision D2); a file that could promote by being edited is not a safe place to put 23
+      records.
+    * **An E4 record with no `transfer_rationale`.** B.3.4 admits a mechanism *only* with a stated
+      argument for transfer to a C4 alcohol. Without the field the criterion is decoration.
+    * **A criterion over its sub-budget, or the set over either cap.** The budget is enforced per
+      admission by `validate_admission`; checking it here as well means the file cannot be
+      *committed* in an over-spent state, which is the state a reviewer would have to catch by eye.
+    """
+    source = _admissions_path(settings, path)
+    document = _read_yaml(source)
+    rows = document.get("records")
+    if not isinstance(rows, list) or not rows:
+        raise AdmissionsFileError(f"{source}: 'records' must be a non-empty list")
+
+    records: list[AdmittedRecord] = []
+    seen: set[str] = set()
+    for index, row in enumerate(rows):
+        where = f"records[{index}]"
+        if not isinstance(row, dict):
+            raise AdmissionsFileError(f"{source}: {where} is not a mapping")
+        publication_id = _require_str(source, where, row.get("publication_id"), "publication_id")
+        where = f"{publication_id}"
+        if publication_id in seen:
+            raise AdmissionsFileError(
+                f"{source}: {publication_id} appears twice. One paper, one admission -- a second "
+                f"row would charge its criterion twice against the sub-budget."
+            )
+        seen.add(publication_id)
+
+        raw_criterion = row.get("admitted_criterion")
+        if not isinstance(raw_criterion, str) or raw_criterion not in CRITERION_BUDGET:
+            raise AdmissionsFileError(
+                f"{source}: {where} has admitted_criterion={raw_criterion!r}, not one of "
+                f"{sorted(CRITERION_BUDGET)}. PLAN.md phase 2: no admitted record lacks a "
+                f"criterion."
+            )
+        criterion: str = raw_criterion
+        slots = _slots_from(source, where, row.get("slot"), criterion)
+
+        verified = row.get("verified")
+        if verified is not False:
+            raise AdmissionsFileError(
+                f"{source}: {where} has verified={verified!r}. This file holds a curation "
+                f"proposal; flipping the bit is a curator act (PLAN.md L.5) and is not done by "
+                f"editing YAML."
+            )
+        confidence = _require_str(source, where, row.get("confidence"), "confidence")
+        if confidence not in MAX_CURATED_CONFIDENCE:
+            raise AdmissionsFileError(
+                f"{source}: {where} has confidence={confidence!r}; while verified is false it may "
+                f"be one of {sorted(MAX_CURATED_CONFIDENCE)}."
+            )
+
+        transfer_rationale = row.get("transfer_rationale")
+        if criterion == "E4" and not isinstance(transfer_rationale, str):
+            raise AdmissionsFileError(
+                f"{source}: {where} is admitted under E4 with no transfer_rationale. B.3.4 admits "
+                f"a mechanism only with a stated argument for transfer to a C4 alcohol."
+            )
+
+        records.append(
+            AdmittedRecord(
+                publication_id=publication_id,
+                criterion=criterion,
+                slots=slots,
+                slot_label=str(row.get("slot")),
+                title=str(row.get("title") or publication_id),
+                measurement_bearing=bool(row.get("measurement_bearing")),
+                verified=False,
+                confidence=confidence,
+                transfer_rationale=(
+                    transfer_rationale if isinstance(transfer_rationale, str) else None
+                ),
+                evidence_ceiling=(
+                    row.get("evidence_ceiling")
+                    if isinstance(row.get("evidence_ceiling"), str)
+                    else None
+                ),
+                spans=_spans_from(source, where, row.get("evidence")),
+            )
+        )
+
+    _check_caps(source, records)
+    return tuple(records)
+
+
+def _check_caps(source: Path, records: Sequence[AdmittedRecord]) -> None:
+    if len(records) > PUBLICATION_CAP:
+        raise AdmissionsFileError(
+            f"{source}: {len(records)} records against a {PUBLICATION_CAP}-publication cap"
+        )
+    measuring = sum(1 for record in records if record.measurement_bearing)
+    if measuring > MEASUREMENT_STUDY_CAP:
+        raise AdmissionsFileError(
+            f"{source}: {measuring} measurement-bearing records against a "
+            f"{MEASUREMENT_STUDY_CAP}-study cap"
+        )
+    for criterion, budget in CRITERION_BUDGET.items():
+        spent = sum(1 for record in records if record.criterion == criterion)
+        if spent > budget:
+            raise AdmissionsFileError(
+                f"{source}: {criterion} carries {spent} records against a budget of {budget}. "
+                f"The budget is a ceiling, and an unspent share elsewhere is reported rather than "
+                f"reallocated."
+            )
+
+
+def verify_record_spans(
+    conn: sqlite3.Connection,
+    settings: Settings,
+    records: Sequence[AdmittedRecord],
+) -> tuple[SpanCheck, ...]:
+    """Re-resolve every quote against the ``fulltext_asset`` store, exactly.
+
+    **Which text.** `load_source_text` reads the stored asset -- not the corpus cache. They are
+    not the same text for every publication and they do not share offsets, and that is not a
+    theoretical distinction: the shortlist drafts this set was built from were verified against the
+    cache, and two of their quotes do not occur in their paper at all. A quote verified in one
+    store is not thereby verified in the other.
+    """
+    from ..extract.harness import SourceTextError, load_source_text
+    from ..llm.validate import Span, verify_span
+
+    checks: list[SpanCheck] = []
+    cache: dict[str, str | None] = {}
+    for record in records:
+        if record.publication_id not in cache:
+            try:
+                loaded, _ = load_source_text(conn, settings, publication_id=record.publication_id)
+            except SourceTextError:
+                cache[record.publication_id] = None
+            else:
+                cache[record.publication_id] = loaded
+        text = cache[record.publication_id]
+        for index, span in enumerate(record.spans):
+            if text is None:
+                checks.append(
+                    SpanCheck(
+                        record.publication_id,
+                        index,
+                        False,
+                        "source_text_unreadable",
+                        "no stored full text, so the quote cannot be re-resolved at all",
+                    )
+                )
+                continue
+            verdict = verify_span(
+                text, Span(quote=span.quote, char_start=span.char_start, char_end=span.char_end)
+            )
+            checks.append(
+                SpanCheck(
+                    record.publication_id,
+                    index,
+                    verdict.ok,
+                    None if verdict.ok else verdict.reason,
+                    None if verdict.ok else verdict.detail,
+                )
+            )
+    return tuple(checks)
+
+
+def install_admissions(
+    conn: sqlite3.Connection,
+    settings: Settings,
+    *,
+    path: Path | None = None,
+    verify_spans: bool = True,
+) -> InstallReport:
+    """Install the curated admission set into a database, refusing anything that does not hold.
+
+    Two gates, and a record has to pass both.
+
+    **Its spans must re-resolve.** A record whose quote no longer occurs at its recorded offsets
+    is not installed, and the check is against the ``fulltext_asset`` store rather than any cache.
+    Installing it anyway would put a criterion in the database backed by a quote that cannot be
+    re-read, which is the failure the offsets exist to make impossible.
+
+    **`validate_admission` must return nothing**, which is where the tier rule, the sub-budget and
+    the layer cap are actually enforced. Problems are collected per record rather than raised, so
+    one bad record does not hide the other twenty-two.
+    """
+    records = load_admissions(settings, path=path)
+
+    failures: tuple[SpanCheck, ...] = ()
+    checked = 0
+    if verify_spans:
+        checks = verify_record_spans(conn, settings, records)
+        checked = len(checks)
+        failures = tuple(check for check in checks if not check.ok)
+    blocked = {check.publication_id for check in failures}
+
+    admitted: list[str] = []
+    refused: list[tuple[str, AdmissionProblem]] = []
+    for record in records:
+        if record.publication_id in blocked:
+            refused.append(
+                (
+                    record.publication_id,
+                    AdmissionProblem(
+                        "span_did_not_re_resolve",
+                        "at least one quote did not re-resolve against the stored full text, so "
+                        "the admission is not installed. Repair the quote against the source "
+                        "rather than loosening the check.",
+                    ),
+                )
+            )
+            continue
+        problems = admit(
+            conn,
+            settings,
+            publication_id=record.publication_id,
+            criterion=record.criterion,
+            slot=record.slots[0],
+        )
+        if problems:
+            refused.extend((record.publication_id, problem) for problem in problems)
+        else:
+            admitted.append(record.publication_id)
+
+    gaps = load_layer_gaps(settings, path=path)
+    written = write_layer_gaps(conn, gaps)
+
+    return InstallReport(
+        admitted=tuple(admitted),
+        refused=tuple(refused),
+        spans_checked=checked,
+        span_failures=failures,
+        gaps_written=written,
+    )
+
+
+def load_layer_gaps(settings: Settings, *, path: Path | None = None) -> tuple[LayerGap, ...]:
+    """The `open_gaps` of the admission set, as `knowledge_gap` rows.
+
+    The slots document asks for this in as many words -- gaps are to be recorded "as
+    ``knowledge_gap`` rows rather than leaving silence" -- and PLAN.md §2.3 says the atlas records
+    a never-attempted experiment as a gap of exactly this shape. The gap belongs beside the
+    admissions because it is the *same pass*: it is what the layer found by reading the corpus and
+    finding nothing, and separating the finding from the evidence for it is how a gap turns back
+    into folklore.
+    """
+    source = _admissions_path(settings, path)
+    document = _read_yaml(source)
+    rows = document.get("open_gaps")
+    if rows is None:
+        return ()
+    if not isinstance(rows, list):
+        raise AdmissionsFileError(f"{source}: 'open_gaps' must be a list")
+
+    gaps: list[LayerGap] = []
+    for index, row in enumerate(rows):
+        where = f"open_gaps[{index}]"
+        if not isinstance(row, dict):
+            raise AdmissionsFileError(f"{source}: {where} is not a mapping")
+        description = _require_str(source, where, row.get("gap"), "gap")
+        kind = row.get("kind")
+        if kind not in GAP_KINDS:
+            raise AdmissionsFileError(
+                f"{source}: '{description}' has kind={kind!r}, not one of {sorted(GAP_KINDS)}. "
+                f"'kind' is what the gap IS; 'status' is how far it has got."
+            )
+        status = row.get("status") or "open"
+        if status not in GAP_STATUSES:
+            raise AdmissionsFileError(
+                f"{source}: '{description}' has status={status!r}, not one of "
+                f"{sorted(GAP_STATUSES)}"
+            )
+        confidence = row.get("confidence") or "unverified"
+        if confidence not in MAX_CURATED_CONFIDENCE:
+            raise AdmissionsFileError(
+                f"{source}: '{description}' has confidence={confidence!r}; a gap inferred from an "
+                f"absence may claim at most {sorted(MAX_CURATED_CONFIDENCE)}."
+            )
+        evidence = _require_str(source, where, row.get("evidence"), "evidence")
+        slug = re.sub(r"[^a-z0-9]+", "-", description.lower()).strip("-")[:40]
+        gaps.append(
+            LayerGap(
+                id=f"YAA:GAP:ethanol-{index}-{slug}",
+                kind=str(kind),
+                compartment_id=(
+                    str(row["compartment"]) if isinstance(row.get("compartment"), str) else None
+                ),
+                description=description,
+                why_it_matters=str(row.get("note") or description),
+                status=str(status),
+                evidence=evidence,
+                confidence=str(confidence),
+            )
+        )
+    return tuple(gaps)
+
+
+def write_layer_gaps(conn: sqlite3.Connection, gaps: Sequence[LayerGap]) -> int:
+    """Store the layer's gaps. Idempotent on id. Zone I: every one is inferred from an absence."""
+    for gap in gaps:
+        conn.execute(
+            "INSERT INTO knowledge_gap (id, kind, compartment_id, description, why_it_matters, "
+            "status, zone, evidence, confidence) VALUES (?,?,?,?,?,?,'I',?,?) "
+            "ON CONFLICT(id) DO UPDATE SET kind=excluded.kind, description=excluded.description, "
+            "why_it_matters=excluded.why_it_matters, status=excluded.status, "
+            "evidence=excluded.evidence, confidence=excluded.confidence",
+            (
+                gap.id,
+                gap.kind,
+                gap.compartment_id,
+                gap.description,
+                gap.why_it_matters,
+                gap.status,
+                gap.evidence,
+                gap.confidence,
+            ),
+        )
+    conn.commit()
+    return len(gaps)

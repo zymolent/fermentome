@@ -116,7 +116,10 @@ def test_every_clause_of_the_rule_is_reachable(parts: tuple, routes: list) -> No
         "host_outside_enumeration": _configuration(["alsS"], organism=_ECOLI),
         "no_enzyme_set_recorded": _configuration(None, localization="in the mitochondria"),
         "matched": _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH6"]),
-        "catalog_gap": _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH7"]),
+        # ADH2 rather than ADH7: ADH7 was this exemplar until it was curated into the catalog
+        # from 10.1016/j.cels.2019.10.006, which is the worklist working. ADH2 is the next real
+        # yeast alcohol dehydrogenase the catalog does not carry.
+        "catalog_gap": _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH2"]),
         "under_specified": _configuration(["ILV2", "ILV5", "ILV3", "KDC", "ADH"]),
     }
     assert set(cases) == {clause.name for clause in MATCHING_RULE}
@@ -154,12 +157,23 @@ def test_a_description_with_no_enzyme_segment_yields_nothing_rather_than_a_guess
 
 
 def test_resolution_is_exact_token_equality_never_substring(parts: tuple) -> None:
-    """ADH7 contains 'ADH' and is a real yeast alcohol dehydrogenase that the catalog does not
-    carry. A substring rule would resolve it to Adh1 or Adh6 and report a build the enumerator
-    cannot express as re-discovered."""
-    resolution = resolve_roles(["ADH7"], parts)
-    assert resolution.unrecognised == ("ADH7",)
+    """ADH2 contains 'ADH' and is a real yeast alcohol dehydrogenase that the catalog does not
+    carry. A substring rule would resolve it to Adh1, Adh6 or Adh7 and report a build the
+    enumerator cannot express as re-discovered.
+
+    This test was written with ADH7 in that slot, and ADH7 is now a catalog part — curated from
+    10.1016/j.cels.2019.10.006, which is the paper the recall harness named it from. So the
+    exemplar moved to the next real absentee rather than the property being retired: the danger is
+    the shape 'a name that ends in a symbol the catalog has', not any one gene, and the catalog
+    filling up is exactly when a substring rule starts finding false matches.
+    """
+    resolution = resolve_roles(["ADH2"], parts)
+    assert resolution.unrecognised == ("ADH2",)
     assert not any(role.filled for role in resolution.roles)
+    # The gene that replaced it as the exemplar must itself still resolve exactly.
+    assert dict((r.role, r.part_ids) for r in resolve_roles(["ADH7"], parts).roles)["ADH"] == (
+        "adh7_native",
+    )
 
 
 def test_an_alias_is_a_named_exception_and_not_a_prefix_rule(parts: tuple) -> None:
@@ -310,7 +324,7 @@ def test_recall_is_over_the_judgeable_set_and_coverage_says_how_big_that_was(
     also the easiest way to inflate a figure, so `coverage` reports exactly how much was held."""
     configurations = (
         _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH6"], name="matched"),
-        _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH7"], name="catalog gap"),
+        _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH2"], name="catalog gap"),
         _configuration(["ILV2", "ILV5", "ILV3", "KDC", "ADH"], name="under specified"),
         _configuration(["ILV2"], strategy="unknown", name="no strategy"),
     )
@@ -327,15 +341,15 @@ def test_the_report_names_every_miss_and_the_enzymes_behind_it(parts: tuple, rou
     """'report recall as a fraction with the misses named' — the fraction alone is not the
     deliverable, and the unrecognised-enzyme list is the curation worklist the harness is for."""
     configurations = (
-        _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH7"], name="gap-a"),
+        _configuration(["ILV2", "ILV5", "ILV3", "ARO10", "ADH2"], name="gap-a"),
         _configuration(["alsS", "ilvC", "ilvD", "kivD", "yqhD"], name="gap-b"),
     )
     report = recall_report(configurations, parts, routes, chassis_organism_id=_YEAST)
-    assert report.unrecognised_enzymes == ("ADH7", "yqhD")
+    assert report.unrecognised_enzymes == ("ADH2", "yqhD")
     body = "\n".join(describe_report(report))
     assert "MISSED" in body
     assert "gap-a" in body and "gap-b" in body
-    assert "ADH7" in body and "yqhD" in body
+    assert "ADH2" in body and "yqhD" in body
 
 
 # -------------------------------------------------------------------------------- the loader

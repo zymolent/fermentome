@@ -1,0 +1,1035 @@
+# The ethanol reference layer - the admitted records (PLAN.md B.3, phase 2).
+#
+# WHAT THIS FILE IS. The 23 publications admitted into the capped ethanol layer, each with the
+# criterion it was admitted under, the verbatim quotes that justify the admission and their
+# character offsets into the stored full text. It is the repo-tier, committed source of truth for
+# the layer: the database is derived tier (~/fermdb-data, rebuildable), so a criterion that lived
+# only in `screening_record` would not survive a rebuild, and the quotes, the transfer rationales
+# and the evidence ceilings have no column anywhere in the schema at all.
+#
+# WHAT THE DATABASE HOLDS INSTEAD. One fact per record: `screening_record.admitted_criterion`,
+# with `review_state='accepted'` and `triage_state='included'`. That column carries the CHECK
+# constraints that make the criterion real - `admitted_criterion IN ('E1'..'E6')` and
+# `admitted_criterion IS NULL OR product_tier = 'ethanol'` - and it is what `budget_status`,
+# `unspent_report`, `validate_admission` and `fermdb literature ethanol status` read. Install this
+# file into a database with `fermdb literature ethanol install`.
+#
+# WHAT HAS NOT HAPPENED, AND IS THE OWNER'S. `verified` is false on all 23 and `confidence` is
+# 'unverified' on all 23; tests/test_ethanol_admission.py fails the day that changes by accident.
+# Nothing in the re-tagging proposals of docs/drafts/ethanol/PHASE2_STATUS.md section 5 is applied
+# beyond the admissions themselves, and the picks remain a curation proposal: the slots document
+# says the agent shortlists and the owner chooses.
+#
+# DO NOT HAND-EDIT THE OFFSETS. They are 0-based half-open [char_start, char_end) into the text
+# `fermdb.extract.harness.load_source_text` returns for that publication_id, and they were
+# re-resolved against the `fulltext_asset` store - NOT against the corpus cache, which is a
+# different text with different offsets and which is how two quotes in an earlier draft came to
+# cite a paper they do not occur in.
+
+version: 1
+installed: '2026-09-22'
+source_draft: docs/drafts/ethanol/phase2_admissions.yaml
+zone:
+  quotes: R
+  rows_written: H
+  gaps: I
+status: INSTALLED as a curation proposal, not as a ratified layer. `verified` is false on every record
+  and `confidence` is 'unverified' on every record. Promoting one means a curator reading the quote
+  and flipping the bit (PLAN.md L.5, decision D2); this file does not do it and the loader refuses to.
+quote_policy: Every quote is a contiguous verbatim span of the stored full text for that publication_id,
+  taken through fermdb.extract.harness.load_source_text. No ellipses, no splicing of non-adjacent sentences,
+  no paraphrase inside quote marks. Hyphenation, ligatures, line breaks and PDF extraction artefacts
+  are reproduced exactly, because cleaning them would break the offsets. Offsets are 0-based half-open
+  [char_start, char_end).
+span_verification:
+  re_verified: '2026-09-22'
+  against: fulltext_asset store, via fermdb.extract.harness.load_source_text
+  checked_with: fermdb.llm.validate.verify_span
+  spans_in_this_file: 53
+  re_resolved_exact: 53
+  absent: 0
+  spliced: 0
+  note: The draft's headline of 63 covers these 53 plus the 10 basis quotes on the re-tagging proposals,
+    which stay in the draft because nothing is re-tagged here beyond the admissions themselves; those
+    10 were re-checked in the same pass and are 10 of 10 exact. Three quotes below occur more than once
+    in their source (repeated data-availability statements); they are exact but not positionally unique,
+    and the recorded offset is the first occurrence.
+caps:
+  publication_cap: 150
+  measurement_study_cap: 60
+  publications_admitted_here: 23
+  measurement_bearing_admitted_here: 22
+budget_position:
+- criterion: E5
+  budget: 45
+  admitted_here: 0
+  unspent: 45
+- criterion: E6
+  budget: 25
+  admitted_here: 3
+  unspent: 22
+- criterion: E1
+  budget: 25
+  admitted_here: 3
+  unspent: 22
+- criterion: E2
+  budget: 20
+  admitted_here: 3
+  unspent: 17
+- criterion: E3
+  budget: 20
+  admitted_here: 3
+  unspent: 17
+- criterion: E4
+  budget: 15
+  admitted_here: 11
+  unspent: 4
+records:
+- publication_id: doi:10.1186/1475-2859-11-131
+  doi: 10.1186/1475-2859-11-131
+  pmid: '22978798'
+  title: An internal deletion in MTH1 enables growth on glucose of pyruvate-decarboxylase negative,
+    non-fermentative Saccharomyces cerevisiae.
+  year: 2012
+  journal: Microbial cell factories
+  admitted_criterion: E1
+  slot: 2
+  current_db_tag: E1
+  action: confirm
+  why_this_criterion: 'B.3.1''s core content: a pdc1Δ pdc5Δ pdc6Δ strain, the glucose intolerance it
+    causes, and the MTH1-ΔT allele that makes a Pdc-minus strain usable on glucose at all. This is the
+    reverse-engineered mechanism behind the whole Pdc-minus chassis line.'
+  what_it_lacks: Reverse engineering of an evolved phenotype; the MTH1-ΔT mechanism explains the glucose
+    tolerance but not the C2 auxotrophy, which is handled by acetate supplementation rather than solved.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: S. cerevisiae strains in which all three structural genes encoding pyruvate decarboxylase
+      (PDC1PDC5 and PDC6[]) were deleted, did not produce ethanol,
+    char_start: 4294
+    char_end: 4444
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: This experiment confirmed that introduction of the MTH1-ΔT mutation was sufficient to enable
+      growth in batch cultures on glucose as sole carbon source
+    char_start: 17384
+    char_end: 17534
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/s13068-019-1486-8
+  doi: 10.1186/s13068-019-1486-8
+  pmid: '31303893'
+  title: Improving isobutanol production with the yeast Saccharomyces cerevisiae by successively blocking
+    competing metabolic pathways as well as ethanol and glycerol formation.
+  year: 2019
+  journal: Biotechnology for biofuels
+  admitted_criterion: E1
+  slot: 2
+  current_db_tag: E3 + E5
+  action: RE-TAG to E1
+  why_this_criterion: 'It is the E1 cost ledger measured inside an isobutanol-producing strain: PDC1
+    and PDC5 deletions, with and without Mth1 rescue, scored for ethanol block, glucose consumption
+    and isobutanol titre in one series. Neither E3 (it is not a wild-type baseline) nor E5 (it measures
+    no matrix cofactor, no ADH3, no shuttle) describes it.'
+  what_it_lacks: Single laboratory lineage; PDC6 is assumed silent rather than shown silent here.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Since PDC6 normally is not expressed [], deletions of PDC1 together with PDC5 were sufficient
+      to block ethanol biosynthesis.
+    char_start: 14520
+    char_end: 14644
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: This clearly demonstrates that a potential C2 auxotrophy is not the bottleneck for isobutanol
+      production in Pdc-deficient cells.
+    char_start: 20092
+    char_end: 20220
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1093/femsyr/foaf014
+  doi: 10.1093/femsyr/foaf014
+  pmid: '40121184'
+  title: The advances in creating Crabtree-negative Saccharomyces cerevisiae and the application for
+    chemicals biosynthesis.
+  year: 2025
+  journal: FEMS yeast research
+  admitted_criterion: E1
+  slot: 2
+  current_db_tag: E1
+  action: confirm
+  why_this_criterion: 'A 2025 review of Crabtree-negative S. cerevisiae construction: it is the only
+    document in the readable E1 pool that assembles the Mth1 suppressor alleles (Δ57–131, A81D, A81P)
+    and the C2/cofactor explanations for the growth defect in one place. Admitted as the counterfactual
+    layer''s orientation document, not as a measurement.'
+  what_it_lacks: A review. Every number in it is another paper's, so it can carry no measurement rows
+    and must never be the source of a value.
+  measurement_bearing: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: PDC-negative strains slow down glucose utilization, and the rate of product production decreases.
+    char_start: 23955
+    char_end: 24052
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Pdc1 plays a major role and has a very high expression level.
+    char_start: 8753
+    char_end: 8814
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/s13068-015-0216-0
+  doi: 10.1186/s13068-015-0216-0
+  pmid: '25759747'
+  title: Large-scale robot-assisted genome shuffling yields industrial Saccharomyces cerevisiae yeasts
+    with increased ethanol tolerance.
+  year: 2015
+  journal: Biotechnology for biofuels
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm
+  why_this_criterion: The performance-ceiling record. Ethanol Red run as an in-batch triplicate control
+    on 35% w/v glucose, with the best hybrid taken to an 8 L pilot at 32% w/v glucose to dryness. This
+    is the number the programme calibrates against.
+  what_it_lacks: Rich YP medium, not defined; the headline 18.7% (v/v) is the pilot hybrid, not Ethanol
+    Red; and the abstract/body %v/v vs %w/v hazard the shortlist flagged applies — read the body tables.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: We first determined the ethanol accumulation capacity under lab-scale VHG conditions (fermentation
+      of 150 ml YP + 35% (w/v) glucose).
+    char_start: 9733
+    char_end: 9866
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: In an 8-l pilot-scale test, the best-performing hybrid fermented medium containing 32% (w/v)
+      glucose to dryness, yielding 18.7% (v/v) ethanol with a p
+    char_start: 1996
+    char_end: 2146
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/s13068-018-1239-0
+  doi: 10.1186/s13068-018-1239-0
+  pmid: '30237826'
+  title: Conditions promoting effective very high gravity sugarcane juice fermentation.
+  year: 2018
+  journal: Biotechnology for biofuels
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm
+  why_this_criterion: VHG on real sugarcane juice with the yield stated explicitly against the 0.511
+    g/g theoretical maximum, which is the form B.3.2 asks for.
+  what_it_lacks: Sugarcane juice, not defined medium, so the substrate is not reproducible; the 93%
+    yield is a fraction of theoretical, not a g/g, and needs the paper's own conversion to be comparable.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: In fact, at 35 °Bx/urea, PE-2 presented the extraordinary yield of 93% with a matching productivity
+      of 4.19 g L−1 h−1 (Table ).
+    char_start: 27972
+    char_end: 28099
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: 'Ethanol yield was calculated according to the theoretical consideration that the conversion
+      of 100 g glucose should give rise to 51.1 g, or 64.75 mL, '
+    char_start: 47541
+    char_end: 47691
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/s40643-022-00580-w
+  doi: 10.1186/s40643-022-00580-w
+  pmid: '38647773'
+  title: Brazilian industrial yeasts show high fermentative performance in high solids content for corn
+    ethanol process.
+  year: 2022
+  journal: Bioresources and bioprocessing
+  admitted_criterion: E2
+  slot: 5
+  current_db_tag: E2
+  action: confirm
+  why_this_criterion: A matched five-strain comparison including Ethanol Red under corn high-solids,
+    which is the closest thing in the corpus to a like-for-like industrial ceiling with the proxy strain
+    in it.
+  what_it_lacks: Corn liquefied paste, so again not a defined medium; the 96 h point was added after
+    the 72 h point, so the two time points are not a designed series.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: The final ethanol concentrations were 16.46, 16.7, 16.89, 16.47, and 16.76% v/v for ER, BG-1,
+      CAT-1, PE-2, and SA-1, respectively.
+    char_start: 13853
+    char_end: 13983
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: In fermentations with high solids concentration (35%), strain BG-1 reached ethanol contents
+      higher than 19% w/v and had a productivity gain of 5.8% co
+    char_start: 1314
+    char_end: 1464
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1093/femsyr/fow006
+  doi: 10.1093/femsyr/fow006
+  pmid: '26818854'
+  title: Replacement of the initial steps of ethanol metabolism in Saccharomyces cerevisiae by ATP-independent
+    acetylating acetaldehyde dehydrogenase.
+  year: 2016
+  journal: FEMS yeast research
+  admitted_criterion: E3
+  slot: 1
+  current_db_tag: E3
+  action: confirm
+  why_this_criterion: 'The strongest baseline in the pool: CEN.PK113-7D in aerobic ethanol-limited chemostat
+    at a fixed dilution rate, defined synthetic medium, with biomass yield, qEtOH, qO2, qCO2, RQ, qglycerol
+    and a closed carbon recovery. Exactly B.3.3''s shape.'
+  what_it_lacks: Aerobic and ethanol-limited, so it is a baseline for respiratory growth ON ethanol,
+    not for the anaerobic glucose fermentation DUET runs. Duplicate reactors only.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Ethanol-limited chemostat cultivation was carried out at 30°C in aerobic 2-L laboratory bioreactors
+      (Applikon, Schiedam, the Netherlands) with a working volume of 1 L. The ingoing synthetic medium
+      (Verduyn et al. ) contained 6 g L−1 ethanol. Culture pH was maintained at 5.0 by automatic addition
+      of 2 M KOH.
+    char_start: 18192
+    char_end: 18500
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Biomass yield | g biomass g ethanol−1 | 0.57 ± 0.01 | 0.60 ± 0.00
+    char_start: 52692
+    char_end: 52757
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Carbon recovery | % | 100 ± 4 | 96 ± 1
+    char_start: 53329
+    char_end: 53367
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/1475-2859-9-16
+  doi: 10.1186/1475-2859-9-16
+  pmid: '20219100'
+  title: 'Fermentation of mixed glucose-xylose substrates by engineered strains of Saccharomyces cerevisiae:
+    role of the coenzyme specificity of xylose reductase, and effect of glucose on xylose utilization.'
+  year: 2010
+  journal: Microbial cell factories
+  admitted_criterion: E3
+  slot: 1
+  current_db_tag: E3
+  action: confirm
+  why_this_criterion: Anaerobic CEN.PK-derived batch on a defined mixed glucose–xylose substrate with
+    closed carbon balances and per-phase yields. It is a baseline AND, since the 2026-09-20 B.3.6 amendment,
+    a MIXED-regime pentose record — the carbon-regime distinction C.5 was amended to hold.
+  what_it_lacks: Engineered XR/XDH strains, so the 'wild type' is BP000, a construct, not a true parental
+    baseline. Single reactor per condition.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Anaerobic batch conversion of mixed sugar substrates contained 10 g/L of xylose and 10 g/L
+      glucose. An initial CDW of ~0.2 g/L was used.
+    char_start: 43785
+    char_end: 43921
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Closed carbon balances for conversion of glucose and xylose indicate that the yield coefficients
+      for product formation from each of the two sugars are internally consistent.
+    char_start: 10011
+    char_end: 10184
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: C-recovery [%] | 101 | 97 | 108 | 107
+    char_start: 11099
+    char_end: 11136
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/s13068-018-1231-8
+  doi: 10.1186/s13068-018-1231-8
+  pmid: '30159031'
+  title: l-Arabinose triggers its own uptake via induction of the arabinose-specific Gal2p transporter
+    in an industrial Saccharomyces cerevisiae strain.
+  year: 2018
+  journal: Biotechnology for biofuels
+  admitted_criterion: E3
+  slot: 1
+  current_db_tag: E3
+  action: confirm
+  why_this_criterion: Defined Verduyn medium at fixed pH and temperature with full yield and rate tables
+    for three industrial strains, which is the industrial-background baseline B.3.3 names and the rest
+    of the pool does not supply.
+  what_it_lacks: 'Shake flasks, not chemostat. And the decisive practical defect: the strains are DSM
+    proprietary with access restricted, so nothing here can ever be reproduced or extended in-house.'
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: All cultivations were performed at pH 4.2 and 30 °C with minimal medium based on Verduyn
+      [].
+    char_start: 17792
+    char_end: 17884
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: The industrial S. cerevisiae strains DS58227, DS61143, and DS61180 have been developed and
+      provided by DSM (Delft, NL). Strain access is restricted an
+    char_start: 16390
+    char_end: 16540
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1534/g3.118.200677
+  doi: 10.1534/g3.118.200677
+  pmid: '30301737'
+  title: Genotype-by-Environment-by-Environment Interactions in the Saccharomyces cerevisiae Transcriptomic
+    Response to Alcohols and Anaerobiosis.
+  year: 2018
+  journal: G3 (Bethesda, Md.)
+  admitted_criterion: E4
+  slot: 4
+  current_db_tag: E4
+  action: confirm
+  why_this_criterion: 'Adapted growth: cells inoculated into alcohol-containing YPD and grown three
+    generations before harvest.'
+  what_it_lacks: Rich medium, duplicate collections, transcriptome only with no genetic validation,
+    and wild/mosaic isolates that connect to no other strain in the ethanol layer.
+  measurement_bearing: true
+  transfer_rationale: TRANSFER IS MEASURED, NOT ARGUED. The same three strains were profiled under ethanol
+    AND 1% isobutanol AND 0.8% 1-butanol, in the same experiment, aerobically and anaerobically. Responses
+    shared between ethanol and isobutanol are demonstrated to transfer; responses the authors find unique
+    to ethanol — flocculation, hexose transport, pseudohyphal growth and induction of respiration genes
+    — are demonstrated NOT to transfer, and that negative list is the more valuable half, because it
+    names where an ethanol-derived expectation would have misled the programme.
+  evidence_ceiling: 'NOT capped at L3 for claims restricted to the alcohols, doses and strains actually
+    assayed: this is direct isobutanol evidence, which is the exemption B.3.4 names. L3 for any extrapolation
+    to DUET''s titres, because the authors state the doses were chosen above engineered-strain titres,
+    and for any extrapolation to CEN.PK or Ethanol Red, because neither was tested.'
+  tests_isobutanol: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: The culture was then used to inoculate YPD, YPD + 0.8% 1-butanol, YPD + 1% isobutanol, YPD
+      + 4% ethanol (or YPD + 3% ethanol for anaerobic conditions, since WA did not grow well anaerobically
+      on 4% ethanol), grown for three generations and collected during log phase by centrifugation.
+    char_start: 8991
+    char_end: 9276
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Interestingly, ethanol uniquely triggered in all three strains the induction of genes involved
+      in flocculation, hexose transport, pseudohyphal growth, and respiration, whereas butanol isoforms
+      did not ().
+    char_start: 20062
+    char_end: 20266
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: All sequencing data are available in the NIH GEO database under accession number GSE118069.
+    char_start: 10285
+    char_end: 10376
+    occurrences_in_source: 3
+    verify_span: exact
+- publication_id: doi:10.1186/s13068-024-02503-7
+  doi: 10.1186/s13068-024-02503-7
+  pmid: '38730312'
+  title: Optimal trade-off between boosted tolerance and growth fitness during adaptive evolution of
+    yeast to ethanol shocks.
+  year: 2024
+  journal: Biotechnology for biofuels and bioproducts
+  admitted_criterion: E4
+  slot: 3 and 4
+  current_db_tag: E4
+  action: confirm (fills slots 3 and 4 from one study — see cost note)
+  why_this_criterion: The only true acute-shock design in S. cerevisiae in the readable pool (19–30%
+    v/v, 2 h, static in PBS), reported alongside a separately-run adapted arm at 8% v/v.
+  what_it_lacks: No omics of any kind, no read-level accession, and shock concentrations far above any
+    fermenter. Using it for both slots 3 and 4 would stop those slots being independent evidence, which
+    is the outcome the no-merging rule exists to prevent — recorded here as a cost of the choice.
+  measurement_bearing: true
+  transfer_rationale: 'The transferable object is not an allele, it is the SHOCK-VERSUS-ADAPTED TRADE-OFF:
+    mutations selected by a transient lethal pulse impose a fitness cost during propagation, and the
+    paper measures both directions in the same background. That trade-off is a property of the SELECTION
+    DESIGN, not of ethanol chemistry, so any DUET chassis screened for C4 tolerance by pulse challenge
+    inherits the same risk whatever the alcohol. That is the argument for transfer, and it is an argument
+    about method rather than about mechanism — which is why it survives the change of alcohol.'
+  evidence_ceiling: L3. No C4 alcohol anywhere; the specific alleles (cyr1A1474T, usv1Δ, BUD3 disruption)
+    are ethanol-selected and untested against isobutanol, and PE-2_H4 is not the programme's proxy strain.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Next, the cell pellet was resuspended in 1 mL PBS 1X buffer containing an initial ethanol
+      concentration of 19% (v/v). During the ethanol treatment (i.e., the ethanol shock) cells were
+      kept static at 32 °C for 2 h.
+    char_start: 53070
+    char_end: 53283
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: These observations indicate trade-off effects for mutations that cause adaptation to transient
+      and drastic ethanol treatments; i.e., although mutations promote cell survival in a stressful
+      environment, they imposed a fitness cost for propagation under mild or nonstressful conditions.
+    char_start: 26634
+    char_end: 26918
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1016/j.jbiotec.2010.06.006
+  doi: 10.1016/j.jbiotec.2010.06.006
+  pmid: '20600383'
+  title: Identification of gene targets eliciting improved alcohol tolerance in Saccharomyces cerevisiae
+    through inverse metabolic engineering.
+  year: 2010
+  journal: Journal of biotechnology
+  admitted_criterion: E4
+  slot: 4
+  current_db_tag: E4
+  action: confirm
+  why_this_criterion: 'Adapted growth by selection: ten serial subcultures in continuous 1% iso-butanol,
+    then tolerance and fermentation assays under 5% ethanol and 1% iso-butanol.'
+  what_it_lacks: Plasmid-borne multicopy overexpression in a laboratory auxotroph, not integrated and
+    not in an industrial background. 1% iso-butanol is far above any achieved titre. No mechanism is
+    established for any of the four genes; they are library hits with a phenotype.
+  measurement_bearing: true
+  transfer_rationale: THIS RECORD LIFTS E4's L3 CAP BY MEASUREMENT RATHER THAN BY ARGUMENT, and it does
+    so in the harder direction. The selection was run in a C4 alcohol — 1% iso-butanol — and the four
+    recovered overexpression targets (INO1, DOG1, HAL1, truncated MSN2) were then shown to improve tolerance
+    to BOTH iso-butanol and ethanol in the same background. So the shared mechanism is established starting
+    from the C4 side, which is the opposite of the ethanol-to-C4 inference the cap exists to police.
+    The authors also state their reason for selecting in iso-butanol rather than ethanol — ethanol evaporates
+    out of shake flasks and iso-butanol is more inhibitory at lower concentration — which is itself
+    a transferable methodological fact for the programme.
+  evidence_ceiling: 'NOT capped at L3 for ''overexpression of INO1, DOG1, HAL1 or truncated MSN2 improves
+    growth of CEN.PK2-1D under 1% iso-butanol'': that is a direct isobutanol measurement. CAPPED AT
+    L3 for any claim about isobutanol TITRE or about an isobutanol-PRODUCING strain — this paper produces
+    no isobutanol, it only imposes it, and tolerance to exogenous isobutanol is not the same phenotype
+    as tolerating self-produced isobutanol.'
+  tests_isobutanol: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: |-
+      The
+      library cell stock was inoculated (1% inoculums) in liquid mini-
+      mal medium (YSC) containing 1% of iso-butanol, followed by serial
+      subculture in fresh medium having the same iso-butanol concen-
+      tration. The serial subculture was repeated ten times.
+    char_start: 12050
+    char_end: 12302
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: |-
+      Notably, there was a three- to sixfold growth
+      difference between the transformants and the parent strain in
+      the presence of 5% ethanol, and nearly a twofold difference was
+      observed in the presence of 1% iso-butanol.
+    char_start: 18935
+    char_end: 19150
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: |-
+      four endogenous S. cerevisiae genes were
+      identiﬁed as overexpression targets eliciting improved tolerance to both iso-butanol and ethanol.
+    char_start: 1605
+    char_end: 1743
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1128/aem.00588-21
+  doi: 10.1128/AEM.00588-21
+  pmid: '34105981'
+  title: Reprogramming of the Ethanol Stress Response in Saccharomyces cerevisiae by the Transcription
+    Factor Znf1 and Its Effect on the Biosynthesis of Glycerol and Ethanol.
+  year: 2021
+  journal: Applied and environmental microbiology
+  admitted_criterion: E4
+  slot: 3
+  current_db_tag: E3
+  action: RE-TAG to E4
+  why_this_criterion: 'Titled ''Reprogramming of the Ethanol Stress Response''; 10% v/v added to a mid-log
+    culture with readouts at 25 min and 6 h. That is a named stress at a stated dose and duration with
+    a named regulator — an E4 mechanism paper. It is not an E3 wild-type baseline: FY73 appears as the
+    wild type against a deletion, and there is no chemostat, no defined medium and no carbon balance.'
+  what_it_lacks: Targeted RT-qPCR panels only — no genome-wide measurement, so nothing to reprocess
+    and every number enters as a figure-derived value. Data availability is 'on request'. Laboratory
+    strains.
+  measurement_bearing: true
+  transfer_rationale: The mechanism classes Znf1 governs under ethanol — glycerol as compatible solute,
+    cell-wall biosynthesis, and UPR activation on protein misfolding — are the same failure modes the
+    C4 literature reports for isobutanol. Isobutanol is more membrane-disruptive per mole than ethanol,
+    so a regulator coordinating cell-wall integrity and the UPR is predicted to matter MORE under a
+    C4 alcohol, not less. That is the direction of the argument; it is a prediction, and nothing here
+    tests it.
+  evidence_ceiling: L3. Argued transfer only, no butanol of any kind.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Then, 10% (vol/vol) ethanol was added to cell culture, and sampling was performed at 25 min
+      and 6 h.
+    char_start: 64545
+    char_end: 64645
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Here, the wild-type and znf1Δ strains were treated with high ethanol concentrations for 25
+      min and 6 h to examine the expression of genes associated with carbohydrate metabolism.
+    char_start: 19950
+    char_end: 20128
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1016/j.crmicr.2026.100653
+  doi: 10.1016/j.crmicr.2026.100653
+  pmid: '42598231'
+  title: Stress-induced remodeling of membrane-bound organelles in budding yeast.
+  year: 2026
+  journal: Current research in microbial sciences
+  admitted_criterion: E4
+  slot: 3
+  current_db_tag: E5
+  action: RE-TAG to E4
+  why_this_criterion: 'An ethanol dose series (2/4/8/10% v/v) added to mid-log cultures with a stated
+    1 h readout — acute shock. Its E5 tag fails B.3.5: mitochondria are one of several organelles surveyed
+    and the mitochondrial result is morphological (fragmentation, Ndi1/Cox9 colocalisation), not a cytosol→matrix
+    redox route. B.3.5 is explicit that E5 ''is a redox-shuttle criterion, not a mitochondria criterion''.'
+  what_it_lacks: Imaging phenotypes only, no genetic dissection of the ethanol arm, no deposited data,
+    and dose-to-panel mapping that lives in figure legends so the dose behind a given statement is often
+    not recoverable from the text. 2026, unreplicated. Moving it out of E5 is genuinely dual-use and
+    costs slot 6 a candidate — though slot 6 spends nothing regardless (see PHASE2_STATUS §E5).
+  measurement_bearing: true
+  transfer_rationale: The four-stress design is what licenses the transfer. Running ethanol against
+    heat, acetic acid and peroxide in the same hands separates the ethanol-SPECIFIC organelle response
+    from the generic stress response, and only the generic component has any prior claim to carrying
+    over to a different alcohol. Mitochondrial fragmentation is generic across all four stresses; early-Golgi
+    marker loss is shared with heat. That discrimination is precisely what B.3.4 demands before an ethanol
+    mechanism is allowed to speak about a C4 alcohol, and it is why this paper is worth more than a
+    single-stress study with a bigger dataset.
+  evidence_ceiling: L3. No C4 alcohol; the comparators are heat, acid and peroxide.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: For ethanol stress, ethanol was added directly to mid-log-phase cultures to the indicated
+      final concentrations of 2%, 4%, 8%, or 10% (v/v).
+    char_start: 9906
+    char_end: 10045
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Ndi1-2GFP remained colocalized with Cox9-mTagBFP under heat, acetic acid, ethanol, and H₂O₂
+      stress (G).
+    char_start: 26673
+    char_end: 26776
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1021/acs.jproteome.1c00139
+  doi: 10.1021/acs.jproteome.1c00139
+  pmid: '34236875'
+  title: Integrated Multi-Omics Analysis of Mechanisms Underlying Yeast Ethanol Tolerance.
+  year: 2021
+  journal: Journal of proteome research
+  admitted_criterion: E4
+  slot: 4
+  current_db_tag: E5
+  action: RE-TAG to E4
+  why_this_criterion: Ethanol tolerance mechanisms in strains evolved 200 generations under 6→12% ethanol,
+    assayed during growth at 6% v/v — adapted growth on two timescales. Its E5 tag rests on a respiration-versus-fermentation
+    conclusion involving Gut2, which is a glycerol-3-phosphate shuttle component; that is real but it
+    is not a cytosol→matrix route for ethanol-derived reducing equivalents, and no cofactor is measured
+    in any compartment.
+  what_it_lacks: Proteome only — the genomes are the prior study's, so the 'multi-omics' is an integration
+    across publications. Two of six adapted clones showed no significantly regulated proteins. Laboratory
+    S288c, aerobic, rich medium.
+  measurement_bearing: true
+  transfer_rationale: 'The transferable claim is the ENERGY-PARTITIONING one: the ancestor shifts toward
+    respiration under ethanol while the adapted strains stay on aerobic fermentation. DUET runs a matrix-localised
+    pathway and is fed by matrix NADH, so whether a tolerance-selected strain keeps or abandons respiratory
+    flux is directly consequential for matrix reducing-equivalent supply — and that consequence follows
+    from the compartment and the flux, not from which alcohol imposed the selection. The argument transfers
+    because it is about what the cell does with its mitochondria, not about how ethanol perturbs a membrane.'
+  evidence_ceiling: L3. No C4 alcohol. The authors themselves warn the regulated set may be a slow-growth
+    signature rather than an ethanol response, and their correction borrows another study's thresholds.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Evolved isolates were previously described and all originated from a diploid, prototrophic
+      S. cerevisiae S288c strain, which was grown in two separate reactors (A and B) through 200 generations
+      of experimental evolution under increasing ethanol concentration (from 6 to 12% EtOH).
+    char_start: 5765
+    char_end: 6045
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: The mass spectrometry proteomics data have been deposited to the ProteomeXchange Consortium
+      via the PRIDE partner repository and made public under the data set identifier PXD006631.
+    char_start: 12103
+    char_end: 12284
+    occurrences_in_source: 2
+    verify_span: exact
+  - quote: The regulated proteins may not reflect the direct consequences of ethanol stress but rather
+      a general profile of slow growth, as suggested by O’Duibhir et al.
+    char_start: 12517
+    char_end: 12675
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1128/msystems.00827-25
+  doi: 10.1128/msystems.00827-25
+  pmid: '41147734'
+  title: Identification of a crucial INO2 allele for enhancing ethanol resistance in an industrial fermentation
+    strain of Saccharomyces cerevisiae.
+  year: 2025
+  journal: mSystems
+  admitted_criterion: E4
+  slot: 4
+  current_db_tag: E3
+  action: RE-TAG to E4
+  why_this_criterion: Three strains of differing tolerance, including a commercial-process isolate,
+    grown at 0/6/10% ethanol with RNA-seq across the fermentation and a candidate INO2 allele with a
+    membrane-lipid mechanism. Adapted growth with a named mechanism — E4, not an E3 baseline.
+  what_it_lacks: Read less thoroughly than the other slot-4 records in the prior shortlist pass, which
+    flagged it as an alternate rather than a proposal; the INO2 allele's causality is argued from function,
+    and this record should be re-read in full before any measurement is extracted from it.
+  measurement_bearing: true
+  transfer_rationale: 'Membrane-lipid composition is the one tolerance axis where a QUANTITATIVE transfer
+    argument to a C4 alcohol exists rather than a hand-wave: isobutanol''s longer alkyl chain partitions
+    into the bilayer more strongly than ethanol''s, so an allele that remodels membrane lipid composition
+    is predicted to matter more under isobutanol, not less. The prediction is directional and testable,
+    which is what B.3.4 asks for. It is untested here.'
+  evidence_ceiling: L3. Prediction only; no C4 alcohol assayed.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: The inoculated yeast cells were grown for 1 h without stress to allow adjustment to the medium.
+      Subsequently, ethanol was added up to reach the specified concentrations.
+    char_start: 41379
+    char_end: 41548
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: This was done in triplicate for each strain (AJ4, MY3, and MY26) and each condition (0%,
+      6%, and 10% of ethanol).
+    char_start: 41265
+    char_end: 41378
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: A notable response at t3 under 10% ethanol was the downregulation of aerobic respiration
+      and fatty acid beta-oxidation in all strains, especially in MY3 and MY26.
+    char_start: 13789
+    char_end: 13951
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1016/j.bbagen.2025.130804
+  doi: 10.1016/j.bbagen.2025.130804
+  pmid: '40187374'
+  title: Yeast Hsp78 plays an essential role in adapting to severe ethanol stress via mild ethanol stress
+    pretreatment in mitochondrial protein quality control.
+  year: 2025
+  journal: Biochimica et biophysica acta. General subjects
+  admitted_criterion: E4
+  slot: 3
+  current_db_tag: E5
+  action: RE-TAG to E4
+  why_this_criterion: A true acute-shock design — severe 10% v/v ethanol with and without a 6% v/v mild
+    pretreatment — with a deletion series (hsp78Δ, mdj1Δ) and named mechanism. Its E5 tag is surface
+    matching on 'mitochondrial'; B.3.5 does not admit mitochondrial protein quality control, which is
+    not a redox route.
+  what_it_lacks: BY4742 laboratory background, synthetic defined medium, and no measurement of the engineered-pathway
+    case — the chaperone-competition argument is the atlas's, not the paper's.
+  measurement_bearing: true
+  transfer_rationale: The transfer argument is about the COMPARTMENT, not the alcohol. DUET localises
+    a heterologous Ehrlich pathway into the mitochondrial matrix, so matrix chaperone capacity — Hsp78,
+    Mdj1, Ssc1/mtHsp70 — is a shared resource between the imported pathway and the alcohol stress response.
+    This paper shows alcohol stress drives aggregation of an endogenous matrix protein (Aco1) into DUMPs
+    and that the mtPQC system is what clears them. Any C4 alcohol that reaches the matrix places the
+    same demand on the same chaperones while they are also being asked to fold an imported KARI and
+    ADH. The competition is structural and does not depend on which alcohol causes it.
+  evidence_ceiling: L3. Ethanol only. That matrix chaperone load is rate-limiting for a heterologous
+    matrix pathway is a hypothesis this record motivates, not one it tests.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: "Pretreatment with 6 % (v/v) ethanol significantly mitigated the formation of DUMPs and Aco1\
+      \ aggregates under \nsubsequent 10 % ethanol stress in wild-type cells but not in hsp78 Δ and\
+      \ mdj1 Δ cells."
+    char_start: 1154
+    char_end: 1350
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: "Moreover, \nintracellular reactive oxygen species levels and the frequency of respiration-deficient\
+      \ mutants under 10 % \nethanol stress were reduced after pretreatment with 6 % ethanol in wild-type\
+      \ cells but not in hsp78 Δ cells."
+    char_start: 1585
+    char_end: 1812
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1016/j.jprot.2019.103377
+  doi: 10.1016/j.jprot.2019.103377
+  pmid: '31102756'
+  title: Integrated transcriptomic and proteomic analysis of the ethanol stress response in Saccharomyces
+    cerevisiae Sc131.
+  year: 2019
+  journal: Journal of proteomics
+  admitted_criterion: E4
+  slot: 3
+  current_db_tag: E5
+  action: RE-TAG to E4
+  why_this_criterion: 4 h at 10% v/v with paired RNA-seq and iTRAQ — 937 DEGs and 457 DEPs on a short
+    exposure. A stress-response mechanism paper. The E5 tag is surface matching on 'mitochondria' in
+    the conclusions; no cofactor, no ADH3, no POS5, no shuttle.
+  what_it_lacks: Sc131 is a fruit-isolate wine strain that connects to no other strain in the layer.
+    The dose series (3/6/10/13/15%) was run only as a growth screen; the omics is at a single dose.
+    No accession stated in the stored text.
+  measurement_bearing: true
+  transfer_rationale: 'Paired transcriptome AND proteome on a single short exposure is the level at
+    which stress responses can be compared ACROSS alcohols at all — a transcript change that no protein
+    change follows is not a mechanism that can be argued to transfer anywhere. The organelle targets
+    it lands on (mitochondria and ER) are the same two the C4 tolerance literature implicates, so the
+    transfer argument is a convergence argument: two organelles, two alcohols, independently implicated.
+    That is weaker than a direct test and is stated as such.'
+  evidence_ceiling: L3. No C4 alcohol; a convergence argument, not a demonstration.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: |-
+      Totally, 937 di ﬀerentially expressed genes (DEGs) and 457 di ﬀerentially expressed proteins (DEPs) were
+      identiﬁed in Sc131 under ethanol stress. Results revealed that 4-h ethanol stress (10% v/v) can induce ﬁla-
+      mentous growth, sexual reproduction.
+    char_start: 1027
+    char_end: 1276
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: |-
+      when the cells grew to mid-
+      exponential phase, appropriate amount of ethanol was added into the
+      media of treatment group to a ﬁnal concentration of 3%, 6%, 10%, 13%
+      and 15% ( v/v), and the non-treated group as the control group.
+    char_start: 6520
+    char_end: 6748
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1016/j.jbiotec.2007.05.010
+  doi: 10.1016/j.jbiotec.2007.05.010
+  pmid: '17604866'
+  title: Identification of target genes conferring ethanol stress tolerance to Saccharomyces cerevisiae
+    based on DNA microarray data analysis.
+  year: 2007
+  journal: Journal of biotechnology
+  admitted_criterion: E4
+  slot: 4
+  current_db_tag: E2
+  action: RE-TAG to E4
+  why_this_criterion: DNA microarray on a laboratory AND a sake strain at 5% v/v ethanol, followed by
+    knockout validation and overexpression rescue — mechanism with genetic validation. It is not an
+    E2 performance-ceiling record; it reports no titer, yield or productivity.
+  what_it_lacks: 2007 microarray platform; the sake strain is not the programme's industrial proxy;
+    and the tolerance gain is measured as growth under 5% ethanol, not as a fermentation outcome.
+  measurement_bearing: true
+  transfer_rationale: 'Unlike every other record here, this mechanism is NOT a membrane or chaperone
+    one: it is amino-acid supply (tryptophan biosynthesis and the tryptophan permease). Its transfer
+    argument is that precursor and transport limitation under alcohol stress is alcohol-agnostic — and
+    it carries a second, sharper relevance that has nothing to do with tolerance: DUET''s Ehrlich pathway
+    competes for the same aromatic and branched-chain amino-acid machinery. A tolerance intervention
+    that works by raising tryptophan flux would be pulling on a pool the production pathway also draws
+    from. This record is admitted as much for that collision as for the tolerance result, and the collision
+    is structural, so it holds for a C4 alcohol.'
+  evidence_ceiling: L3. Ethanol only. The collision argument is the atlas's inference from the paper's
+    result, not the paper's claim.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: |-
+      we obtained the gene expression proﬁles of two strains of Saccharomyces cerevisiae, namely,
+      a laboratory strain and a strain used for brewing Japanese rice wine (sake), in the presence of 5% (v/v) ethanol, using DNA microarray.
+    char_start: 1063
+    char_end: 1290
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: |-
+      Indeed, the strains overexpressing tryptophan
+      biosynthesis genes showed a stress tolerance to 5% ethanol. Moreover, the addition of tryptophan to the culture medium and overexpression of
+      tryptophan permease gene conferred ethanol stress tolerance to yeast cells.
+    char_start: 1830
+    char_end: 2092
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1016/j.jbiosc.2017.04.012
+  doi: 10.1016/j.jbiosc.2017.04.012
+  pmid: '28552194'
+  title: In vivo evolutionary engineering for ethanol-tolerance of Saccharomyces cerevisiae haploid
+    cells triggers diploidization.
+  year: 2017
+  journal: Journal of bioscience and bioengineering
+  admitted_criterion: E4
+  slot: 4
+  current_db_tag: E2
+  action: RE-TAG to E4
+  why_this_criterion: Evolutionary engineering of CEN.PK 113-7D haploids under constant (5% v/v) and
+    increasing (5→11.4% v/v) ethanol, with ploidy analysis and transcriptomes of evolved clones. Adapted
+    growth with a mechanism. It reports no performance ceiling, so E2 is the wrong criterion.
+  what_it_lacks: EMS mutagenesis precedes the selection, so the mutational spectrum is not natural.
+    Transcriptomes are from two clones. CEN.PK 113-7D is the right background for the atlas, which makes
+    the ploidy result more relevant, not less — but also means the result speaks to a laboratory strain.
+  measurement_bearing: true
+  transfer_rationale: 'The transferable claim is about KARYOTYPE, not chemistry: ethanol selection on
+    a haploid drove diploidization of the population at 7% v/v, and loss of MKT1 abolished it. So a
+    tolerance phenotype can be a ploidy change rather than an allele. Any C4 tolerance selection run
+    on a haploid chassis inherits exactly this confound — the selection may be returning a diploid rather
+    than a mutant — and that is independent of which alcohol applies the pressure. It also cross-links
+    E6: MKT1 is one of the three causal genes in doi:10.1101/gr.131698.111, reached by a completely
+    different method, which is the kind of convergence the atlas exists to surface.'
+  evidence_ceiling: L3. Ethanol only. That the same confound operates under isobutanol is an inference
+    from the mechanism's genetics, not a measurement.
+  tests_isobutanol: false
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: |-
+      Analysis of ploidy state Evolved clones were subjected to sporulation on a
+      medium containing 1% (w v
+      /C0 1) potassium acetate and 2% (w v/C0 1) agar. When tetrads
+      were observed on sporulation medium, diploid status was then con ﬁrmed by FACS,
+      as previously described by Bradbury and his colleagues (27).
+    char_start: 11215
+    char_end: 11518
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: |-
+      Selection under increasing ethanol levels yielded evolved clones that could tolerate up to 12% (v v L1) ethanol and had
+      cross-resistance to other stresses. Quite surprisingly, diploidization of the yeast population took place already at 7% (v
+      vL1) ethanol level during evolutionary engineering, and this event was abolished by the loss of MKT1, a gene previously
+      identi
+    char_start: 1393
+    char_end: 1762
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: |-
+      In CONST strategy, cells
+      were exposed to 5% (v v
+      /C0 1) ethanol throughout the successive repetitions.
+    char_start: 9258
+    char_end: 9360
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1101/gr.131698.111
+  doi: 10.1101/gr.131698.111
+  pmid: '22399573'
+  title: Identification of novel causative genes determining the complex trait of high ethanol tolerance
+    in yeast using pooled-segregant whole-genome sequence analysis.
+  year: 2012
+  journal: Genome research
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm
+  why_this_criterion: The only paper in the pool that takes high ethanol tolerance in a Brazilian bioethanol
+    strain down to named causal genes by pooled-segregant analysis and reciprocal hemizygosity — MKT1,
+    SWS2, APJ1. B.3.6 excludes bare tolerance QTL mapping; this goes past mapping to allele-level causality,
+    which is what takes it out of the exclusion.
+  what_it_lacks: Tolerance is scored as growth on ethanol as sole carbon source, which is not the fermentative
+    regime the programme cares about. Effects are modest and the architecture is polygenic, exactly
+    as the slots document predicted. URA3 turns out to confound the low-tolerance control.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: 'In the locus with the strongest linkage, we identified three closely located genes affecting
+      ethanol tolerance: MKT1, SWS2, and APJ1, with SWS2 being '
+    char_start: 1209
+    char_end: 1359
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: Ethanol tolerance was, thereby, defined as growth on solid YP plates with ethanol as the
+      sole carbon source.
+    char_start: 6522
+    char_end: 6630
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1186/s12864-015-1737-4
+  doi: 10.1186/s12864-015-1737-4
+  pmid: '26156140'
+  title: Cell periphery-related proteins as major genomic targets behind the adaptive evolution of an
+    industrial Saccharomyces cerevisiae strain to combined heat and hydrolysate stress.
+  year: 2015
+  journal: BMC genomics
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm
+  why_this_criterion: The only document in the entire corpus that sequences Ethanol Red. It supplies
+    a second, independent ER genome (SRR2002842) to cross-check GCA_029255905.1, which is the single
+    highest-value thing available for the proxy-genome decision.
+  what_it_lacks: It does not test why Ethanol Red is good; ER is the starting point for an evolution
+    experiment, not the object of study. Variant counts against S288c are reported without causality.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: The industrial Saccharomyces cerevisiae strain Ethanol Red [Fermentis, S.I. Lesaffre] (ER)
+      and the derived evolved strain ISO12 [] were used for the e
+    char_start: 6214
+    char_end: 6364
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: The sequence reads from this project have been deposited at the NCBI Sequence Read Archive
+      under the accessions SRR2002842 (ER) and SRR2002960 (ISO12)
+    char_start: 60297
+    char_end: 60447
+    occurrences_in_source: 1
+    verify_span: exact
+- publication_id: doi:10.1371/journal.pgen.1005635
+  doi: 10.1371/journal.pgen.1005635
+  pmid: '26545090'
+  title: Adaptation to High Ethanol Reveals Complex Evolutionary Pathways.
+  year: 2015
+  journal: PLoS genetics
+  admitted_criterion: E6
+  slot: 7
+  current_db_tag: E6
+  action: confirm
+  why_this_criterion: Two years of turbidostat evolution to high ethanol with >30 populations and >100
+    clones sequenced, reporting chromosome III aneuploidy as a recurrent route. It is the strongest
+    evidence in the pool for the slots document's own prediction that the industrial advantage is polygenic
+    with CNV/aneuploidy contribution.
+  what_it_lacks: S288c-derived FY5, a laboratory background, so it is a model of how tolerance is acquired
+    rather than a characterisation of an industrial strain. Aerobic turbidostat.
+  measurement_bearing: true
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Interestingly, acquisition of an extra copy of chromosome III appeared to be a common feature
+      for most of our evolved clones ().
+    char_start: 19761
+    char_end: 19889
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: 'All sequencing data are available from the NCBI Sequence Read Archive: Bioproject, accession
+      number PRJNA292495.'
+    char_start: 63173
+    char_end: 63285
+    occurrences_in_source: 3
+    verify_span: exact
+open_gaps:
+- gap: matrix NAD(P)H pool size and NAD(P)H/NAD(P)+ ratio in living Saccharomyces cerevisiae, measured
+    compartment-resolved under a named growth condition
+  kind: never_attempted
+  status: open
+  compartment: mitochondrial_matrix
+  confidence: medium
+  note: |-
+    WHAT IS MISSING. Not the identity of the matrix NADPH sources - Pos5, Ald4/Ald5, Idp1 and Mae1 are qualitatively known (benchmark BM-COF-005) - but the QUANTITY, in a live cell, in the compartment. No paper in the readable corpus measures a matrix NAD(P)H pool or an NAD(P)H/NAD(P)+ ratio in living S. cerevisiae under any named condition. It is recorded as 'never_attempted' rather than 'quantitative_value_missing' because the searches did not find a measurement whose value went unreported; they found that the experiment has not been done.
+
+    THE EXPERIMENT THIS NAMES, stated so that it can be costed and run. Express a genetically encoded, matrix-targeted NAD(P)H biosensor - SoNar for free NADH/NAD+ and iNap1 for NADPH - each behind a cleavable matrix presequence (Su9 or the Cox4 presequence), with the redox-insensitive control construct (cpYFP) co-run in every condition, because both sensor families report pH as well as redox and the matrix pH moves with the respiratory state. Backgrounds: CEN.PK113-7D as the defined-medium reference and Ethanol Red (GCA_029255905.1) as the industrial proxy, plus a pos5-delta and a POS5-overexpressing derivative of CEN.PK113-7D - the hypothesis under test is G.8's POS5-capacity bottleneck, and it is only testable against a pool that has been perturbed in both directions. Conditions, all on Verduyn defined medium at pH 5.0 and 30 C in chemostat at one fixed dilution rate so the readings are comparable: (i) anaerobic glucose-limited, the regime DUET runs in; (ii) aerobic glucose-limited, as the respiratory contrast; (iii) aerobic ethanol-limited, the state in which Adh3 is actually carrying flux and the matrix NADH pool is being fed, which is B.3.5's own statement of the E5 question. Read out ratiometrically in live cells, per background and per condition, with the cpYFP control subtracted.
+
+    WHAT THE CORPUS ALREADY SUPPLIES, AND WHAT IT DOES NOT. The only compartment-targeted live-cell redox method anywhere in the corpus is doi:10.1016/j.xpro.2020.100160, a mito-roGFP protocol - and it reports the GLUTATHIONE redox potential, not the NAD(P)H pool. It therefore supplies the targeting, imaging and calibration practice but not the measurement: an NAD(P)H sensor has to be added to that protocol rather than the protocol reused as it stands. That is the whole distance between what exists and what is needed.
+
+    WHY IT MATTERS. DUET's redox architecture is load-bearing on matrix reducing-equivalent supply, and phase 3.5's decision checkpoint has to weigh G.8's POS5-capacity bottleneck hypothesis. Both currently rest on no measured quantity in the compartment they are about. It is also why criterion E5's 45-publication budget stands unspent: the budget was sized for a literature that would supply a quantitative anchor, and that literature does not have one to supply. The atlas can record the absence honestly or it can commission the measurement; it cannot read it out of the corpus.
+  evidence: 'Four independent passes over the readable ethanol corpus agree that no such measurement
+    exists: (1) the slot-6 shortlist pass, 2026-09-21; (2) benchmark BM-COF-005''s corpus evidence pass,
+    2026-09-21 (data/benchmarks/known_positives.yaml; verdict partially_supported - the sources are
+    known, the quantity is not); (3) the 127-PDF corpus triage, 2026-09-21; (4) the phase-2 admission
+    pass, 2026-09-21 (docs/drafts/ethanol/PHASE2_STATUS.md section 3a), which scanned all 141 readable
+    E5-tagged publications for six core terms - ADH3, POS5, NAD(H) kinase, the ethanol-acetaldehyde
+    shuttle, matrix NADPH, matrix NADH - and found 97 with none of them, then scanned all 668 readable
+    ethanol-criterion publications for compartment-resolved cofactor measurement. Three documents matched
+    measurement-shaped language and all three are narrative background rather than measurement: doi:10.1534/g3.118.200677
+    (speculating about NADH/NAD+ rebalancing), doi:10.1128/aem.00362-26 (an introduction stating that
+    Adh3 balances the matrix NAD+/NADH ratio) and doi:10.1371/journal.pone.0111585 (ROS).'
