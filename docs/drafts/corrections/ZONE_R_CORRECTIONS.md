@@ -522,3 +522,41 @@ abstract; `doi:10.1186/s13068-019-1560-2` was extracted from a polluted excerpt 
 landed in the abstract, so re-extraction there buys only cost. Note that re-extraction produces
 *new* proposals, not corrections: §5.3's point stands, so the rows above still need §6-style SQL
 whatever is re-run.
+
+---
+
+## 9. §8's two rows, read and corrected — 2026-09-22
+
+§8 declined to propose a disposition for the two `doi:10.1186/s13068-019-1486-8` rows, correctly:
+the body had not been read. It has been now, because one of them turned out to matter more than
+the others.
+
+**`YAA:MOD:5ad5ac8c1f7d0d2c` is the subject of `YAA:ASSERT:65a970e162e06e63`** — one of the five
+L1 assertions written earlier the same day. This is exactly what §2 warned about in the abstract:
+*"these are the rows a later assertion would cite."* It had already happened, within hours.
+
+**Both claims are true.** The paper states each independently in three places:
+
+| row | claim | confirmed at |
+|---|---|---|
+| `YAA:MOD:5ad5ac8c1f7d0d2c` | JWY23 = JWY19 + `ald6Δ` | Fig. 5 legend `[27640…]`; results text `[29026, 29167)` — *"the ALD6 gene … was additionally deleted in strain JWY19, resulting in strain JWY23."*; Table 3 `[39393…]` |
+| `YAA:MOD:cc361f36d38986e4` | JWY19 carries `gpd1Δ gpd2Δ` | same figure legend; Table 3 row `[39314, 39391)` |
+
+A6's own claim — that `ald6Δ` raised isobutanol to 2.09 g/L — is what the results text says in as
+many words.
+
+**So this is a provenance defect, not a factual one**, and the distinction is the whole point. It
+is the same shape as the retyped `parts_catalog.yaml` quotes (right sentence, wrong method) and
+the *opposite* of §§2–4's BSW191 rows, which were wrong about their subject. Getting that
+backwards in either direction would be the real error: retracting a true claim because its
+citation was sloppy destroys curated work, and keeping a false one because its citation looks
+tidy is how the atlas stops meaning anything.
+
+**The correction applied**, therefore, is narrow: **no field of either claim changed.** Only the
+citation moved, from an abstract sentence naming no strain to one that names it. Both replacement
+spans re-resolve exact and occur exactly once. A `curation_event` of action `edit` records the
+move and its reason on each row. `YAA:ASSERT:65a970e162e06e63` needed no change and still closes
+its J.5 chain.
+
+*Recorded here rather than only in the database because `db_file` is derived tier and declared
+rebuildable, while these rows are not — the same tension `db/migrations.py` names in its header.*
