@@ -194,16 +194,159 @@ Each is reversible, spends nothing, touches no bench, and promotes nothing a hum
 | **D10** | **Schema v10: `product.tier` + `product.mw_g_mol`.** | PLAN.md B.1 asserts the first is a column. It was not. The migration makes the plan's own sentence true |
 | **D11** | **Write both missing promoters; make both refuse rather than default.** | A kind with no promoter is a proposal that can never become a row. Refusing loudly is the house pattern (`strain.organism_id`, `bottleneck.observation_type`) |
 | **D12** | **Do not promote the one `pathway_configurations` proposal.** | Its paper is *"Mitochondrial targeting increases specific activity of a heterologous valine assimilation pathway"* — bacterial BCKAD/ACD targeted to the matrix, measuring **enzyme specific activity, not a titer**. The curator had already written the warning into the payload. `C_mitochondrial_ehrlich` is the wrong strategy and the vocabulary has no right one. See §6 |
-| **D13** | **Do not run the lit-agent pipeline yet.** | Its Milvus standalone is `Exited (134)` — SIGABRT, `OOMKilled=false`. Both corpora share one server. Pushing 127 papers into a store that just aborted, before knowing why, risks the cellulase corpus for no urgency |
+| **D13** | **Diagnose the Milvus abort before running the lit-agent pipeline — done, and it is benign.** See §6.1 | Both corpora share one server, so pushing 127 papers into a store that had just aborted would have risked the cellulase corpus for no urgency |
 
 ---
 
-## 6. Decisions that are yours
+## 5a. PLAN.md's own ⚠ debt, discharged — and the proxy that does not proxy
+
+All **58** ⚠ marks in PLAN.md are now audited (`docs/drafts/warnings/PLAN.yaml`), completing the
+sweep the earlier wave began on the three design documents. **68 of 68 quotes re-resolved exact, 0
+absent, 0 spliced**, re-verified programmatically from the `fulltext_asset` rows rather than from a
+working cache.
+
+| already_covered | confirmed | incomplete | not_in_corpus | overstated | **wrong** |
+|---|---|---|---|---|---|
+| 15 | 14 | 13 | 8 | 7 | **1** |
+
+**Five of the 58 are the same claim marked in two or three places**, so a fix applied once leaves
+the document wrong elsewhere.
+
+### The one `wrong`, and it is load-bearing
+
+**Ethanol Red is a diploid. B.4 chose it as the industrial proxy for its
+"aneuploid/polyploid-typical architecture ⚠".** Four corpus papers call it diploid, MATa/α; none
+calls it aneuploid or polyploid. The repo's own `data/omics/reference_genomes.yaml` adds that the
+pinned assembly `GCA_029255905.1` **cannot resolve aneuploidy at all** — so the justifying property
+is contradicted by the literature *and* unverifiable from the assembly chosen to represent it.
+
+This reaches further than one line. DUET's real chassis is an industrial **polyploid**
+(`DUET_TARGET.md` §5.3), so the proxy does not proxy the property it was selected for — and the
+previous wave's ploidy-scaling argument for strategy E's mtDNA gene dosage buys roughly **2×, not
+4×**, if the only industrial genome in hand is diploid.
+
+### The four that would change a build or a decision
+
+1. **The benchmark set is weak in the same way twice.** BM-BNK-style entries expect
+   `gpd1Δ gpd2Δ` to *"impair"* anaerobic growth; the corpus says it **prevents** it, rescuable by
+   acetaldehyde or acetoin. That is the identical strength-inversion wave 1 found in BM-PATH-007.
+   **Two instances is a pattern**: the set needs re-reading for `expected_outcome` *strength*, not
+   only for factual support — an atlas returning the literature's own wording would fail its own
+   measuring stick. The same record surfaces something PLAN.md omits entirely: glycerol-negative
+   mutants lose **osmotolerance**, which is disqualifying for high-gravity fermentation.
+2. **BY4741/S288C has elevated spontaneous petite formation**, attributed to a HAP1-disrupting
+   transposon — and the entire mitochondrial programme runs on that lineage (B.4 admits BY4741 as
+   the deletion-collection tool base). **A strategy-E insert-retention experiment in BY4741 could
+   report loss that is really background petite formation**, and the atlas would store it as
+   evidence against the strategy. This is an experimental-design warning, not a documentation one.
+3. **"Transport of alcohols" is a day-one gene group with no members and no mechanism.**
+   Isobutanol crosses the plasma membrane by **passive diffusion**; FPS1 is a glycerol channel and
+   belongs to the glycerol branch, not to alcohol efflux. Meanwhile the transport gap that *is*
+   real — 2-KIV out of the matrix — stays uncounted.
+4. **PLAN.md gives two different sizes for its own core corpus, and the measurement settling it
+   has been in the repo since 2026-09-19.** B.2 says 400–800 isobutanol papers; H.2 says "low
+   thousands". `DATA_VOLUME.md` measured **768** production-scoped and **1,027** unrestricted,
+   against **6,072** for the comparable ethanol query — an **~8× asymmetry, not the ~25–50×** the
+   scoping argument rests on. The same non-propagation sizes transient storage at **3–4 TB** for a
+   corpus measured at **~48–51 GB**, in the wrong units.
+
+### Worth a minute each
+
+* **Zymomonas is not a yield ceiling.** The only head-to-head in the corpus is a **tie** — yeast at
+  95% of theoretical, *Z. mobilis* "also" 95%, the advantage being in *specific productivity*. Its
+  sole admission rationale (B.4 role 5: calibrating what a yield fraction can reach) is not served,
+  and **criterion E2 is calibrated on it.**
+* **"Early isobutanol reports questioned on carbon-balance grounds" is unsourceable.** Zero papers
+  across 1,309 readable full texts dispute another's numbers. The bound check is justified anyway;
+  this particular rationale is not, and the project has better evidence for the risk in its own
+  reports.
+* **The thermophilic-parts heuristic is refuted in the corpus.** TaAlDH, sourced on the
+  thermostability↔solvent-tolerance correlation, shows "a significant decrease in activity" at 2%
+  isobutanol. No cofactor-switched archaeal or thermophilic variant exists here at all — every one
+  is an engineered mesophile.
+* **A phase-0 acceptance gate depends on an artefact the project does not hold.** The criterion
+  requires reproducing the published recoded ARG8m marker sequence; the rationale is quoted in the
+  corpus but **no paper in it prints the sequence.** It must come from GenBank, and nothing
+  schedules that.
+* B.3.1's vague "glucose-tolerance evolution" has a name in the corpus — **`MTH1ΔT`** — and the
+  paper carrying it is a *pdc*-minus MTH1ΔT strain with an **NADH-preferring KARI**, which is
+  simultaneously E1 evidence and the closest thing the corpus holds to the G.6 parts gap.
+* **2-phenylethanol is co-produced by the same promiscuous KDC and is not in the adjacent tier**,
+  so one of four diagnostic ratios is discarded at admission. The ratio is also *engineerable* —
+  KivD S286T shifts it — and that variant is missing from the parts catalog.
+
+---
+
+## 6. The literature-analysis engine
+
+The owner's direction is to use the pipeline at `D:\Agentic\Literature-analysis` (`lit-agent`) for
+literature analysis and keep its references separate. That is the right call: it is a mature
+7-stage resumable pipeline — Docling layout parsing with a per-page OCR ladder, figure and table
+crops, local VLM description with Claude escalation, BGE-M3 dense+sparse embeddings, Milvus — and
+`fermdb` has nothing comparable for figures or tables.
+
+**Isolation is achievable with zero edits to lit-agent, but only via a second copy of the repo
+tree.** `get_config()` has no `--config` flag and no environment override, and the project root is
+derived by walking up from the imported `config.py` — so whichever copy of `src/` is imported
+decides the config, the `output/` store, `taxonomy.json` and `groups.json`. The full runbook is in
+`docs/drafts/corpus/lit_agent_runbook.md`. The three risks worth naming:
+
+1. `PYTHONPATH` silently not taking, so `lit` resolves to the original repo and every write lands
+   on the cellulase corpus. Gate: `doctor` must print the copy's root before any write.
+2. **`lit publish` and `lit reindex` default `--recreate=True`**, which drops the `lit_*`
+   collections. Plain `lit run` is safe.
+3. `taxonomy.json` is **written back on every categorize call**, so a misconfigured run permanently
+   injects yeast aliases into the curated cellulase taxonomy — quietly, with no error.
+
+Marginal cost is **$0** if the copy pins `providers: ["claude_code"]`; the API budget on the
+original is already exhausted ($16.0056 of $16.00) and a copy would otherwise inherit a fresh
+ledger and silently re-authorize the full amount.
+
+### 6.1 The Milvus abort, diagnosed — and it is not what it looked like
+
+`lit-milvus-standalone` is `Exited (134)`, which is SIGABRT and looked alarming. It is a **startup
+race, not a data problem**:
+
+```
+07:48:40  starting running Milvus components
+07:48:45  "init with etcd failed"  error="context deadline exceeded"
+07:48:50  All cleanup done, handleSignals goroutine quit
+          panic: failed to create etcd client: context deadline exceeded
+```
+
+Milvus came up before etcd was accepting connections and panicked on the deadline. `OOMKilled` is
+**false**, `TotalMem` 33 GB against `UsedMem` 28 MB at the point of failure, and no segment or
+index error appears anywhere. etcd, minio and attu have since been healthy for the better part of
+an hour, so the condition that caused it is gone.
+
+*(Aside worth knowing: `docker logs` cannot stream the whole file — it fails partway with
+`invalid character '\x00'`, so the container's json log is itself damaged. The crash is only
+reachable with `--tail`. That is cosmetic, but it is why a first look at the logs shows a
+goroutine dump with no cause attached.)*
+
+**This needs one command, and I was denied permission to run it** (shared-resource guardrail,
+correctly). It is yours:
+
+```powershell
+docker start lit-milvus-standalone
+# or, equivalently:  docker compose -f D:\Agentic\Literature-analysis\docker\docker-compose.yml up -d milvus
+```
+
+Give it the 90-second `start_period` before judging health. Take
+`docker\milvus_snapshot.ps1 snapshot -WithArtifacts` before any yeast-corpus run — note the
+snapshot is cold, and it is also what brings the stack back up.
+
+---
+
+## 7. Decisions that are yours
 
 | question | why it is yours | what is ready |
 |---|---|---|
 | **The valine-assimilation configuration** | It needs either a new `compartment_strategy` row (a vocabulary change) or a decision that enzyme-activity-only papers are not configurations. Both are scope calls | The promoter, the refusal, and the paper read |
 | **Re-tag the 8 false E5 papers** | Changes what the ethanol budget is spent on | The list, from two independent passes |
+| **Ethanol Red's ploidy, and whether it stays the industrial proxy** | B.4 picked it for a property it does not have, and the alternative is to pick a different proxy or to state the proxy's limit explicitly | The four papers, and the assembly's own inability to resolve aneuploidy |
+| **Re-read the benchmark set for `expected_outcome` strength** | Two independent waves found the same inversion; this is a set-wide re-read, not two fixes | Both instances, quoted |
+| **Which background the strategy-E retention experiment runs in** | BY4741's background petite rate could be read as insert loss. Choosing a background is a bench decision | The transposon/HAP1 attribution, quoted |
 | **Whether to spend slot 6's 45 records at all** | Three passes say the literature has no matrix-redox anchor. Reporting an unspent budget is the slots document's own stated preference | The counts, three ways |
 | **A title/checksum gate on ingest** | 3 of 127 were the wrong paper. Cheap to add; I did not, because it changes acquisition policy | The three DOIs, quarantined |
 | **`programme_fit` values per strategy** | Encodes what DUET is trying to be | The mechanism, seeded `unknown` (D1, previous session) |

@@ -1,0 +1,1067 @@
+# Marked-claim verification for PLAN.md -- the master blueprint.
+#
+# PLAN.md carries 58 warning-marked lines and, unlike ISOBUTANOL_PROGRAM.md,
+# MITOCHONDRIAL_PROGRAM.md and DUET_TARGET.md, none of them had ever been audited. Its own legend
+# (line 23) defines the glyph as "a number or claim taken from background knowledge rather than
+# from a source read". This file says, for each one, what the 1,309 stored full texts -- and,
+# where the claim is about the project rather than about biology, what the repository's own
+# measured documents -- do and do not support.
+#
+# METHOD. Every quote in `evidence` and `repo_evidence` was sliced out of its cached source by
+# regex-anchored offset and never retyped; each slice was then re-resolved at its own offsets with
+# fermdb.llm.validate.verify_span before being written here. 44 corpus quotes and 5 repository
+# quotes, 49 of 49 re-resolved EXACT, 0 absent, 0 spliced. No quote joins two non-adjacent
+# passages; where two passages are needed there are two strings. Quotes are double-quoted YAML
+# scalars, not folded ones, because several carry hard line breaks and en-dashes from PDF text
+# layers that folding would destroy. Each entry is preceded by a comment naming its DOI (or repo
+# path), its cached file and its character offsets, so any quote can be re-resolved independently.
+# The corpus cache was rebuilt from fulltext_asset rows with the repo's own jats_to_text and
+# pdf_to_text, and its numbering reproduces the numbering used by the two earlier waves.
+#
+# NO `confidence` FIELD IS WRITTEN ANYWHERE IN THIS FILE and nothing here is marked verified.
+# PLAN.md was not edited; every correction below is a PROPOSAL. Nothing was written under data/
+# (PLAN.md L.5 / decision D2). No extraction was run.
+#
+# VERDICTS USED
+#   confirmed        the corpus (or a measured repo document) supports the claim as stated
+#   incomplete       true as far as it goes; something load-bearing is missing
+#   overstated       directionally right, quantitatively or categorically too strong
+#   wrong            the corpus contradicts it
+#   not_in_corpus    the corpus cannot answer, or the line is not a factual claim
+#   already_covered  a prior wave's draft settled it; `covered_by` names which
+#
+# TALLY (58 marks, all 58 audited)
+#   already_covered  15   (to the two warnings drafts and the benchmark drafts)
+#   confirmed        14
+#   incomplete       13
+#   not_in_corpus     8   (1 legend line, 5 gene-list/identifier-resolution lines, 2 infrastructure)
+#   overstated        7
+#   wrong             1
+#
+# Five of the 58 marks are DUPLICATES within PLAN.md: the decarboxylase-promiscuity claim is
+# marked three times (165, 733, 1508), the ADH-cofactor claim twice (724, 1506), the E. coli
+# titer/yield claim twice (515, 577), the carbon-balance claim twice (214, 2894) and the
+# SNP-count claim twice (1167, 2895). A fix applied once leaves the document wrong elsewhere.
+#
+# THE FIVE THINGS A READER SHOULD TAKE FROM THIS FILE
+#
+#   1. ETHANOL RED IS A DIPLOID, AND THE PLAN PICKED IT FOR BEING A POLYPLOID. Line 475 justifies
+#      the industrial proxy by its "aneuploid/polyploid-typical architecture". Four papers in this
+#      corpus call Ethanol Red diploid, MATa/alpha; none calls it aneuploid or polyploid. The
+#      repo's own assembly record adds that GCA_029255905.1 cannot resolve aneuploidy at all. This
+#      reaches DUET_TARGET 5.3 (the owner's chassis is a polyploid; the proxy does not proxy the
+#      property it was chosen for) and it halves the ploidy-scaling rescue the previous audit gave
+#      to MITOCHONDRIAL_PROGRAM's gene-dosage case for strategy E.
+#
+#   2. THE BENCHMARK SET IS TOO WEAK IN A SECOND PLACE, THE SAME WAY IT WAS IN THE FIRST. Line
+#      2700 expects "impairs anaerobic growth" from a gpd1 gpd2 double deletion; the corpus says
+#      it PREVENTS anaerobic growth, rescuable by acetaldehyde or acetoin. An atlas returning the
+#      literature's own wording fails its own measuring stick -- exactly the inversion wave 1
+#      found in BM-PATH-007. Two instances is a pattern: the set should be re-read for
+#      expected_outcome STRENGTH, not only for factual support.
+#
+#   3. "TRANSPORT OF ALCOHOLS" IS A GENE GROUP WITH NO MEMBERS AND NO MECHANISM. Line 1191 heads
+#      PDR/SNQ/AQR/QDR/FPS1 as alcohol transporters. Isobutanol crosses the plasma membrane by
+#      passive diffusion; FPS1 is the glycerol channel and matters here for the glycerol branch,
+#      not for alcohol efflux. This is the same category error the previous wave found in
+#      ISOBUTANOL_PROGRAM's knowledge gap 2, now baked into the day-one gene list.
+#
+#   4. THE PLAN GIVES TWO DIFFERENT SIZES FOR ITS OWN CORE CORPUS, AND THE MEASUREMENT THAT
+#      SETTLES IT IS ALREADY IN THE REPO. Line 192 says 400-800 isobutanol papers; line 1701 says
+#      "low thousands". DATA_VOLUME.md measured 768 (production-scoped) and 1,027 (unrestricted)
+#      on 2026-09-19. The same non-propagation left line 1313 sizing transient storage at 3-4 TB
+#      for a corpus measured at ~48-51 GB.
+#
+#   5. S288C IS EXCLUDED FOR THE WRONG REASON, AND THE RIGHT REASON MATTERS MORE. Line 474 bars
+#      S288C from physiology and robustness claims. The corpus adds that the S288C/BY4741 lineage
+#      carries a HAP1-disrupting transposon and forms petites at elevated frequency -- and BY4741
+#      is admitted at line 452 as the deletion-collection tool base on which the entire
+#      mitochondrial programme runs. A strategy-E insert-retention experiment in that background
+#      could report loss that is really background petite formation.
+#
+# WHAT WAS DEPRIORITISED. The brief ordered cost and compute arithmetic last. Section V's
+# remaining unmarked arithmetic was not re-derived; the two marked lines that size storage and
+# planning (1313, 2817) are audited above against the repo's measured figures, and both are
+# superseded by docs/reference/DATA_VOLUME.md rather than by the literature.
+
+version: 1
+zone: R
+status: draft
+document: PLAN.md
+marks_total: 58
+marks_audited: 58
+
+PLAN:
+
+- line: 23
+  claim: >-
+    Legend line: the warning glyph 'marks a number or claim taken from background knowledge rather than from a source read'. This is the convention being defined, not a claim about the world.
+  verdict: not_in_corpus
+  what_to_change: >-
+    Drop the mark. Lines 20-25 are PLAN.md's own legend; the glyph on line 23 is the symbol being defined. If the mark list is regenerated, exclude the legend block, so the count (58 today) reflects only verifiable claims. ISOBUTANOL_PROGRAM.yaml recorded the equivalent line as `confirmed` and MITOCHONDRIAL_AND_DUET.yaml as `not_in_corpus`; the two prior drafts disagree on how to file a legend line and a curator should pick one.
+  consequence_if_wrong: >-
+    none, documentation only.
+  searches_run: ["(manual reading of PLAN.md lines 20-25)"]
+
+- line: 165
+  claim: >-
+    'Ehrlich-pathway decarboxylases act on several 2-ketoacids, so an isobutanol strain almost always makes isoamyl alcohol and 2-methyl-1-butanol too.' The adjacent product tier is 2-methyl-1-butanol, 3-methyl-1-butanol (isoamyl alcohol), n-butanol and 1-propanol, captured only when measured in the same experiment as isobutanol.
+  verdict: incomplete
+  publication: "doi:10.1007/s00253-010-2522-6"
+  corpus_file: "00029.txt"
+  also_in:
+    - "00687.txt doi:10.1186/s12934-022-01738-z"
+    - "00141.txt doi:10.1016/j.synbio.2022.02.007"
+  evidence:
+    # doi:10.1007/s00253-010-2522-6  [00029.txt @777-922]  re-resolved exact
+    - "In addition, other higher chain alcohols such as 1-propanol, 2-methyl-1-butanol, 1-butanol, and 2-phenylethanol were also detected as byproducts."
+    # doi:10.1186/s12934-022-01738-z  [00687.txt @6277-6450]  re-resolved exact
+    - "an engineered KivdS286T with a single amino acid replacement resulted in higher isobutanol production as well as higher isobutanol-to-3M1B molar ratio than the original Kivd"
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt @3225-3532]  re-resolved exact
+    - "The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5)"
+  notes: >-
+    The promiscuity and the co-production are confirmed and are an own-result observation, not a review sentence: a C. glutamicum isobutanol strain reports 1-propanol, 2-methyl-1-butanol, 1-butanol AND 2-phenylethanol as by-products of the same overexpressed KDC. Two things the line misses. (1) 2-PHENYLETHANOL is co-produced by the same enzyme and is NOT in the adjacent tier, so its ratio - one of the four diagnostic ratios the paragraph says it wants - is thrown away at admission. (2) The ratio is ENGINEERABLE and the corpus names the part: KivD S286T, a single substitution, raised both isobutanol and the isobutanol-to-3-methyl-1-butanol molar ratio. That makes decarboxylase specificity a part property with a named variant, not only a diagnostic readout.
+  what_to_change: >-
+    Add 2-phenylethanol to the adjacent tier (same promiscuous KDC, same experiment rule). Reword 'almost always' to 'routinely, and reported as by-products in own-result isobutanol papers' - no paper in this corpus quantifies how often. Add a sentence: 'The ratio is also a tunable design variable: KivD S286T raises the isobutanol-to-3-methyl-1-butanol ratio, so decarboxylase specificity belongs in the parts catalog (G.6) as a variant property.'
+  consequence_if_wrong: >-
+    MEDIUM. Dropping 2-phenylethanol loses the aromatic-ketoacid leg of the leak diagnosis while keeping the branched-chain legs, so a strain leaking through Aro10 onto phenylpyruvate reads as clean. And a KDC-specificity variant that exists in the corpus never reaches G.6, so route ranking cannot propose it.
+  searches_run: ["isoamyl alcohol[^.]{0,200}(2-methyl-1-butanol|isobutanol)", "(broad substrate (range|specificity)|promiscuous)[^.]{0,150}(decarboxylase|2-keto ?acid)", "(2-methyl-1-butanol|3-methyl-1-butanol)[^.]{0,200}(by-?product|co-?produc|alongside)", "KivD[^.]{0,200}(2-ketoisovalerate|2-ketoisocaproate|substrate)"]
+
+- line: 192
+  claim: >-
+    'The isobutanol production literature is small enough to be covered nearly completely - plausibly 400-800 primary papers across all organisms, against tens of thousands for ethanol.'
+  verdict: incomplete
+  repo_evidence:
+    # (repo) docs/reference/DATA_VOLUME.md  @1257-1332  re-resolved exact
+    - "| `isobutanol AND (production OR biosynthesis OR fermentation)` | **768** |"
+    # (repo) docs/reference/DATA_VOLUME.md  @1222-1256  re-resolved exact
+    - "| `isobutanol` (all) | **1,027** |"
+    # (repo) docs/reference/DATA_VOLUME.md  @1662-1762  re-resolved exact
+    - "| `ethanol AND Saccharomyces cerevisiae AND (production OR fermentation OR tolerance)` | **6,072** |"
+  notes: >-
+    This number has already been MEASURED inside this repo and the plan was never updated. DATA_VOLUME.md, built from PubMed counts taken 2026-09-19, gives 768 for the production-scoped isobutanol query and 1,027 for `isobutanol` unrestricted. So 400-800 is right only at its ceiling, and the unrestricted count is above the range entirely. The ethanol half fares worse: the narrowest relevant measured query returns 6,072, which is thousands, not tens of thousands. No broad `ethanol AND yeast` count exists anywhere in the repo, so 'tens of thousands' is still unmeasured. Note also that this line and line 1701 give DIFFERENT sizes for the same corpus ('400-800' vs 'low thousands') - see the record for 1701.
+  what_to_change: >-
+    Replace the estimate with the measurement and cite it: 'measured 2026-09-19: 1,027 PubMed records for `isobutanol`, 768 when scoped to production/biosynthesis/fermentation (docs/reference/DATA_VOLUME.md §1); the comparable scoped ethanol query returns 6,072.' If 'tens of thousands' is kept for ethanol, run and record the broad query that supports it.
+  consequence_if_wrong: >-
+    MEDIUM. B.2's whole scoping argument is the ASYMMETRY between the two corpora. Measured and scoped like-for-like the asymmetry is ~8x, not the ~25-50x the sentence implies. 'Near-total recall' remains achievable at 768-1,027 papers, so the conclusion survives - but the premise as written is an estimate sitting next to a measurement in the same repository, and the reader cannot tell.
+  searches_run: ["(repo) docs/reference/DATA_VOLUME.md §1, measured PubMed counts 2026-09-19"]
+
+- line: 214
+  claim: >-
+    'several early yeast isobutanol reports have been questioned on carbon-balance grounds, and a database that ingests them silently launders a disputed number into a fact.'
+  verdict: overstated
+  publication: "doi:10.1186/1754-6834-4-21"
+  corpus_file: "00597.txt"
+  evidence:
+    # doi:10.1186/1754-6834-4-21  [00597.txt @15659-15855]  re-resolved exact
+    - "A carbon balance calculation showed that after accounting for carbon in produced biomass, isobutanol, ethanol, pyruvate, succinate, glycerol, acetate and CO2, there was about 11% of carbon missing"
+  notes: >-
+    I could not find, anywhere in 1,309 stored full texts, one paper questioning another's isobutanol numbers on carbon-balance grounds. Four search families returned nothing: reproduction failures, disputes, doubts, and yields exceeding theoretical maxima in isobutanol work. What the corpus DOES contain is a yeast isobutanol paper reporting its OWN carbon balance failing to close by about 11%, and then investigating where the carbon went (it looked at 3-methylbutanol and 2-methylbutanol - the same promiscuity line 165 describes). That is self-reported incompleteness by an honest author, not a dispute between groups. Carbon balances elsewhere in the corpus close well (93-103%).
+  what_to_change: >-
+    Replace the sociological claim with the methodological one it is trying to justify: 'carbon balances in this literature do not always close - one yeast isobutanol study reports ~11% of carbon unaccounted for, and by-products of the same promiscuous decarboxylases are a known sink - so every ingested yield is bound-checked against the theoretical maximum and the unclosed fraction recorded where reported.' Drop 'have been questioned' unless a citation can be produced.
+  consequence_if_wrong: >-
+    LOW for the mechanism, MEDIUM for the document's credibility. The S.3 bound check is justified either way and should stay. But this same sentence is re-asserted as risk 6 at line 2894 as the RATIONALE for a whole quality mechanism, and an unsourced claim that named-but-unnamed authors are disputed is the kind of thing that should not be in a design document without a citation.
+  searches_run: ["carbon balance[^.]{0,250}(isobutanol|question|doubt|dispute|exceed)", "(could not be reproduced|failed to reproduce|not reproducible|irreproducib)[^.]{0,200}(isobutanol|higher alcohol)", "isobutanol[^.]{0,150}(questioned|disputed|doubtful|inconsistent with)", "(exceed|above|higher than)[^.]{0,80}theoretical (maximum|yield)", "(carbon (recovery|balance|missing)|missing carbon)"]
+
+- line: 256
+  claim: >-
+    Admitted under criterion E1: 'the glucose-tolerance evolution that makes Pdc-minus strains usable'.
+  verdict: incomplete
+  publication: "doi:10.1016/j.meteno.2016.01.002"
+  corpus_file: "00126.txt"
+  also_in:
+    - "00341.txt doi:10.1093/femsyr/foaf014"
+  evidence:
+    # doi:10.1016/j.meteno.2016.01.002  [00126.txt @31074-31277]  re-resolved exact
+    - "inactivation of the native alcoholic fermentation pathway by deletion of the pyruvate-decarboxylase genes PDC1, PDC5 and PDC6 and introduction of an internal deletion in MTH1 to restore growth on glucose"
+    # doi:10.1093/femsyr/foaf014  [00341.txt @19173-19325]  re-resolved exact
+    - "ALE of PDC-negative strains has identified a number of effective mutations encoding MTH1, a negative regulator of the glucose sensing signaling pathway."
+    # doi:10.1093/femsyr/foaf014  [00341.txt @12968-13098]  re-resolved exact
+    - "It is suspected that the deficiency of intracellular C2 compounds and cofactor imbalance are the possible causes of growth defect."
+  notes: >-
+    Confirmed, and the corpus is far more specific than the plan. The fix is not a vague 'evolution': it is a NAMED ALLELE - an internal deletion in MTH1 (MTH1dT), a negative regulator of glucose sensing, recovered by adaptive laboratory evolution of PDC-negative strains and thereafter carried as a defined genotype. 00126 builds exactly the strain this programme cares about: pdc1 pdc5 pdc6 MTH1dT carrying a full cytosolic isobutanol pathway with an NADH-preferring E. coli KARI (coilvC6E6) and C. glutamicum IlvB/IlvNM13. The corpus also splits the growth defect into TWO causes, not one: C2-compound deficiency AND cofactor imbalance.
+  what_to_change: >-
+    Name the allele: 'the MTH1 internal deletion (MTH1dT) recovered by ALE of PDC-negative strains, which lowers glucose uptake rate and restores growth on glucose'. File it as a `modification` with its own part record rather than as a literature topic, and split the stated cause into C2-compound deficiency and cofactor imbalance. Add doi:10.1016/j.meteno.2016.01.002 as a seed paper: it is a pdc-minus MTH1dT yeast strain carrying an NADH-preferring KARI, which is simultaneously E1 evidence and direct evidence on ISOBUTANOL_PROGRAM's knowledge gap 5.
+  consequence_if_wrong: >-
+    MEDIUM-HIGH, and it is a build item. A Pdc-minus DUET derivative needs MTH1dT or an equivalent; admitting 'the glucose-tolerance evolution' as a topic gets the atlas papers, whereas naming MTH1dT gets a constructible genotype. The same paper is the closest thing in the corpus to an answer on NADH-KARI in yeast, and it is reachable only if this line points at it.
+  searches_run: ["(Pdc[- ]?(negative|minus)|pdc1.{0,30}pdc5.{0,30}pdc6)[^.]{0,250}(glucose|evolution|C2|growth)", "MTH1[^.]{0,200}(deletion|glucose|ALE|evolution)"]
+
+- line: 309
+  claim: >-
+    'isobutanol is considerably more toxic than ethanol on a molar basis and acts partly through different membrane effects, so ethanol tolerance mechanisms transfer unevenly.'
+  verdict: incomplete
+  publication: "doi:10.1534/g3.118.200677"
+  corpus_file: "00936.txt"
+  also_in:
+    - "00118.txt doi:10.1016/j.jbc.2026.113228"
+    - "00080.txt doi:10.1016/j.btre.2026.e00959"
+  evidence:
+    # doi:10.1534/g3.118.200677  [00936.txt @18626-18920]  re-resolved exact
+    - "we next compared the transcriptome responses to 0.8% 1-butanol, 1% isobutanol, and 4% ethanol in strains growing under aerobic conditions. These doses are higher than titers produced by engineered strains, but were chosen to provoke a robust stress response but allow all three strains to grow."
+    # doi:10.1016/j.btre.2026.e00959  [00080.txt @6028-6221]  re-resolved exact
+    - "Isobutanol exhibits more toxicity to yeast cells than ethanol, attributable to the disruption of plasma membrane lipids, membrane transport mechanisms, and the initiation of protein translation"
+    # doi:10.1016/j.jbc.2026.113228  [00118.txt @4937-5137]  re-resolved exact
+    - "In particular, the concentration of isobutanol that inhibits growth (>1.4% w/v, approximately 190 mM) is much higher than the typical concentrations at which specific protein-ligand interactions occur"
+    # doi:10.1534/g3.118.200677  [00936.txt @23028-23261]  re-resolved exact
+    - "Butanols triggered reduced expression of respiration genes during aerobic growth but induced expression anaerobically – this was in contrast to ethanol that led to the induction of respiration genes both aerobically and anaerobically"
+    # doi:10.1534/g3.118.200677  [00936.txt @20787-20923]  re-resolved exact
+    - "Most industrial fermentations are anaerobic, however the majority of studies analyzing alcohol toxicity are based on aerobic conditions."
+  notes: >-
+    The DIRECTION is well supported and the 'different mechanism' half is supported better than the plan claims - but no single study in this corpus measures both alcohols at a matched endpoint and states the molar ratio, which is what 'considerably more toxic on a molar basis' asserts. The closest is a three-strain transcriptome study that dosed 0.8% 1-butanol, 1% isobutanol and 4% ethanol together; the doses were chosen by judgement ('provoke a robust stress response but allow all three strains to grow'), not by a measured equal-effect titration, so the ~4-6x molar spread they imply is suggestive, not a measurement. The mechanism half gets a concrete, citable difference from the same paper: butanols REPRESS respiration genes aerobically and INDUCE them anaerobically, while ethanol induces them under both. That is a transcriptional difference, not the membrane difference the sentence asserts. BM-TOL-001's draft (docs/drafts/benchmarks/tolerance.yaml) reached the same conclusion independently and had to assemble the ratio from two different papers, strains and media.
+  what_to_change: >-
+    Split the claim in two and source each. (a) 'Isobutanol is more growth-inhibitory than ethanol; the closest matched exposure in this corpus is 1% isobutanol against 4% ethanol chosen for comparable stress, and no study here reports a matched-endpoint molar ratio.' Open a `knowledge_gap` for the matched IC50 measurement - it is one cheap experiment. (b) Replace 'different membrane effects' with the difference actually measured: 'the transcriptional responses differ in direction, not only magnitude - butanols repress respiration genes aerobically and induce them anaerobically, ethanol induces them under both.' Add the rider that most alcohol-toxicity literature is AEROBIC while DUET is anaerobic.
+  consequence_if_wrong: >-
+    HIGH for E4 admissions. `transfer_rationale` is the field that decides whether an ethanol tolerance mechanism enters at all, and it is being written against an unmeasured ratio and an unsourced mechanism. The respiration-gene reversal is the strongest transfer argument available and the plan does not use it. The aerobic/anaerobic mismatch is the bigger problem: an ethanol tolerance mechanism established aerobically has two transfer gaps to cross, not one, and B.3.4 counts only one.
+  searches_run: ["isobutanol[^.]{0,200}(more toxic|more inhibitory|greater toxicity)", "(IC50|MIC|half.maximal)[^.]{0,200}(isobutanol|butanol)", "(genes?|transcript[a-z]*)[^.]{0,120}(induced|upregulated)[^.]{0,120}anaerobic"]
+
+- line: 354
+  claim: >-
+    'POS5 is the only named route from matrix NADH to matrix NADPH. That is what makes the architecture close - and it is also why POS5 capacity is the atlas's highest-priority bottleneck hypothesis.'
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/MITOCHONDRIAL_AND_DUET.yaml (DUET_TARGET §7) and docs/reports/2026-09-21-pos5-matrix-nadph.md"
+  notes: >-
+    Settled and settled as WRONG. The Pyc2/Mdh2/Mae1 shunt run in its native mitochondrial location is a second matrix NADH-to-NADPH route, it has been built, and it produced a near-five-fold isobutanol increase; an NADH-preferring KARI removes the requirement altogether. PLAN.md line 354 carries the same error as DUET_TARGET §7 and inherits the same correction. Not re-derived here.
+  what_to_change: >-
+    Apply the correction already drafted for DUET_TARGET §7 to this line too. 'POS5 is the only named route' becomes 'POS5 is one of at least two named matrix routes (the other being the Pyc2/Mdh2/Mae1 shunt), and an NADH-preferring KARI removes the matrix NADPH requirement entirely.' The bottleneck hypothesis survives as a hypothesis; the 'highest-priority' ranking does not follow from single-point-of-failure any more.
+  consequence_if_wrong: >-
+    HIGH, and it is already recorded against DUET. Flagged here because PLAN.md is the master blueprint: correcting DUET_TARGET and leaving line 354 uncorrected leaves the wrong version in the document G.8's bottleneck seeding is read from.
+  searches_run: ["(covered by MITOCHONDRIAL_AND_DUET.yaml - not re-derived)"]
+
+- line: 429
+  claim: >-
+    'Which transporters carry xylose and arabinose, and at what affinity, since glucose-xylose transporter competition is the usual reason a co-fermentation stalls.'
+  verdict: incomplete
+  publication: "doi:10.1007/s10295-019-02242-x"
+  corpus_file: "00053.txt"
+  also_in:
+    - "00823.txt doi:10.1186/s13568-015-0102-y"
+    - "00049.txt doi:10.1007/s00449-026-03399-3"
+  evidence:
+    # doi:10.1007/s10295-019-02242-x  [00053.txt @56911-57045]  re-resolved exact
+    - "Glucose prevents xylose utilization, as it competes with xylose for transport and its use is subject to glucose catabolite repression."
+    # doi:10.1186/s13568-015-0102-y  [00823.txt @5185-5362]  re-resolved exact
+    - "In S. cerevisiae, this pentose is transported by facilitated transport mediated by hexose permeases which transport xylose with very low affinity compared with uptake of glucose"
+  notes: >-
+    Transport competition is real and repeatedly named, but the corpus never gives it alone. Every statement pairs it with GLUCOSE CATABOLITE REPRESSION as a second, independent cause, and supplies the mechanism the plan's 'at what affinity' is groping for: xylose has no dedicated transporter in S. cerevisiae and rides the hexose permeases at very low affinity relative to glucose. So the affinity question is not a parameter to look up, it is the mechanism of the competition.
+  what_to_change: >-
+    '...since xylose is carried by the hexose permeases at very low affinity relative to glucose, so glucose both outcompetes it for transport AND represses its metabolism - the two causes of a stalled co-fermentation are separable and must be recorded separately.' Note that PLAN.md already has a repression row in the next line of the same table; the two rows describe one phenomenon and should cross-reference.
+  consequence_if_wrong: >-
+    MEDIUM. If the atlas files a stalled co-fermentation under transport alone, a reader proposes a transporter swap for a problem that a MIG1/HXK2 intervention may fix, or vice versa. DUET's C6-to-C5 handover is explicitly a designed switch, so getting the two causes separated is a design requirement, not a nicety.
+  searches_run: ["(xylose)[^.]{0,120}(compet[a-z]*)[^.]{0,120}(glucose|hexose transporter|Hxt)", "xylose[^.]{0,150}(affinity|transporter|permease)"]
+
+- line: 451
+  claim: >-
+    'CEN.PK113-7D (the metabolic-engineering and physiology standard, with the best-characterized quantitative fermentation data).'
+  verdict: confirmed
+  publication: "doi:10.1016/j.mec.2023.e00218"
+  corpus_file: "00123.txt"
+  also_in:
+    - "00003.txt doi:10.1002/bit.27210"
+    - "00481.txt doi:10.1128/aem.02330-23"
+  evidence:
+    # doi:10.1016/j.mec.2023.e00218  [00123.txt @15795-15947]  re-resolved exact
+    - "CEN.PK 113-7D (CEN.PK) was chosen to re-analyze the effect of BUD21 deletion on xylose metabolism since it is a popular strain for physiological studies"
+  notes: >-
+    Confirmed in substance. The corpus calls CEN.PK113-7D 'a popular strain for physiological studies' and supplies exactly the data class the plan says it is for: aerobic glucose-limited and nitrogen-limited chemostat and retentostat runs with biomass yields, qO2/qCO2, viability by three independent methods and carbon recovery of 99-100% (doi:10.1002/bit.27210). 'Best-characterized' is a superlative no paper states and none is needed - 'the standard background for quantitative physiology' is both true and sourceable.
+  what_to_change: >-
+    Soften the superlative to 'the standard background for quantitative physiology' and cite one chemostat/retentostat dataset. Everything else on the line stands. Carry one rider from doi:10.1128/aem.02330-23 that matters for cross-strain comparison: CEN.PK113-7D is HAPLOID where Ethanol Red is diploid, so per-cell numbers are not directly comparable across the two proxies.
+  consequence_if_wrong: >-
+    LOW-MEDIUM. The role assignment is right. The haploid/diploid rider is the part worth carrying, because F.4 and the comparability classes will otherwise compare per-cell quantities across a ploidy boundary.
+  searches_run: ["CEN\\.PK[^.]{0,250}(physiolog|chemostat|reference|standard)", "CEN\\.PK113-7D[^.]{0,120}(haploid|diploid)"]
+
+- line: 453
+  claim: >-
+    'Industrial backgrounds - Ethanol Red, PE-2/JAY270, CAT-1 and comparable distillers' lineages - admitted for their robustness and tolerance, which matter for a real process.'
+  verdict: overstated
+  publication: "doi:10.1021/acssynbio.1c00615"
+  corpus_file: "00181.txt"
+  also_in:
+    - "00032.txt doi:10.1007/s00253-014-5580-3"
+  evidence:
+    # doi:10.1021/acssynbio.1c00615  [00181.txt @651-910]  re-resolved exact
+    - "the industrial bioethanol producing strain Saccharomyces cerevisiae Ethanol Red exhibited both higher and more robust growth rates than the laboratory strain CEN.PK and industrial strain PE-2, while a more robust product yield traded off for lower mean levels"
+  notes: >-
+    The corpus contains a direct head-to-head of exactly these strains and it does NOT support treating them as one robustness class. Ethanol Red grew both faster and more robustly than CEN.PK AND than PE-2 - so the industrial lineages differ from each other as well as from the lab strain - and its more robust product yield came at the cost of LOWER MEAN YIELD. The paper's own conclusion is that robustness is function-specific with positive and negative trade-offs. PE-2 and CAT-1 are separately confirmed as the dominant Brazilian fuel-ethanol strains (~60% of Brazilian fuel ethanol in 2007/08) and as more ethanol-tolerant than the comparators tested, so the admission is justified - its stated rationale is what is wrong.
+  what_to_change: >-
+    Replace 'admitted for their robustness and tolerance' with 'admitted individually, not as a class: robustness is function-specific and trades off against mean performance, and these lineages differ from each other (Ethanol Red out-grows PE-2 under the same perturbations).' Make `robustness` a (function, perturbation) pair in the schema rather than a strain attribute, and never aggregate it across the three strains.
+  consequence_if_wrong: >-
+    HIGH for the comparability model (K.4). If robustness is stored as a strain property, the atlas will answer 'is Ethanol Red robust?' with a single value that the one paper measuring it says cannot exist - and it will hide the yield trade-off, which is precisely the number a process owner cares about. It also licenses pooling PE-2 and Ethanol Red data, which the same paper shows is unsafe.
+  searches_run: ["Ethanol Red[^.]{0,250}", "(PE-?2|JAY270|CAT-?1)[^.]{0,250}", "robust[a-z]*[^.]{0,200}(industrial|Ethanol Red|CEN\\.PK)"]
+
+- line: 474
+  claim: >-
+    Proxy table, Anchor row: S288C / RefSeq R64 may not be used for 'any physiology or robustness claim. S288C is a laboratory strain and a poor model of an industrial one.'
+  verdict: incomplete
+  publication: "doi:10.1038/srep06556"
+  corpus_file: "00261.txt"
+  also_in:
+    - "00056.txt doi:10.1007/s10522-025-10233-y"
+  evidence:
+    # doi:10.1038/srep06556  [00261.txt @667-812]  re-resolved exact
+    - "Compared with the genome of laboratory model strain S288C, we identified more than 32,000 SNPs in Y-12632 with 23,000 missense and nonsense SNPs."
+    # doi:10.1007/s10522-025-10233-y  [00056.txt @27083-27296]  re-resolved exact
+    - "some consider BY4741, and its parental strain S288C, to be a poor choice for mitochondrial research as there are high frequencies of petite formation due to spontaneous occurrence of cells deficient in respiration"
+  notes: >-
+    The stated exclusion is right and quantified: an industrial ethanol-tolerant isolate differs from S288C at more than 32,000 SNPs, 23,000 of them missense or nonsense. But the exclusion as written is TOO NARROW in the one direction this programme cannot afford. The corpus records that BY4741 and its parent S288C are considered a poor choice for MITOCHONDRIAL research specifically, because of high spontaneous petite formation - cells deficient in respiration - attributed to a transposon disrupting HAP1. PLAN.md line 452 admits BY4741/S288C as the deletion-collection tool base, and the whole mitochondrial programme (strategies C and E, rho0/rho- work, mtDNA copy number, insert retention) runs on exactly that lineage. A petite-prone, HAP1-disrupted background is a confound for every one of those measurements, and the 'may not be used for' column does not say so.
+  what_to_change: >-
+    Extend the exclusion: 'Any physiology or robustness claim, AND any mitochondrial stability, respiratory-competence or rho-/rho0 measurement: the S288C/BY4741 lineage carries a HAP1-disrupting transposon and forms petites at elevated frequency, so respiration and mtDNA-retention phenotypes measured in it are confounded by the background.' Add a `chassis_profile` field recording HAP1 status and baseline petite frequency for every strain the atlas admits.
+  consequence_if_wrong: >-
+    HIGH and specific. MITOCHONDRIAL_PROGRAM §5 question 5 ('does the insert stay?') and the rho- background rate of 0.1-1% per generation already recorded in docs/reports/2026-09-21-phase-1b-corpus-complete.md are exactly the measurements this confound corrupts. A strategy-E retention experiment run in BY4741 could report insert loss that is really background petite formation, and the atlas would store it as evidence against the strategy.
+  searches_run: ["S288C[^.]{0,250}(industrial|laboratory strain|poor|differ)", "([0-9,]{4,9}) (SNPs|single.nucleotide (polymorphisms|variants))", "(BY4741|S288C)[^.]{0,200}(petite|HAP1|respiration)"]
+
+- line: 475
+  claim: >-
+    Proxy table, Industrial proxy row: Ethanol Red / GCA_029255905.1 stands in for the owner's strain by virtue of 'industrial genetic background, distillers' lineage, high-ethanol robustness, aneuploid/polyploid-typical architecture.'
+  verdict: wrong
+  publication: "doi:10.1093/femsyr/foae013"
+  corpus_file: "00337.txt"
+  also_in:
+    - "00481.txt doi:10.1128/aem.02330-23"
+    - "00671.txt doi:10.1186/s12934-016-0526-3"
+    - "00046.txt doi:10.1007/s00253-026-13830-0"
+    - "00349.txt doi:10.1093/femsyr/foag025"
+  evidence:
+    # doi:10.1093/femsyr/foae013  [00337.txt @9724-9851]  re-resolved exact
+    - "Ethanol Red | Industrial 1 G ethanol production strain, diploid MATa/α | Fermentis, a division of S. I. Lesaffre, Lille, France"
+    # doi:10.1128/aem.02330-23  [00481.txt @7734-7835]  re-resolved exact
+    - "Ethanol Red | Diploid industrial strain; commercially used for bioethanol production | Fermentis, USA"
+    # doi:10.1186/s12934-016-0526-3  [00671.txt @9760-9832]  re-resolved exact
+    - "Ethanol Red was chosen for our study as a representative diploid strain."
+    # doi:10.1093/femsyr/foag025  [00349.txt @16348-16632]  re-resolved exact
+    - "Industrial strains continue to accumulate a variety of structural changes, such as segmental duplications, aneuploidies, and sub-telomeric rearrangements, that fine-tune key fermentation traits including ethanol tolerance, volatile ester production, and efficient nitrogen utilization"
+  repo_evidence:
+    # (repo) data/omics/reference_genomes.yaml  @6888-7054  re-resolved exact
+    - "structural variants\n      (large indels, translocations, copy-number changes, aneuploidy) and subtelomeric regions are\n      NOT reliably resolved from this assembly."
+  notes: >-
+    Four independent papers in this corpus call Ethanol Red a DIPLOID, MATa/alpha - one of them uses it precisely 'as a representative diploid strain'. Not one describes it as aneuploid or polyploid. The generic claim the sentence is reaching for is true of industrial strains AS A CLASS (segmental duplications, aneuploidies and subtelomeric rearrangements are pervasive and do fine-tune ethanol tolerance) but it is not true of this strain, and the citation is to this strain. Worse, the repo's own assembly record says GCA_029255905.1 CANNOT resolve aneuploidy or copy-number change at all - so the claimed justifying property is both contradicted by the literature and unverifiable from the assembly being pinned for it.
+  what_to_change: >-
+    Strike 'aneuploid/polyploid-typical architecture' from the justification. Replace with 'a diploid (MATa/alpha) industrial background' and move the aneuploidy point to where it is true and useful: 'industrial strains as a class carry aneuploidies and subtelomeric rearrangements that tune fermentation traits - which this scaffold-level assembly cannot resolve, so Ethanol Red is a proxy for genetic BACKGROUND and point variation, not for genome architecture.' The 'may not be used for' column already says the right thing about continuity; the 'what it is for' column contradicts it.
+  consequence_if_wrong: >-
+    HIGH, and it reaches two other documents. (1) DUET_TARGET §5.3 describes the owner's chassis as an undisclosed industrial POLYPLOID; if the proxy is a diploid, the proxy does not stand in for the property the chassis was selected for, and that should be stated rather than glossed. (2) MITOCHONDRIAL_PROGRAM's gene-dosage argument for strategy E was rescued in the previous audit by mtDNA copy number scaling with PLOIDY. If the only industrial genome the atlas actually holds is diploid, that rescue buys a factor of ~2, not a factor of ~4, and the dosage case for E weakens accordingly. (3) Any structural-variant claim made against this assembly is unsupportable, which the repo knows and the plan does not repeat.
+  searches_run: ["Ethanol Red[^.]{0,80}(diploid|ploidy|aneuploid|chromosome)", "(industrial|bioethanol|distiller)[^.]{0,120}strains?[^.]{0,150}(aneuploid|polyploid|diploid|heterozygo)", "(repo) data/omics/reference_genomes.yaml ethanol_red structural_caveats"]
+
+- line: 476
+  claim: >-
+    Proxy table, Physiology comparator row: CEN.PK113-7D / GCA_002571405.2 is for 'quantitative physiology: the chemostat, carbon-balance and fermentation datasets that actually have the numbers'.
+  verdict: confirmed
+  publication: "doi:10.1002/bit.27210"
+  corpus_file: "00003.txt"
+  also_in:
+    - "00123.txt doi:10.1016/j.mec.2023.e00218"
+    - "00125.txt doi:10.1016/j.mec.2025.e00267"
+  evidence:
+    # doi:10.1016/j.mec.2023.e00218  [00123.txt @15795-15947]  re-resolved exact
+    - "CEN.PK 113-7D (CEN.PK) was chosen to re-analyze the effect of BUD21 deletion on xylose metabolism since it is a popular strain for physiological studies"
+  notes: >-
+    Confirmed on every element. The corpus supplies CEN.PK113-7D chemostat and retentostat datasets with biomass yield, specific rates, three independent viability measures and carbon recovery reported at 99-100% - literally the chemostat-plus-carbon-balance class the row names. The assembly accession is independently corroborated: a 2025 paper aligns reads to 'S. cerevisiae CEN.PK113-7D reference genome (GCA_002571405.2_ASM257140v2)', the same accession the plan pins. The assembly-level, N50 and submitter figures are separately verified against the NCBI Datasets API in data/omics/reference_genomes.yaml.
+  what_to_change: >-
+    Drop the mark. Optionally add the haploid note (see line 451) so the two proxy rows carry their ploidy, since the industrial proxy's ploidy turns out to be a live issue (line 475).
+  consequence_if_wrong: >-
+    none - the row is right. Recording it because a confirmed row is as useful to a curator as a refuted one, and this is the only proxy row that survives the audit unchanged.
+  searches_run: ["CEN\\.PK[^.]{0,250}(physiolog|chemostat|reference|standard)", "GCA_002571405", "(carbon (recovery|balance))[^.]{0,220}"]
+
+- line: 515
+  claim: >-
+    'E. coli - the organism where the ketoacid route to branched-chain alcohols was first assembled and where the highest titers and near-theoretical anaerobic yields were demonstrated.'
+  verdict: confirmed
+  publication: "doi:10.1007/s10295-020-02319-y"
+  corpus_file: "00054.txt"
+  also_in:
+    - "00190.txt doi:10.1038/nbt.2509"
+    - "00593.txt doi:10.1186/1752-0509-4-53"
+    - "00189.txt doi:10.1038/nature06450"
+  evidence:
+    # doi:10.1007/s10295-020-02319-y  [00054.txt @4911-5073]  re-resolved exact
+    - "Until now, the highest isobutanol titer of 50 g l−1 was achieved in a fed-batch fermentation of Escherichia coli applying in situ product removal by gas stripping"
+    # doi:10.1007/s10295-020-02319-y  [00054.txt @4316-4478]  re-resolved exact
+    - "In a mutated form of ilvC, the cofactor was exchanged from NADPH to NADH. These mutations enabled anaerobic isobutanol production at 100% of the theoretical yield"
+    # doi:10.1038/nbt.2509  [00190.txt @41029-41204]  re-resolved exact
+    - "Bastian, S. et al. Engineered ketol-acid reductoisomerase and alcohol dehydrogenase \nenable anaerobic 2-methylpropan-1-ol production at theoretical yield in Escherichia \ncoli."
+    # doi:10.1007/s10295-020-02319-y  [00054.txt @32466-32626]  re-resolved exact
+    - "Aerobic conditions were selected for the pulsed fed-batches as initial batch cultivations had yielded the highest isobutanol titers and yields for E. coli W Δ4."
+    # doi:10.1186/1752-0509-4-53  [00593.txt @53674-53797]  re-resolved exact
+    - "we have found that the anaerobic production of isobutanol can be coupled to growth at ~94% of the theoretical maximum yield"
+  notes: >-
+    Both halves confirmed. Highest titer: 50 g/L in E. coli fed-batch with in-situ gas stripping - nothing in the corpus approaches it in any other organism (best yeast figures here are 0.17-2.0 g/L). Near-theoretical anaerobic yield: 100% of theoretical, independently restated, plus a model-based 94% growth-coupled design. TWO riders the line should carry. (1) The 100% result required TWO engineered enzymes, not one: the primary reference title names 'Engineered ketol-acid reductoisomerase AND alcohol dehydrogenase'. A 2020 review in the same corpus attributes it to the ilvC cofactor swap alone - the corpus contradicts itself and the atlas should store the conflict. The benchmark audit reached this independently on BM-COF-004. (2) The titer record and the yield record are from DIFFERENT PROCESSES: the highest titers and yields in the fed-batch work were obtained AEROBICALLY. 'Highest titers AND near-theoretical anaerobic yields' reads as one achievement and is two.
+  what_to_change: >-
+    Split the clause: 'where the highest titers were demonstrated (50 g/L, fed-batch with in-situ gas stripping, aerobic) and, separately, where near-theoretical ANAEROBIC yield was demonstrated (100% of theoretical, requiring both an NADH-preferring KARI and an engineered ADH).' Record the single-swap vs double-swap attribution as a first-class `conflict` (J.4) rather than picking a side.
+  consequence_if_wrong: >-
+    HIGH for part selection, and it is the same two-reducing-equivalent error the ISOBUTANOL audit found at its line 122. A route ranker told that the cofactor swap alone bought 100% of theoretical will propose an NADH-KARI with a native ADH and expect anaerobic balance it cannot reach. Conflating the aerobic titer record with the anaerobic yield record additionally sets an unreachable joint target.
+  searches_run: ["(22|50\\.8|highest)[^.]{0,120}isobutanol[^.]{0,120}(titer|g/L|yield)", "anaerobic[^.]{0,200}(100 ?%|theoretical)[^.]{0,120}(isobutanol|yield)"]
+
+- line: 529
+  claim: >-
+    'plus thermophilic and archaeal sources of cofactor-switched or thermostable variants. These organisms need genes, protein sequences, enzyme properties and variant records.'
+  verdict: incomplete
+  publication: "doi:10.1371/journal.pone.0070592"
+  corpus_file: "00890.txt"
+  also_in:
+    - "00195.txt doi:10.1038/s41467-020-18124-1"
+  evidence:
+    # doi:10.1038/s41467-020-18124-1  [00195.txt @6248-6439]  re-resolved exact
+    - "we first employed a genome mining approach, focusing largely on enzymes from thermophilic and hyperthermophilic organisms since thermostability and organic solvent tolerance can be correlated"
+    # doi:10.1371/journal.pone.0070592  [00890.txt @34782-35025]  re-resolved exact
+    - "Thermostability is often correlated with stability in organic solvents , , however in this respect, TaAlDH does not show a remarkable tolerance. At 5% ethanol and 2% isobutanol or n-butanol a significant decrease in activity could be observed."
+  notes: >-
+    Two claims, and they come apart. THERMOSTABLE sourcing is real: a cell-free isobutanol-adjacent build mined thermophilic and hyperthermophilic organisms for 15 enzymes, explicitly reasoning that thermostability and organic-solvent tolerance correlate. COFACTOR-SWITCHED variants from thermophilic or archaeal sources appear NOWHERE in this corpus - every cofactor-switched part here is an engineered E. coli IlvC variant or an engineered L. lactis AdhA, from mesophiles. And the corpus contains a direct TEST of the rationale that fails: a thermophilic aldehyde dehydrogenase (TaAlDH) chosen for exactly that reason showed no remarkable solvent tolerance, with activity significantly reduced at 2% isobutanol - the concentration range an isobutanol process operates in.
+  what_to_change: >-
+    Split the sentence. Keep thermophilic/archaeal sources for THERMOSTABILITY and for purification convenience. Delete 'cofactor-switched' from this clause and move it to where the corpus puts it - engineered variants of mesophilic enzymes (E. coli IlvC, L. lactis AdhA). Add the negative as a recorded caution on the parts catalog: 'thermostability does not reliably predict alcohol tolerance; one thermophilic dehydrogenase lost significant activity at 2% isobutanol.'
+  consequence_if_wrong: >-
+    MEDIUM. Role 4 sets ingestion depth, so this line decides which organisms get variant records. As written it sends effort at archaeal cofactor variants that do not exist in this literature while the real cofactor-switch parts sit in E. coli and L. lactis. The TaAlDH negative is worth more than the positive: it is a published refutation of the heuristic anyone would use to shortlist thermophilic parts for an alcohol process, and G.6's `expression_records` is exactly where it belongs.
+  searches_run: ["(thermophil|archae|Thermus|Pyrococcus|Sulfolobus|Thermoanaerobacter)[^.]{0,150}(alcohol dehydrogenase|decarboxylase|ketol-acid|thermostab)", "cofactor[- ]switch[a-z]*[^.]{0,200}", "thermostab[a-z]*[^.]{0,200}(solvent|tolerance|isobutanol)"]
+
+- line: 535
+  claim: >-
+    'Zymomonas mobilis is admitted as a single yield-ceiling reference - the highest-yield natural ethanologen, useful as a calibration point for what a sugar-to-alcohol yield fraction can reach - and nothing more.'
+  verdict: overstated
+  publication: "doi:10.3389/fbioe.2020.00710"
+  corpus_file: "00980.txt"
+  also_in:
+    - "00162.txt doi:10.1021/acs.jpcb.5c06231"
+  evidence:
+    # doi:10.3389/fbioe.2020.00710  [00980.txt @5028-5269]  re-resolved exact
+    - "The bacterium Zymomonas mobilis has also been proposed for use in industrial ethanol production since it also produces ethanol from glucose at 95% of maximum theoretical yield and has a higher specific ethanol productivity than S. cerevisiae"
+    # doi:10.1021/acs.jpcb.5c06231  [00162.txt @4540-4751]  re-resolved exact
+    - "The ED pathway, which operates under anaerobic conditions, enables near-theoretical ethanol yields with minimal biomass production, making Z. mobilis exceptionally efficient compared to traditional yeast systems"
+  notes: >-
+    The corpus does not support a yield CEILING above yeast's. The one sentence that puts the two side by side gives them the SAME number: S. cerevisiae at 95% of maximum theoretical yield, Z. mobilis 'also' at 95% - and locates Z. mobilis's actual advantage in higher SPECIFIC PRODUCTIVITY, a rate, not a yield. A second paper does call Z. mobilis 'exceptionally efficient compared to traditional yeast systems', attributing it to the ED pathway's minimal biomass production; I record the disagreement rather than resolving it, but note that low biomass formation and high yield fraction are the same observation seen twice, and the only explicit head-to-head number in this corpus is a tie. So the admission's stated PURPOSE - calibrating what a yield fraction can reach - is not served: Z. mobilis supplies no ceiling that yeast does not already supply.
+  what_to_change: >-
+    Either drop the admission, or re-state its rationale to the one the corpus supports: 'admitted as a single reference for the ED-pathway physiology - comparable yield fraction (~95% of theoretical, the same as S. cerevisiae) reached with higher specific productivity and lower biomass yield - which is a rate-and-carbon-partitioning reference, not a yield ceiling.' Record the 'exceptionally efficient' claim as a `conflict` against the 95%/95% statement.
+  consequence_if_wrong: >-
+    MEDIUM-HIGH, because this line is load-bearing twice over. It is the sole justification for admitting a second species into the ethanol layer, and B.3.2 (criterion E2, the performance ceiling) is calibrated on it. If the ceiling is the same as yeast's, then an ethanol result benchmarked against 'the Zymomonas ceiling' is benchmarked against yeast's own ceiling with extra steps - and the E2 admissions are being ranked against a number that does not distinguish anything. Note the Tn-Seq admission at line 577 is separate and unaffected; that one is justified on genome-wide fitness data and stands.
+  searches_run: ["Zymomonas[^.]{0,200}(9[0-9](\\.[0-9])? ?%|yield of the theoretical|higher (ethanol )?yield)", "anaerobic[^.]{0,200}(100 ?%|theoretical)[^.]{0,120}yield", "(ED pathway|Entner)[^.]{0,200}(yield|biomass)"]
+
+- line: 577
+  claim: >-
+    Revised role-3 table, E. coli K-12 MG1655 row, note column: 'The organism the ketoacid route was assembled in; the highest titers and near-theoretical anaerobic yields.'
+  verdict: confirmed
+  covered_by: "this file, line 515 (same claim, same evidence)"
+  notes: >-
+    Identical claim to line 515, restated in the revised depth table. Same verdict, same two riders: the anaerobic 100%-of-theoretical result required BOTH an NADH-preferring KARI and an engineered ADH, and the titer record was set aerobically. Not re-derived.
+  what_to_change: >-
+    Apply the line-515 wording here too, or replace the note with a cross-reference so the two do not drift apart. A separate point specific to this row: it is the only place in the plan where the E. coli claim sits next to an omics-depth decision, and 'only the RNA-Seq runs enter the expression layer' is a separate, unmarked claim that is corroborated by DATA_VOLUME.md's measured library-strategy breakdown (72 RNA-Seq of 120 runs).
+  consequence_if_wrong: >-
+    Same as line 515. Flagged separately only because a document edit that fixes 515 and misses 577 leaves the error in the table a route designer actually reads.
+  searches_run: ["(see line 515)"]
+
+- line: 605
+  claim: >-
+    '"yeast" is a polyphyletic lifestyle and not a clade - S. cerevisiae, Y. lipolytica and K. phaffii are as distantly related to each other as some of them are to filamentous fungi. Encoding "yeast" as a structural level would bake a scientific error into the schema.'
+  verdict: incomplete
+  publication: "doi:10.1042/bsr20150275"
+  corpus_file: "00277.txt"
+  also_in:
+    - "01091.txt doi:10.3390/antiox12101810"
+  evidence:
+    # doi:10.1042/bsr20150275  [00277.txt @6276-6444]  re-resolved exact
+    - "YlMhb1p from Yarrowia lipolytica [] was chosen because this species belongs to basal lineages of Saccharomycotina and phylogenetically is very distant to S. cerevisiae."
+    # doi:10.3390/antiox12101810  [01091.txt @26674-26837]  re-resolved exact
+    - "the 12 budding yeasts analyzed here display similar morphology and common lifestyles, which contradicts their actual molecular divergence at the evolutionary level"
+  notes: >-
+    The PRINCIPLE is confirmed, and better than the plan states it: budding yeasts 'display similar morphology and common lifestyles, which contradicts their actual molecular divergence at the evolutionary level' - which is exactly the argument for a display tag over taxonomy. The magnitude is confirmed for one of the three pairs: S. cerevisiae and Y. lipolytica are 'separated by about 500 million years', with Y. lipolytica in basal Saccharomycotina and 'phylogenetically very distant' to S. cerevisiae - and the same paper notes the two are more distant from each other than either is from C. parapsilosis. What is NOT in this corpus: any statement about Komagataella phaffii's placement, and any comparison of yeast-to-yeast distance against yeast-to-filamentous-fungus distance. That specific comparison is the rhetorical core of the sentence and it is unsourced here.
+  what_to_change: >-
+    Keep the conclusion; source the premise differently. 'S. cerevisiae and Y. lipolytica are separated by roughly 500 million years and sit in different lineages of Saccharomycotina, while sharing a morphology and a lifestyle - so "yeast" is a convergent lifestyle label, not a clade.' Drop the filamentous-fungi comparison or cite it; drop K. phaffii from the example or cite it separately.
+  consequence_if_wrong: >-
+    LOW for the schema, which is right for reasons that survive. Worth fixing anyway because the sentence is the justification for a structural decision (organism hierarchy = NCBI Taxonomy, 'yeast' = display tag) and a justification with an uncitable comparison in it invites the decision to be reopened.
+  searches_run: ["(yeast[s]? (are|is)[^.]{0,80}polyphyletic|polyphyletic[^.]{0,120}yeast)", "(Yarrowia|Y\\. lipolytica)[^.]{0,200}(distant|diverg|phylogen|related)", "yeasts?[^.]{0,120}(do not form a|not a monophyletic|is not a (single )?clade|life ?style)", "(Komagataella|K\\. phaffii|Pichia pastoris)[^.]{0,200}(phylogen|related|distant)"]
+
+- line: 674
+  claim: >-
+    B.6.1: 'the valine branch (Ilv2/Ilv6 acetolactate synthase, Ilv5 ketol-acid reductoisomerase, Ilv3 dihydroxyacid dehydratase) sits in the mitochondrial matrix, while the Ehrlich pathway that finishes isobutanol - a 2-ketoacid decarboxylase, then an alcohol dehydrogenase - is cytosolic.'
+  verdict: confirmed
+  publication: "doi:10.1016/j.synbio.2022.02.007"
+  corpus_file: "00141.txt"
+  also_in:
+    - "00289.txt doi:10.1080/21655979.2021.1978189"
+    - "00569.txt doi:10.1186/1475-2859-12-119"
+  evidence:
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt @3225-3532]  re-resolved exact
+    - "The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5)"
+    # doi:10.1080/21655979.2021.1978189  [00289.txt @22342-22482]  re-resolved exact
+    - "isobutanol production which include valine biosynthesis occur in mitochondria and the rest so called Ehrlich pathway is confined to cytosol."
+  notes: >-
+    Confirmed, repeatedly and by papers that build on the split rather than merely restate it: the mitochondrial/cytosolic division is the premise of both the mIBA (matrix-targeted Ehrlich) and cIBA (cytosolic Ilv) engineering strategies, each of which relocates enzymes ACROSS this boundary and measures the result. BM-PATH-001/002/003/005/006 in the benchmark set were verified on the same split. One thing this corpus adds that the line does not carry: the route crosses the inner membrane TWICE, not once - pyruvate in via the mitochondrial pyruvate carrier, 2-KIV out - which the benchmark audit (docs/reports/2026-09-21-benchmark-verification.md §1) established while finding BM-PATH-007 contradicted BM-PATH-011.
+  what_to_change: >-
+    Drop the mark. Add one clause so B.6.1 carries the crossing count it implies: 'The route therefore crosses the inner membrane twice - pyruvate in through the mitochondrial pyruvate carrier, 2-ketoisovalerate out through an unidentified carrier - and a large fraction of the engineering literature exists to resolve the second crossing.'
+  consequence_if_wrong: >-
+    none for the compartment rule itself, which is correct and correctly made mandatory. MEDIUM for the crossing count: G.7 route enumeration counts membrane transitions, and the atlas's own benchmark set was internally inconsistent on this exact number until wave 1 caught it.
+  searches_run: ["Ehrlich pathway[^.]{0,150}cytosol", "(Ilv2|Ilv5|Ilv3|valine biosynthesis)[^.]{0,150}mitochondri"]
+
+- line: 684
+  claim: >-
+    The ~86 kb figure for S. cerevisiae mtDNA. Settled as `incomplete` - the length is strain-variable and the prior draft carries the range and the reference genome it comes from. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 158"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 158 - not re-derived)"]
+
+- line: 685
+  claim: >-
+    The mtDNA-engineering technique list (biolistic transformation into a rho0 recipient, mitoTALEN/mitoZFN heteroplasmy shifting, DdCBE-class base editing). Settled as `incomplete` twice over - the technique table and the DdCBE row each have their own record, and the benchmark verification additionally found the mitoTALEN leg has NO yeast support in this corpus at all. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 163 and 169"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 163 and 169 - not re-derived)"]
+
+- line: 686
+  claim: >-
+    'no routine CRISPR route, because guide RNA import into the matrix is not established'. Settled as WRONG, and the correction is organism-specific: MTS-Cas9 with an ordinary SNR52-driven gRNA raises rho0 formation in yeast, so some gRNA does reach the matrix; the blocking step in yeast is DONOR-DNA delivery, not guide import. The premise is true in mammalian cells. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 170, and BM-MIT-006 in docs/drafts/benchmarks/mitochondrial_genetics.yaml"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 170 - not re-derived)"]
+
+- line: 687
+  claim: >-
+    'Used for isobutanol: rarely or not at all for this pathway' in the mtDNA-genome-engineering column. Settled, and the negative control is stronger than 'rarely': NO published isobutanol pathway configuration encodes a pathway enzyme in the mitochondrial genome, across 366 readable isobutanol papers. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 141, and BM-NEG-003"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 141 - not re-derived)"]
+
+- line: 691
+  claim: >-
+    'Almost all published mitochondrial isobutanol engineering is compartment targeting ... or relocating the Ilv enzymes to the cytosol by truncating theirs'. Settled as `incomplete`; the prior draft carries the missing detail, including that over-truncating Ilv3 past dN19 kills activity. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 141"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 141 - not re-derived)"]
+
+- line: 699
+  claim: >-
+    NCBI translation table 3: UGA=Trp, AUA=Met, the CUN family = Thr. Settled as `incomplete` - confirmed as far as it goes, with CGA/CGC absence as the missing element. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 178, and BM-MIT-001/002/003"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 178 - not re-derived)"]
+
+- line: 724
+  claim: >-
+    'the alcohol dehydrogenase step is typically NADH-dependent'. Settled as OVERSTATED: true for Adh1/Adh2/AdhA, false for Adh6/Adh7/YqhD, and the published yeast route (kivd + ADH6) is NADPH at BOTH steps. Cofactor belongs on the part, never on the generic step role. Not re-derived. Note this same error is restated at PLAN.md line 1506.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 45, and BM-COF-002"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 45 - not re-derived)"]
+
+- line: 738
+  claim: >-
+    'How 2-ketoisovalerate crosses the mitochondrial inner membrane in the cytosolic-Ehrlich configuration is not settled'. Settled as CONFIRMED - the carrier is genuinely unidentified and the explicit-gap requirement this bullet imposes is correct. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 48, and BM-PATH-008"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 48 - not re-derived)"]
+
+- line: 1498
+  claim: >-
+    'ECM31 --> ketopantoate --> PANTOTHENATE / CoA (competing)'. The pathway edge is CONFIRMED. The associated treatment of ECM31 as needing attenuation rather than deletion was found WRONG - ecm31-delta is viable and is an ordinary published deletion in isobutanol strains, because yeast imports pantothenate through Fen2. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 35 and 272"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 35 and 272 - not re-derived)"]
+
+- line: 1505
+  claim: >-
+    'the two published strategies for resolving the compartment boundary (cytosolic relocalization of the Ilv enzymes; mitochondrial targeting of the Ehrlich enzymes)'. Both settled as CONFIRMED, with the rider recorded in MITOCHONDRIAL_AND_DUET.yaml line 36 that the BENEFIT of matrix localization is contested in this same corpus and cytosolic has been argued preferable at high glucose and under anaerobiosis - DUET's conditions. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 91 and 92"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 91 and 92 - not re-derived)"]
+
+- line: 1506
+  claim: >-
+    'the NADPH/NADH mismatch across Ilv5 and the alcohol dehydrogenase'. Same claim as line 724, same verdict: OVERSTATED. The mismatch is real for some part pairs and absent for others (kivd + ADH6 is NADPH/NADPH). Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 45"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml line 45 - not re-derived)"]
+
+- line: 1623
+  claim: >-
+    'oxygen_sensitivity -- matters for DHAD-class [Fe-S] enzymes'. Settled: the Fe-S half is confirmed, the O2-lability half was found WRONG as an independent property - within the ilvD/EDD family [4Fe-4S] is the oxygen-sensitive form and [2Fe-2S] is not, and the corpus DISAGREES WITH ITSELF about which cluster Ilv3 carries. The field is still the right field to have; what must not happen is defaulting it to 'sensitive' for Ilv3. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 26 and 110"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/warnings/ISOBUTANOL_PROGRAM.yaml lines 26 and 110 - not re-derived)"]
+
+- line: 2702
+  claim: >-
+    'PDC1 deletion reduces ethanol formation'. Settled: supported, and sharpened - deleting PDC1 plus PDC5 collapsed ethanol from ~13 g/L to 0.01 g/L in one corpus strain, and deleting all three abolishes fermentative ethanol and creates the C2 auxotrophy. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/benchmarks/competing_pathway.yaml BM-CMP-002"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/benchmarks/competing_pathway.yaml BM-CMP-002 - not re-derived)"]
+
+- line: 2703
+  claim: >-
+    'The valine pathway genes ILV2, ILV5 and ILV3 are annotated to the mitochondrion'. Settled as supported, and independently re-confirmed here at line 674. Not re-derived.
+  verdict: already_covered
+  covered_by: "docs/drafts/benchmarks/pathway_compartment.yaml BM-PATH-001/002/003, and this file line 674"
+  what_to_change: >-
+    See the named draft. No new work was done on this line; it is listed so the PLAN.md mark count reconciles against the two prior waves.
+  consequence_if_wrong: >-
+    carried from the prior draft.
+  searches_run: ["(covered by docs/drafts/benchmarks/pathway_compartment.yaml BM-PATH-001/002/003 - not re-derived)"]
+
+- line: 702
+  claim: >-
+    'A gene moved into mtDNA must be recoded, or it mistranslates - this is why mitochondrial reporters and markers exist in recoded form.'
+  verdict: confirmed
+  publication: "doi:10.1091/mbc.e16-11-0775"
+  corpus_file: "00320.txt"
+  also_in:
+    - "00070.txt doi:10.1016/bs.mie.2024.07.028"
+    - "00389.txt doi:10.1093/nar/gkac1229"
+  evidence:
+    # doi:10.1091/mbc.e16-11-0775  [00320.txt @8798-8918]  re-resolved exact
+    - "ARG8m differs from nuclear ARG8 in its sequence to accommodate for differences in the genetic code of yeast mitochondria"
+  notes: >-
+    Confirmed directly and for the exact reason stated: ARG8m 'differs from nuclear ARG8 in its sequence to accommodate for differences in the genetic code of yeast mitochondria'. The corpus shows it in use as a recoded marker at three different loci (ATP8, COX2, COX3) and as a reporter substituted into COB, COX1, COX2 and VAR1 ORFs, which is as strong a demonstration of the principle as the literature offers.
+  what_to_change: >-
+    Drop the mark. Optionally name ARG8m in the sentence - it is THE worked example and it is the same marker the phase-0 acceptance criterion at line 2387 depends on.
+  consequence_if_wrong: >-
+    none - confirmed. Worth keeping visible because the recoding requirement is the one place where getting the direction backwards (recoding a presequence-targeted construct) produces a construct that looks right and does not work, which B.6.3 already says.
+  searches_run: ["ARG8m[^.]{0,200}(recoded|codon|sequence)", "recode[a-z]*[^.]{0,200}(mitochondri|marker|reporter)"]
+
+- line: 733
+  claim: >-
+    '2-ketoacid decarboxylases act on several ketoacids, which is why isoamyl alcohol and 2-methyl-1-butanol appear alongside isobutanol. A reaction is therefore competing in one context and the target in another.'
+  verdict: confirmed
+  publication: "doi:10.1007/s00253-010-2522-6"
+  corpus_file: "00029.txt"
+  covered_by: "this file, line 165 (same claim, same evidence); BM-CMP-006"
+  evidence:
+    # doi:10.1007/s00253-010-2522-6  [00029.txt @777-922]  re-resolved exact
+    - "In addition, other higher chain alcohols such as 1-propanol, 2-methyl-1-butanol, 1-butanol, and 2-phenylethanol were also detected as byproducts."
+    # doi:10.1016/j.synbio.2022.02.007  [00141.txt @3225-3532]  re-resolved exact
+    - "The second part of the pathway, the Ehrlich pathway, converts KIV to isobutanol by promiscuous cytosolic enzymes: α-ketoacid decarboxylase (KDC, encoded by pyruvate decarboxylases, PDC1 PDC5 or PDC6, or phenylpyruvate decarboxylase, ARO10) and a NADH-dependent alcohol dehydrogenase (ADH, encoded by ADH1-5)"
+  notes: >-
+    Confirmed. The schema consequence B.6.5 draws from it - `role` belongs to the (reaction, product, context) triple and never as a flag on the reaction - is the correct consequence and is if anything under-argued: the SAME enzyme is simultaneously the target step for isobutanol and a competing step for isoamyl alcohol IN ONE CULTURE, not merely in different papers. The by-product list should include 2-phenylethanol (see line 165).
+  what_to_change: >-
+    Drop the mark on the promiscuity claim. Extend the by-product list to include 2-phenylethanol and 1-propanol, which the same source reports from the same enzyme.
+  consequence_if_wrong: >-
+    none for the schema decision. See line 165 for the admission-tier consequence.
+  searches_run: ["(see line 165)"]
+
+- line: 748
+  claim: >-
+    B.6.7: 'isobutanol is substantially more growth-inhibitory than ethanol on a molar basis, acting partly through different membrane effects - so an ethanol-derived tolerance mechanism is a hypothesis about isobutanol, capped at L3, never a finding.'
+  verdict: incomplete
+  publication: "doi:10.1534/g3.118.200677"
+  corpus_file: "00936.txt"
+  covered_by: "this file, line 309 (same claim); BM-TOL-001 in docs/drafts/benchmarks/tolerance.yaml"
+  evidence:
+    # doi:10.1534/g3.118.200677  [00936.txt @18626-18920]  re-resolved exact
+    - "we next compared the transcriptome responses to 0.8% 1-butanol, 1% isobutanol, and 4% ethanol in strains growing under aerobic conditions. These doses are higher than titers produced by engineered strains, but were chosen to provoke a robust stress response but allow all three strains to grow."
+    # doi:10.1534/g3.118.200677  [00936.txt @23028-23261]  re-resolved exact
+    - "Butanols triggered reduced expression of respiration genes during aerobic growth but induced expression anaerobically – this was in contrast to ethanol that led to the induction of respiration genes both aerobically and anaerobically"
+    # doi:10.1534/g3.118.200677  [00936.txt @20787-20923]  re-resolved exact
+    - "Most industrial fermentations are anaerobic, however the majority of studies analyzing alcohol toxicity are based on aerobic conditions."
+  notes: >-
+    Same verdict as line 309: direction supported, matched-endpoint molar ratio absent from the corpus, and 'different MEMBRANE effects' is the weakest available phrasing of a difference that is better evidenced transcriptionally. The L3 CAP that this bullet imposes is correct and should not be weakened - if anything the corpus argues for tightening it, because most alcohol-toxicity work is aerobic while the target process is anaerobic, and the same study found all three alcohols more inhibitory anaerobically. The five assay types listed in this bullet are separately confirmed by BM-TOL-002.
+  what_to_change: >-
+    As line 309. Additionally, add the aerobic/anaerobic transfer gap to this bullet: an ethanol tolerance mechanism established aerobically must cross TWO gaps (alcohol, and oxygen regime) before it says anything about anaerobic isobutanol, and the atlas should record both.
+  consequence_if_wrong: >-
+    HIGH, and this is the more consequential of the two copies because B.6.7 is the bullet that sets the L3 cap and the assay-type requirement - the mechanisms that enforce the whole tolerance discipline. They are right; their stated justification is partly unsourced, and the unsourced part (molar ratio) is the part a reviewer would attack first.
+  searches_run: ["(see line 309)"]
+
+- line: 1094
+  claim: >-
+    E.2 ingestion table: 'Industrial/bioethanol assemblies (Ethanol Red, PE-2/JAY270, CAT-1 ...) | NCBI | phase 2'.
+  verdict: incomplete
+  repo_evidence:
+    # (repo) data/omics/reference_genomes.yaml  @6888-7054  re-resolved exact
+    - "structural variants\n      (large indels, translocations, copy-number changes, aneuploidy) and subtelomeric regions are\n      NOT reliably resolved from this assembly."
+  notes: >-
+    Not a literature claim - an availability claim about NCBI - so the corpus cannot settle it, but the REPO can and partly contradicts it. data/omics/reference_genomes.yaml holds exactly one industrial assembly, Ethanol Red GCA_029255905.1, verified live against the NCBI Datasets API on 2026-09-20, and says in as many words that Ethanol Red 'is the one with a public NCBI assembly' among the three the plan names. No accession is pinned for PE-2/JAY270 or CAT-1 anywhere in the repo. So the row promises a plural it has not verified, and the one assembly it does have is scaffold-level and explicitly cannot resolve the structural features (aneuploidy, copy number, subtelomeres) that are the stated reason for wanting industrial genomes at all.
+  what_to_change: >-
+    Replace the row with what is actually verified: 'Ethanol Red (GCA_029255905.1, scaffold-level; point variation only) | NCBI | phase 2', and add a separate, honest row: 'PE-2/JAY270, CAT-1 - assembly availability NOT yet verified; check before phasing.' Carry the scaffold caveat into the row rather than leaving it in reference_genomes.yaml where a plan reader will not see it.
+  consequence_if_wrong: >-
+    MEDIUM. Phase 2 is sized on this row. If two of the three named assemblies do not exist at usable quality, the phase either shrinks or needs a sequencing acquisition that nothing in the plan budgets for. The more serious version: the atlas's entire industrial-genome layer currently rests on one scaffold-level assembly that cannot answer the structural questions it was admitted for.
+  searches_run: ["(repo) data/omics/reference_genomes.yaml", "(repo) grep GCA_ across data/ and docs/", "Ethanol Red[^.]{0,250}", "(PE-?2|JAY270|CAT-?1)[^.]{0,250}"]
+
+- line: 1095
+  claim: >-
+    E.2 ingestion table: 'Population variation across ~1,000 S. cerevisiae isolates | the published 1002/1011 Yeast Genomes VCF and assemblies | phase 2'.
+  verdict: confirmed
+  publication: "doi:10.1093/genetics/iyag149"
+  corpus_file: "00371.txt"
+  also_in:
+    - "00427.txt doi:10.1101/2024.12.22.629997"
+    - "00082.txt doi:10.1016/j.cell.2016.08.020"
+  evidence:
+    # doi:10.1093/genetics/iyag149  [00371.txt @12264-12306]  re-resolved exact
+    - "we launched the 1002 Yeast Genomes Project"
+  notes: >-
+    Confirmed as a real and reachable resource. The 1002 Yeast Genomes Project is described by one of its originators in this corpus, and a second paper in the corpus REUSES it in exactly the way the plan intends - aligning the genome sequences of the 1,011 isolates at a locus of interest - and names the data accession (ERP014555). So both the '1002' and '1011' spellings the row hedges between are attested, and the data are downloadable rather than merely published.
+  what_to_change: >-
+    Drop the mark and pin the accession the way the two genome rows are pinned: '1011 Yeast Genomes (ERP014555)'. The 1002/1011 ambiguity is a real feature of the literature (the project was launched as 1002 and published at 1011), so keep both spellings but say which is the data release.
+  consequence_if_wrong: >-
+    LOW - the row is right. Recorded because pinning the accession now is free and turns a phase-2 dependency from a search into a download, the same discipline the two assembly rows already follow.
+  searches_run: ["(1,?011|1,?002) (S\\. cerevisiae |Saccharomyces cerevisiae |yeast )?(isolates|genomes|strains)", "Yeast Genomes Project"]
+
+- line: 1167
+  claim: >-
+    'industrial strains differ from lab strains at tens of thousands of positions and almost none of them are causal.'
+  verdict: confirmed
+  publication: "doi:10.1038/srep06556"
+  corpus_file: "00261.txt"
+  evidence:
+    # doi:10.1038/srep06556  [00261.txt @667-812]  re-resolved exact
+    - "Compared with the genome of laboratory model strain S288C, we identified more than 32,000 SNPs in Y-12632 with 23,000 missense and nonsense SNPs."
+  notes: >-
+    Confirmed with a number, from an own-result whole-genome comparison: an ethanol-tolerant industrial isolate differs from S288C at MORE THAN 32,000 SNPs, of which ~23,000 are missense or nonsense and ~70% of exonic SNPs are non-synonymous, distributed across 3,740 genes. The second half of the claim - almost none causal - is not measurable directly, but 3,740 mutated genes against a handful of demonstrated causal variants is as good an argument as the literature offers, and it is the right argument: the denominator is what makes correlation-based attribution unsafe.
+  what_to_change: >-
+    Drop the mark and cite the number: 'more than 32,000 SNPs between one industrial ethanol-tolerant isolate and S288C, ~23,000 of them missense or nonsense across 3,740 genes'. A concrete denominator makes the Zone I default defensible to a reader who thinks it is over-cautious.
+  consequence_if_wrong: >-
+    none - confirmed, and it justifies a discipline (E.3 output is Zone I unless a paper demonstrates the variant by reconstruction) that is correct. The same claim is restated as risk 7 at line 2895 and inherits this verdict.
+  searches_run: ["([0-9,]{4,9}) (SNPs|single.nucleotide (polymorphisms|variants))", "industrial[^.]{0,200}(differ|SNP|variant)[^.]{0,120}(S288C|laboratory)"]
+
+- line: 1179
+  claim: >-
+    E.4 day-one gene list. Ethanol and central carbon: PDC1 PDC5 PDC6 ADH1-ADH5 SFA1 GPD1 GPD2 GPP1 GPP2 ALD2-ALD6 ACS1 ACS2 PYK1/CDC19 PYK2 PFK1 PFK2 HXK1 HXK2 GLK1 TDH1-TDH3 ENO1 ENO2 PGK1 TPI1 FBA1 PDA1 PDB1 LAT1 LPD1 PYC1 PYC2 MAE1.
+  verdict: not_in_corpus
+  notes: >-
+    Not answerable from a literature corpus: these are identifier-resolution tasks against SGD, which is exactly what the line itself says. Recorded as not_in_corpus rather than skipped, with what I could check by reading. One defect is visible without leaving the document: MAE1 appears in BOTH this list and the isobutanol list at line 1186. A name that resolves twice into two different gene_groups is exactly the E.4 failure mode the section exists to prevent, and the duplicate should be resolved once and cross-referenced.
+  what_to_change: >-
+    Resolve against SGD as the line directs. Before that: de-duplicate MAE1 across lines 1179 and 1186, enumerate the family placeholders, and add the engineered heterologous variants the corpus's own best constructs use (see line 1186).
+  consequence_if_wrong: >-
+    MEDIUM. The acceptance criterion cannot be met by a list that is partly a placeholder, and a duplicated name is a live gene_group ambiguity of the class C.3 is built to prevent.
+  searches_run: ["(identifier resolution against SGD - outside the literature corpus)"]
+
+- line: 1182
+  claim: >-
+    E.4 day-one gene list. Sugar transport and pentose utilization: HXT1-HXT17 GAL2 SUC2 MAL genes XKS1 TAL1 TKL1 RKI1 RPE1 GRE3 PHO13.
+  verdict: not_in_corpus
+  notes: >-
+    Not answerable from a literature corpus: these are identifier-resolution tasks against SGD, which is exactly what the line itself says. Recorded as not_in_corpus rather than skipped, with what I could check by reading. 'MAL genes' is a family placeholder, not a name, and HXT1-HXT17 is a range whose membership is itself contested in the literature - both need enumerating before this list can be a test. The B.3.6/B.4 pentose rows depend on this list resolving.
+  what_to_change: >-
+    Resolve against SGD as the line directs. Before that: de-duplicate MAE1 across lines 1179 and 1186, enumerate the family placeholders, and add the engineered heterologous variants the corpus's own best constructs use (see line 1186).
+  consequence_if_wrong: >-
+    MEDIUM. The acceptance criterion cannot be met by a list that is partly a placeholder, and a duplicated name is a live gene_group ambiguity of the class C.3 is built to prevent.
+  searches_run: ["(identifier resolution against SGD - outside the literature corpus)"]
+
+- line: 1186
+  claim: >-
+    E.4 day-one gene list. Isobutanol and branched-chain: ILV1 ILV2 ILV3 ILV5 ILV6 BAT1 BAT2 LEU1 LEU2 LEU4 LEU9 ARO10 ARO8 ARO9 ADH6 ADH7 MAE1, plus heterologous alsS (B. subtilis), ilvC ilvD (E. coli), kivD adhA (L. lactis).
+  verdict: not_in_corpus
+  notes: >-
+    Not answerable from a literature corpus: these are identifier-resolution tasks against SGD, which is exactly what the line itself says. Recorded as not_in_corpus rather than skipped, with what I could check by reading. Two gaps visible against the corpus work already done. (a) MAE1 is duplicated from line 1179. (b) The heterologous set omits the parts the corpus's best-performing constructs actually use: the NADH-preferring IlvC variant (coilvC6E6), the feedback-insensitive C. glutamicum IlvB/IlvNM13 acetolactate synthase, the engineered AdhA variants, and ECM31 - which the DUET amendment added to the 2-KIV competing set and which therefore must resolve on day one too. Listing wild-type ilvC but not its engineered variant is the same error ISOBUTANOL_PROGRAM line 122 was corrected for.
+  what_to_change: >-
+    Resolve against SGD as the line directs. Before that: de-duplicate MAE1 across lines 1179 and 1186, enumerate the family placeholders, and add the engineered heterologous variants the corpus's own best constructs use (see line 1186).
+  consequence_if_wrong: >-
+    MEDIUM. The acceptance criterion cannot be met by a list that is partly a placeholder, and a duplicated name is a live gene_group ambiguity of the class C.3 is built to prevent.
+  searches_run: ["(identifier resolution against SGD - outside the literature corpus)"]
+
+- line: 1189
+  claim: >-
+    E.4 day-one gene list. Regulation and tolerance: MSN2 MSN4 HSF1 HAA1 YAP1 SKN7 PDR1 PDR3 WAR1 ROX1 HAP1 MIG1 SNF1 ADR1 CAT8 TPS1 TPS2 NTH1 PMA1 INO1 OPI1 ERG3 ERG6 ERG11 SPT15 HSP12 HSP26 HSP104.
+  verdict: not_in_corpus
+  notes: >-
+    Not answerable from a literature corpus: these are identifier-resolution tasks against SGD, which is exactly what the line itself says. Recorded as not_in_corpus rather than skipped, with what I could check by reading. HAP1 is on this list, which is fortunate: the corpus records that the S288C/BY4741 lineage carries a transposon disrupting HAP1 and forms petites at elevated frequency (see this file, line 474). So HAP1 must resolve not only as a gene_group but with its ALLELE STATE recorded per background, or every expression comparison anchored on S288C inherits a silent regulatory lesion.
+  what_to_change: >-
+    Resolve against SGD as the line directs. Before that: de-duplicate MAE1 across lines 1179 and 1186, enumerate the family placeholders, and add the engineered heterologous variants the corpus's own best constructs use (see line 1186).
+  consequence_if_wrong: >-
+    MEDIUM. The acceptance criterion cannot be met by a list that is partly a placeholder, and a duplicated name is a live gene_group ambiguity of the class C.3 is built to prevent.
+  searches_run: ["(identifier resolution against SGD - outside the literature corpus)"]
+
+- line: 1193
+  claim: >-
+    E.4 day-one gene list. 'Every entry is marked and must be resolved against SGD during phase 1 - that resolution IS the phase-1 genomics acceptance criterion.'
+  verdict: not_in_corpus
+  notes: >-
+    Not answerable from a literature corpus: these are identifier-resolution tasks against SGD, which is exactly what the line itself says. Recorded as not_in_corpus rather than skipped, with what I could check by reading. This line is correct as a process statement and needs no literature. It is listed so the count reconciles. The one substantive comment: a list that contains a duplicate (MAE1) and two family placeholders ('MAL genes', the PDR/SNQ/AQR/QDR/FPS1 'set') is not yet a test, because a test must be able to fail. Enumerate before phase 1 starts, not during.
+  what_to_change: >-
+    Resolve against SGD as the line directs. Before that: de-duplicate MAE1 across lines 1179 and 1186, enumerate the family placeholders, and add the engineered heterologous variants the corpus's own best constructs use (see line 1186).
+  consequence_if_wrong: >-
+    MEDIUM. The acceptance criterion cannot be met by a list that is partly a placeholder, and a duplicated name is a live gene_group ambiguity of the class C.3 is built to prevent.
+  searches_run: ["(identifier resolution against SGD - outside the literature corpus)"]
+
+- line: 1191
+  claim: >-
+    E.4: 'Transport of alcohols and stress: the relevant PDR/SNQ/AQR/QDR/FPS1 set.'
+  verdict: overstated
+  publication: "doi:10.1016/j.jbc.2026.113228"
+  corpus_file: "00118.txt"
+  also_in:
+    - "00043.txt doi:10.1007/s00253-025-13446-w"
+    - "00228.txt doi:10.1038/s41598-020-67635-w"
+  evidence:
+    # doi:10.1016/j.jbc.2026.113228  [00118.txt @23788-23982]  re-resolved exact
+    - "Because small aliphatic alcohols like isobutanol easily cross the plasma membrane via passive diffusion, their intracellular concentrations rapidly equilibrate with the extracellular environment"
+    # doi:10.1007/s00253-025-13446-w  [00043.txt @4583-4677]  re-resolved exact
+    - "The Fps1 glycerol channel in S. cerevisiae was a member of the major intrinsic protein family."
+  notes: >-
+    The heading asserts that these genes transport alcohols, and for the target alcohol the corpus says there is nothing to transport: small aliphatic alcohols like isobutanol cross the plasma membrane by PASSIVE DIFFUSION and equilibrate with the medium, and the same is said of ethanol elsewhere in the corpus. FPS1 is an aquaglyceroporin - the corpus calls it 'the Fps1 glycerol channel ... a member of the major intrinsic protein family' - and the reason it appears in ethanol papers is that deleting it raises ethanol titer by reducing GLYCEROL efflux, not by transporting ethanol. The PDR/SNQ/QDR multidrug exporters have a real but weaker basis: efflux pumps are up-regulated in isobutanol-tolerant strains, which is an association, not a demonstrated alcohol transport activity. This is the same category error the previous wave found in ISOBUTANOL_PROGRAM's knowledge gap 2, which funds a transporter screen for a carrier that does not exist.
+  what_to_change: >-
+    Re-title the group to what it is: 'Multidrug efflux and membrane-stress genes (PDR1 PDR3 PDR5 PDR12, SNQ2, AQR1, QDR1-3) and the glycerol channel FPS1 (glycerol efflux, not alcohol efflux).' Add an explicit note: 'Isobutanol and ethanol cross the plasma membrane by passive diffusion; no alcohol exporter is established. The unsolved transport problems in this route are the INTERMEDIATES - acetolactate, DHIV, 2-KIV - not the product.' Enumerate the PDR/SNQ/AQR/QDR members; as written the group has no members and cannot be a day-one test.
+  consequence_if_wrong: >-
+    HIGH, because it compounds an error already flagged elsewhere. A gene group titled 'transport of alcohols' is what a route designer queries when asking how to reduce intracellular isobutanol, and the atlas would return five gene families for a problem that has no transporter - while the real intermediate leak (2-KIV out of the matrix, the one genuinely unidentified carrier, line 738) stays uncounted. It also mis-files FPS1, whose actual value here is as a GLYCEROL-branch part relevant to lines 1485-1486.
+  searches_run: ["FPS1|Fps1p", "isobutanol[^.]{0,150}(passive diffusion|diffuses|efflux pump|exporter)", "(PDR|SNQ|QDR|AQR)[^.]{0,200}(alcohol|ethanol|isobutanol|tolerance)"]
+
+- line: 1299
+  claim: >-
+    F.4 pipeline: 'fetch (ENA FASTQ preferred over SRA .sra for throughput).'
+  verdict: not_in_corpus
+  notes: >-
+    An infrastructure claim about two public archives' delivery characteristics. No publication in a biology corpus speaks to it and none should be expected to. It is also cheaply measurable rather than arguable: time one run from each endpoint. Note that DATA_VOLUME.md's measured per-run size (~426 MB) is a .sra figure, so if the pipeline fetches FASTQ the sizing arithmetic at line 1313 is being done in the wrong units - see that record.
+  what_to_change: >-
+    Either measure it (one timed fetch of the same accession from ENA and from SRA, recorded in DATA_VOLUME.md) or drop the justification and state the preference as a choice: 'ENA FASTQ, to avoid the .sra-to-FASTQ conversion step.' A measured claim in a document full of measured claims is worth the ten minutes.
+  consequence_if_wrong: >-
+    LOW on its own. MEDIUM in combination with line 1313: the two lines together decide the transient storage sizing, and they are in different units.
+  searches_run: ["(infrastructure claim - not answerable from a literature corpus)"]
+
+- line: 1313
+  claim: >-
+    '3,000 yeast RNA-seq runs are roughly 3-4 TB of compressed FASTQ but under 10 GB of retained quantification output.'
+  verdict: overstated
+  repo_evidence:
+    # (repo) docs/reference/DATA_VOLUME.md  @4091-4130  re-resolved exact
+    - "| Mean per run | ~426 MB, ~2.4 Gbases |"
+  notes: >-
+    Superseded inside the repo and not updated here. THREE problems, in ascending order of seriousness. (1) UNITS: DATA_VOLUME.md's measured figure is ~426 MB and ~2.4 Gbases per run in .sra format; 3-4 TB for 3,000 runs implies ~1.1-1.3 GB per run, i.e. a .sra-to-FASTQ.gz expansion factor of ~2.5-3x that the plan never states. The estimate may be roughly right, but it is arithmetic on an unstated conversion and is presented as a measurement. (2) SCOPE: '3,000 yeast RNA-seq runs' is itself unsourced. The measured numbers are 147 SRA records for isobutanol (72 of them RNA-Seq) and 50,626 for S. cerevisiae transcriptomic overall - 3,000 is neither. (3) SUPERSEDED: PLAN.md's own inserted note at section V says the real figures are 'roughly 100x smaller', and DATA_VOLUME.md puts the entire isobutanol SRA corpus at ~48-51 GB. So the number that sized the 'transient FASTQ' decision is two orders of magnitude above the corpus the project actually has.
+  what_to_change: >-
+    Replace with the measurement and its scope: 'the measured isobutanol SRA corpus is ~48-51 GB across 120-148 runs (~426 MB, ~2.4 Gbases per run, .sra); FASTQ.gz runs roughly 2-3x that. The transient-FASTQ decision is therefore sized at ~100-150 GB, not terabytes - see DATA_VOLUME.md.' If the 3,000-run figure is meant to size a hypothetical full-yeast-transcriptome ingest, say so and give its own source.
+  consequence_if_wrong: >-
+    MEDIUM, and it cuts the reassuring way. The DECISION (stream and delete) is right at either size. But the 3-4 TB figure is the number a reader uses to judge whether the project needs a workstation, and at the real corpus size it does not. Section V already says this and this line was not updated, so the plan contradicts itself 1,500 lines apart.
+  searches_run: ["(repo) docs/reference/DATA_VOLUME.md §2, measured SRA runinfo 2026-09-19"]
+
+- line: 1369
+  claim: >-
+    'QC gates carried from genome-db: mapping rate >= 0.50 accept / 0.35-0.50 flag / below reject.'
+  verdict: not_in_corpus
+  notes: >-
+    A threshold imported from a sibling project, not a claim about yeast biology; no paper in this corpus sets it and none would. The line is honest about its provenance, which is the right way to carry a borrowed constant. The genuinely checkable part - that a percentage written where a fraction belongs is the silent error of this column class - is a schema argument the CHECK constraint already enforces.
+  what_to_change: >-
+    Keep, and add the provenance the mark is really asking for: cite the genome-db file and commit the thresholds came from, and record whether they were tuned on yeast data or on that project's organism. A borrowed threshold whose tuning set is unknown should be re-derived on the first ten datasets, which phase 3 can do for free.
+  consequence_if_wrong: >-
+    LOW now, MEDIUM at phase 3. A mapping-rate gate tuned on a different organism and a different reference-completeness regime will mis-flag; since industrial strains are being mapped to S288C (line 1371 onward), the unmapped fraction is EXPECTED to be elevated for exactly the samples the atlas most cares about, and a borrowed gate could reject them systematically.
+  searches_run: ["(infrastructure threshold imported from genome-db - not a literature claim)"]
+
+- line: 1485
+  claim: >-
+    'The glycerol branch is annotated as the principal anaerobic redox sink for surplus cytosolic NADH.'
+  verdict: confirmed
+  publication: "doi:10.1093/femsyr/fox044"
+  corpus_file: "00351.txt"
+  also_in:
+    - "00140.txt doi:10.1016/j.synbio.2021.12.010"
+  evidence:
+    # doi:10.1093/femsyr/fox044  [00351.txt @37010-37283]  re-resolved exact
+    - "Glycerol formation, catalyzed by the two isoforms of glycerol-3-phosphate dehydrogenase (Gpd1 and Gpd2) and of glycerol-3-phosphate phosphatase (Gpp1 and Gpp2), is required during anaerobic growth of S. cerevisiae for reoxidation of NADH generated in biosynthetic reactions"
+  notes: >-
+    Confirmed, and the corpus is more precise about WHERE the surplus NADH comes from: glycerol formation via Gpd1/Gpd2 and Gpp1/Gpp2 'is required during anaerobic growth of S. cerevisiae for reoxidation of NADH generated in BIOSYNTHETIC REACTIONS'. That matters because glycolysis-to-ethanol is already redox-neutral: the surplus is anabolic, so the size of the glycerol sink scales with BIOMASS FORMATION, not with sugar flux. The plan's word 'surplus' is correct but hides that dependency.
+  what_to_change: >-
+    Drop the mark and add the source of the surplus: 'the principal anaerobic redox sink for the cytosolic NADH generated in biosynthetic reactions - so its size scales with biomass formation rather than with glycolytic flux.'
+  consequence_if_wrong: >-
+    MEDIUM for route arithmetic. A redox balance that treats the glycerol sink as proportional to sugar uptake will mis-size it at low growth rate - which is exactly the regime a production phase runs in - and any intervention that redirects the sink (the isobutanol route is one) has a growth-rate-dependent effect the atlas should be able to express.
+  searches_run: ["gpd1[^.]{0,60}gpd2[^.]{0,250}(anaerobic|growth)", "glycerol[^.]{0,200}(redox|NADH)[^.]{0,120}(sink|reoxidation|balanc)"]
+
+- line: 1486
+  claim: >-
+    'deleting it without providing an alternative NADH sink impairs anaerobic growth.'
+  verdict: incomplete
+  publication: "doi:10.1016/j.synbio.2021.12.010"
+  corpus_file: "00140.txt"
+  also_in:
+    - "00051.txt doi:10.1007/s10295-013-1311-5"
+    - "00435.txt doi:10.1111/1751-7915.12080"
+  evidence:
+    # doi:10.1016/j.synbio.2021.12.010  [00140.txt @19922-19980]  re-resolved exact
+    - "double deletion of GPD1 and GPD2 prevents anaerobic growth"
+    # doi:10.1016/j.synbio.2021.12.010  [00140.txt @19986-20173]  re-resolved exact
+    - "Anaerobic growth of gpd1Δ gpd2Δ strains can be rescued by supplementation of compounds such as acetaldehyde or acetoin, which can be reduced by intracellular NADH-dependent dehydrogenases"
+    # doi:10.1016/j.synbio.2021.12.010  [00140.txt @20179-20309]  re-resolved exact
+    - "Glycerol-negative mutants are highly sensitive to osmotic stress due to the key role of glycerol in osmotolerance of S. cerevisiae"
+  notes: >-
+    UNDERSTATED, and the understatement is the kind that breaks a benchmark. The corpus says double deletion of GPD1 and GPD2 PREVENTS anaerobic growth - not impairs it - and the rescue is specific and named: supplementation with acetaldehyde or acetoin, or an engineered NADH sink such as a heterologous acetylating acetaldehyde dehydrogenase with acetate. The corpus also carries a SECOND consequence the line omits entirely: glycerol-negative mutants are highly sensitive to OSMOTIC STRESS, because glycerol is also the osmolyte. For a high-gravity industrial process that is not a footnote. Measured numbers exist for the engineered rescue: an evolved gpd1 gpd2 mhpF strain reached 0.21/h against 0.13/h for its ancestor and 0.32/h for the Gpd+ reference - so even a good rescue does not restore wild-type growth.
+  what_to_change: >-
+    'Deleting both without providing an alternative NADH sink PREVENTS anaerobic growth; it can be rescued by acetaldehyde or acetoin supplementation or by an engineered NADH-consuming route (e.g. acetylating acetaldehyde dehydrogenase plus acetate), which restores growth only partially. A second, independent cost is loss of osmotolerance, since glycerol is also the osmolyte.' Store the two consequences as separate linked assertions - this line is explicitly the template for how the atlas represents engineering trade-offs, and a template that carries one consequence teaches the atlas to carry one.
+  consequence_if_wrong: >-
+    HIGH, on two counts. (1) BENCHMARK: PLAN.md line 2700 restates this as a known-positive the atlas must recover, with 'impairs anaerobic growth' as the expected outcome. An atlas that correctly returns 'prevents anaerobic growth, rescuable by acetaldehyde' scores as a MISMATCH against its own measuring stick - the same failure mode wave 1 found in BM-PATH-007. (2) PROCESS: osmotolerance loss is a disqualifying property for a high-gravity fermentation and it is nowhere in the plan.
+  searches_run: ["gpd1[^.]{0,60}gpd2[^.]{0,250}(anaerobic|growth)", "glycerol.negative[^.]{0,200}(osmo|stress)", "(acetaldehyde|acetoin|acetylating acetaldehyde dehydrogenase)[^.]{0,200}(rescue|anaerobic)"]
+
+- line: 1508
+  claim: >-
+    'the promiscuity of the 2-ketoacid decarboxylases, which is why isoamyl alcohol and 2-methyl-1-butanol appear as by-products; and pyruvate competition with Pdc-mediated ethanol formation.'
+  verdict: confirmed
+  publication: "doi:10.1007/s00253-010-2522-6"
+  corpus_file: "00029.txt"
+  covered_by: "this file, lines 165 and 733"
+  evidence:
+    # doi:10.1007/s00253-010-2522-6  [00029.txt @777-922]  re-resolved exact
+    - "In addition, other higher chain alcohols such as 1-propanol, 2-methyl-1-butanol, 1-butanol, and 2-phenylethanol were also detected as byproducts."
+  notes: >-
+    Third restatement of the same promiscuity claim in PLAN.md (165, 733, 1508). Confirmed each time; the by-product list should gain 2-phenylethanol at all three sites. The pyruvate-competition half of this sentence is separately settled by BM-CMP-001/002.
+  what_to_change: >-
+    As lines 165 and 733. Consider collapsing the three statements into one and cross-referencing, so a future correction has one place to land rather than three.
+  consequence_if_wrong: >-
+    none new. The three-way duplication is itself worth noting: this audit found the same claim marked three times and the ADH cofactor claim marked twice (724, 1506), which inflates the mark count and means a fix applied once leaves the document still wrong elsewhere.
+  searches_run: ["(see lines 165 and 733)"]
+
+- line: 1701
+  claim: >-
+    H.2: 'Expected scale: ethanol + yeast is a very large literature (tens of thousands of records); isobutanol + microbial production is far smaller (low thousands).'
+  verdict: overstated
+  repo_evidence:
+    # (repo) docs/reference/DATA_VOLUME.md  @1257-1332  re-resolved exact
+    - "| `isobutanol AND (production OR biosynthesis OR fermentation)` | **768** |"
+    # (repo) docs/reference/DATA_VOLUME.md  @1222-1256  re-resolved exact
+    - "| `isobutanol` (all) | **1,027** |"
+    # (repo) docs/reference/DATA_VOLUME.md  @1662-1762  re-resolved exact
+    - "| `ethanol AND Saccharomyces cerevisiae AND (production OR fermentation OR tolerance)` | **6,072** |"
+  notes: >-
+    Both sides are wrong in the same direction, and the line CONTRADICTS PLAN.md's own line 192. Measured: isobutanol production-scoped = 768, isobutanol unrestricted = 1,027. 'Low thousands' is 2-4x high, and line 192 says '400-800' for the same corpus - the plan gives two incompatible sizes for the one number that its whole scoping argument rests on. Ethanol: the narrowest relevant measured query returns 6,072; 'tens of thousands' is unmeasured anywhere in the repo. The conclusion drawn here - that the isobutanol side 'can plausibly be read in full' - is if anything STRENGTHENED by the real numbers, which is the useful part.
+  what_to_change: >-
+    Replace both figures with DATA_VOLUME.md's measured counts and reconcile with line 192 so the plan states one number: '~1,000 isobutanol records (768 production-scoped), against 6,072 for a comparably scoped ethanol query - a ~8x asymmetry on like-for-like scoping.' Then the claim 'the isobutanol side can be read in full' is a conclusion from a measurement instead of a hope.
+  consequence_if_wrong: >-
+    MEDIUM-HIGH for planning and HIGH for trust. H.3's relevance-ranking pipeline is justified by the ethanol side being unreadably large; at 6,072 scoped records that is still true, so the mechanism survives. But two different sizes for the same corpus in one document is the kind of internal inconsistency that makes a reader stop trusting the other numbers - and the measurement that settles it has been sitting in docs/reference/ since 2026-09-19.
+  searches_run: ["(repo) docs/reference/DATA_VOLUME.md §1 vs PLAN.md line 192"]
+
+- line: 2387
+  claim: >-
+    Phase-0 acceptance: 'the recoder round-trips a known mitochondrial gene and reproduces the published recoded marker sequence for a control.'
+  verdict: incomplete
+  publication: "doi:10.1091/mbc.e16-11-0775"
+  corpus_file: "00320.txt"
+  also_in:
+    - "00070.txt doi:10.1016/bs.mie.2024.07.028"
+    - "00389.txt doi:10.1093/nar/gkac1229"
+  evidence:
+    # doi:10.1091/mbc.e16-11-0775  [00320.txt @8798-8918]  re-resolved exact
+    - "ARG8m differs from nuclear ARG8 in its sequence to accommodate for differences in the genetic code of yeast mitochondria"
+  notes: >-
+    The CONTROL EXISTS and is well attested - ARG8m, recoded to accommodate the yeast mitochondrial code, used at ATP8, COX2 and COX3 and as a reporter in four ORFs. What is NOT in this corpus is the SEQUENCE. No paper here prints the recoded ARG8m nucleotide sequence, so the acceptance criterion as written cannot be executed from the stored literature; the reference sequence has to be pulled from GenBank or from a plasmid map in supplementary material that is not part of the stored full text. That is an acquisition task nobody has scheduled, and it gates a phase-0 acceptance gate.
+  what_to_change: >-
+    Name the control and its source: 'reproduces the published recoded ARG8m sequence (fetch the reference sequence from GenBank; it is not recoverable from the stored full-text corpus)'. Add the fetch to the phase-0 task list explicitly, because an acceptance criterion whose reference artefact has not been acquired cannot be met.
+  consequence_if_wrong: >-
+    MEDIUM and immediate. This is a PHASE-0 gate - the earliest checkpoint in the plan - and it currently depends on an artefact the project does not hold. The recoder itself is the component that, if wrong, produces mistranslated mtDNA constructs (B.6.3), so this is the one acceptance test that should not be quietly skipped for want of a reference file.
+  searches_run: ["ARG8m[^.]{0,200}(recoded|codon|sequence)", "recoded[^.]{0,200}(sequence|GenBank|accession)"]
+
+- line: 2700
+  claim: >-
+    S.5 known-positive benchmark example: 'Deleting both GPD1 and GPD2 reduces glycerol and impairs anaerobic growth.'
+  verdict: incomplete
+  publication: "doi:10.1016/j.synbio.2021.12.010"
+  corpus_file: "00140.txt"
+  covered_by: "this file, line 1486; BM-CMP-003 in docs/drafts/benchmarks/competing_pathway.yaml"
+  evidence:
+    # doi:10.1016/j.synbio.2021.12.010  [00140.txt @19922-19980]  re-resolved exact
+    - "double deletion of GPD1 and GPD2 prevents anaerobic growth"
+    # doi:10.1016/j.synbio.2021.12.010  [00140.txt @19986-20173]  re-resolved exact
+    - "Anaerobic growth of gpd1Δ gpd2Δ strains can be rescued by supplementation of compounds such as acetaldehyde or acetoin, which can be reduced by intracellular NADH-dependent dehydrogenases"
+  notes: >-
+    Same defect as line 1486, and here it is worse because this is the MEASURING STICK. The corpus says the double deletion PREVENTS anaerobic growth; the benchmark expects 'impairs'. An atlas that returns the literature's own wording fails its own test, which is precisely the inversion wave 1 found in BM-PATH-007 and flagged as the reason the benchmark set 'could not have been passed'. This is the second instance of that pattern.
+  what_to_change: >-
+    Restate the benchmark as 'prevents anaerobic growth (rescuable by acetaldehyde or acetoin supplementation, or by an engineered NADH sink)', and add the osmotolerance consequence as a separate entry rather than folding it in - they are independent phenotypes with independent evidence.
+  consequence_if_wrong: >-
+    HIGH. S.5 calls recovery against this set 'the headline number for whether the atlas works'. A second entry whose expected_outcome is strictly weaker than the literature means the headline number penalises correctness again. Both instances found so far are in the direction of the benchmark being too weak, which suggests the whole set should be re-read for expected_outcome strength, not only for factual support.
+  searches_run: ["(see line 1486)"]
+
+- line: 2701
+  claim: >-
+    S.5 known-positive benchmark example: 'Anaerobic conditions induce a recognizable, published set of genes relative to aerobic.'
+  verdict: confirmed
+  publication: "doi:10.1534/g3.118.200677"
+  corpus_file: "00936.txt"
+  evidence:
+    # doi:10.1534/g3.118.200677  [00936.txt @18146-18363]  re-resolved exact
+    - "significantly higher expression of genes related to energy production, mobilization of energy reserves, gene induced in the environmental stress response, and PAU genes that are induced as part of the hypoxic response"
+    # doi:10.1534/g3.118.200677  [00936.txt @20787-20923]  re-resolved exact
+    - "Most industrial fermentations are anaerobic, however the majority of studies analyzing alcohol toxicity are based on aerobic conditions."
+  notes: >-
+    Confirmed, with a named and recognisable set: genes of energy production, mobilization of energy reserves, the environmental stress response, and the PAU genes 'that are induced as part of the hypoxic response'. The PAU family is the sharp, testable part - it is a specific seripauperin family with a specific hypoxic induction, which is what a benchmark needs. The same paper supplies the caution that makes this entry worth having: most alcohol-toxicity work is aerobic while industrial fermentation is anaerobic, so the aerobic/anaerobic contrast is not a background detail in this atlas, it is a primary axis.
+  what_to_change: >-
+    Make the benchmark falsifiable by naming the set: 'anaerobic growth induces the PAU (seripauperin) family and the hypoxic response relative to aerobic, alongside environmental-stress-response genes', with an expected_outcome that names PAU. As written ('a recognizable, published set') the entry cannot fail, which means it cannot test anything.
+  consequence_if_wrong: >-
+    MEDIUM. An unfalsifiable benchmark entry inflates the pass rate - the headline number S.5 defines - without measuring anything. Naming PAU costs nothing and turns it into a real gate on the F.3 condition annotation, which is where aeration is recorded.
+  searches_run: ["(genes?|transcript[a-z]*)[^.]{0,120}(induced|upregulated|up-regulated)[^.]{0,120}anaerobic", "(PAU|seripauperin|hypoxic response)[^.]{0,200}"]
+
+- line: 2817
+  claim: >-
+    V.1: 'The numbers below are estimates for planning and should be re-measured after phase 3's first ten datasets.'
+  verdict: confirmed
+  repo_evidence:
+    # (repo) docs/reference/DATA_VOLUME.md  @4091-4130  re-resolved exact
+    - "| Mean per run | ~426 MB, ~2.4 Gbases |"
+  notes: >-
+    Correct as a self-description, and the plan has already done better than it promised - the re-measurement happened before phase 3, in DATA_VOLUME.md, using measured PubMed and SRA counts, and section V carries an inserted note saying the real figures are 'roughly 100x smaller'. So this line is true and stale at the same time. The one thing that did NOT get updated from the measurement is line 1313, which still carries the 3-4 TB sizing - see that record.
+  what_to_change: >-
+    Drop the mark and replace the forward-looking sentence with the backward-looking fact: 'These numbers were estimates; they have since been re-measured in docs/reference/DATA_VOLUME.md and are roughly 100x smaller. This section is retained as the sizing that would apply if the omics layer were restored at the originally envisaged scale.' Then propagate to line 1313.
+  consequence_if_wrong: >-
+    LOW for the section, which already warns the reader. MEDIUM as a pattern: the project measured its own estimates and updated two places out of three. A measurement that does not propagate is a second source of truth, and the plan now has one.
+  searches_run: ["(repo) docs/reference/DATA_VOLUME.md vs PLAN.md §V"]
+
+- line: 2894
+  claim: >-
+    Risk table, risk 6: 'Negative results are rarely published; some early isobutanol claims are disputed on carbon-balance grounds.'
+  verdict: overstated
+  publication: "doi:10.1186/1754-6834-4-21"
+  corpus_file: "00597.txt"
+  covered_by: "this file, line 214 (same claim, same evidence)"
+  evidence:
+    # doi:10.1186/1754-6834-4-21  [00597.txt @15659-15855]  re-resolved exact
+    - "A carbon balance calculation showed that after accounting for carbon in produced biomass, isobutanol, ethanol, pyruvate, succinate, glycerol, acetate and CO2, there was about 11% of carbon missing"
+  notes: >-
+    Second statement of the line-214 claim, and here it is the stated RATIONALE for a whole quality mechanism (carbon-balance flags, conflicts first-class, disputed values shown as disputed). No paper in 1,309 stored full texts disputes another's isobutanol numbers on carbon-balance grounds. The one relevant finding is a paper reporting ~11% of its own carbon unaccounted for. The FIRST half of the risk - negative results are rarely published - is independently supported by this project's own corpus work: zero peroxisomal isobutanol builds across 366 readable isobutanol papers, and zero papers following a heterologous mtDNA ORF over generations. Absence of negative results is demonstrable; the dispute is not.
+  what_to_change: >-
+    Keep risk 6 and its mitigations; re-source the rationale. 'Negative results are rarely published - this corpus contains zero peroxisomal isobutanol builds and zero retention studies of a heterologous mtDNA ORF - and carbon balances do not always close, with one yeast isobutanol study reporting ~11% of carbon unaccounted for.' Drop 'disputed' unless a citation exists.
+  consequence_if_wrong: >-
+    MEDIUM for the document, LOW for the mechanism. The mitigations are right regardless. But a risk register whose stated evidence cannot be produced is the part of a plan a reviewer tests first, and the project has better evidence for this exact risk sitting in its own reports.
+  searches_run: ["(see line 214)"]
+
+- line: 2895
+  claim: >-
+    Risk table, risk 7: 'Expression correlates with everything; industrial strains differ from lab strains at tens of thousands of positions.'
+  verdict: confirmed
+  publication: "doi:10.1038/srep06556"
+  corpus_file: "00261.txt"
+  covered_by: "this file, line 1167 (same claim, same evidence)"
+  evidence:
+    # doi:10.1038/srep06556  [00261.txt @667-812]  re-resolved exact
+    - "Compared with the genome of laboratory model strain S288C, we identified more than 32,000 SNPs in Y-12632 with 23,000 missense and nonsense SNPs."
+  notes: >-
+    Confirmed, same evidence as line 1167: >32,000 SNPs between an industrial ethanol-tolerant isolate and S288C, ~23,000 missense or nonsense, across 3,740 genes. The mitigations it justifies (evidence types kept distinct in the schema, L3 unreachable by correlation alone, level shown next to the claim in the UI) are correctly scoped to the risk.
+  what_to_change: >-
+    Drop the mark and cite the number, as at line 1167. A risk register entry with a real denominator in it is more persuasive than one with 'tens of thousands'.
+  consequence_if_wrong: >-
+    none - confirmed. Recorded for completeness and because this is one of only two risk-table entries carrying a mark.
+  searches_run: ["(see line 1167)"]
