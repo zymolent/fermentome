@@ -374,9 +374,31 @@ def repo_settings() -> Settings:
     return Settings.load(paths_file=PATHS_FILE, env={})
 
 
-def test_the_curated_admission_set_loads(repo_settings: Settings) -> None:
+def test_the_curated_admission_set_loads_and_stays_deliberately_short(
+    repo_settings: Settings,
+) -> None:
+    """The layer is *under*-filled on purpose, and that is the deliverable.
+
+    CHANGED 2026-09-22. This asserted `len(records) == 23`, which pinned a literal and therefore
+    failed on the twenty-fourth admission whatever its merit -- and the owner's slot-6 pick was
+    always going to produce one. A count is not the property; "far short of the cap, and the
+    shortfall is reported rather than consumed" is (`ETHANOL_REFERENCE_SLOTS.md`: *"an unspent
+    share is not reallocated automatically -- it is reported, because 'we found fewer admissible
+    papers than expected' is a finding about the literature, not slack to consume"*).
+
+    The exact position is already pinned, against the file's own recorded figure, by
+    `test_the_files_recorded_budget_position_matches_the_records_and_the_code`. This one asserts
+    the shape: a real layer, nowhere near 150. The upper bound is deliberately loose -- four
+    independent passes put the honestly admissible total at roughly 45-65, so a set that grew past
+    half the cap would mean the admission test had stopped biting, which is worth a failing test.
+    """
     records = load_admissions(repo_settings)
-    assert len(records) == 23, "phase 2 admitted 23; the deliverable is the number, not 150"
+    assert records, "the layer loads at all"
+    assert len(records) < PUBLICATION_CAP // 2, (
+        f"{len(records)} records against a {PUBLICATION_CAP} cap. The measured ceiling is ~45-65; "
+        "past half the cap, check that the B.3 admission criteria are still being applied rather "
+        "than the budget being filled."
+    )
 
 
 def test_no_admitted_record_lacks_a_criterion(repo_settings: Settings) -> None:

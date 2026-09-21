@@ -654,6 +654,57 @@ def _required_fields(evidence: EvidenceRequest) -> list[Requirement]:
     return out
 
 
+def _check_evidence_agrees_with_itself(request: AssertionRequest) -> list[str]:
+    """Warn when the **direct** evidence items disagree with each other about the direction.
+
+    This is the disagreement PLAN.md J.4 is about, and it is the one that actually costs a level:
+    ``assertion_level`` counts distinct directions among direct evidence and withholds L2 while
+    there is more than one. Two labs reporting opposite effects is a finding, and the usual right
+    answer is two assertions and a ``conflict`` row -- which is a curator act under J.4 and L.5,
+    so this reports and does not refuse. Refusing would also make the view's own
+    ``n_direct_directions <= 1`` branch unreachable through this module.
+
+    SEPARATED from the per-item check against ``assertion.direction`` on 2026-09-22. The two were
+    one test, and it warned on the atlas's first L2 -- subject ``gene_group BAT1``, assertion
+    ``decreases``, both evidence items ``increases`` -- announcing that L2 was unreachable, while
+    the view returned L2. Evidence disagreeing with the *assertion's* sign is normal wherever the
+    subject is what the experiment acted on; evidence disagreeing with *itself* is not.
+    """
+    directions = {
+        e.direction
+        for e in request.evidence
+        if e.direction is not None and e.evidence_type in DIRECT_TYPES
+    }
+    if len(directions) <= 1:
+        return []
+    return [
+        "the direct evidence items disagree with each other about the direction "
+        f"({', '.join(sorted(directions))}). `assertion_level` counts distinct directions and "
+        "withholds L2 while more than one stands, so this assertion cannot be replicated-grade "
+        "as it is. PLAN.md J.4 would record this as a `conflict` between two assertions rather "
+        "than a disagreement inside one; recording that is a curator's decision, not this "
+        "module's"
+    ]
+
+
+def _subject_is_its_own_perturbation(request: AssertionRequest) -> bool:
+    """Is the assertion's subject the thing the experiment changed?
+
+    This decides whether a sign mismatch between an evidence item and its assertion is suspect or
+    expected, and the two cases are genuinely different:
+
+    * subject ``modification`` -- the subject *is* the change, so "this deletion increased the
+      titer" and "this deletion decreases production" are two statements about one thing and
+      disagreeing is a real signal;
+    * subject ``gene_group`` / ``gene`` -- the subject is what the change acted *on*, so the signs
+      are expected to invert. Deleting BAT1 raises isobutanol precisely because BAT1 lowers it.
+
+    Kept as a named predicate rather than inlined, because the distinction is the whole content of
+    the warning it gates and a bare ``in`` test at the call site would read as an arbitrary list.
+    """
+    return request.subject_type == "modification"
+
+
 def _check_evidence(
     conn: sqlite3.Connection, request: AssertionRequest, evidence: EvidenceRequest, index: int
 ) -> tuple[list[Requirement], list[str], list[str]]:
@@ -742,17 +793,36 @@ def _check_evidence(
         evidence.direction is not None
         and request.direction is not None
         and evidence.direction != request.direction
+        and _subject_is_its_own_perturbation(request)
     ):
-        # Not refused. `assertion_level` counts distinct directions among direct evidence and
-        # withholds L2 when there is more than one, so the schema plainly expects this to be
-        # storable. What it should not do is happen silently: the usual right answer is two
-        # assertions and a `conflict` row (PLAN.md J.4), and recording a conflict is a curator
-        # act this module may not perform.
+        # Not refused. `assertion_level` counts distinct directions among **direct evidence**, and
+        # withholds L2 when those disagree with *each other*. It never reads
+        # `assertion.direction`, so a mismatch against the assertion's own sign costs nothing.
+        #
+        # NARROWED 2026-09-22, and the narrowing was found by the first L2 rather than reasoned
+        # out. This warned on `YAA:ASSERT:893939228cea1ef4` -- subject `gene_group BAT1`,
+        # direction `decreases`, both evidence items `increases` -- saying "the derived level will
+        # not reach L2 while both stand". The view returned **L2**. The warning was conflating two
+        # different things:
+        #
+        #   * evidence items that disagree with each *other* -- a real conflict, and what J.4 is
+        #     about;
+        #   * an evidence direction that differs from the *assertion's* sign, which is the normal
+        #     and correct shape whenever the subject is a gene and the experiment is its deletion.
+        #     "Deleting BAT1 increased isobutanol" and "BAT1 decreases isobutanol" are the same
+        #     finding stated about two different subjects, and forcing them to agree would make
+        #     the atlas assert the opposite of what its papers report.
+        #
+        # So the check now fires only where the subject is itself the perturbation -- a
+        # `modification`, where the two signs describe the same thing and disagreeing really is
+        # suspect. A wrong warning is worse than none: it teaches a curator to expect noise here,
+        # and the next one may be real.
         warnings.append(
             f"{where} points {evidence.direction!r} and the assertion says "
-            f"{request.direction!r}. The derived level will not reach L2 while both stand. "
-            "PLAN.md J.4 would record this as a `conflict` between two assertions rather than a "
-            "disagreement inside one; recording that is a curator's decision, not this module's"
+            f"{request.direction!r}, and the subject IS the perturbation, so the two describe the "
+            "same change and should agree. PLAN.md J.4 would record a genuine disagreement as a "
+            "`conflict` between two assertions rather than inside one; recording that is a "
+            "curator's decision, not this module's"
         )
 
     if evidence.confidence not in {"unverified", "low", "medium", "high"}:
@@ -856,6 +926,8 @@ def plan_assertion(conn: sqlite3.Connection, request: AssertionRequest) -> Asser
         missing.extend(item_missing)
         blockers.extend(item_blockers)
         warnings.extend(item_warnings)
+
+    warnings.extend(_check_evidence_agrees_with_itself(request))
 
     if request.bottleneck_id:
         row = conn.execute(

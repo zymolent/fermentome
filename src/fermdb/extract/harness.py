@@ -112,7 +112,12 @@ EXTRACTOR: Final[str] = "fermdb.extract.harness"
 #: Bumped when this module changes what an extraction row *means* — the section selection, the
 #: span translation, the validation gate. Not a release number: it is the answer to "would this
 #: code produce the same row from the same paper?", which a curator reviewing an old row needs.
-EXTRACTOR_VERSION: Final[str] = "1"
+#:
+#: ``"2"``: a structured abstract's sub-headings no longer become sections of the paper
+#: (:func:`_fold_structured_abstract`). A version-1 row for a paper with a structured abstract was
+#: extracted from an excerpt whose first ``results`` piece was the abstract, and its spans may be
+#: labelled ``results`` while sitting in it; a version-2 row cannot be.
+EXTRACTOR_VERSION: Final[str] = "2"
 
 
 # ---------------------------------------------------------------------------------- exceptions
@@ -204,6 +209,55 @@ _HEADING_RE: Final[re.Pattern[str]] = re.compile(
 
 _WHITESPACE_RE: Final[re.Pattern[str]] = re.compile(r"\s+")
 
+#: The names a structured abstract's own sub-headings can carry. BMC, Frontiers, PeerJ, MDPI and
+#: the rest of the house styles all spell an abstract as ``Background`` / ``Methods`` / ``Results``
+#: / ``Conclusions``, which :data:`_HEADING_KEYWORDS` matches exactly as it matches the body's.
+#: Anything outside this set — ``references``, ``supplementary``, ``acknowledgements`` — ends the
+#: run, because no abstract contains one.
+_ABSTRACT_PART_NAMES: Final[frozenset[str]] = frozenset(
+    {
+        "abstract",
+        "introduction",
+        "methods",
+        "results",
+        "results_and_discussion",
+        "discussion",
+        "conclusion",
+    }
+)
+
+#: The names a *body* can open with. The abstract is confirmed only when the run's **first** such
+#: name re-opens further down: that second ``Background`` is the paper itself starting from the
+#: top, and it is the only positive evidence that what came first was a summary of the paper
+#: rather than the paper.
+#:
+#: Insisting on the *first* one, rather than on any of them, is what tells a structured abstract
+#: apart from a body that merely announces ``Methods`` twice — Elsevier and MDPI both do that, and
+#: such a body re-opens ``methods`` but never re-opens its ``Introduction``. Over the 1,429 stored
+#: full texts the two readings differ by exactly the 13 double-``Methods`` bodies, all of which
+#: the strict one correctly declines to fold, and by no structured abstract at all.
+_BODY_OPENING_NAMES: Final[frozenset[str]] = frozenset(
+    {"introduction", "methods", "results", "results_and_discussion"}
+)
+
+#: How long one sub-heading of a structured abstract may be, and how long the whole of it may be.
+#:
+#: **A second guard, deliberately independent of the first.** The re-opening test above is
+#: structural and the length test is dimensional, and they agree: over the 1,429 stored full texts
+#: each one *on its own* selects exactly the same 293 runs. Neither is load-bearing alone, which
+#: is the point — a paper that defeated one would have to defeat the other too, and the failure
+#: this guards against is silent (a folded body loses its real Results from the excerpt).
+#:
+#: **Where the numbers come from.** Across those 293 runs the longest single part is 1,495
+#: characters and the longest whole run 3,890. The shortest body section that must be *rejected*
+#: is 2,204 (a body Introduction), and the double-``Methods`` bodies start at 3,797. So 2,000 sits
+#: in the gap with room on both sides, and 6,000 is slack over an observed 3,890. A run that
+#: overruns is cut at that point rather than abandoned, because the overrun *is* the body
+#: beginning: in all eight corpus cases the part that broke the cap was the body's own
+#: Introduction, and every abstract sub-heading was already inside the run.
+_ABSTRACT_PART_MAX_CHARS: Final[int] = 2000
+_ABSTRACT_MAX_CHARS: Final[int] = 6000
+
 #: How a section is announced inside the excerpt. The model is told these count toward its
 #: offsets and that a quote must not cross one; :meth:`Excerpt.to_document` enforces the second
 #: half by refusing to translate a span that is not wholly inside one piece.
@@ -244,6 +298,81 @@ def _heading_name(text: str) -> str | None:
     return None
 
 
+def _structured_abstract_run(sections: Sequence[Section]) -> tuple[int, int] | None:
+    """The half-open index range of a leading structured abstract, or None if there is not one.
+
+    A structured abstract is a run of sections at the very top of the document — after
+    ``front_matter``, if there is one — that is short, whose names are abstract-plausible and
+    distinct, and whose first body-opening name re-opens further down. That last clause is the
+    whole test: the second ``Background`` is the paper starting from the top, so everything before
+    it was a summary of the paper rather than part of it.
+
+    Nothing here looks for the word "abstract", because in 85 of the 209 affected papers there is
+    no ``Abstract`` heading to find — ``jats_to_text`` emits the sub-headings bare, straight after
+    the title block, and the run begins at ``Background``.
+    """
+    start = 1 if sections and sections[0].name == "front_matter" else 0
+    seen: list[str] = []
+    stop = start
+    total = 0
+    for section in sections[start:]:
+        if section.name not in _ABSTRACT_PART_NAMES or section.name in seen:
+            break
+        if section.length > _ABSTRACT_PART_MAX_CHARS:
+            break
+        if total + section.length > _ABSTRACT_MAX_CHARS:
+            break
+        seen.append(section.name)
+        total += section.length
+        stop += 1
+    if stop == start:
+        return None
+    # Only a name the body could open with counts as confirmation, and only the first of them. A
+    # run of nothing but `abstract` — an ordinary unstructured abstract — has no such name at all
+    # and is left alone, which is why a normal paper passes through this function untouched.
+    openers = [name for name in seen if name in _BODY_OPENING_NAMES]
+    if not openers:
+        return None
+    if not any(section.name == openers[0] for section in sections[stop:]):
+        return None
+    return start, stop
+
+
+def _fold_structured_abstract(sections: tuple[Section, ...]) -> tuple[Section, ...]:
+    """Collapse a structured abstract's sub-headings into the one ``abstract`` section they are.
+
+    The sub-headings of a structured abstract are not the paper's sections. ``Results`` inside a
+    BMC abstract announces four sentences summarizing the Results section; it is not the Results
+    section, and it is the single worst passage in the paper to hand an extractor, because the
+    abstract is exactly where several strains get compressed into one subject-less clause —
+    *"the integration of PDH suppression by lpd1Δ ... in BSW205 and BSW206 strains"*. Fed to the
+    model under the label ``results``, that produced three Zone R rows attributing an abstract
+    claim to a strain the sentence never named (docs/drafts/corrections/ZONE_R_CORRECTIONS.md).
+
+    The collapse happens here, in the sectioner, rather than in :func:`build_excerpt`, and the
+    difference is not cosmetic. ``build_excerpt`` could have been taught to take only the first or
+    the largest ``results``, and the excerpt would then have been right while ``span.section``
+    went on saying ``results`` for a sentence in the abstract — which is the half that made this
+    invisible for three rows and one bulk accept. A span's section is read off the section it
+    lands in, so the only place that can stop a span being *labelled* ``results`` in the abstract
+    is the place that decides what is named ``results``.
+
+    Tiling is preserved: the run becomes one section spanning exactly the characters its parts
+    spanned, keeping the heading that opened it.
+    """
+    span = _structured_abstract_run(sections)
+    if span is None:
+        return sections
+    start, stop = span
+    folded = Section(
+        "abstract",
+        sections[start].char_start,
+        sections[stop - 1].char_end,
+        sections[start].heading_as_reported,
+    )
+    return (*sections[:start], folded, *sections[stop:])
+
+
 def split_sections(document: str) -> tuple[Section, ...]:
     """Split a paper's plain text into named, contiguous, non-overlapping sections.
 
@@ -255,6 +384,12 @@ def split_sections(document: str) -> tuple[Section, ...]:
     A document with no recognizable heading comes back as a single :data:`UNSECTIONED` section
     rather than as an error: deciding what to do about that is :func:`build_excerpt`'s job, and it
     has the caller's wanted-section list to decide with.
+
+    A leading *structured* abstract — the ``Background`` / ``Results`` / ``Conclusions``
+    sub-headings BMC and its imitators print inside the abstract — is collapsed into a single
+    ``abstract`` section by :func:`_fold_structured_abstract`, so that the paper's Results is the
+    only thing named ``results``. Headings further down are never touched: a body whose Methods
+    really is announced twice keeps both halves, and both are still sent.
     """
     boundaries: list[tuple[int, str, str]] = []
     for match in _HEADING_RE.finditer(document):
@@ -272,7 +407,7 @@ def split_sections(document: str) -> tuple[Section, ...]:
     for index, (start, name, heading) in enumerate(boundaries):
         end = boundaries[index + 1][0] if index + 1 < len(boundaries) else len(document)
         sections.append(Section(name, start, end, heading))
-    return tuple(sections)
+    return _fold_structured_abstract(tuple(sections))
 
 
 @dataclass(frozen=True)

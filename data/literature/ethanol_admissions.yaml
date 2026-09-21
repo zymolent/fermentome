@@ -1,6 +1,6 @@
 # The ethanol reference layer - the admitted records (PLAN.md B.3, phase 2).
 #
-# WHAT THIS FILE IS. The 23 publications admitted into the capped ethanol layer, each with the
+# WHAT THIS FILE IS. The 24 publications admitted into the capped ethanol layer, each with the
 # criterion it was admitted under, the verbatim quotes that justify the admission and their
 # character offsets into the stored full text. It is the repo-tier, committed source of truth for
 # the layer: the database is derived tier (~/fermdb-data, rebuildable), so a criterion that lived
@@ -14,11 +14,20 @@
 # `unspent_report`, `validate_admission` and `fermdb literature ethanol status` read. Install this
 # file into a database with `fermdb literature ethanol install`.
 #
-# WHAT HAS NOT HAPPENED, AND IS THE OWNER'S. `verified` is false on all 23 and `confidence` is
-# 'unverified' on all 23; tests/test_ethanol_admission.py fails the day that changes by accident.
+# WHAT HAS NOT HAPPENED, AND IS THE OWNER'S. `verified` is false on all 24 and `confidence` is
+# 'unverified' on all 24; tests/test_ethanol_admission.py fails the day that changes by accident.
 # Nothing in the re-tagging proposals of docs/drafts/ethanol/PHASE2_STATUS.md section 5 is applied
 # beyond the admissions themselves, and the picks remain a curation proposal: the slots document
 # says the agent shortlists and the owner chooses.
+#
+# AMENDED 2026-09-22 - SLOT 6, THE LAYER'S FIRST E5 ADMISSION. The 24th record,
+# `doi:10.1016/j.mec.2024.e00245`, is the owner's pick from the eight-candidate re-run in
+# `docs/drafts/ethanol/slot6_E5_redox_shuttle_rerun.yaml`, where it is rank 1; the other seven were
+# not picked. It moves E5 from 0 to 1 of 45. It is admitted for a CONDITIONAL and ADVERSE result -
+# cytosolic Pos5 helps on glucose, stops helping past ~24 h, and goes net negative alongside ZWF1* -
+# which is a prediction against DUET's own architecture (G.8), not for it. Its Pos5 is CYTOSOLIC,
+# no cofactor is measured in it, and its two load-bearing numbers are cited rather than measured;
+# all three are on the record in `what_it_lacks` and in `evidence_ceiling`, which caps it at L3.
 #
 # DO NOT HAND-EDIT THE OFFSETS. They are 0-based half-open [char_start, char_end) into the text
 # `fermdb.extract.harness.load_source_text` returns for that publication_id, and they were
@@ -45,25 +54,27 @@ span_verification:
   re_verified: '2026-09-22'
   against: fulltext_asset store, via fermdb.extract.harness.load_source_text
   checked_with: fermdb.llm.validate.verify_span
-  spans_in_this_file: 53
-  re_resolved_exact: 53
+  spans_in_this_file: 60
+  re_resolved_exact: 60
   absent: 0
   spliced: 0
-  note: The draft's headline of 63 covers these 53 plus the 10 basis quotes on the re-tagging proposals,
-    which stay in the draft because nothing is re-tagged here beyond the admissions themselves; those
-    10 were re-checked in the same pass and are 10 of 10 exact. Three quotes below occur more than once
-    in their source (repeated data-availability statements); they are exact but not positionally unique,
-    and the recorded offset is the first occurrence.
+  note: The draft's headline of 63 covers the first 53 of these plus the 10 basis quotes on the re-tagging
+    proposals, which stay in the draft because nothing is re-tagged here beyond the admissions themselves;
+    those 10 were re-checked in the same pass and are 10 of 10 exact. Three quotes below occur more than
+    once in their source (repeated data-availability statements); they are exact but not positionally
+    unique, and the recorded offset is the first occurrence. The remaining 7 are the slot-6 E5 admission
+    added 2026-09-22; every one of them was SLICED from the fulltext_asset store at its recorded offsets
+    rather than transcribed, and re-checked with verify_span - 7 of 7 exact, each unique in its source.
 caps:
   publication_cap: 150
   measurement_study_cap: 60
-  publications_admitted_here: 23
-  measurement_bearing_admitted_here: 22
+  publications_admitted_here: 24
+  measurement_bearing_admitted_here: 23
 budget_position:
 - criterion: E5
   budget: 45
-  admitted_here: 0
-  unspent: 45
+  admitted_here: 1
+  unspent: 44
 - criterion: E6
   budget: 25
   admitted_here: 3
@@ -1007,6 +1018,120 @@ records:
     char_end: 63285
     occurrences_in_source: 3
     verify_span: exact
+- publication_id: doi:10.1016/j.mec.2024.e00245
+  doi: 10.1016/j.mec.2024.e00245
+  pmid: '39072283'
+  title: 'A comparative analysis of NADPH supply strategies in Saccharomyces cerevisiae: Production of
+    d-xylitol from d-xylose as a case study.'
+  year: 2024
+  journal: Metabolic engineering communications
+  admitted_criterion: E5
+  slot: 6
+  current_db_tag: E5
+  action: confirm (the owner's slot-6 pick, 2026-09-22; the layer's first E5 admission, from the eight-candidate
+    re-run in docs/drafts/ethanol/slot6_E5_redox_shuttle_rerun.yaml, where it is rank 1)
+  why_this_criterion: 'B.3.5 admits ''POS5 (mitochondrial NADH kinase) - expression level, overexpression
+    phenotypes, pos5Δ consequences, and any measured matrix NADPH response'', and this is the readable
+    pool''s most carefully controlled POS5 overexpression phenotype in S. cerevisiae: CEN.PK2-1C derivatives
+    (PRY53/PRY54 against PRY39/PRY48), selective SC medium with 30 g/L glucose and 20 g/L xylose, shake
+    flasks and stirred-tank bioreactors, culture triplicates, t-tests. Its unique contribution - and the
+    reason it was picked over seven other candidates - is that it puts a CONDITION on Pos5 instead of
+    treating it as a monotonic knob. cPos5 raises xylitol titre during the glucose phase, loses the gain
+    past ~24 h, and is net negative across the whole fermentation once ZWF1* is present; the paper then
+    names the mechanism, an order-of-magnitude fall in NADH/NAD+ after the diauxic shift starving Pos5
+    of substrate. That is an ADVERSE PREDICTION ABOUT DUET''S OWN ARCHITECTURE, which proposes to feed
+    Pos5 from ethanol-derived matrix NADH in exactly that state, and it bears directly on G.8''s POS5-capacity
+    bottleneck hypothesis. It is admitted because it argues against the programme''s load-bearing hypothesis
+    rather than for it (J.4 - disputes are stored, not resolved).'
+  what_it_lacks: 'THE COMPARTMENT IS WRONG, AND THIS IS THE FIRST THING A READER SHOULD WEIGH. The N-terminal
+    mitochondrial targeting sequence (amino acids 1-17) is deleted - verified in the methods for this
+    admission, evidence[3] - so the enzyme is cytosolic and the substrate pool whose collapse it reports
+    is the CYTOSOLIC NADH/NAD+ ratio. DUET''s Pos5 is native and matrix-resident, and the matrix NADH/NAD+
+    ratio after the diauxic shift is a different quantity that nobody has measured (YAA:GAP:ethanol-0-matrix-nad-p-h-pool-size-and-nad-p-h-nad).
+    Everything transferable here transfers at L3; nothing here refutes anything about the matrix. NO COFACTOR
+    IS MEASURED ANYWHERE IN IT. Not cytosolic NADH, not matrix NADH, not NADPH, not ATP. The entire redox
+    argument is read off product titre, which also moves with expression burden, growth rate and carbon
+    uptake. THE TWO NUMBERS THAT DO THE ARGUMENTATIVE WORK ARE CITED, NOT MEASURED HERE: the 50-fold NADH-over-NAD+
+    preference of Pos5 (evidence[1]) and the order-of-magnitude drop in NADH/NAD+ after the diauxic shift
+    (evidence[6]). Admitting this record means admitting a paper''s reading of two other papers, and the
+    primary sources must be chased before either number is quoted as a measurement. Beyond those three:
+    the product is xylitol via an NADPH-dependent xylose reductase - no alcohol, no Ilv5, no KARI, no
+    Ehrlich step, so it shares a cofactor demand with DUET and nothing else. Pos5 is the paper''s WORST-PERFORMING
+    strategy and not its headline (that is ZWF1 overexpression); the POS5 arm is one section and one figure
+    and is under-powered relative to the ZWF1 arm. The RNR2 promoter is deliberately weak, chosen because
+    stronger expression was reported to impair growth, so the experiment tests low-level cytosolic Pos5
+    and says nothing about what a high-capacity Pos5 would do. No repository deposit appears in the stored
+    full text; figures and supplementary files only.'
+  measurement_bearing: true
+  evidence_ceiling: L3, and the cap is the compartment rather than the alcohol. B.3.5's own evidence ceiling
+    already caps a matrix-redox assertion resting only on E5 records at L3 (J.3); this record sits below
+    even that, because its Pos5 is cytosolic. 'cPos5 helps on glucose and stops helping after the diauxic
+    shift' is a direct measurement in a CEN.PK background and may be stated as one. 'DUET's matrix Pos5
+    will run out of NADH after the diauxic shift' is an L3 TRANSFER CLAIM from a cytosolic pool to a matrix
+    pool, and the matrix quantity is the one the layer's open knowledge_gap says has never been measured.
+    The record is admitted as a warning that transfers at L3, never as a refutation.
+  verified: false
+  confidence: unverified
+  evidence:
+  - quote: Expression of the mitochondrial NADH kinase Pos5 in the cytosol likewise improved the production
+      of xylitol only on glucose, but not in combination with enhanced Zwf1 activity.
+    char_start: 1512
+    char_end: 1688
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: The mitochondrial kinase Pos5 can phosphorylate both NADH and NAD+, but its preference for
+      NADH is up to 50-fold higher compared to NAD+ ().
+    char_start: 42036
+    char_end: 42176
+    occurrences_in_source: 1
+    verify_span: exact
+    note: THE 50-FOLD FIGURE IS THIS PAPER CITING ANOTHER, not measuring. The empty parentheses are a
+      stripped citation marker in the stored text and are reproduced exactly, because cleaning them would
+      break the offsets.
+  - quote: For cytosolic localization, the N-terminal targeting sequence (amino acids 1–17) of Pos5 was
+      deleted based on previous work ().
+    char_start: 42177
+    char_end: 42304
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The results-section statement of the compartment. The methods statement that makes it a fact
+      rather than a narrative claim is the next span.
+  - quote: The POS5 sequence lacking the codons of the mitochondrial targeting signal (corresponding to
+      amino acids 1–17) was cloned into the pYTK001 entry plasmid and placed under the control of the
+      RNR2 promoter and SSA1 terminator using the Golden Gate toolbox according to the established procedure
+      () for the construction of SiHV207.
+    char_start: 14480
+    char_end: 14807
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'METHODS, plasmid construction. Verified directly in the methods for this admission: the targeting
+      signal is deleted at the DNA level, so the enzyme this paper tests is cytosolic Pos5 and not DUET''s
+      matrix-resident Pos5. The strain table says the same for PRY53/PRY54 (Δleu2::RNR2p-cPOS5-SSA1t).'
+  - quote: In the PRY39 background, cytosolic Pos5 increased xylitol titers during the glucose phase and
+      even slightly outperformed PRY48 at early time points, but this effect was lost at time points later
+      than 24 h (a, )
+    char_start: 42606
+    char_end: 42816
+    occurrences_in_source: 1
+    verify_span: exact
+    note: 'The condition-dependence in the paper''s own words: the gain exists and then stops existing.
+      Truncated at the figure callout; the sentence continues with a stripped citation residue that carries
+      no content.'
+  - quote: In the PRY48 background, cPos5 had a negative effect during the whole fermentation, demonstrating
+      that it does not act synergistically with the ZWF1* overexpression (a).
+    char_start: 42844
+    char_end: 43013
+    occurrences_in_source: 1
+    verify_span: exact
+  - quote: A likely reason is a decrease in the NADH/NAD+ ratio by one order of magnitude after the diauxic
+      shift (), which would decrease the substrate availability for Pos5.
+    char_start: 59028
+    char_end: 59192
+    occurrences_in_source: 1
+    verify_span: exact
+    note: The load-bearing sentence for the pick, and note its own hedge - 'A likely reason'. The paper
+      offers this as an explanation, not as a demonstration, and the order-of-magnitude NADH/NAD+ figure
+      is CITED from another study, not measured here.
 open_gaps:
 - gap: matrix NAD(P)H pool size and NAD(P)H/NAD(P)+ ratio in living Saccharomyces cerevisiae, measured
     compartment-resolved under a named growth condition

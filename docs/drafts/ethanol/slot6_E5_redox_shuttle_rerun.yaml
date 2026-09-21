@@ -1,5 +1,13 @@
 # Slot 6 — Mitochondrial redox shuttle (criterion E5). SHORTLIST RE-RUN, 2026-09-22.
 #
+# ───────────────────────────────────────────────────────── DECIDED. See `owner_decision` below.
+# The owner picked RANK 1 (doi:10.1016/j.mec.2024.e00245) on 2026-09-22. The other SEVEN were NOT
+# picked and remain unadmitted candidates — not rejections, and the file is kept whole so a later
+# pass starts from a ranked list rather than from nothing. The "NOTHING IS ADMITTED HERE" paragraph
+# below describes this file as it stood when it was written and is still true OF THIS FILE: the
+# admission lives in `data/literature/ethanol_admissions.yaml` and in `screening_record`, put there
+# by `fermdb literature ethanol install`. Nothing here was edited into a decision.
+#
 # Supersedes the candidate list in slot6_E5_redox_shuttle.yaml. That file's pool assessment,
 # its `not_shortlisted_but_notable` entries and its quote-verification notes all still stand;
 # what is replaced is the THREE-CANDIDATE list and the ranking.
@@ -62,12 +70,57 @@
 # `fermdb.llm.validate.verify_span`. 10 of 10 exact, 0 failures, each unique in its source.
 # Offsets are 0-based half-open [char_start, char_end).
 
+owner_decision:
+  decided_on: '2026-09-22'
+  decided_by: project owner
+  picked: doi:10.1016/j.mec.2024.e00245
+  picked_rank: 1
+  not_picked:
+    - rank 2 — doi:10.1186/s13068-023-02309-z (the runner-up; architecturally closer, matrix POS5)
+    - rank 3 — doi:10.1128/aem.00362-26
+    - rank 4 — doi:10.1371/journal.pone.0346295
+    - rank 5 — doi:10.1186/1471-2164-9-170
+    - rank 6 — doi:10.3389/fmicb.2018.01460
+    - rank 7 — doi:10.1093/femsyr/foae037
+    - rank 8 — doi:10.1007/s00253-015-7266-x
+  one_of_eight: >-
+    ONE line of 45 was spent, not two and not three. The owner did not take the "picking both is
+    defensible" option offered under `why_the_runner_up_could_win_instead`, so the matrix-compartment
+    half of the question — what does raising NATIVE, matrix Pos5 buy — is still unrepresented in the
+    layer. That is a consequence of the pick and is recorded here rather than left to be rediscovered.
+  admitted_as: >-
+    `data/literature/ethanol_admissions.yaml`, record 24, admitted_criterion E5, slot 6,
+    measurement_bearing true, verified FALSE, confidence 'unverified'. Installed through
+    `fermdb literature ethanol install` on 2026-09-22 after `fermdb.db.migrations.copy_backup`.
+    E5 moves 0 → 1 of 45; the layer is 24 of 150 publications and 23 of 60 measurement studies.
+  what_survived_into_the_record: >-
+    Both halves, because the slots document is emphatic that a case argued only in favour is an
+    advocacy note. The strength: it is the only paper in the pool that puts a CONDITION on Pos5
+    rather than treating it as a monotonic knob, and the condition is DUET's own — an adverse
+    prediction against G.8's POS5-capacity hypothesis (J.4, disputes are stored). The weaknesses,
+    written onto the record's own face in `what_it_lacks` and `evidence_ceiling`: its Pos5 is
+    CYTOSOLIC (targeting sequence aa 1–17 deleted, re-verified in the METHODS for the admission and
+    quoted from there, evidence[3]), so it transfers at L3 and refutes nothing about the matrix;
+    NO COFACTOR is measured anywhere in it; and the two numbers doing the argumentative work — the
+    50-fold NADH preference and the order-of-magnitude NADH/NAD+ drop — are CITED, not measured here.
+  spans: >-
+    7 of 7 exact. Every quote was SLICED out of the `fulltext_asset` store at its offsets through
+    `fermdb.extract.harness.load_source_text` and re-checked with `fermdb.llm.validate.verify_span`
+    — none retyped, none spliced, each unique in its source. Five are this file's candidate-1 quotes
+    at their recorded offsets; two are new, the Methods strain-construction sentence (char 14480) and
+    the PRY39 glucose-phase sentence (char 42606) that states the condition-dependence directly.
+  still_unresolved: >-
+    Nothing about §3a changed. No paper measures a matrix NAD(P)H pool or ratio in living
+    S. cerevisiae under a named condition, the knowledge_gap row stands open, and the pick does not
+    close it — it makes the absence sharper, because the quantity the admitted paper's argument turns
+    on is the CYTOSOLIC ratio and the matrix one remains unmeasured.
+
 slot:
   number: 6
   name: Mitochondrial redox shuttle
   criterion: E5
   budget: 45
-  admitted_today: 0
+  admitted_today: 1  # was 0 when this shortlist was written; the owner picked rank 1 the same day
   question: How do reducing equivalents reach the matrix?
   pool_readable: 136
   pool_with_two_or_more_core_terms: 33
@@ -133,6 +186,7 @@ recommended:
 candidates:
 
   - rank: 1
+    status: PICKED BY THE OWNER, 2026-09-22 — admitted under E5, slot 6. See `owner_decision` above.
     publication_id: doi:10.1016/j.mec.2024.e00245
     pmid: '39072283'
     doi: 10.1016/j.mec.2024.e00245

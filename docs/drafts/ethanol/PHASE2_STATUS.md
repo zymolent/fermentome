@@ -10,6 +10,32 @@
 > owner's. The §3a finding is now a `never_attempted` `knowledge_gap` row
 > (`YAA:GAP:ethanol-0-matrix-nad-p-h-pool-size-and-nad-p-h-nad`) rather than a paragraph.
 
+> **AMENDED 2026-09-22 — SLOT 6 IS DECIDED, AND E5 IS NO LONGER ZERO.** The owner picked
+> `10.1016/j.mec.2024.e00245` — the paper §3b named as one that "should be read in full before slot
+> 6 is decided" — from the eight-candidate re-run in `slot6_E5_redox_shuttle_rerun.yaml`, where it is
+> rank 1. It is admitted under **E5, slot 6**, and installed through
+> `fermdb literature ethanol install` after `fermdb.db.migrations.copy_backup`. **E5 moves 0 → 1 of
+> 45.** The layer is now **24 of 150** publications and **23 of 60** measurement-bearing studies; the
+> file carries **60 spans, 60 of 60 re-resolved exact**, of which the 7 new ones were *sliced* from
+> the `fulltext_asset` store rather than transcribed. `validate_admission` returns no problems on all
+> 24. `verified` is still **false** and `confidence` still **`unverified`** on every record,
+> including this one — promotion remains a curator act and was not performed. The other seven
+> candidates were **not** picked and are not admitted. §3 below is superseded only on the count; its
+> finding — §3a — is untouched, and the pick makes it sharper rather than softer. See §3d.
+>
+> **ONE TEST NOW FAILS, AND IT IS A FINDING RATHER THAN A DEFECT IN THIS CHANGE.**
+> `tests/test_ethanol_admission.py::test_the_curated_admission_set_loads` asserts
+> `len(records) == 23` with the message *"phase 2 admitted 23; the deliverable is the number, not
+> 150"*. It pins a **literal count**, so it fails on any 24th admission whatever its merit — and
+> slot 6 was always going to produce one. It is not a budget or a cap test: every budget and cap
+> assertion in the same file still passes, `validate_admission` returns no problems on all 24, and
+> `test_the_files_recorded_budget_position_matches_the_records_and_the_code` passes because the
+> file's own `budget_position` was updated with the records. **The test was not weakened, loosened
+> or edited**; `tests/` is not this pass's to change. The count needs re-pinning to 24, or
+> re-expressing as the property it means (*"well under 150"*), by whoever owns that file. Otherwise:
+> `ruff check`, `ruff format --check` and `mypy` are all clean — mypy at **no issues in 68 source
+> files**, unchanged — and the remaining 1266 of 1268 tests pass (1 skipped).
+
 2026-09-21. **DRAFT** (as first written; see the note above for what has since been installed).
 Nothing was written to the database and nothing under `data/`. No `confidence`
 value is set anywhere; no record is marked `verified`. `fermdb extract` was not run. Project rule L.5,
@@ -26,15 +52,18 @@ is a finding about the literature, not slack to consume."*
 
 | criterion | slot(s) | budget | tagged pool | **readable** | admissible (my read) | **admitted** | unspent | why unspent |
 |---|---|---|---|---|---|---|---|---|
-| **E5** redox shuttle | 6 | **45** | 636 | 141 | **~5–8** | **0** | **45** | Not scarcity of *papers* but scarcity of *measurements* — §3 |
+| **E5** redox shuttle | 6 | **45** | 636 | 141 | **~5–8** | **1** ✱ | **44** | Not scarcity of *papers* but scarcity of *measurements* — §3 |
 | **E6** industrial performance | 7 | 25 | 279 | 148 | 6–10 | **3** | 22 | Genuinely thin once off-target organisms are removed; Ethanol Red uncharacterised |
 | **E1** competing sink | 2 | 25 | 68 | **16** | ~6 | **3** | 22 | **Acquisition, not scarcity** — 52 identified papers unreadable — §4 |
 | **E2** performance ceiling | 5 | 20 | 587 | 267 | 12–15 | **3** | 17 | Ceiling is established by 3; more would be padding (B.3.2: "not a survey") |
 | **E3** wild-type baselines | 1 | 20 | 319 | 106 | ~5 | **3** | 17 | Chemostat/carbon-balance standard is rare; 3 is close to everything that meets it |
 | **E4** transferable mechanism | 3, 4 | 15 | 23 | 11 | ~12 | **11** | 4 | The one criterion the new PDFs materially fixed — §2 |
-| | | **150** | | | | **23** | **127** | |
+| | | **150** | | | | **24** ✱ | **126** ✱ | |
 
-Caps: **23 of 150** publications, **22 of 60** measurement-bearing studies. Both well under.
+✱ as of the 2026-09-22 slot-6 amendment above. The table was written when E5 stood at 0 and the
+layer at 23; the E5 line and the totals are the only figures that moved.
+
+Caps: **24 of 150** publications, **23 of 60** measurement-bearing studies. Both well under.
 
 Readable pools are counted live from the database (`fulltext_asset.storage_state='stored_fulltext'`)
 and are larger than the 2026-09-21 shortlist report's figures, because the 127-PDF delivery has since
@@ -42,7 +71,8 @@ been ingested. That ingest changed **E4 and nothing else**, exactly as the corpu
 
 Every one of the 23 was put through `fermdb.literature.ethanol.validate_admission` read-only.
 **All 23 return no problems** — correct criterion vocabulary, ethanol tier present, screened through
-discovery, within budget, within cap.
+discovery, within budget, within cap. Re-run over the installed set after the slot-6 admission:
+**all 24 return no problems.**
 
 ---
 
@@ -73,6 +103,35 @@ reproduced in-house).
 `10.1534/g3.118.200677`, `10.1016/j.jbiotec.2010.06.006`, `10.1021/acs.jproteome.1c00139`,
 `10.1128/msystems.00827-25`, `10.1016/j.jbiotec.2007.05.010`, `10.1016/j.jbiosc.2017.04.012`
 (`10.1186/s13068-024-02503-7` serves both slots, with the cost of doing so recorded on the record).
+
+**E5 (1)** *(added 2026-09-22)* — `10.1016/j.mec.2024.e00245`, *"A comparative analysis of NADPH
+supply strategies in S. cerevisiae"*. The owner's slot-6 pick. Admitted for a **conditional and
+adverse** result, not a favourable one: cytosolic Pos5 raises xylitol titre during the glucose
+phase, loses the gain past ~24 h, and is **net negative across the whole fermentation once `ZWF1*`
+is present** — and the paper names the mechanism, an order-of-magnitude fall in NADH/NAD⁺ after the
+diauxic shift starving Pos5 of substrate. That is a testable adverse prediction about **DUET's own
+architecture**, which proposes to feed Pos5 from ethanol-derived matrix NADH in exactly that state,
+and against **G.8**'s POS5-capacity bottleneck hypothesis. J.4: disputes are stored, not resolved.
+
+  Three weaknesses are on the record's face, in `what_it_lacks` and `evidence_ceiling`, and they are
+  the reason the admission is capped at **L3**:
+
+  1. **Its Pos5 is cytosolic.** The N-terminal targeting sequence (amino acids 1–17) is deleted —
+     re-verified in the **Methods** for this admission and quoted from there, not from the results
+     narrative. So the pool whose collapse it reports is the **cytosolic** NADH/NAD⁺ ratio. DUET's
+     Pos5 is native and matrix-resident. The warning transfers as an **L3 transfer claim** and
+     refutes nothing about the matrix.
+  2. **No cofactor is measured anywhere in it** — not cytosolic NADH, not matrix NADH, not NADPH,
+     not ATP. The whole redox argument is read off product titre.
+  3. **Its two load-bearing numbers are cited, not measured here**: the 50-fold NADH-over-NAD⁺
+     preference of Pos5, and the order-of-magnitude NADH/NAD⁺ drop after the diauxic shift. Admitting
+     it means admitting a paper's reading of two other papers; the primary sources must be chased
+     before either number is quoted as a measurement.
+
+  Also: xylitol via an NADPH-dependent xylose reductase, so it shares a cofactor demand with DUET and
+  nothing else; Pos5 is the paper's **worst-performing** strategy and not its headline (that is
+  `ZWF1`), occupying one section and one figure; and the `RNR2` promoter is deliberately weak, so the
+  experiment tests *low-level* cytosolic Pos5 and says nothing about a high-capacity one.
 
 **E6 (3)** — `10.1101/gr.131698.111` (MKT1/SWS2/APJ1 by pooled-segregant analysis; past mapping to
 allele-level causality, which is what lifts it out of B.3.6's QTL exclusion) ·
@@ -111,8 +170,10 @@ Nine are capped at L3. Two are not:
 
 ## 3. E5 — the account of why 45 cannot be spent
 
-**Admitted: 0 of 45.** But the flat statement "E5 has no anchor" is slightly wrong in a way that
-matters for the owner's next decision, so here is the measured version.
+**Admitted: 1 of 45** since 2026-09-22 (§3d). This section was written at 0 and is left as written,
+because the reason 45 cannot be spent is unchanged by spending one of them. The flat statement "E5
+has no anchor" is slightly wrong in a way that matters for the owner's next decision, so here is the
+measured version.
 
 ### 3a. The core finding, reproduced independently here
 
@@ -156,6 +217,12 @@ material and one of them the shortlist did not surface:
   cerevisiae"*, 15 `POS5` mentions. **Not on the slot-6 shortlist.** On its face this is the most
   directly on-target document in the pool for the `POS5`-capacity bottleneck hypothesis (G.8), and it
   should be read in full before slot 6 is decided.
+  **[2026-09-22: it was read in full, and it is now ADMITTED — §3d. Two corrections to the sentence
+  above, both from the re-run. (i) "Not on the slot-6 shortlist" is half right: it was not among the
+  three CANDIDATES, but it was in the prior draft under `not_shortlisted_but_notable`, correctly
+  described there as the wrong compartment. It was found and filed one tier too low, not missed.
+  (ii) "the most directly on-target document in the pool" overstates it — its Pos5 is CYTOSOLIC. Its
+  value is not that it is on target but that it is ADVERSE.]**
 * `10.1371/journal.pone.0346295` — `pos5Δ` consequences, but in *S. pombe* and read out as CoQ
   biosynthesis.
 * `10.1007/s00253-015-7266-x` — `ADH3` in *Dekkera bruxellensis*.
@@ -191,6 +258,34 @@ Also relevant to phase-2 acceptance: PLAN.md's revised acceptance text makes `AD
 records **a phase-2 blocker**. On the evidence here that acceptance criterion cannot be met as
 written *for a measurement-bearing record*, and the owner has to choose between amending it and
 commissioning the measurement. That is flagged, not resolved.
+
+### 3d. 2026-09-22 — the number is 1, and the amended acceptance clause is met
+
+§3c's first reason has been discharged. The shortlist was re-run over eight ranked candidates
+(`slot6_E5_redox_shuttle_rerun.yaml`), the owner picked rank 1 —
+**`10.1016/j.mec.2024.e00245`** — and it is installed under **E5, slot 6**. The other seven were not
+picked; they remain unadmitted candidates rather than rejections, and the ranked file is kept whole
+so a later pass starts from it.
+
+**E5: 1 of 45 admitted, 44 unspent.** §3c's *second* reason is untouched and is why the number is 1
+and not 8: an unspent share is a finding about the literature, not slack to consume.
+
+**Against PLAN.md's phase-2 acceptance as amended 2026-09-22** — which replaced the blocker with
+*"at least one qualitative `ADH3`/`POS5`/shuttle record admitted under E5, against a realistic
+ceiling of about 5–8"* — **that clause is now met.** One qualitative `POS5` record is admitted under
+E5; it is exactly what B.3.5's "`POS5` … overexpression phenotypes" clause names; the number is
+reported with its reason, as the amendment requires; and the never-attempted `knowledge_gap` the
+same amendment requires is installed. The clause asks for a *qualitative* record and does not ask
+for a measurement, which is the distinction the amendment was written to draw.
+
+**What is NOT resolved by it, and must not be read as resolved:** §3a. No paper measures a matrix
+NAD(P)H pool or ratio in living *S. cerevisiae* under a named condition; four passes agree, this
+pick is not a fifth counterexample, and the gap row stays open. If anything the pick **sharpens**
+the absence: the quantity the admitted paper's whole argument turns on — an order-of-magnitude fall
+in NADH/NAD⁺ after the diauxic shift — is the **cytosolic** ratio, is **cited from another study
+rather than measured here**, and the **matrix** counterpart that DUET actually depends on has never
+been measured by anyone. The atlas now holds a warning about its own architecture that it cannot
+check.
 
 ---
 
@@ -296,6 +391,17 @@ proposed but **blocked**:
 
 **63 of 63 quotes re-resolved exact, 0 absent, 0 spliced.**
 
+**2026-09-22, the slot-6 admission adds 7.** The installed file now carries **60 spans and
+re-resolves 60 of 60 exact** (53 + 7); the 63 headline above counts the original 53 plus the 10
+basis quotes that stay in the draft. Every one of the 7 was **sliced out of the `fulltext_asset`
+store at its offsets** through `load_source_text` and re-checked with `verify_span` — **7 of 7
+exact, none retyped, none spliced, each unique in its source**. Five are the re-run's candidate-1
+quotes at their recorded offsets; two are new: the **Methods** strain-construction sentence
+(char 14480), which is where the aa 1–17 deletion is established rather than narrated, and the PRY39
+glucose-phase sentence (char 42606), which states the condition-dependence in the paper's own words.
+One of the seven is truncated at a figure callout — contiguous, no ellipsis, the omitted tail being
+stripped-citation residue — which is the same convention the existing records use.
+
 Checked with `fermdb.llm.validate.verify_span` against the stored full text loaded through
 `fermdb.extract.harness.load_source_text`. Every quote is a **contiguous** span — the two-marker
 extraction used to build them cannot produce a splice — with no ellipses and no paraphrase inside
@@ -332,7 +438,15 @@ the offsets certainly are not shared.
 * **Whether to commission the matrix-redox measurement** (§3a), and whether to amend PLAN.md's
   phase-2 acceptance, which currently makes `ADH3`/`POS5` records a blocker that the corpus cannot
   satisfy with a measurement.
-* **Whether to re-run slot 6's shortlist** now that `10.1016/j.mec.2024.e00245` is on the table.
+* ~~**Whether to re-run slot 6's shortlist** now that `10.1016/j.mec.2024.e00245` is on the
+  table.~~ **DONE, 2026-09-22.** Re-run over eight candidates, owner picked rank 1, admitted under
+  E5. What remains the owner's here is narrower: **whether to spend a second E5 line on the runner-up
+  `10.1186/s13068-023-02309-z`.** The pick spends one, so the matrix-compartment half of the
+  question — what raising *native, matrix* Pos5 buys — is still unrepresented in the layer, and the
+  two records contradict each other in no respect.
+* **Whether to record candidate 7's licence constraint as a blocker or a footnote.**
+  `10.1093/femsyr/foae037` is `cc by-nc-nd`, `text_mining_allowed: no` — unique among the eight, and
+  it matters only if that candidate is ever picked.
 * **The manual download queue.** 52 E1 papers and 12 remaining E4 papers need institutional access.
   E1's budget is unspendable without them.
 * **PLAN.md still reads "E1–E5"** in its phase-2 acceptance while E6 carries an accepted 25-paper

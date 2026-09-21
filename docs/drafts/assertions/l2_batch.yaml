@@ -1,0 +1,499 @@
+# The atlas's first L2 assertion, as a proposal. NOTHING HERE HAS BEEN WRITTEN.
+#
+# The argument for every entry is in docs/drafts/assertions/L2_BATCH.md; this file is the
+# machine-readable half and is deliberately not self-justifying.
+#
+# Fields you will not find, on purpose, and the same two as first_batch.yaml:
+#   * `level` -- there is no such column. `assertion_level` derives it. `expected_level` below is
+#     a prediction plus the rule it follows, checked by an in-memory rehearsal, never a value to
+#     be written.
+#   * `effect_size` -- E1 cites a fold-change and E2 a titer against a non-detect; neither is an
+#     effect this atlas may put a number on. Left NULL, with effect_unit / effect_ci_* / effect_n.
+#
+# One field that is here and is NOT a column: `control_measurement_id`, carried for the reader
+# exactly as first_batch.yaml carried it. `evidence_item` has no such column. PLAN.md J.3 requires
+# a stated control (`control_strain_id` or `control_condition_id`), not a second number.
+
+batch: l2_batch
+status: proposal
+approved_set: direct_perturbation
+drafted_by: agent
+drafted_on: 2026-09-22
+source_database: "~/fermdb-data/fermdb.sqlite3 (opened mode=ro)"
+writes_performed:
+  to_the_atlas: none
+  to_the_curation_queue: >-
+    17 `modifications` curation tasks for doi:10.1016/j.ymben.2017.10.001, queued by
+    `fermdb extract run --doi 10.1016/j.ymben.2017.10.001 --only-kind modifications`
+    (provider agent-sdk, model claude-opus-5). All 17 are `pending`. None accepted, rejected or
+    promoted. See `extraction_run` below.
+live_counts_after_drafting:
+  assertion: 5
+  evidence_item: 5
+
+extraction_run:
+  publication_id: doi:10.1016/j.ymben.2017.10.001
+  reason: >-
+    the paper was extracted on 2026-09-21 with
+    prompt_version 'extraction/v1+723f92719ad1+kinds:strains,pathway_configurations,measurements',
+    so it had 46 promoted measurements and zero `modification` rows. A narrowed run makes no claim
+    about the kinds it did not ask for, which is why re-running for one kind is the cheap fix.
+  command: "fermdb extract run --doi 10.1016/j.ymben.2017.10.001 --only-kind modifications"
+  provider: agent-sdk
+  model: claude-opus-5
+  extraction_id: YAA:EXTR:20bf017a9eef42668de4aa35158f0e51
+  prompt_version: extraction/v1+723f92719ad1+kinds:modifications
+  sections: methods,results,results_and_discussion
+  chars_sent: 34199
+  fraction_of_document: 0.47
+  tokens: 9526
+  attempts: 1
+  cache_hit: false
+  records_proposed: 17
+  curation_tasks_queued: 17
+  curation_tasks_resolved: 0
+  notes: "14 span_offsets_repaired notes; every repaired quote occurred exactly once in the document"
+  the_two_that_matter:
+    - record_path: modifications[6]
+      curation_task: YAA:CTASK:9855a532579049a4a428da2526e147c3
+      proposal: "knockout of BAT1, strain SHy24 (CEN.PK2-1C background)"
+      span: "YAA:SPAN:9d3edbfbadfa4f338ba18cb1e012e9db [31339, 31364) 'However, deletion of BAT1'"
+    - record_path: modifications[16]
+      curation_task: YAA:CTASK:eba686a0ecaa4814aa7ae8a8dc399942
+      proposal: "knockout of BAT1, strain SHy104 (BY4741 background)"
+      span: "YAA:SPAN:f3f98865a3624af39297dfda2d554442 [48197, 48223) 'Deletion of BAT1 in BY4741'"
+  not_on_the_critical_path: >-
+    these two `modification` rows are NOT required for the L2 below, and the stated reason for the
+    run ("the near miss needs modification rows") does not survive contact with
+    `assertion_id_for`. See `why_the_subject_is_a_gene_group`. The run was still worth making: the
+    perturbation records are missing from the atlas and a curator will want them.
+
+second_bat1_paper:
+  publication_id: doi:10.1016/j.btre.2026.e00959
+  extraction_already_full_kind: true
+  extraction_id: YAA:EXTR:2ffc95cbec9d48eab4b6d50a1e14b4f9
+  prompt_version: extraction/v1+723f92719ad1
+  modification_rows_present: 1
+  modification_id: YAA:MOD:8003a204b05640ff
+  conclusion: >-
+    no extraction was needed. This paper was extracted without --only-kind, so its modifications
+    were proposed and one (deletion of BAT1 by CRISPR/Cas9, strain IbOH-1bat1delta) is already
+    promoted to Zone R.
+
+why_the_subject_is_a_gene_group:
+  finding: >-
+    subject_type='modification' cannot reach L2 for this claim, under any curation.
+  why: >-
+    assertion_id_for hashes AssertionRequest.identity(), which includes subject_id. A
+    `modification` row belongs to one strain in one paper, so Princeton's bat1-delta (SHy24) and
+    Chulalongkorn's bat1-delta (IbOH-1) are two rows, two subject_ids and two assertion ids. Two
+    assertions with one evidence item each are two L1s forever.
+  rehearsed: >-
+    from_modification(YAA:MOD:8003a204b05640ff, ...) -> YAA:ASSERT:05f3751605dfdcbd, which is a
+    different id from the drafted YAA:ASSERT:017a897a1a9054c2.
+  rejected_workaround: >-
+    attaching Princeton's evidence to the Chulalongkorn modification's assertion. The assertion's
+    subject would then be one CRISPR deletion in one Thai industrial isolate, cited in support by
+    a Princeton experiment on CEN.PK2-1C. That is J.3's conflation moved from the group column to
+    the subject column.
+  chosen: "gene_group YAA:GG:yhr208w (BAT1 / YHR208W, scope 'species', zone H, confidence high)"
+  gene_rejected: >-
+    YAA:GENE:gcf-000146045-2-yhr208w is zone R, which would have matched the assertion's zone more
+    tidily, but it is bound to assembly GCF_000146045.2 (S288C). Neither experiment is in S288C:
+    one is CEN.PK2-1C, the other a UV-mutagenised derivative of industrial isolate G2-3-2 whose own
+    BAT1 carries a C320T / I107T substitution. schema.sql says on that column why it matters --
+    "a gene id is meaningless without its assembly". A species-scope gene group is the only anchor
+    that honestly spans both.
+  zone_note: >-
+    first assertion in the atlas whose subject is not zone R. CONVENTIONS.md's zone table allows
+    it ("H -- may support a conclusion: yes") and assertion_level does not read zone at all, but
+    it is a precedent and the owner should set it knowingly.
+
+independent_groups:
+  - id: group:avalos-princeton
+    used_by: [E1, E3]
+    publication: doi:10.1016/j.ymben.2017.10.001
+    pmid: "29037781"
+    decided_from: >-
+      PubMed author affiliations for PMID 29037781. Hammer, Sarah K -- Department of Chemical and
+      Biological Engineering, Princeton University. Avalos, Jose L -- same department, plus the
+      Andlinger Center for Energy and the Environment and the Department of Molecular Biology,
+      Princeton University; corresponding author, javalos@princeton.edu. Two authors, one
+      institution, one senior author.
+  - id: group:koonthongkaew-chulalongkorn
+    used_by: [E2]
+    publication: doi:10.1016/j.btre.2026.e00959
+    pmid: "42088643"
+    decided_from: >-
+      PubMed author affiliations for PMID 42088643. Thammapanyaphong, Naphattarachon and
+      Boonyanuwat, Manutsanun -- Department of Microbiology, Faculty of Sciences, Chulalongkorn
+      University, Bangkok. Luengnaruemitchai, Apanee -- The Petroleum and Petrochemical College
+      and the Center of Excellence on Catalysis for Bioenergy and Renewable Chemicals,
+      Chulalongkorn University. Koonthongkaew, Jirasin (last author) -- Department of
+      Microbiology and the Research Unit in Bioconversion/Bioseparation, Chulalongkorn University.
+      Four authors, one institution, last author is the group's BCAT specialist.
+
+independent_group_convention:
+  form: "group:<pi-surname>-<institution>, settled by the owner 2026-09-22"
+  not_decided_from: >-
+    the publication id, and not from anything the atlas stores. `publication` has no author or
+    affiliation column, so this is a curator judgement each time.
+
+independence_claim:
+  shared_authors: none
+  author_sets:
+    avalos_princeton: [Hammer SK, Avalos JL]
+    koonthongkaew_chulalongkorn: [Thammapanyaphong N, Boonyanuwat M, Luengnaruemitchai A, Koonthongkaew J]
+  intersection: []
+  shared_institution: none
+  detail: >-
+    Princeton, New Jersey against Chulalongkorn University, Bangkok. No shared department, centre
+    or corresponding address, and nine years apart. This is the claim that makes the L2 real: if
+    the two labs were not independent, COUNT(DISTINCT independent_group) would be laundering a
+    repeat into a replication.
+  citation_is_not_collaboration: >-
+    the Chulalongkorn paper cites the Princeton one as prior literature -- "Hammer and Avalos
+    (2017) demonstrated that deletion of the BAT1 gene is the most effective approach to improve
+    isobutanol productivity" [21327, 21465). That is the second group deliberately testing the
+    first group's finding in a background the first group never touched, which is the strongest
+    form J.3's axis-2 count can take, not evidence against independence.
+  near_miss_that_would_have_broken_it:
+    publication_id: doi:10.1186/s13068-019-1560-2
+    pmid: "31548865"
+    title: "Xylose utilization stimulates mitochondrial production of isobutanol and 2-methyl-1-butanol in S. cerevisiae"
+    authors: [Zhang Y, Lane S, Chen JM, Hammer SK, Luttinger J, Yang L, Jin YS, Avalos JL]
+    group: group:avalos-princeton
+    warning: >-
+      a third paper in the corpus carries BAT1 spans and looks, from the DOI alone, like a third
+      group. Senior author Avalos; Hammer is on both papers. Counting it as a third group would
+      promote this assertion on a repeat rather than a replication -- the precise failure J.3
+      exists to prevent. Recorded so the next person does not have to rediscover it.
+
+proposals:
+  - key: L2-1
+    name: BAT1 affects isobutanol production
+    assertion_id: YAA:ASSERT:017a897a1a9054c2
+    subject_type: gene_group
+    subject_id: YAA:GG:yhr208w
+    subject_label: "BAT1 / YHR208W, mitochondrial branched-chain amino acid transaminase, species scope"
+    predicate: affects_production_of
+    predicate_checked_against: "`predicate` table, 17 active terms (PLAN.md J.2)"
+    predicate_rejected_alternatives:
+      affects_yield_of: "both cited numbers are titers or fold-changes in titer, not yields"
+      improves_when_modified_by: "structurally impossible -- assertion.object_type has no 'modification' value"
+      is_bottleneck_for: >-
+        tempting: the Chulalongkorn paper calls Bat1 "the rate-limiting and bottleneck enzyme that
+        limits isobutanol productivity" in as many words, and it would sidestep the sign problem
+        by leaving assertion.direction NULL. Not used because the evidence offered is two titer
+        comparisons -- they measure how much isobutanol, not where flux is limited. That claim
+        belongs to the `bottleneck` table with its own evidence.
+      competes_with: >-
+        the most mechanistically accurate description of Bat1 (it drains KIV to valine) and not
+        supported by these two measurements either.
+    object_type: product
+    object_id: YAA:PRODUCT:isobutanol
+    product_id: YAA:PRODUCT:isobutanol
+    context_id: null
+    context_note: >-
+      the two experiments share no `condition_context` row and the claim is not condition-specific.
+      Both are valine-free, which is worth knowing and is not what context_id is for here.
+    direction: increases
+    direction_is_an_owner_decision: true
+    effect_size: null
+    effect_unit: null
+    effect_ci_low: null
+    effect_ci_high: null
+    effect_n: null
+    effect_size_reason: >-
+      E1 cites a fold-change the paper reported (14.2x) and E2 a titer against a control the paper
+      reports as not-detected. A fold-change over a non-detect has no finite value, and mixing the
+      two into one effect_size would be a number this atlas computed rather than one either paper
+      reported.
+    zone: R
+    confidence: medium
+    expected_level: L2
+    expected_basis: direct_evidence_replicated
+    expected_level_reason: >-
+      two active direct_perturbation items, two distinct non-NULL independent_group values, one
+      distinct direction among them, no open `conflict` row of kind 'direction'. That is
+      assertion_level's L2 branch verbatim: n_direct > 0 AND n_direct_groups >= 2 AND
+      n_direct_directions <= 1.
+    plan:
+      ready: true
+      note: "ready to write assertion YAA:ASSERT:017a897a1a9054c2 with 2 evidence item(s)"
+      missing: []
+      blockers: []
+      warnings: []
+    evidence:
+      - key: E1
+        evidence_id: YAA:EV:a3092a401c302d0c
+        evidence_type: direct_perturbation
+        independent_group: group:avalos-princeton
+        strain_id: YAA:STRAIN:shy24
+        strain_label: "SHy24, bat1-delta in CEN.PK2-1C"
+        control_strain_id: YAA:STRAIN:shy23
+        control_strain_label: "SHy23, the wild-type control of the same series"
+        control_condition_id: null
+        measurement_id: YAA:MEAS:1e8f45029502a6d4
+        measurement_label: "14.2, quantity_kind fold_increase_in_isobutanol_production"
+        span_id: YAA:SPAN:9a52a8dc28ef4afc9dfd74dd94f410a6
+        span_offsets: "[31365, 31429)"
+        publication_id: doi:10.1016/j.ymben.2017.10.001
+        direction: increases
+        zone: R
+        confidence: medium
+        control_measurement_id: YAA:MEAS:dc0d5fef6b42e641   # NOT a column; 42 +/- 11 mg/L, SHy23
+        comparator_justification: >-
+          the control is named in the preceding sentence of the same figure panel: "When BAT2 is
+          deleted in CEN.PK2-1C (SHy25) isobutanol production (35 +/- 12 mg/L) remains
+          approximately the same as in the wild type control (42 +/- 11 mg/L), (SHy23), (Fig. 3b).
+          However, deletion of BAT1 (SHy24) results in a 14.2-fold increase in isobutanol
+          production". Same 48-h high-cell-density fermentation, same panel, differing by bat1Δ.
+        measurement_choice_justification: >-
+          SHy24 has exactly one promoted titer, 122 mg/L (YAA:MEAS:e52fb6b66fa8d889), and it is the
+          VALINE-FED condition -- "In the presence of valine, isobutanol titers of bat1Δ strains
+          are substantially decreased by as much as 80% to 269 +/- 16 mg/L and 122 +/- 8 mg/L with
+          (SHy16) and without (SHy24)" [33624, 33798). Citing it would attach a +valine number to a
+          claim the authors state for valine-free medium: "with valine removed from the media, we
+          observe an unprecedented 14.2-fold increase" [47942, 48087). The 14.2-fold row is the
+          valine-free comparison and is what the abstract leads with.
+
+      - key: E2
+        evidence_id: YAA:EV:405403e8e4094f4a
+        evidence_type: direct_perturbation
+        independent_group: group:koonthongkaew-chulalongkorn
+        strain_id: YAA:STRAIN:iboh-1bat1
+        strain_label: "IbOH-1bat1delta, CRISPR/Cas9 BAT1 knockout"
+        control_strain_id: YAA:STRAIN:iboh-1
+        control_strain_label: "IbOH-1, the isogenic BAT1-intact parent"
+        control_condition_id: null
+        measurement_id: YAA:MEAS:e02f80aee1c3706c
+        measurement_label: "0.866 g/L titer, YNB + 100 g/L glucose, 72 h"
+        span_id: YAA:SPAN:3d8e0f0e20774354aea1f0562f2741a8
+        span_offsets: "[27209, 27324)"
+        publication_id: doi:10.1016/j.btre.2026.e00959
+        direction: increases
+        zone: R
+        confidence: medium
+        control_measurement_id: null   # NOT a column; and see control_is_uncurated below
+        comparator_justification: >-
+          FIRST_BATCH.md R1 refused this claim for "no isogenic control exists". That is true of
+          the promoted `measurement` rows and false of the paper. Full text [22145, 22531): "To
+          investigate whether the mutation in the BAT1 gene of IbOH-1 affected Bat1 enzyme
+          function, isobutanol content was compared between G2-3-2 and the IbOH-1. The results
+          indicated that the isobutanol concentration in both strains was below the quantification
+          limit." Fig. 4 caption [22627, 22745): "Isobutanol concentration (g/L) from G2-3-2,
+          IbOH-1, and IbOH-1bat1delta (N.D. indicates not-detected amount of isobutanol)." And
+          [25664, 25825): "IbOH-1bat1delta demonstrated a significantly greater elevation in
+          isobutanol levels compared to the sub-quantified isobutanol content observed in IbOH-1."
+          IbOH-1 is the test strain minus the CRISPR deletion and nothing else, measured in the
+          same figure. R1's objection was right about the wrong control (the generic
+          YAA:STRAIN:wild-type-s-cerevisiae at 6.4 mg/L) and is answered by using the right one.
+        control_is_uncurated: >-
+          the control's VALUE is "not detected" and nobody curated a measurement row for a
+          non-detect. `measurement` has is_below_lod, detection_limit and is_upper_bound for
+          exactly this, so it is a curation gap, not a schema gap. It does not block this evidence
+          item: `evidence_item` has no control_measurement_id column at all, and J.3 requires a
+          stated control, not a second number. YAA:STRAIN:iboh-1 is a row in the atlas today.
+        measurement_choice_justification: >-
+          four titers are promoted for IbOH-1bat1delta -- 0.215 g/L (YPD, 100 g/L glucose), 0.866
+          g/L (YNB, 100 g/L glucose), 1.001 g/L (YNB, 150 g/L glucose) and 2.016 g/L (best shake
+          flask). YNB is "minimal YNB medium devoid of valine" [26887, 27004), making 0.866 g/L the
+          item whose condition is closest to E1's valine-free condition. A bonus, not a
+          requirement: the claim is a direction, and all four exceed a non-detect.
+        caveat_that_does_not_change_the_direction: >-
+          IbOH-1 is a UV mutagenesis product and its own BAT1 carries a C320T / I107T substitution.
+          The authors test whether that allele alone suffices and report it does not (isobutanol
+          below quantification in both G2-3-2 and IbOH-1), which is why they then deleted the gene.
+          So E2 contrasts bat1-delta against a hypomorph-or-neutral BAT1 allele rather than a
+          textbook wild type. That makes E2's effect size unquantifiable and leaves `increases`
+          untouched.
+
+    optional_third_evidence_item:
+      key: E3
+      offered_not_urged: true
+      evidence_id: YAA:EV:11d04fe1b54ece5c
+      evidence_type: direct_perturbation
+      independent_group: group:avalos-princeton   # the SAME group as E1
+      strain_id: YAA:STRAIN:shy104
+      strain_label: "SHy104, bat1-delta in BY4741"
+      control_strain_id: YAA:STRAIN:shy99
+      control_strain_label: "SHy99, wild-type BY4741"
+      measurement_id: YAA:MEAS:d33a41cb54d11bf7
+      measurement_label: "8.8, quantity_kind fold_increase"
+      span_id: YAA:SPAN:a6773db939f44975b6b8dbe80faf4b6a
+      span_offsets: "[48310, 48355)"
+      publication_id: doi:10.1016/j.ymben.2017.10.001
+      direction: increases
+      zone: R
+      confidence: medium
+      what_it_adds: >-
+        a third genetic background (BY4741 alongside CEN.PK2-1C and the industrial isolate), which
+        strengthens J.3 axis 2's n_organisms / n_condition_classes. It adds NO group, and the
+        rehearsal confirms the level is L2 with or without it.
+
+rehearsal:
+  method: >-
+    the live atlas was copied into a :memory: database with sqlite3.Connection.backup, so the walk
+    covers the five existing L1s as well as the new row. build_assertion ran there as curator
+    kangkon, kind human. The level was read out of the assertion_level view, never chosen.
+  variants:
+    - id: A
+      built: "E1 + E2 -- the proposal"
+      n_evidence: 2
+      n_direct: 2
+      n_direct_groups: 2
+      level: L2
+      derived_reason: direct_evidence_replicated
+      plan: {ready: true, missing: [], blockers: [], warnings: []}
+    - id: B1
+      built: "E1 alone (Princeton only)"
+      n_evidence: 1
+      n_direct: 1
+      n_direct_groups: 1
+      level: L1
+      derived_reason: direct_evidence
+    - id: B2
+      built: "E2 alone (Chulalongkorn only)"
+      n_evidence: 1
+      n_direct: 1
+      n_direct_groups: 1
+      level: L1
+      derived_reason: direct_evidence
+    - id: B3
+      built: "E1 via build_assertion, then E2 via attach_evidence -- the path this will take"
+      before: "level='L1' basis='direct_evidence'"
+      after: "level='L2' basis='direct_evidence_replicated'"
+      assertion_row_after: {direction: increases, created_by: kangkon, zone: R}
+      note: >-
+        the assertion row is identical before and after. Nothing recomputed a level, because there
+        is nowhere a level is kept. PLAN.md J.1 ("an assertion is never edited") and J.3 ("the
+        level is a view, not a column") are the same sentence seen from two ends, and this is the
+        first time the atlas has demonstrated it.
+    - id: B4
+      built: "E1 + E2, both mislabelled group:avalos-princeton"
+      n_evidence: 2
+      n_direct: 2
+      n_direct_groups: 1
+      level: L1
+      derived_reason: direct_evidence
+      note: >-
+        THE row that matters. The same two experiments, the same two papers, the same two numbers,
+        and it grades L1 -- the only thing that changed is the string in independent_group. That is
+        J.3's second axis doing the entire job, on real data, for the first time.
+    - id: B5
+      built: "E2 with independent_group = None"
+      plan_ready: false
+      refused_with: >-
+        evidence[1].independent_group: PLAN.md J.3 counts independence by group, not by
+        publication, because one lab publishing three times is not three independent observations.
+    - id: B6
+      built: "E1 + E3 + E2"
+      n_evidence: 3
+      n_direct: 3
+      n_direct_groups: 2
+      level: L2
+      derived_reason: direct_evidence_replicated
+    - id: B7
+      built: "E1 + E2 with E2's direction flipped to 'decreases'"
+      n_evidence: 2
+      n_direct: 2
+      n_direct_groups: 2
+      level: L1
+      derived_reason: direct_evidence
+      note: >-
+        discordance alone does NOT withhold the level -- it falls through the L2 branch
+        (n_direct_directions = 2) to the L1 branch. The NULL / 'direct_evidence_discordant' state
+        needs an OPEN `conflict` row of kind 'direction', which is a curator act under PLAN.md J.4
+        and which no module writes automatically.
+  traceability_walk:
+    whole_rehearsal_atlas:
+      n_walked: 6
+      n_closed: 6
+      n_broken: 0
+      breaks: {}
+      exit_code: 0
+    narrowed_to_the_new_assertion:
+      n_walked: 1
+      n_closed: 1
+      n_broken: 0
+      breaks: {}
+      exit_code: 0
+    note: >-
+      both evidence items close the literature arm through span -> publication; the analysis arm is
+      not involved, so the known dataset_unreachable gap does not arise.
+  live_atlas_recounted_afterwards:
+    assertion: 5
+    evidence_item: 5
+
+owner_decisions:
+  - id: D1
+    decision: "the sign convention on assertion.direction"
+    detail: >-
+      the five existing assertions have subject_type='modification', so direction='increases' reads
+      as "the deletion increased the titer". L2-1's subject is the GENE, and the same value now
+      reads "BAT1 increases isobutanol production", which is the opposite of what both papers
+      found. (a) "the direction the perturbation moved the product" = increases, consistent with
+      the five existing rows and with evidence_item.direction's documented meaning in
+      assertions.py ("the comparison against the control"); drafted above. (b) "the direction of
+      the subject's own effect" = decreases, the standard reading for a gene subject of an
+      affects_* predicate; reads correctly in a UI, costs a re-reading of the five existing rows,
+      and changes the assertion id to YAA:ASSERT:893939228cea1ef4 because direction is in
+      identity().
+    level_impact: none
+    level_impact_detail: >-
+      both were rehearsed and both return L2. assertion_level never reads assertion.direction; it
+      counts COUNT(DISTINCT e.direction) over the evidence rows only. This is a display and
+      semantics decision, not a level decision.
+  - id: D2
+    decision: "the two group slugs become permanent keys in COUNT(DISTINCT independent_group)"
+    detail: >-
+      group:avalos-princeton must also be the slug on doi:10.1186/s13068-019-1560-2 when that paper
+      is asserted on.
+  - id: D3
+    decision: "whether E3 is included"
+    detail: "safe either way; see rehearsal B6"
+  - id: D4
+    decision: "subject_type gene_group vs gene"
+    detail: >-
+      see why_the_subject_is_a_gene_group. gene_group is recommended on assembly grounds; it makes
+      this the first assertion in the atlas whose subject is not zone R.
+
+finding_for_whoever_owns_src:
+  where: "src/fermdb/curate/assertions.py, _check_evidence, the direction-mismatch warning"
+  finding: >-
+    under owner decision D1 option (b) the planner emits, on BOTH evidence items, "The derived
+    level will not reach L2 while both stand" -- and the view then returns L2. The warning is
+    accurate when the evidence items disagree with EACH OTHER; it is misleading when they all
+    agree with each other and merely differ from the assertion's own sign, because
+    assertion_level does not read assertion.direction at all.
+  reported_not_fixed: "src/ was out of scope this session"
+
+curation_tasks_this_turned_up:
+  - priority: 1
+    task: "curate YAA:STRAIN:iboh-1's non-detect from Fig. 4 of doi:10.1016/j.btre.2026.e00959"
+    why: >-
+      measurement has is_below_lod, detection_limit and is_upper_bound for exactly this. It would
+      put the control's number in the atlas rather than only in a draft, and would let a future
+      effect_size be computed as a lower bound. It does NOT block L2-1.
+  - priority: 2
+    task: "review the 17 pending `modifications` proposals on doi:10.1016/j.ymben.2017.10.001"
+    why: >-
+      two of them are the bat1-delta rows the atlas has never had (modifications[6] SHy24,
+      modifications[16] SHy104). The other fifteen are the ILV overexpressions, bat2-delta,
+      ilv6-delta, the mitochondrially-targeted ARO10 / LlAdhA-RE1 pair and the BAT1
+      complementation plasmid.
+  - priority: 3
+    task: "re-read FIRST_BATCH.md R1"
+    why: >-
+      its refusal is answered by the Fig. 4 control. If R1 is still wanted as a
+      modification-subject L1 on the Chulalongkorn paper, it is writable today with
+      control_strain_id = YAA:STRAIN:iboh-1.
+  - priority: 4
+    task: "curate titers for JWY05, JWY06 and JWY07 in doi:10.1186/s13068-019-1486-8"
+    why: >-
+      their curated genotype spans carry delta-bat1, delta-bat2 and delta-bat1 delta-bat2, and all
+      three strain rows exist with zero measurements. Curating those titers would make
+      group:boles-goethe-frankfurt a THIRD independent group on this same assertion. The view has
+      no level above L2 for direct evidence, so the grade would not change -- but n_direct_groups
+      = 3 is the number a reader should see.
