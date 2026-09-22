@@ -957,9 +957,20 @@ def _plan_configuration(
     Two columns a payload cannot supply, refused rather than guessed, in the manner of
     `strain.organism_id` and `bottleneck.observation_type`:
 
-    * `host_strain_id` -- the extraction schema has no host field. The configuration's host is the
-      difference between a yeast build and an *E. coli* one, and inferring it from whichever strain
-      the paper mentions most is the cross-paper guessing CONVENTIONS.md forbids.
+    * `host_strain_id` -- the configuration's host is the difference between a yeast build and an
+      *E. coli* one, and inferring it from whichever strain the paper mentions most is the
+      cross-paper guessing CONVENTIONS.md forbids.
+
+      **Correction, 2026-09-22.** This paragraph used to begin "the extraction schema has no host
+      field", and that was false: `pathway_configurations` carries `strain_name_as_reported`
+      ("Which strain this configuration belongs to, as written"), and 31 of the 46 configurations
+      in the queue populate it. The refusal stands, but not for the reason given -- resolving that
+      name would be an ordinary strain lookup, no different from the one `_plan_measurement` does.
+
+      What actually keeps a configuration unpromotable is the *other* bullet, which is still
+      true. So wiring the host up would move nothing: every configuration would refuse one line
+      later on `product_id` instead. That is worth knowing before someone spends an afternoon on
+      the host and finds the table still empty.
     * `product_id` -- likewise absent. A configuration is *for* a product, and defaulting it to
       isobutanol because this is an isobutanol atlas would file a 3-HP or n-butanol build as an
       isobutanol one.

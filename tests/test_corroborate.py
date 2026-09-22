@@ -228,16 +228,50 @@ def test_a_proposal_with_no_quote_cannot_be_corroborated() -> None:
     assert report.verdict == REVIEW
 
 
-def test_pathway_configurations_have_no_subject_to_corroborate() -> None:
-    """Deliberate: the extraction schema carries no host, so these always go to a reader.
+def test_a_configuration_is_judged_on_its_strain_not_excluded_for_lacking_one() -> None:
+    """The schema does carry a subject, and saying otherwise printed a false reason for months.
 
-    Mirrors `curate.promote._plan_configuration`, which refuses to guess the host rather than
-    inventing one. If a host field is ever added there, it belongs in `IDENTIFYING_FIELDS` too.
+    A configuration whose quote names the strain it is filed against is as self-evidencing as any
+    other record. Most are not -- only 4 of the 46 in the queue -- but they now reach review with
+    the true reason attached rather than "no identifying fields are defined for this kind".
     """
     report = corroborate_payload(
-        "T", "pathway_configurations", payload("a cytosolic Ehrlich pathway was assembled")
+        "T",
+        "pathway_configurations",
+        payload(
+            "Strain JWY23 was constructed by integrating the Ehrlich pathway",
+            strain_name_as_reported="JWY23",
+        ),
+    )
+    assert report.verdict == ACCEPT, report.note
+
+
+def test_a_configuration_with_no_strain_still_goes_to_review() -> None:
+    """`strain_name_as_reported` is nullable, and 15 of 46 in the queue are null."""
+    report = corroborate_payload(
+        "T",
+        "pathway_configurations",
+        payload("a cytosolic Ehrlich pathway was assembled", strain_name_as_reported=None),
     )
     assert report.verdict == REVIEW
+
+
+def test_a_configurations_enzyme_list_is_not_treated_as_a_plural_subject() -> None:
+    """A pathway names several enzymes because it has several. That is not the multi-subject bug.
+
+    `enzymes_as_reported` is deliberately absent from IDENTIFYING_FIELDS: listing it would make
+    `_names_one_thing` reject every configuration for a property that is correct.
+    """
+    report = corroborate_payload(
+        "T",
+        "pathway_configurations",
+        payload(
+            "Strain JWY23 expressed ALS, KARI, DHAD, KDC, and ADH",
+            strain_name_as_reported="JWY23",
+            enzymes_as_reported=["ALS", "KARI", "DHAD", "KDC", "ADH"],
+        ),
+    )
+    assert report.verdict == ACCEPT, report.note
 
 
 # --------------------------------------------------------------------------------------------

@@ -78,10 +78,21 @@ __all__ = [
 #: the parts that decide which row this becomes. A measurement's `basis` or `time_h` being absent
 #: from the quote is normal and says nothing about whether the row is correctly attributed.
 #:
-#: `pathway_configurations` is deliberately absent. Its payload carries no subject at all -- the
-#: extraction schema has no host field, which is why `curate.promote._plan_configuration` refuses
-#: to guess one -- so there is nothing here to corroborate and every configuration goes to review
-#: by construction. That is correct rather than a gap.
+#: `pathway_configurations` was excluded here until 2026-09-22 on the stated grounds that its
+#: payload "carries no subject at all". **That was wrong**, and reading a payload rather than a
+#: docstring is what showed it: the schema has carried `strain_name_as_reported` all along,
+#: described as "Which strain this configuration belongs to, as written". 31 of 46 configurations
+#: in the queue name one.
+#:
+#: The practical effect of the error was small -- only 4 of those 31 name a strain their own quote
+#: contains, so nearly all of them route to review either way -- but the *reason* printed beside
+#: them was false, and a reader told "no identifying fields are defined for this kind" would draw
+#: a different conclusion than one told "this configuration's quote does not name the strain it is
+#: filed against". The second is true and is the finding.
+#:
+#: `enzymes_as_reported` is deliberately NOT listed. A configuration names several enzymes because
+#: a pathway has several, so the plurality that condemns a strain field is correct here, and
+#: `_names_one_thing` would reject every configuration for a property that is not a defect.
 IDENTIFYING_FIELDS: Final[Mapping[str, tuple[tuple[str, str], ...]]] = {
     # (payload key, what kind of thing it is)
     "strains": (("name_as_reported", "text"),),
@@ -100,6 +111,7 @@ IDENTIFYING_FIELDS: Final[Mapping[str, tuple[tuple[str, str], ...]]] = {
         ("unit", "unit"),
     ),
     "conditions": (("value_as_reported", "text"),),
+    "pathway_configurations": (("strain_name_as_reported", "text"),),
     "bottlenecks": (("node_as_reported", "text"),),
     "part_expression_records": (
         ("part_as_reported", "text"),
