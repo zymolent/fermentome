@@ -210,3 +210,33 @@ def test_a_model_verdict_is_stored_unverified(atlas: sqlite3.Connection, tmp_pat
 def test_an_unknown_decider_kind_is_refused(tmp_path: Path) -> None:
     with pytest.raises(ScreeningError, match="decided_by_kind"):
         load_decisions(_file(tmp_path, _row("doi:10.1/drop", kind="robot")))
+
+
+def test_publication_keys_reaches_a_paper_by_doi_and_by_pmid(atlas: sqlite3.Connection) -> None:
+    """The join bug that cost 298 verdicts, pinned.
+
+    300 real publications carry a `pmid:` id with an empty `doi` column. A DOI-keyed import drops
+    every one of them and reports a clean run, which is how it went unnoticed: the only symptom
+    was a symmetric 298-row remainder on both sides of the join, and a symmetric remainder reads
+    like two disjoint corpora rather than one missing identifier.
+    """
+    from fermdb.literature.screening import publication_keys
+
+    atlas.executescript(
+        """
+        INSERT INTO publication (id, doi, pmid, zone, evidence, confidence) VALUES
+            ('doi:10.1/withdoi', '10.1/WithDoi', '12345', 'R', 'test', 'low'),
+            ('pmid:99887766', NULL, '99887766', 'R', 'test', 'low');
+        """
+    )
+    atlas.commit()
+    keys = publication_keys(atlas)
+
+    # Reachable by either identifier, however the other side spells it.
+    assert keys["doi:10.1/withdoi"] == "doi:10.1/withdoi"
+    assert keys["pmid:12345"] == "doi:10.1/withdoi"
+    # The row a DOI-only join would silently lose.
+    assert keys["pmid:99887766"] == "pmid:99887766"
+    assert not any(k.startswith("doi:") and v == "pmid:99887766" for k, v in keys.items())
+    # The id itself always resolves, so a caller holding a fermdb id needs no special case.
+    assert keys["doi:10.1/keep"] == "doi:10.1/keep"

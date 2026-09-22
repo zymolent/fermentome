@@ -178,6 +178,33 @@ def install_decisions(
     return counts
 
 
+def publication_keys(conn: sqlite3.Connection) -> dict[str, str]:
+    """Every identifier a publication can be reached by, mapped to its `publication.id`.
+
+    Exists because joining an outside screening tool to this atlas on DOI alone is wrong, and
+    wrong in a way that looks fine. **300 of these publications carry a `pmid:` id and an empty
+    `doi` column.** A DOI-keyed import silently dropped all 300 and reported a clean run; the
+    discrepancy only surfaced because a screening agent imported 1,308 rows against a gap measured
+    at 1,606, and the agent turned out to be right.
+
+    The tell was there earlier and was misread: the same 298 came out of *both* sides of the join,
+    once as "atlas rows the tool has not seen" and once as "tool rows the atlas does not hold". A
+    join that leaves a symmetric remainder is one identifier short, not two disjoint corpora.
+
+    Keys are `doi:<lowercased>`, `pmid:<digits>`, and the id itself, so a caller can look up
+    whatever the other side happens to hold.
+    """
+    keys: dict[str, str] = {}
+    for row in conn.execute("SELECT id, doi, pmid FROM publication"):
+        pub = str(row["id"]).lower()
+        keys[pub] = pub
+        if row["doi"]:
+            keys["doi:" + str(row["doi"]).strip().lower()] = pub
+        if row["pmid"]:
+            keys["pmid:" + str(row["pmid"]).strip()] = pub
+    return keys
+
+
 def working_ids(conn: sqlite3.Connection) -> tuple[str, ...]:
     """Publications in scope: everything the atlas holds, minus what the owner rejected.
 
