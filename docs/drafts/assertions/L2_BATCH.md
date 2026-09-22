@@ -406,9 +406,39 @@ the owner should know that before it is the precedent.
 3. **`FIRST_BATCH.md` R1 should be re-read**, not because it was careless but because its refusal
    is now answered (§2). If R1 is still wanted as a `modification`-subject L1 on the Chulalongkorn
    paper, it is writable today with `control_strain_id = YAA:STRAIN:iboh-1`.
-4. **The `bat1Δ`/`bat2Δ` strains in `doi:10.1186/s13068-019-1486-8`** — JWY05, JWY06, JWY07 carry
+4. ~~**The `bat1Δ`/`bat2Δ` strains in `doi:10.1186/s13068-019-1486-8`** — JWY05, JWY06, JWY07 carry
    `Δbat1`, `Δbat2` and `Δbat1 Δbat2` in their curated genotype spans, with no promoted titers and
    no `modification` rows. If those titers were curated, `group:boles-goethe-frankfurt` would
    become a **third** independent group on this same assertion. The view has no L-above-L2 for
    direct evidence, so it would not change the grade — but `n_direct_groups = 3` is the number a
-   reader should see.
+   reader should see.~~
+
+   **STRUCK 2026-09-22. Wrong on both counts, and acting on it would have cost the atlas its only
+   L2.** This item was written from the genotype spans without reading what the paper concluded.
+   Both quotes below were re-sliced from the stored asset at the offsets given and verified
+   character-for-character before this correction was written.
+
+   *There are no titers to curate.* `[17550, 17687)`: *"Bat1/2-deficient strain JWY07 with its
+   blocked valine biosynthesis was not able to grow to a sufficient OD for fermentation
+   experiments. "* JWY07 was never fermented, and the paper gives no isobutanol number for JWY05
+   or JWY06 either.
+
+   *And the direction is opposite.* `[17687, 17899)`: *"However, even slight reductions of the
+   valine synthesis by deleting only BAT1 (JWY05) or BAT2 (JWY06) had negative effects on growth
+   in media without valine and on isobutanol production, in contrast to other work"* — the paper
+   names the disagreement itself.
+
+   So Boles is not a third group agreeing. It is a **contradiction**, and a contradiction is not
+   free: `assertion_level` withholds L2 while `n_direct_directions > 1`, so attaching a Boles
+   `bat1Δ` result as direct evidence would take this assertion from L2 to **L1**. Rehearsed
+   against an in-memory copy with a clearly-marked synthetic row, since no real titer exists:
+   `n_direct_groups` 2→3 and the level **demotes**. The claim above that "it would not change the
+   grade" is the exact opposite of what the view does.
+
+   The demotion is the right *outcome* — a contradicting result is a finding — but it must be
+   visible. When this was first rehearsed, `attach_evidence` performed it in complete silence;
+   that defect is fixed in `3c0e0ea`, which now warns on any move to a weaker level and reports
+   the disagreement.
+
+   **What to do instead:** curate a `span` over `[17687, 17899)` and record a `conflict` between
+   two assertions, which is what PLAN.md J.4 asks for. Do not curate titers that do not exist.
