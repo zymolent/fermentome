@@ -40,8 +40,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 from . import curate
 from .config import Settings
@@ -740,6 +743,48 @@ def cmd_curate_corroborate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _organism_spread(conn: sqlite3.Connection, supplied: Mapping[str, Any]) -> str | None:
+    """Refuse one `--organism` stamped across strains from several papers. None means proceed.
+
+    `promote` builds `supplied` once and hands the same mapping to every task in the bulk path,
+    so `--organism` applied without `--task` sets one organism on every accepted strain there is.
+    Measured on the queue of 2026-09-22 that is 222 strains from 11 publications, of which at
+    least 19 are *E. coli* -- and the yeast ones are not one organism either, since BY4741 and
+    CEN.PK2-1C have separate `organism` rows in this atlas.
+
+    That is precisely the cross-paper guessing `_plan_configuration` refuses to do for
+    `host_strain_id`, done at scale, silently, through a different door. `strain.organism_id` is
+    not a formality: it is what separates a yeast build from a bacterial one, and it is the field
+    every downstream organism filter trusts.
+
+    Within a single publication the curator has read that paper and can assert its organism, so
+    that stays allowed. Across publications they demonstrably have not, so it is refused with the
+    spread named and the per-paper command spelled out.
+    """
+    if not supplied.get("organism_id"):
+        return None
+    rows = conn.execute(
+        "SELECT publication_id, COUNT(*) n FROM curation_task "
+        "WHERE status IN ('accepted','edited') AND record_kind = 'strains' "
+        "GROUP BY publication_id ORDER BY n DESC"
+    ).fetchall()
+    if len(rows) <= 1:
+        return None
+    total = sum(int(r["n"]) for r in rows)
+    listing = "\n".join(f"    {r['n']:>4}  {r['publication_id']}" for r in rows)
+    return (
+        f"refusing --organism {supplied['organism_id']!r} for a bulk promotion: it would be "
+        f"written onto {total} accepted strain proposal(s) from {len(rows)} publications.\n"
+        f"{listing}\n"
+        "One organism across several papers is a guess about papers nobody read for this run, "
+        "and organism_id is what separates a yeast build from a bacterial one.\n"
+        "Promote one publication at a time, or one task at a time:\n"
+        "    fermdb curate promote --task <id> --organism <id> --curator NAME --reason ...\n"
+        "Promotions that need no organism are unaffected -- rerun without --organism to write "
+        "those first."
+    )
+
+
 def cmd_curate_promote(args: argparse.Namespace) -> int:
     """Write the rows that accepted proposals describe, or say precisely why each cannot."""
     from .curate.promote import NotPromotable, plan_promotion, promote, promote_ready
@@ -762,6 +807,12 @@ def cmd_curate_promote(args: argparse.Namespace) -> int:
     }
     curator = Curator(name=args.curator, kind="human")
     try:
+        if not args.task:
+            spread = _organism_spread(conn, supplied)
+            if spread is not None:
+                print(spread, file=sys.stderr)
+                return 2
+
         if args.task:
             task = curate.get_task(conn, args.task)
             if args.dry_run:

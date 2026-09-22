@@ -864,3 +864,86 @@ def test_a_part_expression_promotes_into_zone_r_with_the_papers_wording_kept(
     assert row["zone"] == "R"
     assert "Su9 presequence" in row["evidence"]
     assert "alsS from Bacillus subtilis" in row["evidence"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The bulk `--organism` guard (fermdb.cli._organism_spread)
+# ---------------------------------------------------------------------------------------------
+
+
+def _accept_strain(conn: sqlite3.Connection, task_id: str, publication_id: str) -> None:
+    """A minimal accepted strain proposal, with the publication and extraction it hangs off.
+
+    The audit columns are all supplied because `curation_task` CHECKs that an accepted row
+    carries curator, kind, resolved_at and reason together -- the trail is not optional.
+    """
+    conn.execute(
+        "INSERT OR IGNORE INTO publication (id, year, zone, evidence, confidence) "
+        "VALUES (?, 2020, 'R', 'test fixture', 'low')",
+        (publication_id,),
+    )
+    extraction_id = f"YAA:EXTR:{publication_id.rsplit(':', 1)[-1]}"
+    conn.execute(
+        "INSERT OR IGNORE INTO extraction (id, publication_id, extractor, extractor_version, "
+        "model, prompt_version, input_hash, review_state, zone) "
+        "VALUES (?, ?, 'test', '1', 'test-model', 'v1', ?, 'proposed', 'I')",
+        (extraction_id, publication_id, f"hash-{publication_id}"),
+    )
+    conn.execute(
+        "INSERT INTO curation_task (id, extraction_id, publication_id, record_kind, record_path, "
+        "payload, proposal_hash, status, curator, curator_kind, resolved_at, resolution_reason, "
+        "zone) VALUES (?,?,?,'strains',?,'{}',?,'accepted','kangkon','human',"
+        "'2026-09-22T00:00:00+00:00','test', 'I')",
+        (
+            task_id,
+            extraction_id,
+            publication_id,
+            f"strains[{task_id}]",  # UNIQUE (extraction_id, record_path)
+            f"hash-{task_id}",
+        ),
+    )
+
+
+def test_one_organism_is_refused_across_several_publications(atlas: sqlite3.Connection) -> None:
+    """The footgun this exists for, measured on the real queue before it was built.
+
+    `promote` builds `supplied` once and hands the same mapping to every task in the bulk path,
+    so a single `--organism` reaches every accepted strain there is. On 2026-09-22 that was 222
+    strains from 11 publications, at least 19 of them *E. coli* -- and it is the field that
+    separates a yeast build from a bacterial one.
+    """
+    from fermdb.cli import _organism_spread
+
+    _accept_strain(atlas, "YAA:CTASK:s1", "YAA:PUB:test")
+    _accept_strain(atlas, "YAA:CTASK:s2", "YAA:PUB:other")
+    atlas.commit()
+
+    note = _organism_spread(atlas, {"organism_id": "YAA:ORG:scer"})
+    assert note is not None
+    assert "2 publications" in note
+    assert "YAA:PUB:test" in note and "YAA:PUB:other" in note
+    # It must say what to do instead, or it is an obstacle rather than a guard.
+    assert "--task" in note
+
+
+def test_one_organism_is_allowed_within_a_single_publication(atlas: sqlite3.Connection) -> None:
+    """A curator who has read one paper can assert its organism. Across papers they have not."""
+    from fermdb.cli import _organism_spread
+
+    _accept_strain(atlas, "YAA:CTASK:s1", "YAA:PUB:test")
+    _accept_strain(atlas, "YAA:CTASK:s2", "YAA:PUB:test")
+    atlas.commit()
+
+    assert _organism_spread(atlas, {"organism_id": "YAA:ORG:scer"}) is None
+
+
+def test_promotions_that_need_no_organism_are_never_blocked(atlas: sqlite3.Connection) -> None:
+    """The guard is about one flag, not about bulk promotion, which is the useful path."""
+    from fermdb.cli import _organism_spread
+
+    _accept_strain(atlas, "YAA:CTASK:s1", "YAA:PUB:test")
+    _accept_strain(atlas, "YAA:CTASK:s2", "YAA:PUB:other")
+    atlas.commit()
+
+    assert _organism_spread(atlas, {}) is None
+    assert _organism_spread(atlas, {"basis": "consumed"}) is None
