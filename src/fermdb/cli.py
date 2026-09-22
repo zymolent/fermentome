@@ -99,6 +99,7 @@ from .literature.rescreen import (
     summary_lines,
     write_proposals,
 )
+from .literature.screening import corpus_counts
 from .llm import (
     FileCache,
     LlmConfig,
@@ -250,6 +251,29 @@ def cmd_literature_status(args: argparse.Namespace) -> int:
             f"{last_hit:>9}{drift:>7}{status.included:>6}{status.needs_full_text:>8}"
             f"{status.excluded:>6}"
         )
+
+    # The counts above are DISCOVERY: what the queries returned and how discovery.py triaged it.
+    # They are not a reading list, and every figure quoted off `publication` was read as one until
+    # the owner's own screening was loaded on 2026-09-22. Printed here so the two are never again
+    # confused by someone glancing at this command.
+    conn = open_db(settings.db_file)
+    try:
+        counts = corpus_counts(conn)
+    finally:
+        conn.close()
+    print()
+    print(
+        f"corpus: {counts['discovered']} discovered, {counts['excluded']} rejected by a curator, "
+        f"{counts['working']} in the working set"
+    )
+    print(
+        f"  of the working set: {counts['included']} affirmatively included, "
+        f"{counts['borderline']} borderline, {counts['undecided']} never screened"
+    )
+    print(
+        "  'never screened' is not 'rejected'. Discovery found these; nobody has read them yet, "
+        "and\n  they stay in scope until somebody does."
+    )
     return 0
 
 
