@@ -58,6 +58,7 @@ to anything that reads it" failure the migrations module keeps finding. `measure
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sqlite3
@@ -294,6 +295,11 @@ def _strain_id(name: str) -> str:
     return f"YAA:STRAIN:{_slug(name)}"
 
 
+def _stable_digest(text: str) -> str:
+    """A deterministic 16-hex id fragment. `hash()` is salted per process and would not do."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
 def _measurement_id(task: Task) -> str:
     """Derived from the proposal hash, so re-promoting the same proposal is a no-op."""
     return f"YAA:MEAS:{task.proposal_hash[:16]}"
@@ -437,6 +443,9 @@ def _plan_measurement(
             "source_locator": str(payload.get("source_locator") or "text"),
             "is_below_lod": 1 if payload.get("is_below_lod") else 0,
             "is_upper_bound": 1 if payload.get("is_upper_bound") else 0,
+            # Carried so `_write_measurement` can hang a `sample` off it. NOT a measurement
+            # column -- see `_sample_for`.
+            "time_h": _timepoint(payload),
         },
         missing=tuple(missing),
         blockers=tuple(blockers),
@@ -494,16 +503,79 @@ def _write_genotype(
     )
 
 
+def _timepoint(payload: Mapping[str, Any]) -> float | None:
+    """The hour the reading was taken, if the paper stated one. Never inferred.
+
+    `extract/schemas.py` asks for `time_h` on every measurement and 43% of the phase-1 batch
+    carries one. Anything unparseable returns None rather than a guess: a wrong timepoint is worse
+    than no timepoint, because it looks like a measured fact.
+    """
+    raw = payload.get("time_h")
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        hours = float(raw)
+    except (TypeError, ValueError):
+        return None
+    return hours if hours >= 0 else None
+
+
+def _sample_for(conn: sqlite3.Connection, plan: PromotionPlan) -> str | None:
+    """The `sample` a timed measurement hangs off, created if this is the first at that hour.
+
+    **Why a sample and not a column on `measurement`.** Until now the timepoint was read,
+    transported and dropped at this exact line, and the atlas holds the consequence: BSW205 with a
+    titer of 1.62 g/L and another of 230 mg/L, same strain, same paper, same locator, nothing to
+    tell them apart. They are 24 h and 48 h of one fermentation, and isobutanol is volatile, so
+    the paper is consistent and the atlas lost the fact that makes it so.
+
+    The schema already models this correctly and `measurement` is not where it goes: `sample`
+    carries `time_h`, because a timepoint is a property of **the sample drawn**, not of the
+    condition the culture was grown under -- 24 h and 48 h share one `condition_context`. Adding
+    `measurement.time_h` would give the schema two homes for one fact and they would drift.
+
+    `condition_context_id` is left NULL, and that is allowed rather than sloppy: the column is
+    nullable, and CONVENTIONS' "no sample enters a contrast without an approved condition context"
+    governs **contrasts**, not a sample's existence. Filling it is the next iteration's job.
+
+    This is the chassis only. It preserves a fact that was being destroyed, so that the richer
+    `condition_context` work can be done later against real rows instead of re-derived from spans.
+    """
+    time_h = plan.row.get("time_h")
+    strain_id = plan.row.get("strain_id")
+    if time_h is None or not strain_id:
+        return None
+
+    # Deterministic, like every other id here: promoting two measurements from one paper at one
+    # hour on one strain must reuse the sample, not make a second.
+    digest = _stable_digest(f"{plan.row['publication_id']}|{strain_id}|{time_h}")
+    sample_id = f"YAA:SAMPLE:{digest}"
+    conn.execute(
+        "INSERT INTO sample (id, strain_id, time_h, zone, evidence, confidence) "
+        "VALUES (?,?,?,'R',?,'medium') ON CONFLICT(id) DO NOTHING",
+        (
+            sample_id,
+            strain_id,
+            time_h,
+            f"the {time_h} h reading of {strain_id} in {plan.row['publication_id']}, from the "
+            f"paper's own stated timepoint; condition_context not yet curated",
+        ),
+    )
+    return sample_id
+
+
 def _write_measurement(
     conn: sqlite3.Connection, plan: PromotionPlan, *, evidence: str, confidence: str
 ) -> bool:
+    sample_id = _sample_for(conn, plan)
     conn.execute(
-        "INSERT INTO measurement (id, strain_id, publication_id, quantity_kind, product_id, "
-        "value_as_reported, unit_as_reported, basis, source_locator, is_below_lod, "
+        "INSERT INTO measurement (id, sample_id, strain_id, publication_id, quantity_kind, "
+        "product_id, value_as_reported, unit_as_reported, basis, source_locator, is_below_lod, "
         "is_upper_bound, zone, evidence, confidence) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
         (
             plan.row["id"],
+            sample_id,
             plan.row["strain_id"],
             plan.row["publication_id"],
             plan.row["quantity_kind"],

@@ -871,6 +871,122 @@ def test_a_part_expression_promotes_into_zone_r_with_the_papers_wording_kept(
 # ---------------------------------------------------------------------------------------------
 
 
+def _promote_strain(conn: sqlite3.Connection) -> None:
+    """A measurement cannot promote before its subject exists -- the promoter refuses it."""
+    P.promote(
+        conn,
+        "YAA:CTASK:strain",
+        curator=HUMAN,
+        reason="subject first",
+        supplied={"organism_id": "YAA:ORG:scer"},
+    )
+
+
+def _set_time(conn: sqlite3.Connection, task_id: str, value: object) -> None:
+    payload = json.loads(
+        conn.execute("SELECT payload FROM curation_task WHERE id = ?", (task_id,)).fetchone()[
+            "payload"
+        ]
+    )
+    payload["time_h"] = value
+    conn.execute(
+        "UPDATE curation_task SET payload = ? WHERE id = ?", (json.dumps(payload), task_id)
+    )
+    conn.commit()
+
+
+def test_a_stated_timepoint_becomes_a_sample_rather_than_being_dropped(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The chassis for time. Until this, the timepoint was read, carried and discarded.
+
+    `measurement` has no time column and should not get one: `sample.time_h` already holds it,
+    because a timepoint is a property of the sample drawn rather than of the condition the culture
+    was grown under. Two readings at 24 h and 48 h share one condition and differ in when somebody
+    looked.
+    """
+    _set_time(atlas, "YAA:CTASK:meas", 24)
+    _promote_strain(atlas)
+    result = P.promote(atlas, "YAA:CTASK:meas", curator=HUMAN, reason="checked")
+    row = atlas.execute(
+        "SELECT sample_id FROM measurement WHERE id = ?", (result.row_id,)
+    ).fetchone()
+    assert row["sample_id"] is not None
+    sample = atlas.execute(
+        "SELECT strain_id, time_h, condition_context_id, zone FROM sample WHERE id = ?",
+        (row["sample_id"],),
+    ).fetchone()
+    assert sample["time_h"] == 24
+    assert sample["strain_id"] == "YAA:STRAIN:bsw191"
+    assert sample["zone"] == "R"
+    # Nullable on purpose: CONVENTIONS' "no sample enters a contrast without an approved condition
+    # context" governs contrasts, not whether the sample may exist. Filling it is a later pass.
+    assert sample["condition_context_id"] is None
+
+
+def test_a_measurement_with_no_stated_time_gets_no_sample(atlas: sqlite3.Connection) -> None:
+    """A timepoint is never inferred. 57% of the batch states none, and absence is not zero."""
+    _promote_strain(atlas)
+    result = P.promote(atlas, "YAA:CTASK:meas", curator=HUMAN, reason="checked")
+    row = atlas.execute(
+        "SELECT sample_id FROM measurement WHERE id = ?", (result.row_id,)
+    ).fetchone()
+    assert row["sample_id"] is None
+    assert atlas.execute("SELECT count(*) FROM sample").fetchone()[0] == 0
+
+
+def test_an_unparseable_timepoint_is_dropped_rather_than_guessed(
+    atlas: sqlite3.Connection,
+) -> None:
+    """A wrong timepoint is worse than none: it looks like a measured fact."""
+    _set_time(atlas, "YAA:CTASK:meas", "after two days")
+    _promote_strain(atlas)
+    result = P.promote(atlas, "YAA:CTASK:meas", curator=HUMAN, reason="checked")
+    row = atlas.execute(
+        "SELECT sample_id FROM measurement WHERE id = ?", (result.row_id,)
+    ).fetchone()
+    assert row["sample_id"] is None
+
+
+def test_two_measurements_at_one_hour_share_one_sample(atlas: sqlite3.Connection) -> None:
+    """The sample id is derived, so a second reading at the same hour reuses it.
+
+    A titer and a yield taken from the same flask at 24 h are two measurements of ONE sample. If
+    each made its own, the atlas would claim two cultures where the paper describes one.
+    """
+    _set_time(atlas, "YAA:CTASK:meas", 24)
+    _promote_strain(atlas)
+    first = P.promote(atlas, "YAA:CTASK:meas", curator=HUMAN, reason="a")
+
+    payload = json.loads(
+        atlas.execute("SELECT payload FROM curation_task WHERE id = 'YAA:CTASK:meas'").fetchone()[
+            "payload"
+        ]
+    )
+    payload["quantity_kind"] = "yield"
+    payload["basis"] = "consumed"
+    payload["value"] = 0.31
+    payload["unit"] = "g/g"
+    atlas.execute(
+        "INSERT INTO curation_task (id, extraction_id, publication_id, record_path, record_kind, "
+        "payload, status, priority, attempt_count, proposal_hash, curator, curator_kind, "
+        "resolved_at, resolution_reason, zone) "
+        "VALUES ('YAA:CTASK:meas2', 'YAA:EXTR:test', 'YAA:PUB:test', 'measurements[1]', "
+        "'measurements', ?, 'accepted', 1, 0, 'hash-meas2', 'kangkon', 'human', "
+        "'2026-09-20T00:00:00Z', 'checked', 'I')",
+        (json.dumps(payload),),
+    )
+    atlas.commit()
+    second = P.promote(atlas, "YAA:CTASK:meas2", curator=HUMAN, reason="b")
+
+    ids = atlas.execute(
+        "SELECT DISTINCT sample_id FROM measurement WHERE id IN (?, ?)",
+        (first.row_id, second.row_id),
+    ).fetchall()
+    assert len(ids) == 1, "one flask at one hour is one sample"
+    assert atlas.execute("SELECT count(*) FROM sample").fetchone()[0] == 1
+
+
 def _accept_strain(conn: sqlite3.Connection, task_id: str, publication_id: str) -> None:
     """An accepted `strains` proposal."""
     _accept_task(conn, task_id, publication_id, "strains")
