@@ -944,8 +944,16 @@ CREATE TABLE analysis_result (
     kind              TEXT NOT NULL,
     -- Points at Parquet on disk, never a BLOB in the database.
     payload_ref       TEXT NOT NULL,
+    -- The deposit the analysed samples came from. PLAN.md J.5's analysis arm reads
+    -- `assertion -> evidence_item -> analysis_result -> dataset -> accession`, and without this
+    -- column the walk stopped one hop short of the only identifier an outside reader can check.
+    -- Nullable because an analysis can span deposits or predate one; `query traceability` reports
+    -- a NULL here as a gap it could not follow rather than as a broken chain.
+    dataset_id        TEXT REFERENCES dataset(id),
     zone              TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I'))
 );
+
+CREATE INDEX analysis_result_by_dataset ON analysis_result(dataset_id);
 
 -- Every quantitative experimental result, production and phenotype alike, is one row.
 CREATE TABLE measurement (
@@ -2347,3 +2355,78 @@ CREATE INDEX gene_annotation_by_term ON gene_annotation(source, term_id);
 -- the first.
 CREATE UNIQUE INDEX gene_annotation_dedup
     ON gene_annotation(gene_group_id, source, term_id, COALESCE(evidence_code, ''));
+
+-- A recorded doubt about a specific row, raised by a named detector against a stated threshold.
+--
+-- The atlas already records what a source said (Zone R), what a parse made of it (Zone H) and
+-- what a model inferred (Zone I). What it could not record until now is "this row is probably
+-- wrong, and here is the statistic that says so" -- which is a different kind of statement from
+-- all three, because it is *about* a row rather than a claim the row makes.
+--
+-- Three rules this table exists to enforce, each learned from a specific incident:
+--
+--   * A flag NEVER deletes and never edits the row it is about. SRR16481343 in SRP342112 is
+--     declared as the parent strain and looks like a producer; the cheap fix is to relabel it to
+--     whatever it resembles, and that fix is circular -- it uses the expression data to repair
+--     the metadata and then analyses the data under the repaired metadata. The row stays as the
+--     submitter deposited it, and the doubt sits beside it.
+--   * A flag is machine-readable so that downstream code can honour it WITHOUT being asked.
+--     `omics.contrasts.refusals` consults this table, so a quarantined sample cannot silently
+--     enter a future contrast because somebody forgot. That is the whole point of storing the
+--     doubt rather than writing it in a report.
+--   * A flag carries its detector, its statistic and its threshold, so it can be recomputed,
+--     argued with and cleared. A doubt with no number behind it is an opinion, and opinions
+--     do not get to exclude data.
+--
+-- `zone` is fixed at 'I': a detector's verdict is an inference about data, never data itself.
+CREATE TABLE data_quality_flag (
+    id           TEXT PRIMARY KEY,
+    -- Polymorphic on purpose: the same detector vocabulary applies to a sequencing run, a
+    -- measurement read out of a paper, and a publication that turns out to be a duplicate.
+    target_type  TEXT NOT NULL CHECK (target_type IN ('sample', 'sra_run', 'measurement',
+                                                      'publication', 'strain', 'analysis_result')),
+    target_id    TEXT NOT NULL,
+    kind         TEXT NOT NULL CHECK (kind IN (
+                     -- the declared label does not match what the data looks like
+                     'mislabel_suspected',
+                     -- the sample does not agree with its own declared replicates
+                     'replicate_incoherent',
+                     -- the same observation is already in the atlas under another id
+                     'redundant_record',
+                     -- two rows of one library counted as two biological observations
+                     'technical_replicate',
+                     -- the value is outside what the system can produce
+                     'value_implausible',
+                     -- measurable, but the measurement cannot be attributed
+                     'confounded_measurement')),
+    -- 'quarantine' excludes the row from downstream analysis until cleared; 'warn' is recorded
+    -- and reported but excludes nothing. A detector that cannot tell the difference should emit
+    -- 'warn' -- an over-eager quarantine deletes data in everything but name.
+    severity     TEXT NOT NULL CHECK (severity IN ('quarantine', 'warn')),
+    detector     TEXT NOT NULL,              -- module + rule name, e.g. 'omics.quality:coherence'
+    statistic    REAL,                       -- what the detector measured
+    threshold    REAL,                       -- what it was measured against
+    rationale    TEXT NOT NULL,              -- prose a curator can act on
+    -- What the row most resembles instead, when the detector can say. Recorded as a lead for a
+    -- human, NEVER applied: see the header note on circularity.
+    resembles    TEXT,
+    raised_by    TEXT NOT NULL,
+    actor_kind   TEXT NOT NULL CHECK (actor_kind IN ('human', 'agent')),
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    -- 'active' until a person decides. 'confirmed' keeps the exclusion and records that it was
+    -- reviewed; 'cleared' lifts it. Only a person moves a flag out of 'active'.
+    status       TEXT NOT NULL DEFAULT 'active'
+                 CHECK (status IN ('active', 'confirmed', 'cleared')),
+    resolved_by  TEXT,
+    resolved_reason TEXT,
+    zone         TEXT NOT NULL DEFAULT 'I' CHECK (zone = 'I'),
+    CHECK (status = 'active' OR (resolved_by IS NOT NULL AND resolved_reason IS NOT NULL))
+);
+
+CREATE INDEX data_quality_flag_by_target ON data_quality_flag(target_type, target_id, status);
+CREATE INDEX data_quality_flag_by_kind ON data_quality_flag(kind, severity, status);
+
+-- One active flag per (target, kind, detector): re-running a detector updates its finding rather
+-- than stacking a second identical doubt on the same row.
+CREATE UNIQUE INDEX data_quality_flag_dedup
+    ON data_quality_flag(target_type, target_id, kind, detector);

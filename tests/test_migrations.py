@@ -31,8 +31,9 @@ from fermdb.db import migrations as M
 # detect the drift it exists to detect.
 #
 # `measurement` and `bottleneck` joined the list at v12, which is the first migration to add a
-# column to a table that was already full of rows. `publication`, `curation_task` and
-# `curation_event` joined with them for a different reason: v12's backfill READS those three, so a
+# column to a table that was already full of rows. `publication`, `curation_task`,
+# `curation_event`, `processing_run`, `dataset` and `analysis_result` joined for a different
+# reason: v12's backfill READS those three, so a
 # v5 database without them cannot be migrated at all. They are reduced to the columns that
 # backfill touches and are deliberately never shape-compared -- see the note above them below, so
 # nobody later mistakes a stub for a record of what v5 declared.
@@ -159,6 +160,17 @@ CREATE TABLE curation_event (
     action      TEXT NOT NULL,
     target_type TEXT NOT NULL,
     target_id   TEXT NOT NULL
+);
+-- Likewise stubs, and likewise never shape-compared: v16 adds `analysis_result.dataset_id`, so
+-- both tables must exist for the migration to run at all. Reduced to the columns v16 touches.
+CREATE TABLE processing_run (id TEXT PRIMARY KEY);
+CREATE TABLE dataset (id TEXT PRIMARY KEY);
+CREATE TABLE analysis_result (
+    id                TEXT PRIMARY KEY,
+    processing_run_id TEXT NOT NULL REFERENCES processing_run(id),
+    kind              TEXT NOT NULL,
+    payload_ref       TEXT NOT NULL,
+    zone              TEXT NOT NULL
 );
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 INSERT INTO meta VALUES ('schema_version', '5');

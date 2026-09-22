@@ -5,13 +5,43 @@ routes, parts, compartments, engineering records, fermentation phenotypes and li
 integrated so that every statement traces back to the experiment supporting it, and so that the
 answer to "what should I build next" is ranked rather than merely listed.
 
-**Status (2026-09-21): the machinery is built and the atlas is nearly empty of curated content.**
-Schema v9, 64 tables, 990 tests passing. 5,164 publications resolved and 1,310 full texts stored;
-600 routes enumerated against six gates; the mitochondrial activator map and heterologous-ORF
-precedents curated. But `measurement`, `strain`, `modification` and `pathway_configuration` all
-read **zero**, and 95 extraction proposals are queued for a curator who has not started. That is
-not a surprise — PLAN.md W.2 predicted it in writing: *"curation throughput, not compute, is the
-rate limit."* It is now the observed state.
+**Status (2026-09-22): the transcript layer is wired end to end and now answers the question it
+was built for.** Schema v15, 65 tables, 1,466 tests passing. 5,164 publications resolved and 1,429 full texts stored; 6,400 routes enumerated
+against six gates; the mitochondrial activator map and heterologous-ORF precedents curated.
+
+`condition_context` went from **0 to 9** and 87 of 172 samples now carry an approved context and a
+declared strain, so the F.3 gate that blocked every contrast is satisfied for the studies whose
+deposits declare their design. **36 differential-expression contrasts** are stored where there
+were none (50 computable, 14 withheld over quarantined samples), and `pathway_route.score_evidence` is populated where it was NULL on all 6,400 rows.
+
+SRP342112 was then requantified against its deposited cassette (GenBank MZ541859.1, 33/33 runs,
+$0.96 of EC2), which is what makes the transcript layer say anything: **the engineered steps are
+not transcriptionally limited.** All four pathway constructs run 13-17 log2 above the parent, and
+`adhA` is among the most abundant transcripts in every producer. It also showed that the native
+`ILV3` row in the older matrices was **88% cassette spillover** — a reminder that a native gene's
+row is not a measurement of that gene when the build carries its own codon-optimized copy.
+`docs/reports/2026-09-22-transcript-backed-routes.md` has the arithmetic and the three claims an
+adversarial review destroyed along the way.
+
+Doubts about specific rows are now data rather than prose. `data_quality_flag` (schema v15) holds
+**4 quarantined samples** whose declared labels contradict their own transcriptomes — the cassette
+rows separate a build from a parent by three orders of magnitude, so the check is threshold-free —
+and **77 runs** recorded as technical replicates of one another. A quarantined sample cannot enter
+a contrast, because `omics.contrasts` reads the table — not because somebody remembers the report.
+Nothing is ever relabelled or deleted: using expression data to repair metadata and then analysing
+the data under the repaired metadata is circular, and at n=3 it is circular in the direction that
+manufactures significance.
+
+The loop is closed end to end: the four strains with transcript evidence now carry their own
+titers, and `python ops/answer.py` prints feasibility, transcript backing and measured
+performance together. The result inverts the obvious guess — **the mitochondrial build makes
+170 mg/L against 46 for the cytosolic one and 37 for the parent, and the redox-balanced cytosolic
+build is the worst strain in its study.** Expression does not discriminate between them; the
+limitation is 2Fe-2S cluster assembly at Ilv3p, which is a metabolite and genetics finding, not a
+transcript one.
+
+Curation is still the rate limit, exactly as PLAN.md W.2 predicted: 894 proposals are queued, and
+136 newly harvested isobutanol yields are quote-verified but unreviewed.
 
 Scope is set to **route answers first**: phases 0–4 plus a decision checkpoint, roughly 5.5–6.5
 months solo full-time, ending in a ranked evidence-backed route list, an isobutanol omics layer
@@ -60,6 +90,24 @@ the isobutanol program asks.*
   units, identifiers, evidence levels, the reported/harmonized/inferred split.
 * [docs/reference/OPEN_QUESTIONS.md](docs/reference/OPEN_QUESTIONS.md) — decisions deliberately
   left open, each with what blocks it and a fallback default.
+* [docs/reports/2026-09-22-transcript-backed-routes.md](docs/reports/2026-09-22-transcript-backed-routes.md)
+  — the transcript layer: what it measures, what it refuses to claim, and the four commands that
+  rebuild it (`ops/apply_run_conditions.py` → `ops/flag_quality.py` → `ops/run_contrasts.py` →
+  `ops/score_routes.py` → `ops/answer.py`).
+* [docs/reports/2026-09-22-transgene-requantification.md](docs/reports/2026-09-22-transgene-requantification.md)
+  — the cassette-aware requantification: what was added to the index and from where, the mapping-rate
+  control, and the per-strain cassette expression the transcript answer rests on.
+
+## Asking the atlas the question it was built for
+
+```bash
+python ops/answer.py --verbose
+```
+
+Prints the feasible routes, what fraction of each is actually backed by transcript data, and the
+reported yield ceiling — as **three separate columns**, never fused into one score. A route can be
+feasible and unevidenced, or evidenced and low-yielding, and collapsing those into a single
+ranking would hide which of the three is carrying it.
 
 ## The distinction that matters most
 

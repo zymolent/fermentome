@@ -480,6 +480,63 @@ _V13_TO_V14: Final[Migration] = Migration(
     ),
 )
 
+_V14_TO_V15: Final[Migration] = Migration(
+    from_version=14,
+    to_version=15,
+    summary=(
+        "data_quality_flag -- a recorded, machine-readable doubt about a row, so a suspect "
+        "sample is excluded by the code that reads it rather than by whoever remembers"
+    ),
+    statements=(
+        """CREATE TABLE data_quality_flag (
+            id           TEXT PRIMARY KEY,
+            target_type  TEXT NOT NULL CHECK (target_type IN ('sample', 'sra_run', 'measurement',
+                                                              'publication', 'strain',
+                                                              'analysis_result')),
+            target_id    TEXT NOT NULL,
+            kind         TEXT NOT NULL CHECK (kind IN ('mislabel_suspected',
+                                                       'replicate_incoherent',
+                                                       'redundant_record',
+                                                       'technical_replicate',
+                                                       'value_implausible',
+                                                       'confounded_measurement')),
+            severity     TEXT NOT NULL CHECK (severity IN ('quarantine', 'warn')),
+            detector     TEXT NOT NULL,
+            statistic    REAL,
+            threshold    REAL,
+            rationale    TEXT NOT NULL,
+            resembles    TEXT,
+            raised_by    TEXT NOT NULL,
+            actor_kind   TEXT NOT NULL CHECK (actor_kind IN ('human', 'agent')),
+            created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+            status       TEXT NOT NULL DEFAULT 'active'
+                         CHECK (status IN ('active', 'confirmed', 'cleared')),
+            resolved_by  TEXT,
+            resolved_reason TEXT,
+            zone         TEXT NOT NULL DEFAULT 'I' CHECK (zone = 'I'),
+            CHECK (status = 'active' OR (resolved_by IS NOT NULL AND resolved_reason IS NOT NULL))
+        )""",
+        "CREATE INDEX data_quality_flag_by_target "
+        "ON data_quality_flag(target_type, target_id, status)",
+        "CREATE INDEX data_quality_flag_by_kind ON data_quality_flag(kind, severity, status)",
+        "CREATE UNIQUE INDEX data_quality_flag_dedup "
+        "ON data_quality_flag(target_type, target_id, kind, detector)",
+    ),
+)
+
+_V15_TO_V16: Final[Migration] = Migration(
+    from_version=15,
+    to_version=16,
+    summary=(
+        "analysis_result.dataset_id -- so J.5's analysis arm can reach the accession an "
+        "outside reader can check, instead of stopping one hop short"
+    ),
+    statements=(
+        "ALTER TABLE analysis_result ADD COLUMN dataset_id TEXT REFERENCES dataset(id)",
+        "CREATE INDEX analysis_result_by_dataset ON analysis_result(dataset_id)",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -491,6 +548,8 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V11_TO_V12,
     _V12_TO_V13,
     _V13_TO_V14,
+    _V14_TO_V15,
+    _V15_TO_V16,
 )
 
 

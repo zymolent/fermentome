@@ -147,10 +147,10 @@ WHY_IT_MATTERS: Final[Mapping[str, str]] = {
         "the curation event exists but names no curator, which is a judgement made by nobody"
     ),
     "dataset_unreachable": (
-        "J.5's analysis arm continues `-> dataset -> accession` and the schema has no column to "
-        "follow: neither `analysis_result` nor `processing_run` carries a dataset id. The walk "
-        "verifies the arm as far as it goes and says where it stopped rather than claiming a hop "
-        "it did not check"
+        "J.5's analysis arm continues `-> dataset -> accession`, and this `analysis_result` "
+        "leaves `dataset_id` NULL -- an analysis spanning several deposits, or one stored before "
+        "v16 added the column. The walk verifies the arm as far as it goes and says where it "
+        "stopped rather than claiming a hop it did not check"
     ),
 }
 
@@ -518,8 +518,9 @@ def _analysis_arm(
 ) -> tuple[list[str], list[Break], list[Gap]]:
     """J.5's first arm: analysis_result -> processing_run -> dataset -> accession.
 
-    It stops at `processing_run`, because that is where the schema stops. The remaining two hops
-    are reported as a :class:`Gap` rather than walked or assumed.
+    Since v16 it continues to `dataset` and its accession where the `analysis_result` names
+    one. Where it does not, the remaining hops are reported as a :class:`Gap` rather than walked
+    or assumed.
     """
     hops: list[str] = []
     breaks: list[Break] = []
@@ -527,12 +528,15 @@ def _analysis_arm(
 
     result_id = row["analysis_result_id"]
     run_id = row["processing_run_id"]
+    dataset_id: str | None = None
     if result_id and resolved["analysis_result_id"]:
         hops.append(f"analysis_result {result_id}")
         found = conn.execute(
-            "SELECT processing_run_id FROM analysis_result WHERE id = ?", (str(result_id),)
+            "SELECT processing_run_id, dataset_id FROM analysis_result WHERE id = ?",
+            (str(result_id),),
         ).fetchone()
         owner = None if found is None else found["processing_run_id"]
+        dataset_id = None if found is None else found["dataset_id"]
         if owner is None or not _exists(conn, "processing_run", str(owner)):
             breaks.append(
                 Break(
@@ -547,14 +551,33 @@ def _analysis_arm(
     elif run_id and resolved["processing_run_id"]:
         hops.append(f"processing_run {run_id}")
 
-    if hops:
+    # v16 gave `analysis_result` a `dataset_id`, so the arm can now reach the accession an
+    # outside reader can actually check. A NULL is still reported as the gap it is -- an analysis
+    # spanning deposits, or one written before the column existed -- rather than passed over.
+    if dataset_id:
+        accession = conn.execute(
+            "SELECT accession FROM dataset WHERE id = ?", (str(dataset_id),)
+        ).fetchone()
+        if accession is None:
+            breaks.append(
+                Break(
+                    "dangling_citation",
+                    where,
+                    f"analysis_result {result_id!r} names dataset {dataset_id!r} and there is "
+                    "no such row in `dataset`",
+                )
+            )
+        else:
+            hops.append(f"dataset {dataset_id}")
+            hops.append(f"accession {accession['accession']}")
+    elif hops:
         gaps.append(
             Gap(
                 "dataset_unreachable",
                 where,
-                "the analysis arm resolves as far as `processing_run` and stops: neither "
-                "`analysis_result` nor `processing_run` carries a dataset id, so J.5's "
-                "`-> dataset -> accession` has no column to follow",
+                "the analysis arm resolves as far as `processing_run` and stops: this "
+                "`analysis_result` carries no dataset id, so J.5's `-> dataset -> accession` "
+                "has nothing to follow for this row",
             )
         )
     return hops, breaks, gaps
