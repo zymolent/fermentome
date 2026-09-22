@@ -1,106 +1,106 @@
-publication_id	done	readable	topic	priority	category	cat_rank	score	year	title
-doi:10.1016/j.ymben.2020.01.004	False	True	isobutanol	2	strain_engineering	0	100.0	2020	Isobutanol production in Corynebacterium glutamicum: Suppressed succinate by-p
-doi:10.1007/s00253-023-12821-9	False	True	isobutanol	2	strain_engineering	0	95.0	2024	Microbial host engineering for sustainable isobutanol production from renewabl
-doi:10.1016/j.jbiotec.2023.03.012	False	True	isobutanol	2	strain_engineering	0	95.0	2023	Strategy for efficiently utilizing Escherichia coli cells producing isobutanol
-doi:10.1016/j.ymben.2020.04.002	False	True	isobutanol	2	strain_engineering	0	95.0	2020	"Corrigendum to ""Uncovering the role of branched-chain amino acid transaminases"
-doi:10.1016/j.biochi.2014.10.024	False	True	isobutanol	2	strain_engineering	0	95.0	2015	Identification and optimization of a novel thermo- and solvent stable ketol-ac
-doi:10.1016/j.jbiosc.2012.02.029	False	True	isobutanol	2	strain_engineering	0	95.0	2012	A new carbon catabolite repression mutation of Escherichia coli, mlc∗, and its
-doi:10.1016/j.ymben.2011.08.004	False	True	isobutanol	2	strain_engineering	0	95.0	2011	An evolutionary strategy for isobutanol production strain development in Esche
-doi:10.1016/j.enzmictec.2026.110838	False	True	isobutanol	2	strain_engineering	0	95.0	2026	Improving isobutanol and 2-ketoisovalerate production by reducing by-product s
-doi:10.1016/j.biortech.2018.03.081	False	True	isobutanol	2	microbial_production	1	100.0	2018	Improved production of isobutanol in pervaporation-coupled bioreactor using su
-doi:10.1016/j.ymben.2017.07.003	False	True	isobutanol	2	microbial_production	1	95.0	2017	Isobutanol and 2-ketoisovalerate production by Klebsiella pneumoniae via a nat
-doi:10.1016/j.ymben.2014.03.006	False	True	isobutanol	2	microbial_production	1	95.0	2014	Isobutanol production at elevated temperatures in thermophilic Geobacillus the
-doi:10.1016/j.jbiotec.2024.07.014	False	True	isobutanol	2	microbial_production	1	95.0	2024	Employment of light-inducible promoter in genetically engineered cyanobacteria
-doi:10.1016/j.biortech.2012.09.104	False	True	isobutanol	2	microbial_production	1	95.0	2013	Microbial synthesis of n-butanol, isobutanol, and other higher alcohols from d
-doi:10.1016/j.biortech.2019.122104	False	True	isobutanol	2	microbial_production	1	85.0	2019	Cell-free production of isobutanol: A completely immobilized system.
-doi:10.1016/j.jbiosc.2017.01.010	False	True	isobutanol	2	tolerance_stress	2	95.0	2017	"Corrigendum to ""Experimental evolution and gene knockout studies reveal AcrA-m"
-doi:10.1016/j.cels.2020.01.005	False	True	isobutanol	2	tolerance_stress	2	85.0	2020	Evaluation of Kuroda et al.: Insight into Yeast Isobutanol Tolerance with Adva
-doi:10.1016/j.ymben.2005.09.007	False	True	ethanol	8	strain_engineering	0	100.0	2006	In silico aided metabolic engineering of Saccharomyces cerevisiae for improved
-doi:10.1016/j.biortech.2011.05.075	False	True	ethanol	8	strain_engineering	0	100.0	2011	Industrial yeast strain engineered to ferment ethanol from lignocellulosic bio
-doi:10.1016/j.jbiosc.2019.03.009	False	True	ethanol	8	strain_engineering	0	95.0	2019	Establishment of a transient CRISPR-Cas9 genome editing system in Candida glyc
-doi:10.1016/j.jbiosc.2015.10.013	False	True	ethanol	8	strain_engineering	0	95.0	2016	Functional expression of xylose isomerase in flocculating industrial Saccharom
-doi:10.1016/j.ymben.2017.02.006	False	True	ethanol	8	strain_engineering	0	95.0	2017	Metabolic engineering of a haploid strain derived from a triploid industrial y
-doi:10.1016/j.biortech.2010.09.122	False	True	ethanol	8	strain_engineering	0	95.0	2011	Screening and construction of Saccharomyces cerevisiae strains with improved m
-doi:10.1016/j.jbiosc.2015.10.012	False	True	ethanol	8	strain_engineering	0	95.0	2016	Improved stress resistance and ethanol production by segmental haploidization 
-doi:10.1016/j.biortech.2017.05.191	False	True	ethanol	8	strain_engineering	0	95.0	2017	Deletion of acetate transporter gene ADY2 improved tolerance of Saccharomyces 
-doi:10.1016/j.ymben.2011.09.005	False	True	ethanol	8	strain_engineering	0	95.0	2011	Engineering topology and kinetics of sucrose metabolism in Saccharomyces cerev
-doi:10.1016/j.ymben.2010.11.003	False	True	ethanol	8	strain_engineering	0	95.0	2011	Minimization of glycerol synthesis in industrial ethanol yeast without influen
-doi:10.1016/j.jbiotec.2007.04.019	False	True	ethanol	8	strain_engineering	0	95.0	2007	Ethanol production from xylose by recombinant Saccharomyces cerevisiae express
-doi:10.1016/j.jbiotec.2016.05.028	False	True	ethanol	8	strain_engineering	0	95.0	2016	Mating type and ploidy effect on the β-glucosidase activity and ethanol-produc
-doi:10.1016/j.enzmictec.2012.07.003	False	True	ethanol	8	strain_engineering	0	95.0	2012	Increased ethanol production from glycerol by Saccharomyces cerevisiae strains
-doi:10.1016/j.biortech.2026.134456	False	True	ethanol	8	strain_engineering	0	95.0	2026	Adaptive evolution of thermotolerant xylose-utilizing Saccharomyces cerevisiae
-doi:10.1016/j.enzmictec.2010.10.008	False	True	ethanol	8	strain_engineering	0	85.0	2011	Expression of aspartic protease from Neurospora crassa in industrial ethanol-p
-doi:10.1016/j.biortech.2023.129993	False	True	ethanol	8	microbial_production	1	100.0	2024	High titer (>100 g/L) ethanol production from pretreated corn stover hydrolysa
-doi:10.1016/j.ymben.2023.06.009	False	True	ethanol	8	microbial_production	1	100.0	2023	Consolidated bioprocessing for bioethanol production by metabolically engineer
-doi:10.1016/j.biortech.2008.03.037	False	True	ethanol	8	microbial_production	1	100.0	2008	Production of bio-ethanol from soybean molasses by Saccharomyces cerevisiae at
-doi:10.1016/j.biortech.2010.11.034	False	True	ethanol	8	microbial_production	1	95.0	2011	Fermentation of biomass sugars to ethanol using native industrial yeast strain
-doi:10.1016/j.jbiosc.2011.12.015	False	True	ethanol	8	microbial_production	1	95.0	2012	Ethanol yield and volatile compound content in fermentation of agave must by K
-doi:10.1016/j.jbiotec.2016.07.004	False	True	ethanol	8	microbial_production	1	95.0	2016	Bioethanol production by reusable Saccharomyces cerevisiae immobilized in a ma
-doi:10.1016/j.biortech.2008.11.047	False	True	ethanol	8	microbial_production	1	95.0	2009	Bioethanol production performance of five recombinant strains of laboratory an
-doi:10.1016/j.biortech.2011.01.062	False	True	ethanol	8	microbial_production	1	95.0	2011	Fermentation of cellobiose to ethanol by industrial Saccharomyces strains carr
-doi:10.1016/j.jbiosc.2010.02.003	False	True	ethanol	8	microbial_production	1	95.0	2010	Strategy for simultaneous saccharification and fermentation using a respirator
-doi:10.1016/j.jbiotec.2010.02.009	False	True	ethanol	8	microbial_production	1	95.0	2010	Thermodynamic analysis of fermentation and anaerobic growth of baker's yeast f
-doi:10.1016/j.biortech.2026.134191	False	True	ethanol	8	tolerance_stress	2	95.0	2026	Engineering stress tolerance in Saccharomyces cerevisiae by overexpressing PIR
-doi:10.1016/j.bbagen.2025.130804	False	True	ethanol	8	tolerance_stress	2	95.0	2025	Yeast Hsp78 plays an essential role in adapting to severe ethanol stress via m
-doi:10.1016/j.jbiosc.2014.04.016	False	True	ethanol	8	tolerance_stress	2	95.0	2014	Creation of an ethanol-tolerant Saccharomyces cerevisiae strain by 266 nm lase
-doi:10.1016/j.biortech.2011.02.101	False	True	ethanol	8	tolerance_stress	2	95.0	2011	Expression of aldehyde dehydrogenase 6 reduces inhibitory effect of furan deri
-doi:10.1007/s00253-020-10518-x	False	True	ethanol	8	tolerance_stress	2	95.0	2020	Rpn4 and proteasome-mediated yeast resistance to ethanol includes regulation o
-doi:10.1016/j.jbiosc.2017.04.012	False	True	ethanol	8	tolerance_stress	2	95.0	2017	In vivo evolutionary engineering for ethanol-tolerance of Saccharomyces cerevi
-doi:10.1016/j.biortech.2022.128079	False	True	ethanol	8	tolerance_stress	2	95.0	2022	Investigation of stress tolerance of Pichia kudriavzevii for high gravity bioe
-doi:10.1016/j.biortech.2017.01.040	False	True	ethanol	8	tolerance_stress	2	95.0	2017	Novel strategy to improve vanillin tolerance and ethanol fermentation performa
-doi:10.1016/j.biortech.2026.135679	False	True	ethanol	8	tolerance_stress	2	95.0	2026	Enhanced cellulosic ethanol production by increasing p-benzoquinone tolerance 
-doi:10.1016/j.jbiotec.2007.05.010	False	True	ethanol	8	tolerance_stress	2	95.0	2007	Identification of target genes conferring ethanol stress tolerance to Saccharo
-doi:10.1016/j.jbiosc.2009.03.019	False	True	ethanol	8	tolerance_stress	2	95.0	2009	Ethanol-tolerant Saccharomyces cerevisiae strains isolated under selective con
-doi:10.1016/j.jprot.2019.103377	False	True	ethanol	8	tolerance_stress	2	85.0	2019	Integrated transcriptomic and proteomic analysis of the ethanol stress respons
-doi:10.1016/j.fm.2023.104288	False	True	ethanol	8	tolerance_stress	2	75.0	2023	Bioactive dipeptides enhance the tolerance of lager yeast to ethanol-oxidation
-doi:10.1007/s11356-023-30185-5	False	True	ethanol	8	feedstock_process	3	95.0	2024	Enhanced ethanol production using hydrophobic resin detoxified Pine forest lit
-doi:10.1016/j.scitotenv.2022.157302	False	True	ethanol	8	feedstock_process	3	95.0	2022	Bioethanol production from expired cookies and economic analysis for practical
-doi:10.1016/j.biortech.2008.11.010	False	True	ethanol	8	feedstock_process	3	95.0	2009	Flocculation characteristics of an isolated mutant flocculent Saccharomyces ce
-doi:10.1016/j.biortech.2025.133155	False	True	ethanol	8	feedstock_process	3	95.0	2025	Evaluation of the application effect of surface immobilization technology on f
-doi:10.1016/j.biortech.2015.03.127	False	True	ethanol	8	feedstock_process	3	95.0	2015	Repeated ethanol production from sweet sorghum juice concentrated by membrane 
-doi:10.1016/j.biortech.2022.128002	False	True	ethanol	8	feedstock_process	3	95.0	2022	Bioethanol production from microalgae biomass at high-solids loadings.
-doi:10.1016/j.biortech.2013.12.081	False	True	ethanol	8	feedstock_process	3	95.0	2014	Ethanol fermentation of energy beets by self-flocculating and non-flocculating
-doi:10.1016/j.jbiotec.2004.01.017	False	True	ethanol	8	feedstock_process	3	95.0	2004	Continuous ethanol production and evaluation of yeast cell lysis and viability
-doi:10.1016/j.biortech.2011.12.144	False	True	ethanol	8	feedstock_process	3	95.0	2012	Display of cellulases on the cell surface of Saccharomyces cerevisiae for high
-doi:10.1016/j.biortech.2010.11.097	False	True	ethanol	8	feedstock_process	3	95.0	2011	Potential utilization of sorghum field waste for fuel ethanol production emplo
-doi:10.1016/j.biortech.2014.07.082	False	True	ethanol	8	feedstock_process	3	95.0	2014	Increased ethanol production from sweet sorghum juice concentrated by a membra
-doi:10.1016/j.biortech.2018.11.053	False	True	ethanol	8	feedstock_process	3	95.0	2019	Ethanol fermentation from non-detoxified lignocellulose hydrolysate by a multi
-doi:10.1016/j.carbpol.2017.01.090	False	True	ethanol	8	feedstock_process	3	95.0	2017	Production of bioethanol from pre-treated cotton fabrics and waste cotton mate
-doi:10.1007/s11356-016-8018-x	False	True	ethanol	8	feedstock_process	3	95.0	2017	Identification of strain isolated from dates (Phœnix dactylifera L.) for enhan
-doi:10.1016/j.biortech.2010.07.079	False	True	ethanol	8	feedstock_process	3	95.0	2010	Selection of stress-tolerant yeasts for simultaneous saccharification and ferm
-doi:10.1016/j.biortech.2013.07.078	False	True	ethanol	8	feedstock_process	3	95.0	2013	Simultaneous saccharification and fermentation of Agave tequilana fructans by 
-doi:10.1016/j.biortech.2010.03.129	False	True	ethanol	8	feedstock_process	3	95.0	2010	Ethanolic cofermentation with glucose and xylose by the recombinant industrial
-doi:10.1016/j.biortech.2012.08.080	False	True	ethanol	8	feedstock_process	3	95.0	2012	Conversion of coffee residue waste into bioethanol with using popping pretreat
-doi:10.1016/j.biortech.2014.01.060	False	True	ethanol	8	feedstock_process	3	95.0	2014	Inhibitor analysis and adaptive evolution of Saccharomyces cerevisiae for simu
-doi:10.1016/j.biortech.2004.12.034	False	True	ethanol	8	feedstock_process	3	95.0	2005	Ethanolic fermentation of acid pre-treated starch industry effluents by recomb
-doi:10.1016/j.biortech.2018.01.123	False	True	ethanol	8	feedstock_process	3	95.0	2018	Largely enhanced bioethanol production through the combined use of lignin-modi
-doi:10.1016/j.jbiotec.2021.03.012	False	True	ethanol	8	feedstock_process	3	95.0	2021	Very high gravity ethanol fermentation from sweet sorghum stem juice using a s
-doi:10.1016/j.biortech.2009.12.090	False	True	ethanol	8	feedstock_process	3	95.0	2010	Fuel ethanol production from granular corn starch using Saccharomyces cerevisi
-doi:10.1016/j.biortech.2014.06.005	False	True	ethanol	8	feedstock_process	3	95.0	2014	An alternative feedstock of corn meal for industrial fuel ethanol production: 
-doi:10.1016/j.biortech.2010.10.126	False	True	ethanol	8	feedstock_process	3	95.0	2011	Bioconversion of industrial hemp to ethanol and methane: the benefits of steam
-doi:10.1016/j.biortech.2011.08.027	False	True	ethanol	8	feedstock_process	3	95.0	2011	Ethanol production from selected lignocellulosic hydrolysates by genome shuffl
-doi:10.1016/j.biortech.2009.03.046	False	True	ethanol	8	feedstock_process	3	95.0	2009	Ethanol production from sweet sorghum juice using very high gravity technology
-doi:10.1016/j.biortech.2010.12.115	False	True	ethanol	8	feedstock_process	3	95.0	2011	Application of simultaneous saccharification and fermentation (SSF) from visco
-doi:10.1016/j.biotechadv.2007.09.002	False	True	ethanol	8	feedstock_process	3	95.0	2008	Ethanol fermentation technologies from sugar and starch feedstocks.
-doi:10.1016/j.jbiosc.2016.04.012	False	True	ethanol	8	feedstock_process	3	95.0	2016	Optimization of prehydrolysis time and substrate feeding to improve ethanol pr
-doi:10.1007/s10529-010-0330-9	False	True	ethanol	8	feedstock_process	3	95.0	2010	Selection of Saccharomyces cerevisiae strains for efficient very high gravity 
-doi:10.1016/j.biortech.2017.05.125	False	True	ethanol	8	feedstock_process	3	95.0	2017	Continuous bioethanol fermentation from wheat straw hydrolysate with high susp
-doi:10.1016/j.biortech.2009.08.100	False	True	ethanol	8	feedstock_process	3	95.0	2010	Pretreatment of spruce and oak by N-methylmorpholine-N-oxide (NMMO) for effici
-doi:10.1016/j.copbio.2014.09.004	False	True	other	10	strain_engineering	0	100.0	2015	Metabolic engineering of Saccharomyces cerevisiae for production of butanol is
-doi:10.1016/j.biortech.2015.08.086	False	True	other	10	strain_engineering	0	95.0	2015	Metabolic engineering of Klebsiella pneumoniae for the de novo production of 2
-doi:10.1016/j.ymben.2014.07.007	False	True	other	10	strain_engineering	0	95.0	2014	Metabolic engineering for higher alcohol production.
-doi:10.1016/j.ymben.2019.08.015	False	True	other	10	strain_engineering	0	95.0	2019	Engineering transcription factor BmoR for screening butanol overproducers.
-doi:10.2323/jgam.44.347	False	True	other	10	strain_engineering	0	85.0	1998	Breeding of flocculent industrial alcohol yeast strains by self-cloning of the
-doi:10.1007/10_2007_057	False	True	other	10	strain_engineering	0	85.0	2007	Development of efficient xylose fermentation in Saccharomyces cerevisiae: xylo
-doi:10.1016/j.cbpa.2013.03.036	False	True	other	10	microbial_production	1	95.0	2013	Advanced biofuel production by the yeast Saccharomyces cerevisiae.
-doi:10.1016/j.jbiotec.2010.06.006	False	True	other	10	tolerance_stress	2	95.0	2010	Identification of gene targets eliciting improved alcohol tolerance in Sacchar
-doi:10.1016/j.biortech.2012.08.104	False	True	other	10	tolerance_stress	2	85.0	2012	Sm-like protein enhanced tolerance of recombinant Saccharomyces cerevisiae to 
-doi:10.1016/j.fgb.2024.103914	False	True	other	10	tolerance_stress	2	85.0	2024	Differential impacts of furfural and acetic acid on the bioenergetics and ferm
-doi:10.1016/j.jbiosc.2015.09.006	False	True	other	10	tolerance_stress	2	85.0	2016	Screening of natural yeast isolates under the effects of stresses associated w
-doi:10.1016/j.ymben.2020.06.003	False	True	other	10	tolerance_stress	2	85.0	2020	Stress-driven dynamic regulation of multiple tolerance genes improves robustne
-doi:10.1007/s10482-006-9085-7	False	True	other	10	feedstock_process	3	95.0	2006	Alcoholic fermentation of carbon sources in biomass hydrolysates by Saccharomy
-doi:10.1016/j.biortech.2011.12.147	False	True	other	10	feedstock_process	3	95.0	2012	The combination of glycerol metabolic engineering and drug resistance marker-a
-doi:10.1016/j.biortech.2026.135490	False	True	other	10	feedstock_process	3	85.0	2026	Efficient high-temperature simultaneous saccharification and fermentation of l
-doi:10.1016/j.biortech.2007.09.046	False	True	other	10	feedstock_process	3	85.0	2008	Simultaneous saccharification and fermentation of acid-pretreated corncobs wit
-doi:10.1016/j.biortech.2013.09.082	False	True	other	10	feedstock_process	3	85.0	2013	Continuous co-fermentation of cellobiose and xylose by engineered Saccharomyce
-doi:10.1016/j.biortech.2011.04.094	False	True	other	10	feedstock_process	3	85.0	2011	Techno-economic implications of improved high gravity corn mash fermentation.
+publication_id	done	readable	topic	priority	category	cat_rank	non_primary	score	year	title
+doi:10.1016/j.ymben.2020.01.004	False	True	isobutanol	2	strain_engineering	0	False	100.0	2020	Isobutanol production in Corynebacterium glutamicum: Suppressed succinate by-p
+doi:10.1016/j.jbiosc.2012.02.029	False	True	isobutanol	2	strain_engineering	0	False	95.0	2012	A new carbon catabolite repression mutation of Escherichia coli, mlc∗, and its
+doi:10.1007/s00253-023-12821-9	False	True	isobutanol	2	strain_engineering	0	False	95.0	2024	Microbial host engineering for sustainable isobutanol production from renewabl
+doi:10.1016/j.biochi.2014.10.024	False	True	isobutanol	2	strain_engineering	0	False	95.0	2015	Identification and optimization of a novel thermo- and solvent stable ketol-ac
+doi:10.1016/j.jbiotec.2023.03.012	False	True	isobutanol	2	strain_engineering	0	False	95.0	2023	Strategy for efficiently utilizing Escherichia coli cells producing isobutanol
+doi:10.1016/j.ymben.2011.08.004	False	True	isobutanol	2	strain_engineering	0	False	95.0	2011	An evolutionary strategy for isobutanol production strain development in Esche
+doi:10.1016/j.enzmictec.2026.110838	False	True	isobutanol	2	strain_engineering	0	False	95.0	2026	Improving isobutanol and 2-ketoisovalerate production by reducing by-product s
+doi:10.1016/j.biortech.2018.03.081	False	True	isobutanol	2	microbial_production	1	False	100.0	2018	Improved production of isobutanol in pervaporation-coupled bioreactor using su
+doi:10.1016/j.jbiotec.2024.07.014	False	True	isobutanol	2	microbial_production	1	False	95.0	2024	Employment of light-inducible promoter in genetically engineered cyanobacteria
+doi:10.1016/j.ymben.2017.07.003	False	True	isobutanol	2	microbial_production	1	False	95.0	2017	Isobutanol and 2-ketoisovalerate production by Klebsiella pneumoniae via a nat
+doi:10.1016/j.biortech.2012.09.104	False	True	isobutanol	2	microbial_production	1	False	95.0	2013	Microbial synthesis of n-butanol, isobutanol, and other higher alcohols from d
+doi:10.1016/j.ymben.2014.03.006	False	True	isobutanol	2	microbial_production	1	False	95.0	2014	Isobutanol production at elevated temperatures in thermophilic Geobacillus the
+doi:10.1016/j.biortech.2019.122104	False	True	isobutanol	2	microbial_production	1	False	85.0	2019	Cell-free production of isobutanol: A completely immobilized system.
+doi:10.1016/j.ymben.2005.09.007	False	True	ethanol	8	strain_engineering	0	False	100.0	2006	In silico aided metabolic engineering of Saccharomyces cerevisiae for improved
+doi:10.1016/j.biortech.2011.05.075	False	True	ethanol	8	strain_engineering	0	False	100.0	2011	Industrial yeast strain engineered to ferment ethanol from lignocellulosic bio
+doi:10.1016/j.biortech.2010.09.122	False	True	ethanol	8	strain_engineering	0	False	95.0	2011	Screening and construction of Saccharomyces cerevisiae strains with improved m
+doi:10.1016/j.jbiosc.2019.03.009	False	True	ethanol	8	strain_engineering	0	False	95.0	2019	Establishment of a transient CRISPR-Cas9 genome editing system in Candida glyc
+doi:10.1016/j.jbiotec.2007.04.019	False	True	ethanol	8	strain_engineering	0	False	95.0	2007	Ethanol production from xylose by recombinant Saccharomyces cerevisiae express
+doi:10.1016/j.ymben.2017.02.006	False	True	ethanol	8	strain_engineering	0	False	95.0	2017	Metabolic engineering of a haploid strain derived from a triploid industrial y
+doi:10.1016/j.biortech.2017.05.191	False	True	ethanol	8	strain_engineering	0	False	95.0	2017	Deletion of acetate transporter gene ADY2 improved tolerance of Saccharomyces 
+doi:10.1016/j.jbiosc.2015.10.012	False	True	ethanol	8	strain_engineering	0	False	95.0	2016	Improved stress resistance and ethanol production by segmental haploidization 
+doi:10.1016/j.ymben.2011.09.005	False	True	ethanol	8	strain_engineering	0	False	95.0	2011	Engineering topology and kinetics of sucrose metabolism in Saccharomyces cerev
+doi:10.1016/j.ymben.2010.11.003	False	True	ethanol	8	strain_engineering	0	False	95.0	2011	Minimization of glycerol synthesis in industrial ethanol yeast without influen
+doi:10.1016/j.enzmictec.2012.07.003	False	True	ethanol	8	strain_engineering	0	False	95.0	2012	Increased ethanol production from glycerol by Saccharomyces cerevisiae strains
+doi:10.1016/j.biortech.2026.134456	False	True	ethanol	8	strain_engineering	0	False	95.0	2026	Adaptive evolution of thermotolerant xylose-utilizing Saccharomyces cerevisiae
+doi:10.1016/j.jbiotec.2016.05.028	False	True	ethanol	8	strain_engineering	0	False	95.0	2016	Mating type and ploidy effect on the β-glucosidase activity and ethanol-produc
+doi:10.1016/j.jbiosc.2015.10.013	False	True	ethanol	8	strain_engineering	0	False	95.0	2016	Functional expression of xylose isomerase in flocculating industrial Saccharom
+doi:10.1016/j.enzmictec.2010.10.008	False	True	ethanol	8	strain_engineering	0	False	85.0	2011	Expression of aspartic protease from Neurospora crassa in industrial ethanol-p
+doi:10.1016/j.ymben.2023.06.009	False	True	ethanol	8	microbial_production	1	False	100.0	2023	Consolidated bioprocessing for bioethanol production by metabolically engineer
+doi:10.1016/j.biortech.2023.129993	False	True	ethanol	8	microbial_production	1	False	100.0	2024	High titer (>100 g/L) ethanol production from pretreated corn stover hydrolysa
+doi:10.1016/j.biortech.2008.03.037	False	True	ethanol	8	microbial_production	1	False	100.0	2008	Production of bio-ethanol from soybean molasses by Saccharomyces cerevisiae at
+doi:10.1016/j.biortech.2011.01.062	False	True	ethanol	8	microbial_production	1	False	95.0	2011	Fermentation of cellobiose to ethanol by industrial Saccharomyces strains carr
+doi:10.1016/j.jbiosc.2011.12.015	False	True	ethanol	8	microbial_production	1	False	95.0	2012	Ethanol yield and volatile compound content in fermentation of agave must by K
+doi:10.1016/j.biortech.2008.11.047	False	True	ethanol	8	microbial_production	1	False	95.0	2009	Bioethanol production performance of five recombinant strains of laboratory an
+doi:10.1016/j.jbiotec.2016.07.004	False	True	ethanol	8	microbial_production	1	False	95.0	2016	Bioethanol production by reusable Saccharomyces cerevisiae immobilized in a ma
+doi:10.1016/j.jbiosc.2010.02.003	False	True	ethanol	8	microbial_production	1	False	95.0	2010	Strategy for simultaneous saccharification and fermentation using a respirator
+doi:10.1016/j.jbiotec.2010.02.009	False	True	ethanol	8	microbial_production	1	False	95.0	2010	Thermodynamic analysis of fermentation and anaerobic growth of baker's yeast f
+doi:10.1016/j.biortech.2010.11.034	False	True	ethanol	8	microbial_production	1	False	95.0	2011	Fermentation of biomass sugars to ethanol using native industrial yeast strain
+doi:10.1016/j.biortech.2026.135679	False	True	ethanol	8	tolerance_stress	2	False	95.0	2026	Enhanced cellulosic ethanol production by increasing p-benzoquinone tolerance 
+doi:10.1016/j.jbiosc.2017.04.012	False	True	ethanol	8	tolerance_stress	2	False	95.0	2017	In vivo evolutionary engineering for ethanol-tolerance of Saccharomyces cerevi
+doi:10.1016/j.jbiosc.2014.04.016	False	True	ethanol	8	tolerance_stress	2	False	95.0	2014	Creation of an ethanol-tolerant Saccharomyces cerevisiae strain by 266 nm lase
+doi:10.1016/j.biortech.2017.01.040	False	True	ethanol	8	tolerance_stress	2	False	95.0	2017	Novel strategy to improve vanillin tolerance and ethanol fermentation performa
+doi:10.1016/j.biortech.2022.128079	False	True	ethanol	8	tolerance_stress	2	False	95.0	2022	Investigation of stress tolerance of Pichia kudriavzevii for high gravity bioe
+doi:10.1016/j.biortech.2011.02.101	False	True	ethanol	8	tolerance_stress	2	False	95.0	2011	Expression of aldehyde dehydrogenase 6 reduces inhibitory effect of furan deri
+doi:10.1016/j.biortech.2026.134191	False	True	ethanol	8	tolerance_stress	2	False	95.0	2026	Engineering stress tolerance in Saccharomyces cerevisiae by overexpressing PIR
+doi:10.1016/j.jbiosc.2009.03.019	False	True	ethanol	8	tolerance_stress	2	False	95.0	2009	Ethanol-tolerant Saccharomyces cerevisiae strains isolated under selective con
+doi:10.1016/j.bbagen.2025.130804	False	True	ethanol	8	tolerance_stress	2	False	95.0	2025	Yeast Hsp78 plays an essential role in adapting to severe ethanol stress via m
+doi:10.1007/s00253-020-10518-x	False	True	ethanol	8	tolerance_stress	2	False	95.0	2020	Rpn4 and proteasome-mediated yeast resistance to ethanol includes regulation o
+doi:10.1016/j.jbiotec.2007.05.010	False	True	ethanol	8	tolerance_stress	2	False	95.0	2007	Identification of target genes conferring ethanol stress tolerance to Saccharo
+doi:10.1016/j.jprot.2019.103377	False	True	ethanol	8	tolerance_stress	2	False	85.0	2019	Integrated transcriptomic and proteomic analysis of the ethanol stress respons
+doi:10.1016/j.fm.2023.104288	False	True	ethanol	8	tolerance_stress	2	False	75.0	2023	Bioactive dipeptides enhance the tolerance of lager yeast to ethanol-oxidation
+doi:10.1016/j.biortech.2012.08.080	False	True	ethanol	8	feedstock_process	3	False	95.0	2012	Conversion of coffee residue waste into bioethanol with using popping pretreat
+doi:10.1016/j.biortech.2009.12.090	False	True	ethanol	8	feedstock_process	3	False	95.0	2010	Fuel ethanol production from granular corn starch using Saccharomyces cerevisi
+doi:10.1016/j.biortech.2009.03.046	False	True	ethanol	8	feedstock_process	3	False	95.0	2009	Ethanol production from sweet sorghum juice using very high gravity technology
+doi:10.1016/j.biortech.2013.12.081	False	True	ethanol	8	feedstock_process	3	False	95.0	2014	Ethanol fermentation of energy beets by self-flocculating and non-flocculating
+doi:10.1016/j.biortech.2015.03.127	False	True	ethanol	8	feedstock_process	3	False	95.0	2015	Repeated ethanol production from sweet sorghum juice concentrated by membrane 
+doi:10.1016/j.biortech.2011.08.027	False	True	ethanol	8	feedstock_process	3	False	95.0	2011	Ethanol production from selected lignocellulosic hydrolysates by genome shuffl
+doi:10.1016/j.jbiosc.2016.04.012	False	True	ethanol	8	feedstock_process	3	False	95.0	2016	Optimization of prehydrolysis time and substrate feeding to improve ethanol pr
+doi:10.1016/j.carbpol.2017.01.090	False	True	ethanol	8	feedstock_process	3	False	95.0	2017	Production of bioethanol from pre-treated cotton fabrics and waste cotton mate
+doi:10.1016/j.biortech.2022.128002	False	True	ethanol	8	feedstock_process	3	False	95.0	2022	Bioethanol production from microalgae biomass at high-solids loadings.
+doi:10.1016/j.biortech.2025.133155	False	True	ethanol	8	feedstock_process	3	False	95.0	2025	Evaluation of the application effect of surface immobilization technology on f
+doi:10.1016/j.biotechadv.2007.09.002	False	True	ethanol	8	feedstock_process	3	False	95.0	2008	Ethanol fermentation technologies from sugar and starch feedstocks.
+doi:10.1016/j.biortech.2011.12.144	False	True	ethanol	8	feedstock_process	3	False	95.0	2012	Display of cellulases on the cell surface of Saccharomyces cerevisiae for high
+doi:10.1007/s10529-010-0330-9	False	True	ethanol	8	feedstock_process	3	False	95.0	2010	Selection of Saccharomyces cerevisiae strains for efficient very high gravity 
+doi:10.1016/j.biortech.2013.07.078	False	True	ethanol	8	feedstock_process	3	False	95.0	2013	Simultaneous saccharification and fermentation of Agave tequilana fructans by 
+doi:10.1016/j.jbiotec.2004.01.017	False	True	ethanol	8	feedstock_process	3	False	95.0	2004	Continuous ethanol production and evaluation of yeast cell lysis and viability
+doi:10.1007/s11356-016-8018-x	False	True	ethanol	8	feedstock_process	3	False	95.0	2017	Identification of strain isolated from dates (Phœnix dactylifera L.) for enhan
+doi:10.1016/j.biortech.2010.07.079	False	True	ethanol	8	feedstock_process	3	False	95.0	2010	Selection of stress-tolerant yeasts for simultaneous saccharification and ferm
+doi:10.1016/j.biortech.2017.05.125	False	True	ethanol	8	feedstock_process	3	False	95.0	2017	Continuous bioethanol fermentation from wheat straw hydrolysate with high susp
+doi:10.1016/j.biortech.2018.01.123	False	True	ethanol	8	feedstock_process	3	False	95.0	2018	Largely enhanced bioethanol production through the combined use of lignin-modi
+doi:10.1016/j.biortech.2010.12.115	False	True	ethanol	8	feedstock_process	3	False	95.0	2011	Application of simultaneous saccharification and fermentation (SSF) from visco
+doi:10.1016/j.biortech.2014.06.005	False	True	ethanol	8	feedstock_process	3	False	95.0	2014	An alternative feedstock of corn meal for industrial fuel ethanol production: 
+doi:10.1016/j.biortech.2014.07.082	False	True	ethanol	8	feedstock_process	3	False	95.0	2014	Increased ethanol production from sweet sorghum juice concentrated by a membra
+doi:10.1016/j.biortech.2010.03.129	False	True	ethanol	8	feedstock_process	3	False	95.0	2010	Ethanolic cofermentation with glucose and xylose by the recombinant industrial
+doi:10.1016/j.biortech.2010.11.097	False	True	ethanol	8	feedstock_process	3	False	95.0	2011	Potential utilization of sorghum field waste for fuel ethanol production emplo
+doi:10.1016/j.biortech.2008.11.010	False	True	ethanol	8	feedstock_process	3	False	95.0	2009	Flocculation characteristics of an isolated mutant flocculent Saccharomyces ce
+doi:10.1016/j.scitotenv.2022.157302	False	True	ethanol	8	feedstock_process	3	False	95.0	2022	Bioethanol production from expired cookies and economic analysis for practical
+doi:10.1016/j.biortech.2009.08.100	False	True	ethanol	8	feedstock_process	3	False	95.0	2010	Pretreatment of spruce and oak by N-methylmorpholine-N-oxide (NMMO) for effici
+doi:10.1016/j.biortech.2010.10.126	False	True	ethanol	8	feedstock_process	3	False	95.0	2011	Bioconversion of industrial hemp to ethanol and methane: the benefits of steam
+doi:10.1016/j.biortech.2004.12.034	False	True	ethanol	8	feedstock_process	3	False	95.0	2005	Ethanolic fermentation of acid pre-treated starch industry effluents by recomb
+doi:10.1007/s11356-023-30185-5	False	True	ethanol	8	feedstock_process	3	False	95.0	2024	Enhanced ethanol production using hydrophobic resin detoxified Pine forest lit
+doi:10.1016/j.biortech.2018.11.053	False	True	ethanol	8	feedstock_process	3	False	95.0	2019	Ethanol fermentation from non-detoxified lignocellulose hydrolysate by a multi
+doi:10.1016/j.jbiotec.2021.03.012	False	True	ethanol	8	feedstock_process	3	False	95.0	2021	Very high gravity ethanol fermentation from sweet sorghum stem juice using a s
+doi:10.1016/j.biortech.2014.01.060	False	True	ethanol	8	feedstock_process	3	False	95.0	2014	Inhibitor analysis and adaptive evolution of Saccharomyces cerevisiae for simu
+doi:10.1016/j.copbio.2014.09.004	False	True	other	10	strain_engineering	0	False	100.0	2015	Metabolic engineering of Saccharomyces cerevisiae for production of butanol is
+doi:10.1016/j.ymben.2019.08.015	False	True	other	10	strain_engineering	0	False	95.0	2019	Engineering transcription factor BmoR for screening butanol overproducers.
+doi:10.1016/j.ymben.2014.07.007	False	True	other	10	strain_engineering	0	False	95.0	2014	Metabolic engineering for higher alcohol production.
+doi:10.1016/j.biortech.2015.08.086	False	True	other	10	strain_engineering	0	False	95.0	2015	Metabolic engineering of Klebsiella pneumoniae for the de novo production of 2
+doi:10.1007/10_2007_057	False	True	other	10	strain_engineering	0	False	85.0	2007	Development of efficient xylose fermentation in Saccharomyces cerevisiae: xylo
+doi:10.2323/jgam.44.347	False	True	other	10	strain_engineering	0	False	85.0	1998	Breeding of flocculent industrial alcohol yeast strains by self-cloning of the
+doi:10.1016/j.cbpa.2013.03.036	False	True	other	10	microbial_production	1	False	95.0	2013	Advanced biofuel production by the yeast Saccharomyces cerevisiae.
+doi:10.1016/j.jbiotec.2010.06.006	False	True	other	10	tolerance_stress	2	False	95.0	2010	Identification of gene targets eliciting improved alcohol tolerance in Sacchar
+doi:10.1016/j.ymben.2020.06.003	False	True	other	10	tolerance_stress	2	False	85.0	2020	Stress-driven dynamic regulation of multiple tolerance genes improves robustne
+doi:10.1016/j.jbiosc.2015.09.006	False	True	other	10	tolerance_stress	2	False	85.0	2016	Screening of natural yeast isolates under the effects of stresses associated w
+doi:10.1016/j.biortech.2012.08.104	False	True	other	10	tolerance_stress	2	False	85.0	2012	Sm-like protein enhanced tolerance of recombinant Saccharomyces cerevisiae to 
+doi:10.1016/j.fgb.2024.103914	False	True	other	10	tolerance_stress	2	False	85.0	2024	Differential impacts of furfural and acetic acid on the bioenergetics and ferm
+doi:10.1007/s10482-006-9085-7	False	True	other	10	feedstock_process	3	False	95.0	2006	Alcoholic fermentation of carbon sources in biomass hydrolysates by Saccharomy
+doi:10.1016/j.biortech.2011.12.147	False	True	other	10	feedstock_process	3	False	95.0	2012	The combination of glycerol metabolic engineering and drug resistance marker-a
+doi:10.1016/j.biortech.2013.09.082	False	True	other	10	feedstock_process	3	False	85.0	2013	Continuous co-fermentation of cellobiose and xylose by engineered Saccharomyce
+doi:10.1016/j.biortech.2011.04.094	False	True	other	10	feedstock_process	3	False	85.0	2011	Techno-economic implications of improved high gravity corn mash fermentation.
+doi:10.1016/j.biortech.2007.09.046	False	True	other	10	feedstock_process	3	False	85.0	2008	Simultaneous saccharification and fermentation of acid-pretreated corncobs wit
+doi:10.1016/j.biortech.2026.135490	False	True	other	10	feedstock_process	3	False	85.0	2026	Efficient high-temperature simultaneous saccharification and fermentation of l
+doi:10.1016/j.ymben.2020.04.002	False	True	isobutanol	2	strain_engineering	0	True	95.0	2020	"Corrigendum to ""Uncovering the role of branched-chain amino acid transaminases"
+doi:10.1016/j.jbiosc.2017.01.010	False	True	isobutanol	2	tolerance_stress	2	True	95.0	2017	"Corrigendum to ""Experimental evolution and gene knockout studies reveal AcrA-m"
+doi:10.1016/j.cels.2020.01.005	False	True	isobutanol	2	tolerance_stress	2	True	85.0	2020	Evaluation of Kuroda et al.: Insight into Yeast Isobutanol Tolerance with Adva
