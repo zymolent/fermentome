@@ -778,6 +778,39 @@ _FLAG_FOR: Final[Mapping[str, str]] = {
 }
 
 
+def cmd_curate_duplicates(args: argparse.Namespace) -> int:
+    """Proposals describing a measurement the atlas already holds. Reports; writes nothing."""
+    from .curate.duplicates import find_duplicates
+
+    settings = Settings.load()
+    conn = open_db(settings.db_file)
+    try:
+        found = find_duplicates(conn)
+    finally:
+        conn.close()
+
+    if not found:
+        print("no pending proposal duplicates a promoted measurement")
+        return 0
+
+    richer = [d for d in found if d.supersedes]
+    print(
+        f"{len(found)} proposal(s) describe a measurement already in the atlas; "
+        f"{len(richer)} of them carry fields the promoted row does not"
+    )
+    if args.verbose:
+        for item in found:
+            print(f"  {item.line()}")
+    print(
+        "\nThese get different ids, because proposal_hash covers the quote and these quotes "
+        "differ. So promoting them writes SECOND rows rather than updating the first, and the "
+        "id-level 'already present' check will not catch it.\n"
+        "The richer ones are supersessions, not repeats -- keeping both, or retracting the "
+        "thinner row, is a curator's decision under PLAN.md J.1 and L.5. Nothing here does it."
+    )
+    return 0
+
+
 def _bulk_supply_spread(conn: sqlite3.Connection, supplied: Mapping[str, Any]) -> str | None:
     """Refuse a `--flag` value stamped across rows it cannot be true of. None means proceed.
 
@@ -1260,6 +1293,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--curator", default=None, help="who is deciding; required with --accept"
     )
     p_cu_corroborate.set_defaults(func=cmd_curate_corroborate)
+
+    p_cu_duplicates = cu_sub.add_parser(
+        "duplicates",
+        help="proposals describing a measurement the atlas already holds under another id",
+    )
+    p_cu_duplicates.add_argument(
+        "--verbose", action="store_true", help="list each proposal and the row it duplicates"
+    )
+    p_cu_duplicates.set_defaults(func=cmd_curate_duplicates)
 
     p_cu_promote = cu_sub.add_parser(
         "promote",
