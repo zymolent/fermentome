@@ -44,7 +44,7 @@ import sqlite3
 import sys
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from . import curate
 from .config import Settings
@@ -743,46 +743,97 @@ def cmd_curate_corroborate(args: argparse.Namespace) -> int:
     return 0
 
 
-def _organism_spread(conn: sqlite3.Connection, supplied: Mapping[str, Any]) -> str | None:
-    """Refuse one `--organism` stamped across strains from several papers. None means proceed.
+#: Supplied fields that are a property of ONE PAPER, and the record kinds each one reaches.
+#:
+#: A curator who has read a paper can assert these for that paper. Across papers they are a guess
+#: about papers nobody opened for this run -- and `_plan_configuration` already refuses to make
+#: exactly this guess for `host_strain_id`, so making it through a CLI flag instead is the same
+#: error wearing a different hat.
+_PAPER_SCOPED: Final[Mapping[str, tuple[str, ...]]] = {
+    "organism_id": ("strains",),
+    "basis": ("measurements", "co_reported_higher_alcohols"),
+    "product_id": ("measurements", "co_reported_higher_alcohols", "pathway_configurations"),
+    "host_strain_id": ("pathway_configurations", "part_expression_records"),
+    "pathway_id": ("pathway_configurations",),
+}
 
-    `promote` builds `supplied` once and hands the same mapping to every task in the bulk path,
-    so `--organism` applied without `--task` sets one organism on every accepted strain there is.
-    Measured on the queue of 2026-09-22 that is 222 strains from 11 publications, of which at
-    least 19 are *E. coli* -- and the yeast ones are not one organism either, since BY4741 and
-    CEN.PK2-1C have separate `organism` rows in this atlas.
+#: Supplied fields that name ONE SPECIFIC ROW. These are wrong for more than one task at all,
+#: within a paper as much as across papers: two configurations cannot share `--name`, and two
+#: expression records naming different genes cannot share one `--part` catalog id.
+_RECORD_SCOPED: Final[Mapping[str, tuple[str, ...]]] = {
+    "name": ("pathway_configurations",),
+    "part_id": ("part_expression_records",),
+    "outcome_measurement_id": ("part_expression_records",),
+}
 
-    That is precisely the cross-paper guessing `_plan_configuration` refuses to do for
-    `host_strain_id`, done at scale, silently, through a different door. `strain.organism_id` is
-    not a formality: it is what separates a yeast build from a bacterial one, and it is the field
-    every downstream organism filter trusts.
+_FLAG_FOR: Final[Mapping[str, str]] = {
+    "organism_id": "--organism",
+    "basis": "--basis",
+    "product_id": "--product",
+    "host_strain_id": "--host-strain",
+    "pathway_id": "--pathway",
+    "name": "--name",
+    "part_id": "--part",
+    "outcome_measurement_id": "--outcome-measurement",
+}
 
-    Within a single publication the curator has read that paper and can assert its organism, so
-    that stays allowed. Across publications they demonstrably have not, so it is refused with the
-    spread named and the per-paper command spelled out.
+
+def _bulk_supply_spread(conn: sqlite3.Connection, supplied: Mapping[str, Any]) -> str | None:
+    """Refuse a `--flag` value stamped across rows it cannot be true of. None means proceed.
+
+    `cmd_curate_promote` builds `supplied` once and hands the same mapping to every task in the
+    bulk path, so any of these flags used without `--task` reaches every accepted record of the
+    kinds it applies to. Measured on the queue of 2026-09-22: `--organism` would have written one
+    organism onto 222 strains from 11 publications, at least 19 of them *E. coli* -- and the
+    yeast ones are not one organism either, since BY4741 and CEN.PK2-1C have separate `organism`
+    rows here.
+
+    The two classes fail differently and so are refused differently. A **paper-scoped** value is
+    defensible for one publication and a guess across several, so it is refused only on a spread.
+    A **record-scoped** value names one row, so it is wrong for any two tasks at all -- the
+    clearest case being `--product`, which `_plan_configuration` refuses to default precisely
+    because filing a 3-HP build as an isobutanol one is what that would do.
+
+    The message names the spread and the fix, and says which promotions are unaffected: a guard
+    that blocks the useful path alongside the dangerous one is an obstacle, not a guard.
     """
-    if not supplied.get("organism_id"):
-        return None
-    rows = conn.execute(
-        "SELECT publication_id, COUNT(*) n FROM curation_task "
-        "WHERE status IN ('accepted','edited') AND record_kind = 'strains' "
-        "GROUP BY publication_id ORDER BY n DESC"
-    ).fetchall()
-    if len(rows) <= 1:
-        return None
-    total = sum(int(r["n"]) for r in rows)
-    listing = "\n".join(f"    {r['n']:>4}  {r['publication_id']}" for r in rows)
-    return (
-        f"refusing --organism {supplied['organism_id']!r} for a bulk promotion: it would be "
-        f"written onto {total} accepted strain proposal(s) from {len(rows)} publications.\n"
-        f"{listing}\n"
-        "One organism across several papers is a guess about papers nobody read for this run, "
-        "and organism_id is what separates a yeast build from a bacterial one.\n"
-        "Promote one publication at a time, or one task at a time:\n"
-        "    fermdb curate promote --task <id> --organism <id> --curator NAME --reason ...\n"
-        "Promotions that need no organism are unaffected -- rerun without --organism to write "
-        "those first."
-    )
+    for field_name, kinds in {**_PAPER_SCOPED, **_RECORD_SCOPED}.items():
+        value = supplied.get(field_name)
+        if not value:
+            continue
+        placeholders = ", ".join("?" for _ in kinds)
+        rows = conn.execute(
+            "SELECT publication_id, COUNT(*) n FROM curation_task "  # noqa: S608
+            f"WHERE status IN ('accepted','edited') AND record_kind IN ({placeholders}) "
+            "GROUP BY publication_id ORDER BY n DESC",
+            kinds,
+        ).fetchall()
+        total = sum(int(r["n"]) for r in rows)
+        record_scoped = field_name in _RECORD_SCOPED
+        if total <= 1 or (not record_scoped and len(rows) <= 1):
+            continue
+
+        flag = _FLAG_FOR[field_name]
+        listing = "\n".join(f"    {r['n']:>4}  {r['publication_id']}" for r in rows)
+        why = (
+            f"{flag} names one specific row, so it cannot be true of {total} of them."
+            if record_scoped
+            else (
+                f"One {flag} value across {len(rows)} papers is a guess about papers nobody read "
+                "for this run."
+            )
+        )
+        return (
+            f"refusing {flag} {value!r} for a bulk promotion: it would be written onto {total} "
+            f"accepted {'/'.join(kinds)} proposal(s) from {len(rows)} publication(s).\n"
+            f"{listing}\n"
+            f"{why}\n"
+            "Promote one task at a time instead:\n"
+            f"    fermdb curate promote --task <id> {flag} <value> --curator NAME --reason ...\n"
+            f"Promotions that need no {flag} are unaffected -- rerun without it to write those "
+            "first."
+        )
+    return None
 
 
 def cmd_curate_promote(args: argparse.Namespace) -> int:
@@ -808,7 +859,7 @@ def cmd_curate_promote(args: argparse.Namespace) -> int:
     curator = Curator(name=args.curator, kind="human")
     try:
         if not args.task:
-            spread = _organism_spread(conn, supplied)
+            spread = _bulk_supply_spread(conn, supplied)
             if spread is not None:
                 print(spread, file=sys.stderr)
                 return 2

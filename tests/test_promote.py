@@ -867,12 +867,19 @@ def test_a_part_expression_promotes_into_zone_r_with_the_papers_wording_kept(
 
 
 # ---------------------------------------------------------------------------------------------
-# The bulk `--organism` guard (fermdb.cli._organism_spread)
+# The bulk supplied-value guard (fermdb.cli._bulk_supply_spread)
 # ---------------------------------------------------------------------------------------------
 
 
 def _accept_strain(conn: sqlite3.Connection, task_id: str, publication_id: str) -> None:
-    """A minimal accepted strain proposal, with the publication and extraction it hangs off.
+    """An accepted `strains` proposal."""
+    _accept_task(conn, task_id, publication_id, "strains")
+
+
+def _accept_task(
+    conn: sqlite3.Connection, task_id: str, publication_id: str, record_kind: str
+) -> None:
+    """A minimal accepted proposal, with the publication and extraction it hangs off.
 
     The audit columns are all supplied because `curation_task` CHECKs that an accepted row
     carries curator, kind, resolved_at and reason together -- the trail is not optional.
@@ -892,16 +899,22 @@ def _accept_strain(conn: sqlite3.Connection, task_id: str, publication_id: str) 
     conn.execute(
         "INSERT INTO curation_task (id, extraction_id, publication_id, record_kind, record_path, "
         "payload, proposal_hash, status, curator, curator_kind, resolved_at, resolution_reason, "
-        "zone) VALUES (?,?,?,'strains',?,'{}',?,'accepted','kangkon','human',"
+        "zone) VALUES (?,?,?,?,?,'{}',?,'accepted','kangkon','human',"
         "'2026-09-22T00:00:00+00:00','test', 'I')",
         (
             task_id,
             extraction_id,
             publication_id,
-            f"strains[{task_id}]",  # UNIQUE (extraction_id, record_path)
+            record_kind,
+            f"{record_kind}[{task_id}]",  # UNIQUE (extraction_id, record_path)
             f"hash-{task_id}",
         ),
     )
+
+
+def _accept_config(conn: sqlite3.Connection, task_id: str, publication_id: str) -> None:
+    """An accepted `pathway_configurations` proposal, for the record-scoped flags."""
+    _accept_task(conn, task_id, publication_id, "pathway_configurations")
 
 
 def test_one_organism_is_refused_across_several_publications(atlas: sqlite3.Connection) -> None:
@@ -912,15 +925,15 @@ def test_one_organism_is_refused_across_several_publications(atlas: sqlite3.Conn
     strains from 11 publications, at least 19 of them *E. coli* -- and it is the field that
     separates a yeast build from a bacterial one.
     """
-    from fermdb.cli import _organism_spread
+    from fermdb.cli import _bulk_supply_spread
 
     _accept_strain(atlas, "YAA:CTASK:s1", "YAA:PUB:test")
     _accept_strain(atlas, "YAA:CTASK:s2", "YAA:PUB:other")
     atlas.commit()
 
-    note = _organism_spread(atlas, {"organism_id": "YAA:ORG:scer"})
+    note = _bulk_supply_spread(atlas, {"organism_id": "YAA:ORG:scer"})
     assert note is not None
-    assert "2 publications" in note
+    assert "2 publication(s)" in note
     assert "YAA:PUB:test" in note and "YAA:PUB:other" in note
     # It must say what to do instead, or it is an obstacle rather than a guard.
     assert "--task" in note
@@ -928,22 +941,56 @@ def test_one_organism_is_refused_across_several_publications(atlas: sqlite3.Conn
 
 def test_one_organism_is_allowed_within_a_single_publication(atlas: sqlite3.Connection) -> None:
     """A curator who has read one paper can assert its organism. Across papers they have not."""
-    from fermdb.cli import _organism_spread
+    from fermdb.cli import _bulk_supply_spread
 
     _accept_strain(atlas, "YAA:CTASK:s1", "YAA:PUB:test")
     _accept_strain(atlas, "YAA:CTASK:s2", "YAA:PUB:test")
     atlas.commit()
 
-    assert _organism_spread(atlas, {"organism_id": "YAA:ORG:scer"}) is None
+    assert _bulk_supply_spread(atlas, {"organism_id": "YAA:ORG:scer"}) is None
+
+
+def test_a_record_scoped_value_is_refused_for_two_tasks_even_in_one_paper(
+    atlas: sqlite3.Connection,
+) -> None:
+    """`--name`, `--part` and `--outcome-measurement` name one row, not a paper's worth of them.
+
+    The paper-scoped spread rule would wave these through inside a single publication, and that
+    would still be wrong: two configurations cannot share a name, and two expression records
+    naming different genes cannot share one catalog part id.
+    """
+    from fermdb.cli import _bulk_supply_spread
+
+    _accept_config(atlas, "YAA:CTASK:c1", "YAA:PUB:test")
+    _accept_config(atlas, "YAA:CTASK:c2", "YAA:PUB:test")
+    atlas.commit()
+
+    note = _bulk_supply_spread(atlas, {"name": "the isobutanol build"})
+    assert note is not None
+    assert "names one specific row" in note
+    assert "--name" in note
+
+
+def test_a_paper_scoped_value_is_still_allowed_for_two_tasks_in_one_paper(
+    atlas: sqlite3.Connection,
+) -> None:
+    """The distinction has to cut both ways or it is just a blanket refusal."""
+    from fermdb.cli import _bulk_supply_spread
+
+    _accept_config(atlas, "YAA:CTASK:c1", "YAA:PUB:test")
+    _accept_config(atlas, "YAA:CTASK:c2", "YAA:PUB:test")
+    atlas.commit()
+
+    assert _bulk_supply_spread(atlas, {"pathway_id": "YAA:PATH:ehrlich"}) is None
 
 
 def test_promotions_that_need_no_organism_are_never_blocked(atlas: sqlite3.Connection) -> None:
     """The guard is about one flag, not about bulk promotion, which is the useful path."""
-    from fermdb.cli import _organism_spread
+    from fermdb.cli import _bulk_supply_spread
 
     _accept_strain(atlas, "YAA:CTASK:s1", "YAA:PUB:test")
     _accept_strain(atlas, "YAA:CTASK:s2", "YAA:PUB:other")
     atlas.commit()
 
-    assert _organism_spread(atlas, {}) is None
-    assert _organism_spread(atlas, {"basis": "consumed"}) is None
+    assert _bulk_supply_spread(atlas, {}) is None
+    assert _bulk_supply_spread(atlas, {"basis": "consumed"}) is None
