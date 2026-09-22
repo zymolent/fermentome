@@ -542,6 +542,32 @@ class OllamaProvider:
             "prompt": prompt,
             "stream": False,
             "options": merged,
+            # Reasoning OFF, and this is the fix for the failure MODEL_ROUTING.md section 7b
+            # recorded -- whose diagnosis was wrong about the mechanism.
+            #
+            # 7b blamed `format`: qwen3.6 answering a schema-constrained request with an empty
+            # string. Measured directly on 2026-09-23, the cause is thinking, not format. On one
+            # extraction-shaped prompt:
+            #
+            #     thinking on (default) : 75.0 s,  544 chars of answer, 10,255 of reasoning
+            #     think=false           :  3.8 s,  448 chars of answer,      0 of reasoning
+            #     think=false + format  :  3.7 s,  448 chars of answer,      0 of reasoning
+            #
+            # Ollama returns reasoning in a separate `thinking` field, so when a hard prompt
+            # exhausts the budget mid-reasoning, `response` arrives EMPTY while the model has in
+            # fact been working. That is 7b's "dangerous result" -- an empty extraction is
+            # indistinguishable from "this paper reports nothing" -- and on a real 12,000-character
+            # excerpt it happened every time, on both reasoning models this machine has. (Their
+            # names belong in `config.py` and nowhere else; `test_llm` enforces that, and caught
+            # this comment naming one.)
+            #
+            # With reasoning off the same model answers 20x faster AND accepts the schema
+            # constraint, so this both restores the local tier and removes the need for 7b's
+            # drop-the-format retry below on these models.
+            #
+            # A non-reasoning model ignores the field, so it is sent unconditionally rather than
+            # gated on a model-name pattern nobody would maintain.
+            "think": False,
         }
         if schema is not None and self._constrain_with_schema:
             # Ollama accepts a JSON Schema in `format` and constrains decoding to it. When the

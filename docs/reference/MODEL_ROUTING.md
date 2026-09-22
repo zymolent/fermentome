@@ -248,6 +248,37 @@ Run against Ollama 0.33.3 on this workstation. **Read this before changing a mod
 | `gpt-oss:20b` | `json` | HTTP 500 |
 | `gemma4:31b` | `json` | works, ~43 s — too slow for bulk extraction |
 
+### 7b-i. Correction, 2026-09-23: the cause was reasoning, not `format`
+
+The table above blames `format`. Measured directly, that is wrong, and the real cause has a cheap
+fix that restores the whole local tier.
+
+`qwen3.6` is a **reasoning** model and Ollama returns its reasoning in a separate `thinking`
+field. On one extraction-shaped prompt:
+
+| mode | time | answer | reasoning |
+|---|---|---|---|
+| thinking on (the default) | **75.0 s** | 544 chars | **10,255 chars** |
+| `think: false` | **3.8 s** | 448 chars | 0 |
+| `think: false` + `format` | **3.7 s** | 448 chars | 0 |
+
+So on a hard prompt the model exhausts its budget mid-reasoning and `response` arrives EMPTY while
+the model has in fact been working. That is the "dangerous result" this section named, and on a
+real 12,000-character excerpt it happened every time — `qwen3.6:27b` and `qwen3.6:35b` alike, and
+the drop-the-format retry did not help because format was never the problem.
+
+With `think: false` the same model answers **20x faster AND accepts the schema constraint**. The
+Ollama provider now sends it unconditionally; a non-reasoning model ignores the field, which is
+better than gating on a model-name pattern nobody would maintain.
+
+Verified end to end: `extract run --only-kind strains` on `doi:10.1186/s13068-015-0361-5` went
+from *"reply contains no JSON object"* to **23 validated strain records in 93 s**.
+
+A note on the other model tested here: `qwen2.5:7b-instruct` does answer, and fast, but its quotes
+are *paraphrased* rather than copied, so every span fails `quote_absent_from_source`. That is the
+span validator working, and it is why a smaller model is not a drop-in substitute on this track —
+the atlas's quality floor is verbatim quotation, not plausible text.
+
 **The empty string is the dangerous result.** It is not an error, and it is indistinguishable
 from *"the model found no facts in this paper."* The extraction harness was written assuming
 schema-constrained decoding works; on this machine that combination yields nothing, so a whole
