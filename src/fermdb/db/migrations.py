@@ -408,6 +408,54 @@ _V11_TO_V12: Final[Migration] = Migration(
     ),
 )
 
+#: A curator's own include/exclude verdict on a publication, which the atlas had nowhere to put.
+#:
+#: `screening_record.triage_state` is NOT that place, and the schema says so in its own words: it
+#: is "a deterministic function of query_families.yaml and the recorded rule in discovery.py",
+#: stamped Zone H because re-running the same family reproduces it, and anything else "must never
+#: overwrite `triage_state` here directly". Writing a human verdict there would be erased by the
+#: next `fermdb literature discover`, silently, and the owner would have to re-read the papers.
+#:
+#: Deleting the rows is the other tempting answer and is worse. PLAN.md L.5 forbids an agent
+#: deleting at all, and H.3 gives the reason that outlives the rule: **"an excluded paper is a
+#: decision, not an absence."** A dropped row cannot say why it went, and the next discovery run
+#: puts it straight back with no memory that anybody judged it. The `exclusion_reason` column on
+#: `screening_record` already encodes that principle for machine triage; this table extends it to
+#: the curator.
+#:
+#: Zone R, because a person read the paper and decided. One row per publication: a second verdict
+#: on the same paper replaces the first through the curator's own path, and the `curation_event`
+#: log is where the history lives, exactly as it does for `curation_task`.
+_V12_TO_V13: Final[Migration] = Migration(
+    from_version=12,
+    to_version=13,
+    summary=(
+        "screening_decision -- the curator's own include/exclude verdict, which triage_state "
+        "cannot hold because discovery rebuilds it"
+    ),
+    statements=(
+        """
+        CREATE TABLE screening_decision (
+            publication_id  TEXT PRIMARY KEY REFERENCES publication(id),
+            decision        TEXT NOT NULL
+                            CHECK (decision IN ('include', 'exclude', 'borderline')),
+            -- Never NULL, for the reason screening_record.exclusion_reason is never NULL on an
+            -- exclusion: a changed policy must be able to ask what it would now include.
+            reason          TEXT NOT NULL,
+            -- Where the verdict was read from, so it can be re-derived: a folder the curator
+            -- sorted PDFs into, a spreadsheet column, a session at the screen.
+            source          TEXT NOT NULL,
+            decided_by      TEXT NOT NULL,
+            decided_at      TEXT NOT NULL,
+            zone            TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+            evidence        TEXT NOT NULL,
+            confidence      TEXT NOT NULL
+        )
+        """,
+        "CREATE INDEX screening_decision_by_decision ON screening_decision(decision)",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -417,6 +465,7 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V9_TO_V10,
     _V10_TO_V11,
     _V11_TO_V12,
+    _V12_TO_V13,
 )
 
 

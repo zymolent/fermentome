@@ -1,0 +1,599 @@
+# screening_decisions.tsv -- the project owner's own include/exclude verdicts, one per
+# publication, recorded from how PDFs were sorted under
+# D:\Agentic\bifserver-works\literatures on 2026-09-22.
+#
+# These are NOT screening_record.triage_state. That column is Zone H, a deterministic
+# function of query_families.yaml and discovery.py, and the schema says it must never be
+# overwritten directly -- the next discovery run rebuilds it. A person who read a paper
+# and rejected it is not a function of the query file, so the verdict lives here and in
+# the screening_decision table, where re-running discovery cannot erase it.
+#
+# in_atlas records whether the DOI matched a publication row at the time of writing. 'no'
+# means the owner screened a paper discovery never returned: kept deliberately, because a
+# decision about a paper the atlas has not seen is still a decision, and dropping it here
+# would silently re-open the paper if discovery later finds it.
+#
+# pdf/ (17 files, unsorted) is absent on purpose. Undecided is not a decision.
+publication_id	decision	reason	source	decided_by	decided_at	in_atlas	pdf_file
+doi:10.1002/j.1460-2075.1985.tb04112.x	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1002_j.1460-2075.1985.tb04112.x.pdf
+doi:10.1002/j.1460-2075.1990.tb07636.x	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1002_j.1460-2075.1990.tb07636.x.pdf
+doi:10.1002/j.1460-2075.1992.tb05336.x	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1002_j.1460-2075.1992.tb05336.x.pdf
+doi:10.1002/j.1460-2075.1995.tb00191.x	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1002_j.1460-2075.1995.tb00191.x.pdf
+doi:10.1002/j.1460-2075.1995.tb00302.x	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1002_j.1460-2075.1995.tb00302.x.pdf
+doi:10.1007/978-1-0716-2922-2_24	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_978-1-0716-2922-2_24.pdf
+doi:10.1007/bf00310888	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00310888.pdf
+doi:10.1007/bf00311209	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00311209.pdf
+doi:10.1007/bf00311880	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00311880.pdf
+doi:10.1007/bf00312618	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00312618.pdf
+doi:10.1007/bf00312648	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00312648.pdf
+doi:10.1007/bf00312651	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00312651.pdf
+doi:10.1007/bf00312770	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00312770.pdf
+doi:10.1007/bf00314437	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00314437.pdf
+doi:10.1007/bf00317071	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00317071.pdf
+doi:10.1007/bf00318513	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00318513.pdf
+doi:10.1007/bf00318522	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00318522.pdf
+doi:10.1007/bf00318525	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00318525.pdf
+doi:10.1007/bf00321109	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00321109.pdf
+doi:10.1007/bf00336483	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00336483.pdf
+doi:10.1007/bf00336780	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00336780.pdf
+doi:10.1007/bf00336781	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00336781.pdf
+doi:10.1007/bf00336786	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00336786.pdf
+doi:10.1007/bf00351653	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00351653.pdf
+doi:10.1007/bf00351660	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00351660.pdf
+doi:10.1007/bf00351744	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00351744.pdf
+doi:10.1007/bf00355058	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00355058.pdf
+doi:10.1007/bf00357167	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00357167.pdf
+doi:10.1007/bf00365628	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00365628.pdf
+doi:10.1007/bf00365643	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00365643.pdf
+doi:10.1007/bf00365679	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00365679.pdf
+doi:10.1007/bf00365694	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00365694.pdf
+doi:10.1007/bf00365714	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00365714.pdf
+doi:10.1007/bf00365720	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00365720.pdf
+doi:10.1007/bf00376789	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00376789.pdf
+doi:10.1007/bf00384603	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00384603.pdf
+doi:10.1007/bf00390335	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00390335.pdf
+doi:10.1007/bf00390336	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00390336.pdf
+doi:10.1007/bf00405096	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00405096.pdf
+doi:10.1007/bf00417811	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00417811.pdf
+doi:10.1007/bf00418526	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00418526.pdf
+doi:10.1007/bf00419558	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00419558.pdf
+doi:10.1007/bf00420605	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00420605.pdf
+doi:10.1007/bf00420627	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00420627.pdf
+doi:10.1007/bf00421604	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00421604.pdf
+doi:10.1007/bf00429824	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00429824.pdf
+doi:10.1007/bf00434887	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00434887.pdf
+doi:10.1007/bf00435207	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00435207.pdf
+doi:10.1007/bf00435287	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00435287.pdf
+doi:10.1007/bf00445745	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00445745.pdf
+doi:10.1007/bf00447385	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00447385.pdf
+doi:10.1007/bf00449815	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_bf00449815.pdf
+doi:10.1007/s00253-020-10819-1	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00253-020-10819-1.pdf
+doi:10.1007/s00294-002-0337-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-002-0337-4.pdf
+doi:10.1007/s00294-003-0398-z	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-003-0398-z.pdf
+doi:10.1007/s00294-003-0420-5	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-003-0420-5.pdf
+doi:10.1007/s00294-004-0493-9	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-004-0493-9.pdf
+doi:10.1007/s00294-004-0503-y	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-004-0503-y.pdf
+doi:10.1007/s00294-004-0537-1	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-004-0537-1.pdf
+doi:10.1007/s00294-005-0022-5	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-005-0022-5.pdf
+doi:10.1007/s00294-005-0023-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-005-0023-4.pdf
+doi:10.1007/s00294-005-0566-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-005-0566-4.pdf
+doi:10.1007/s00294-005-0582-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-005-0582-4.pdf
+doi:10.1007/s00294-009-0260-z	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-009-0260-z.pdf
+doi:10.1007/s00294-014-0472-8	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-014-0472-8.pdf
+doi:10.1007/s00294-015-0498-6	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-015-0498-6.pdf
+doi:10.1007/s00294-017-0717-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-017-0717-4.pdf
+doi:10.1007/s00294-018-0803-2	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00294-018-0803-2.pdf
+doi:10.1007/s002940000155	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940000155.pdf
+doi:10.1007/s002940050094	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050094.pdf
+doi:10.1007/s002940050111	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050111.pdf
+doi:10.1007/s002940050262	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050262.pdf
+doi:10.1007/s002940050307	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050307.pdf
+doi:10.1007/s002940050395	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050395.pdf
+doi:10.1007/s002940050422	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050422.pdf
+doi:10.1007/s002940050427	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050427.pdf
+doi:10.1007/s002940050469	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050469.pdf
+doi:10.1007/s002940050522	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940050522.pdf
+doi:10.1007/s002940070001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s002940070001.pdf
+doi:10.1007/s00424-006-0083-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s00424-006-0083-4.pdf
+doi:10.1007/s10495-007-0758-0	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s10495-007-0758-0.pdf
+doi:10.1007/s10886-025-01685-0	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s10886-025-01685-0.pdf
+doi:10.1007/s11033-019-04782-y	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s11033-019-04782-y.pdf
+doi:10.1007/s11274-026-04985-z	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s11274-026-04985-z.pdf
+doi:10.1007/s11427-023-2468-y	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1007_s11427-023-2468-y.pdf
+doi:10.1016/0003-2697_65_90282-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_0003-2697_65_90282-4.pdf
+doi:10.1016/j.ab.2008.08.030	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ab.2008.08.030.pdf
+doi:10.1016/j.ab.2010.04.021	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ab.2010.04.021.pdf
+doi:10.1016/j.abb.2007.04.029	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.abb.2007.04.029.pdf
+doi:10.1016/j.abb.2007.04.039	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.abb.2007.04.039.pdf
+doi:10.1016/j.abb.2025.110406	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.abb.2025.110406.pdf
+doi:10.1016/j.abb.2025.110674	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.abb.2025.110674.pdf
+doi:10.1016/j.aca.2005.06.028	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.aca.2005.06.028.pdf
+doi:10.1016/j.aca.2011.11.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.aca.2011.11.014.pdf
+doi:10.1016/j.aca.2011.11.042	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.aca.2011.11.042.pdf
+doi:10.1016/j.aca.2014.05.042	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.aca.2014.05.042.pdf
+doi:10.1016/j.ajem.2022.10.048	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ajem.2022.10.048.pdf
+doi:10.1016/j.bbadis.2007.01.009	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbadis.2007.01.009.pdf
+doi:10.1016/j.bbagen.2014.02.015	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2014.02.015.pdf
+doi:10.1016/j.bbagen.2014.06.017	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2014.06.017.pdf
+doi:10.1016/j.bbagen.2016.07.029	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2016.07.029.pdf
+doi:10.1016/j.bbagen.2018.02.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2018.02.012.pdf
+doi:10.1016/j.bbagen.2019.129417	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2019.129417.pdf
+doi:10.1016/j.bbagen.2019.129504	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2019.129504.pdf
+doi:10.1016/j.bbagen.2022.130147	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2022.130147.pdf
+doi:10.1016/j.bbagen.2025.130845	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2025.130845.pdf
+doi:10.1016/j.bbagrm.2008.09.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbagrm.2008.09.008.pdf
+doi:10.1016/j.bbalip.2012.11.007	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbalip.2012.11.007.pdf
+doi:10.1016/j.bbamcr.2020.118816	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbamcr.2020.118816.pdf
+doi:10.1016/j.bbrc.2010.01.051	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbrc.2010.01.051.pdf
+doi:10.1016/j.bbrc.2010.10.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbrc.2010.10.014.pdf
+doi:10.1016/j.bbrc.2012.05.151	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbrc.2012.05.151.pdf
+doi:10.1016/j.bbrc.2014.08.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbrc.2014.08.011.pdf
+doi:10.1016/j.bbrc.2017.03.126	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bbrc.2017.03.126.pdf
+doi:10.1016/j.bcp.2014.07.027	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bcp.2014.07.027.pdf
+doi:10.1016/j.biocel.2012.07.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biocel.2012.07.001.pdf
+doi:10.1016/j.biocel.2015.05.016	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biocel.2015.05.016.pdf
+doi:10.1016/j.biochi.2013.11.007	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biochi.2013.11.007.pdf
+doi:10.1016/j.biochi.2013.12.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biochi.2013.12.005.pdf
+doi:10.1016/j.bioelechem.2014.06.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bioelechem.2014.06.005.pdf
+doi:10.1016/j.bioorg.2020.104192	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bioorg.2020.104192.pdf
+doi:10.1016/j.biopha.2008.06.032	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biopha.2008.06.032.pdf
+doi:10.1016/j.biortech.2009.12.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2009.12.003.pdf
+doi:10.1016/j.biortech.2010.09.102	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.09.102.pdf
+doi:10.1016/j.biortech.2013.07.081	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2013.07.081.pdf
+doi:10.1016/j.biortech.2015.02.015	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2015.02.015.pdf
+doi:10.1016/j.biortech.2016.12.061	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2016.12.061.pdf
+doi:10.1016/j.biortech.2021.125693	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2021.125693.pdf
+doi:10.1016/j.biortech.2021.125846	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2021.125846.pdf
+doi:10.1016/j.biortech.2023.128586	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2023.128586.pdf
+doi:10.1016/j.biortech.2025.132656	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2025.132656.pdf
+doi:10.1016/j.biortech.2025.133508	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2025.133508.pdf
+doi:10.1016/j.biortech.2025.133803	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2025.133803.pdf
+doi:10.1016/j.biortech.2026.134659	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.134659.pdf
+doi:10.1016/j.biortech.2026.134710	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.134710.pdf
+doi:10.1016/j.biortech.2026.134731	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.134731.pdf
+doi:10.1016/j.biortech.2026.135138	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.135138.pdf
+doi:10.1016/j.biortech.2026.135531	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.135531.pdf
+doi:10.1016/j.bios.2007.06.021	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bios.2007.06.021.pdf
+doi:10.1016/j.bios.2018.11.036	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bios.2018.11.036.pdf
+doi:10.1016/j.bios.2026.119171	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.bios.2026.119171.pdf
+doi:10.1016/j.biotechadv.2015.10.015	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2015.10.015.pdf
+doi:10.1016/j.biotechadv.2025.108593	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2025.108593.pdf
+doi:10.1016/j.biotechadv.2026.108896	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2026.108896.pdf
+doi:10.1016/j.biotechadv.2026.108905	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2026.108905.pdf
+doi:10.1016/j.carbpol.2016.06.062	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.carbpol.2016.06.062.pdf
+doi:10.1016/j.carbpol.2020.117472	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.carbpol.2020.117472.pdf
+doi:10.1016/j.carbpol.2022.120459	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.carbpol.2022.120459.pdf
+doi:10.1016/j.cca.2006.08.020	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.cca.2006.08.020.pdf
+doi:10.1016/j.cca.2010.03.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.cca.2010.03.008.pdf
+doi:10.1016/j.chemosphere.2009.02.010	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2009.02.010.pdf
+doi:10.1016/j.chemosphere.2009.02.027	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2009.02.027.pdf
+doi:10.1016/j.chemosphere.2010.09.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2010.09.002.pdf
+doi:10.1016/j.chemosphere.2010.09.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2010.09.003.pdf
+doi:10.1016/j.chemosphere.2012.03.052	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2012.03.052.pdf
+doi:10.1016/j.chemosphere.2018.10.053	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2018.10.053.pdf
+doi:10.1016/j.chemosphere.2021.131578	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chemosphere.2021.131578.pdf
+doi:10.1016/j.chroma.2009.05.022	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2009.05.022.pdf
+doi:10.1016/j.chroma.2013.10.034	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2013.10.034.pdf
+doi:10.1016/j.chroma.2014.03.040	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2014.03.040.pdf
+doi:10.1016/j.chroma.2014.04.036	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2014.04.036.pdf
+doi:10.1016/j.chroma.2016.06.052	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2016.06.052.pdf
+doi:10.1016/j.chroma.2016.10.053	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2016.10.053.pdf
+doi:10.1016/j.chroma.2021.462680	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.chroma.2021.462680.pdf
+doi:10.1016/j.clinbiochem.2020.03.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.clinbiochem.2020.03.001.pdf
+doi:10.1016/j.colsurfb.2021.111978	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.colsurfb.2021.111978.pdf
+doi:10.1016/j.colsurfb.2025.115252	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.colsurfb.2025.115252.pdf
+doi:10.1016/j.copbio.2025.103387	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.copbio.2025.103387.pdf
+doi:10.1016/j.cub.2025.09.046__1823	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_j.cub.2025.09.046__1823.pdf
+doi:10.1016/j.dnarep.2005.10.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.dnarep.2005.10.003.pdf
+doi:10.1016/j.dnarep.2006.04.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.dnarep.2006.04.002.pdf
+doi:10.1016/j.dnarep.2008.11.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.dnarep.2008.11.004.pdf
+doi:10.1016/j.dnarep.2023.103582	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.dnarep.2023.103582.pdf
+doi:10.1016/j.ejpb.2007.04.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ejpb.2007.04.008.pdf
+doi:10.1016/j.envpol.2016.05.033	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.envpol.2016.05.033.pdf
+doi:10.1016/j.envpol.2023.121287	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.envpol.2023.121287.pdf
+doi:10.1016/j.enzmictec.2023.110343	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2023.110343.pdf
+doi:10.1016/j.eururo.2012.11.053	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.eururo.2012.11.053.pdf
+doi:10.1016/j.exger.2010.01.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.exger.2010.01.012.pdf
+doi:10.1016/j.fct.2007.09.091	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fct.2007.09.091.pdf
+doi:10.1016/j.fct.2024.115155	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fct.2024.115155.pdf
+doi:10.1016/j.febslet.2007.05.048	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.febslet.2007.05.048.pdf
+doi:10.1016/j.febslet.2008.11.028	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.febslet.2008.11.028.pdf
+doi:10.1016/j.febslet.2009.04.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.febslet.2009.04.003.pdf
+doi:10.1016/j.febslet.2011.03.022	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.febslet.2011.03.022.pdf
+doi:10.1016/j.febslet.2011.06.034	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.febslet.2011.06.034.pdf
+doi:10.1016/j.febslet.2012.03.046	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.febslet.2012.03.046.pdf
+doi:10.1016/j.femsyr.2004.10.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.femsyr.2004.10.011.pdf
+doi:10.1016/j.fgb.2007.03.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2007.03.005.pdf
+doi:10.1016/j.fgb.2008.01.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2008.01.003.pdf
+doi:10.1016/j.fgb.2008.05.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2008.05.011.pdf
+doi:10.1016/j.fgb.2009.07.006	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2009.07.006.pdf
+doi:10.1016/j.fgb.2010.06.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2010.06.005.pdf
+doi:10.1016/j.fgb.2012.02.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2012.02.002.pdf
+doi:10.1016/j.fgb.2015.02.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2015.02.004.pdf
+doi:10.1016/j.fgb.2015.07.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2015.07.004.pdf
+doi:10.1016/j.fgb.2015.11.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2015.11.004.pdf
+doi:10.1016/j.fgb.2016.07.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2016.07.012.pdf
+doi:10.1016/j.fgb.2022.103701	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2022.103701.pdf
+doi:10.1016/j.fgb.2026.104068	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fgb.2026.104068.pdf
+doi:10.1016/j.fm.2005.02.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2005.02.002.pdf
+doi:10.1016/j.fm.2012.08.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2012.08.002.pdf
+doi:10.1016/j.fm.2020.103659	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2020.103659.pdf
+doi:10.1016/j.fm.2023.104460	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2023.104460.pdf
+doi:10.1016/j.fm.2024.104569	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2024.104569.pdf
+doi:10.1016/j.fm.2024.104643	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2024.104643.pdf
+doi:10.1016/j.fm.2025.104850	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.fm.2025.104850.pdf
+doi:10.1016/j.foodchem.2012.07.090	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2012.07.090.pdf
+doi:10.1016/j.foodchem.2012.09.048	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2012.09.048.pdf
+doi:10.1016/j.foodchem.2014.01.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2014.01.003.pdf
+doi:10.1016/j.foodchem.2015.10.106	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2015.10.106.pdf
+doi:10.1016/j.foodchem.2016.04.021	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2016.04.021.pdf
+doi:10.1016/j.foodchem.2016.04.110	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2016.04.110.pdf
+doi:10.1016/j.foodchem.2016.06.062	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2016.06.062.pdf
+doi:10.1016/j.foodchem.2018.07.183	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2018.07.183.pdf
+doi:10.1016/j.foodchem.2018.08.015	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2018.08.015.pdf
+doi:10.1016/j.foodchem.2018.08.141	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2018.08.141.pdf
+doi:10.1016/j.foodchem.2019.125003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2019.125003.pdf
+doi:10.1016/j.foodchem.2019.125130	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2019.125130.pdf
+doi:10.1016/j.foodchem.2020.126610	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2020.126610.pdf
+doi:10.1016/j.foodchem.2020.127852	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2020.127852.pdf
+doi:10.1016/j.foodchem.2020.128897	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2020.128897.pdf
+doi:10.1016/j.foodchem.2022.132125	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2022.132125.pdf
+doi:10.1016/j.foodchem.2022.133289	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2022.133289.pdf
+doi:10.1016/j.foodchem.2022.134982	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2022.134982.pdf
+doi:10.1016/j.foodchem.2026.150572	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodchem.2026.150572.pdf
+doi:10.1016/j.foodres.2014.08.033	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2014.08.033.pdf
+doi:10.1016/j.foodres.2018.01.059	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2018.01.059.pdf
+doi:10.1016/j.foodres.2018.08.016	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2018.08.016.pdf
+doi:10.1016/j.foodres.2018.10.024	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2018.10.024.pdf
+doi:10.1016/j.foodres.2020.109955	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2020.109955.pdf
+doi:10.1016/j.foodres.2022.110959	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2022.110959.pdf
+doi:10.1016/j.foodres.2022.111350	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2022.111350.pdf
+doi:10.1016/j.foodres.2022.111885	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2022.111885.pdf
+doi:10.1016/j.foodres.2022.112180	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2022.112180.pdf
+doi:10.1016/j.foodres.2023.113196	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2023.113196.pdf
+doi:10.1016/j.foodres.2023.113488	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2023.113488.pdf
+doi:10.1016/j.foodres.2024.113977	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2024.113977.pdf
+doi:10.1016/j.foodres.2024.115139	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2024.115139.pdf
+doi:10.1016/j.foodres.2024.115340	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2024.115340.pdf
+doi:10.1016/j.foodres.2025.115772	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2025.115772.pdf
+doi:10.1016/j.foodres.2025.117040	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2025.117040.pdf
+doi:10.1016/j.foodres.2026.119566	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2026.119566.pdf
+doi:10.1016/j.foodres.2026.119731	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.foodres.2026.119731.pdf
+doi:10.1016/j.forsciint.2007.03.018	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.forsciint.2007.03.018.pdf
+doi:10.1016/j.forsciint.2011.03.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.forsciint.2011.03.003.pdf
+doi:10.1016/j.forsciint.2017.06.024	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.forsciint.2017.06.024.pdf
+doi:10.1016/j.forsciint.2017.10.021	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.forsciint.2017.10.021.pdf
+doi:10.1016/j.forsciint.2021.110809	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.forsciint.2021.110809.pdf
+doi:10.1016/j.forsciint.2022.111503	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.forsciint.2022.111503.pdf
+doi:10.1016/j.freeradbiomed.2023.05.023	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.freeradbiomed.2023.05.023.pdf
+doi:10.1016/j.funbio.2011.02.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.funbio.2011.02.011.pdf
+doi:10.1016/j.funbio.2012.04.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.funbio.2012.04.008.pdf
+doi:10.1016/j.funbio.2014.07.007	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.funbio.2014.07.007.pdf
+doi:10.1016/j.funbio.2018.07.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.funbio.2018.07.005.pdf
+doi:10.1016/j.funbio.2019.11.009	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.funbio.2019.11.009.pdf
+doi:10.1016/j.funbio.2026.101772	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.funbio.2026.101772.pdf
+doi:10.1016/j.gene.2005.03.020	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.gene.2005.03.020.pdf
+doi:10.1016/j.gene.2008.07.031	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.gene.2008.07.031.pdf
+doi:10.1016/j.gene.2008.09.028	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.gene.2008.09.028.pdf
+doi:10.1016/j.gene.2013.05.042	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.gene.2013.05.042.pdf
+doi:10.1016/j.gene.2015.01.060	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.gene.2015.01.060.pdf
+doi:10.1016/j.gene.2024.148722	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.gene.2024.148722.pdf
+doi:10.1016/j.ijbiomac.2016.12.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijbiomac.2016.12.004.pdf
+doi:10.1016/j.ijbiomac.2023.127385	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijbiomac.2023.127385.pdf
+doi:10.1016/j.ijbiomac.2024.134831	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijbiomac.2024.134831.pdf
+doi:10.1016/j.ijbiomac.2025.149143	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijbiomac.2025.149143.pdf
+doi:10.1016/j.ijfoodmicro.2006.06.018	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2006.06.018.pdf
+doi:10.1016/j.ijfoodmicro.2006.06.025	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2006.06.025.pdf
+doi:10.1016/j.ijfoodmicro.2009.02.027	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2009.02.027.pdf
+doi:10.1016/j.ijfoodmicro.2010.07.024	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2010.07.024.pdf
+doi:10.1016/j.ijfoodmicro.2010.08.013	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2010.08.013.pdf
+doi:10.1016/j.ijfoodmicro.2012.11.024	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2012.11.024.pdf
+doi:10.1016/j.ijfoodmicro.2013.08.021	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2013.08.021.pdf
+doi:10.1016/j.ijfoodmicro.2013.11.030	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2013.11.030.pdf
+doi:10.1016/j.ijfoodmicro.2016.07.019	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2016.07.019.pdf
+doi:10.1016/j.ijfoodmicro.2018.10.025	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2018.10.025.pdf
+doi:10.1016/j.ijfoodmicro.2019.108255	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2019.108255.pdf
+doi:10.1016/j.ijfoodmicro.2021.109226	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2021.109226.pdf
+doi:10.1016/j.ijfoodmicro.2025.111415	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2025.111415.pdf
+doi:10.1016/j.ijfoodmicro.2026.111831	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2026.111831.pdf
+doi:10.1016/j.ijpara.2020.07.010	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijpara.2020.07.010.pdf
+doi:10.1016/j.ijpharm.2008.12.028	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ijpharm.2008.12.028.pdf
+doi:10.1016/j.jbiosc.2012.01.013	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2012.01.013.pdf
+doi:10.1016/j.jbiosc.2013.09.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2013.09.011.pdf
+doi:10.1016/j.jbiosc.2014.12.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2014.12.014.pdf
+doi:10.1016/j.jbiosc.2016.06.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2016.06.005.pdf
+doi:10.1016/j.jbiosc.2017.06.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2017.06.001.pdf
+doi:10.1016/j.jbiosc.2018.07.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2018.07.011.pdf
+doi:10.1016/j.jbiosc.2020.12.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2020.12.001.pdf
+doi:10.1016/j.jbiosc.2026.07.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2026.07.005.pdf
+doi:10.1016/j.jbiotec.2005.07.016	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2005.07.016.pdf
+doi:10.1016/j.jbiotec.2006.09.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2006.09.012.pdf
+doi:10.1016/j.jbiotec.2008.07.1787	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2008.07.1787.pdf
+doi:10.1016/j.jbiotec.2011.04.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2011.04.014.pdf
+doi:10.1016/j.jbiotec.2013.12.017	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2013.12.017.pdf
+doi:10.1016/j.jbiotec.2015.06.384	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2015.06.384.pdf
+doi:10.1016/j.jbiotec.2016.10.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2016.10.008.pdf
+doi:10.1016/j.jbiotec.2017.03.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2017.03.005.pdf
+doi:10.1016/j.jbiotec.2018.04.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2018.04.001.pdf
+doi:10.1016/j.jbiotec.2019.11.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2019.11.008.pdf
+doi:10.1016/j.jbiotec.2024.08.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2024.08.014.pdf
+doi:10.1016/j.jbiotec.2025.05.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2025.05.008.pdf
+doi:10.1016/j.jchromb.2024.124168	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jchromb.2024.124168.pdf
+doi:10.1016/j.jcis.2008.02.016	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jcis.2008.02.016.pdf
+doi:10.1016/j.jcis.2009.03.071	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jcis.2009.03.071.pdf
+doi:10.1016/j.jcis.2010.03.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jcis.2010.03.001.pdf
+doi:10.1016/j.jcis.2024.08.075	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jcis.2024.08.075.pdf
+doi:10.1016/j.jconhyd.2005.10.007	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jconhyd.2005.10.007.pdf
+doi:10.1016/j.jconhyd.2006.06.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jconhyd.2006.06.003.pdf
+doi:10.1016/j.jconhyd.2010.02.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jconhyd.2010.02.002.pdf
+doi:10.1016/j.jep.2024.118473	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jep.2024.118473.pdf
+doi:10.1016/j.jep.2026.121406	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jep.2026.121406.pdf
+doi:10.1016/j.jes.2023.06.017	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jes.2023.06.017.pdf
+doi:10.1016/j.jes.2024.11.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jes.2024.11.003.pdf
+doi:10.1016/j.jflm.2016.07.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jflm.2016.07.014.pdf
+doi:10.1016/j.jgg.2015.09.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jgg.2015.09.004.pdf
+doi:10.1016/j.jhazmat.2008.09.127	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jhazmat.2008.09.127.pdf
+doi:10.1016/j.jhazmat.2009.10.009	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jhazmat.2009.10.009.pdf
+doi:10.1016/j.jhazmat.2018.08.068	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jhazmat.2018.08.068.pdf
+doi:10.1016/j.jhazmat.2023.131836	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jhazmat.2023.131836.pdf
+doi:10.1016/j.jhazmat.2023.132488	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jhazmat.2023.132488.pdf
+doi:10.1016/j.jinorgbio.2018.07.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jinorgbio.2018.07.003.pdf
+doi:10.1016/j.jmb.2007.06.074	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jmb.2007.06.074.pdf
+doi:10.1016/j.jmb.2011.02.044	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jmb.2011.02.044.pdf
+doi:10.1016/j.jmb.2015.03.006	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jmb.2015.03.006.pdf
+doi:10.1016/j.jmgm.2025.108951	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jmgm.2025.108951.pdf
+doi:10.1016/j.jtemb.2018.05.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.jtemb.2018.05.011.pdf
+doi:10.1016/j.mad.2011.05.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mad.2011.05.002.pdf
+doi:10.1016/j.margen.2021.100864	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.margen.2021.100864.pdf
+doi:10.1016/j.mehy.2012.10.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mehy.2012.10.002.pdf
+doi:10.1016/j.mimet.2006.04.014	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mimet.2006.04.014.pdf
+doi:10.1016/j.mimet.2015.02.002	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mimet.2015.02.002.pdf
+doi:10.1016/j.mito.2006.02.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2006.02.003.pdf
+doi:10.1016/j.mito.2006.11.024	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2006.11.024.pdf
+doi:10.1016/j.mito.2008.01.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2008.01.004.pdf
+doi:10.1016/j.mito.2009.07.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2009.07.004.pdf
+doi:10.1016/j.mito.2010.08.007	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2010.08.007.pdf
+doi:10.1016/j.mito.2012.07.109	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2012.07.109.pdf
+doi:10.1016/j.mito.2016.03.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2016.03.004.pdf
+doi:10.1016/j.mito.2016.04.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2016.04.003.pdf
+doi:10.1016/j.mito.2019.03.006	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2019.03.006.pdf
+doi:10.1016/j.mito.2021.08.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2021.08.012.pdf
+doi:10.1016/j.mito.2023.09.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mito.2023.09.004.pdf
+doi:10.1016/j.mrfmmm.2005.10.006	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mrfmmm.2005.10.006.pdf
+doi:10.1016/j.mrfmmm.2009.05.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mrfmmm.2009.05.008.pdf
+doi:10.1016/j.mrfmmm.2012.12.004	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mrfmmm.2012.12.004.pdf
+doi:10.1016/j.mrgentox.2006.02.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.mrgentox.2006.02.005.pdf
+doi:10.1016/j.ntt.2015.11.006	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ntt.2015.11.006.pdf
+doi:10.1016/j.pep.2008.02.013	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.pep.2008.02.013.pdf
+doi:10.1016/j.pep.2024.106540	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.pep.2024.106540.pdf
+doi:10.1016/j.phytochem.2012.03.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.phytochem.2012.03.003.pdf
+doi:10.1016/j.plantsci.2013.02.016	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.plantsci.2013.02.016.pdf
+doi:10.1016/j.saa.2006.07.035	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.saa.2006.07.035.pdf
+doi:10.1016/j.saa.2020.119177	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.saa.2020.119177.pdf
+doi:10.1016/j.saa.2022.121790	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.saa.2022.121790.pdf
+doi:10.1016/j.talanta.2008.03.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.talanta.2008.03.012.pdf
+doi:10.1016/j.talanta.2018.11.016	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.talanta.2018.11.016.pdf
+doi:10.1016/j.tox.2013.07.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.tox.2013.07.001.pdf
+doi:10.1016/j.virusres.2021.198624	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.virusres.2021.198624.pdf
+doi:10.1016/j.wasman.2010.08.015	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.wasman.2010.08.015.pdf
+doi:10.1016/j.wasman.2012.03.011	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.wasman.2012.03.011.pdf
+doi:10.1016/j.watres.2025.124849	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.watres.2025.124849.pdf
+doi:10.1016/j.yexcr.2006.08.021	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.yexcr.2006.08.021.pdf
+doi:10.1016/j.ymben.2009.05.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2009.05.001.pdf
+doi:10.1016/j.ymben.2013.11.001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2013.11.001.pdf
+doi:10.1016/j.ymben.2014.02.003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2014.02.003.pdf
+doi:10.1016/j.ymben.2016.10.010	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2016.10.010.pdf
+doi:10.1016/j.ymben.2021.11.005	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2021.11.005.pdf
+doi:10.1016/j.ymben.2024.11.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2024.11.012.pdf
+doi:10.1016/j.ymben.2025.02.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2025.02.008.pdf
+doi:10.1016/j.ymben.2025.11.012	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2025.11.012.pdf
+doi:10.1016/j.ymben.2026.102527	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2026.102527.pdf
+doi:10.1016/j.ymben.2026.102542	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymben.2026.102542.pdf
+doi:10.1016/j.ymeth.2006.04.009	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ymeth.2006.04.009.pdf
+doi:10.1016/j.ympev.2017.02.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.ympev.2017.02.008.pdf
+doi:10.1016/j.yrtph.2007.12.008	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.yrtph.2007.12.008.pdf
+doi:10.1016/j.yrtph.2025.105914	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1016_j.yrtph.2025.105914.pdf
+doi:10.1016/s0014-5793_97_01269-6	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s0014-5793_97_01269-6.pdf
+doi:10.1016/s0091-3057_96_00163-3	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s0091-3057_96_00163-3.pdf
+doi:10.1016/s0304-4165_00_00040-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s0304-4165_00_00040-4.pdf
+doi:10.1016/s0378-4347_99_00063-8	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s0378-4347_99_00063-8.pdf
+doi:10.1016/s0379-0738_02_00182-2	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s0379-0738_02_00182-2.pdf
+doi:10.1016/s1001-0742_08_60005-4	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s1001-0742_08_60005-4.pdf
+doi:10.1016/s1001-0742_08_62360-8	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s1001-0742_08_62360-8.pdf
+doi:10.1016/s1001-0742_09_60289-8	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s1001-0742_09_60289-8.pdf
+doi:10.1016/s1001-0742_11_60788-2	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	no	10.1016_s1001-0742_11_60788-2.pdf
+doi:10.1017/s0007114520003669	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1017_s0007114520003669.pdf
+doi:10.1017/s0016672300015068	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1017_s0016672300015068.pdf
+doi:10.1021/acs.jcim.5c02906	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1021_acs.jcim.5c02906.pdf
+doi:10.1021/acs.molpharmaceut.9b00805	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1021_acs.molpharmaceut.9b00805.pdf
+doi:10.1021/acssynbio.1c00549	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1021_acssynbio.1c00549.pdf
+doi:10.1021/acssynbio.5c00096	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1021_acssynbio.5c00096.pdf
+doi:10.1021/acssynbio.5c00689	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1021_acssynbio.5c00689.pdf
+doi:10.1073/pnas.88.17.7864	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1073_pnas.88.17.7864.pdf
+doi:10.1128/aem.02591-07	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1128_aem.02591-07.pdf
+doi:10.1128/aem.69.4.2094-2099.2003	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1128_aem.69.4.2094-2099.2003.pdf
+doi:10.1134/s0006297925603296	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1134_s0006297925603296.pdf
+doi:10.1172/jci118100	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1172_jci118100.pdf
+doi:10.1172/jci29089	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1172_jci29089.pdf
+doi:10.1248/bpb.29.923	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1248_bpb.29.923.pdf
+doi:10.1248/bpb.31.2001	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1248_bpb.31.2001.pdf
+doi:10.1248/bpb1978.15.99	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1248_bpb1978.15.99.pdf
+doi:10.1248/cpb.46.1474	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1248_cpb.46.1474.pdf
+doi:10.1248/cpb.49.1170	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1248_cpb.49.1170.pdf
+doi:10.1248/cpb.52.270	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.1248_cpb.52.270.pdf
+doi:10.2323/jgam.58.43	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.2323_jgam.58.43.pdf
+doi:10.3314/jjmm.45.1	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.3314_jjmm.45.1.pdf
+doi:10.3892/mmr.2011.427	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.3892_mmr.2011.427.pdf
+doi:10.4193/rhino10.263	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.4193_rhino10.263.pdf
+doi:10.5271/sjweh.2658	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.5271_sjweh.2658.pdf
+doi:10.7164/antibiotics.37.13	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.7164_antibiotics.37.13.pdf
+doi:10.7164/antibiotics.38.505	exclude	Owner read the PDF and rejected it as out of scope for the isobutanol/ethanol atlas.	pdf_excluded/	kangkon	2026-09-22	yes	10.7164_antibiotics.38.505.pdf
+doi:10.1006/mben.1999.0140	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1006_mben.1999.0140.pdf
+doi:10.1007/10_2007_057	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_10_2007_057.pdf
+doi:10.1007/bf00435452	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_bf00435452.pdf
+doi:10.1007/s00253-020-10518-x	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s00253-020-10518-x.pdf
+doi:10.1007/s00253-021-11278-y	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s00253-021-11278-y.pdf
+doi:10.1007/s00253-023-12821-9	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s00253-023-12821-9.pdf
+doi:10.1007/s00438-024-02196-5	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s00438-024-02196-5.pdf
+doi:10.1007/s10295-018-2017-5	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s10295-018-2017-5.pdf
+doi:10.1007/s10482-006-9085-7	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s10482-006-9085-7.pdf
+doi:10.1007/s10529-010-0330-9	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s10529-010-0330-9.pdf
+doi:10.1007/s11274-018-2463-2	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s11274-018-2463-2.pdf
+doi:10.1007/s11356-016-8018-x	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s11356-016-8018-x.pdf
+doi:10.1007/s11356-023-30185-5	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1007_s11356-023-30185-5.pdf
+doi:10.1016/j.bbagen.2025.130804	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.bbagen.2025.130804.pdf
+doi:10.1016/j.biocel.2015.08.010	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biocel.2015.08.010.pdf
+doi:10.1016/j.biochi.2014.10.024	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biochi.2014.10.024.pdf
+doi:10.1016/j.biortech.2004.12.034	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2004.12.034.pdf
+doi:10.1016/j.biortech.2007.09.046	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2007.09.046.pdf
+doi:10.1016/j.biortech.2008.03.037	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2008.03.037.pdf
+doi:10.1016/j.biortech.2008.11.010	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2008.11.010.pdf
+doi:10.1016/j.biortech.2008.11.047	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2008.11.047.pdf
+doi:10.1016/j.biortech.2009.03.046	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2009.03.046.pdf
+doi:10.1016/j.biortech.2009.05.011	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2009.05.011.pdf
+doi:10.1016/j.biortech.2009.08.100	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2009.08.100.pdf
+doi:10.1016/j.biortech.2009.12.090	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2009.12.090.pdf
+doi:10.1016/j.biortech.2010.03.129	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.03.129.pdf
+doi:10.1016/j.biortech.2010.07.079	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.07.079.pdf
+doi:10.1016/j.biortech.2010.09.122	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.09.122.pdf
+doi:10.1016/j.biortech.2010.10.126	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.10.126.pdf
+doi:10.1016/j.biortech.2010.11.034	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.11.034.pdf
+doi:10.1016/j.biortech.2010.11.097	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.11.097.pdf
+doi:10.1016/j.biortech.2010.12.115	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2010.12.115.pdf
+doi:10.1016/j.biortech.2011.01.062	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.01.062.pdf
+doi:10.1016/j.biortech.2011.02.101	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.02.101.pdf
+doi:10.1016/j.biortech.2011.04.094	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.04.094.pdf
+doi:10.1016/j.biortech.2011.05.075	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.05.075.pdf
+doi:10.1016/j.biortech.2011.06.058	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.06.058.pdf
+doi:10.1016/j.biortech.2011.08.027	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.08.027.pdf
+doi:10.1016/j.biortech.2011.12.144	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.12.144.pdf
+doi:10.1016/j.biortech.2011.12.147	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2011.12.147.pdf
+doi:10.1016/j.biortech.2012.08.080	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2012.08.080.pdf
+doi:10.1016/j.biortech.2012.08.104	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2012.08.104.pdf
+doi:10.1016/j.biortech.2012.09.104	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2012.09.104.pdf
+doi:10.1016/j.biortech.2013.07.078	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2013.07.078.pdf
+doi:10.1016/j.biortech.2013.09.082	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2013.09.082.pdf
+doi:10.1016/j.biortech.2013.12.081	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2013.12.081.pdf
+doi:10.1016/j.biortech.2014.01.060	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2014.01.060.pdf
+doi:10.1016/j.biortech.2014.06.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2014.06.005.pdf
+doi:10.1016/j.biortech.2014.07.082	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2014.07.082.pdf
+doi:10.1016/j.biortech.2015.03.127	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2015.03.127.pdf
+doi:10.1016/j.biortech.2015.08.086	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2015.08.086.pdf
+doi:10.1016/j.biortech.2017.01.040	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2017.01.040.pdf
+doi:10.1016/j.biortech.2017.05.125	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2017.05.125.pdf
+doi:10.1016/j.biortech.2017.05.138	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2017.05.138.pdf
+doi:10.1016/j.biortech.2017.05.191	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2017.05.191.pdf
+doi:10.1016/j.biortech.2017.05.197	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2017.05.197.pdf
+doi:10.1016/j.biortech.2018.01.123	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2018.01.123.pdf
+doi:10.1016/j.biortech.2018.03.081	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2018.03.081.pdf
+doi:10.1016/j.biortech.2018.07.150	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2018.07.150.pdf
+doi:10.1016/j.biortech.2018.11.053	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2018.11.053.pdf
+doi:10.1016/j.biortech.2019.122104	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2019.122104.pdf
+doi:10.1016/j.biortech.2022.128002	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2022.128002.pdf
+doi:10.1016/j.biortech.2022.128079	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2022.128079.pdf
+doi:10.1016/j.biortech.2023.129993	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2023.129993.pdf
+doi:10.1016/j.biortech.2025.132921	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2025.132921.pdf
+doi:10.1016/j.biortech.2025.133155	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2025.133155.pdf
+doi:10.1016/j.biortech.2026.134191	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.134191.pdf
+doi:10.1016/j.biortech.2026.134456	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.134456.pdf
+doi:10.1016/j.biortech.2026.135490	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.135490.pdf
+doi:10.1016/j.biortech.2026.135679	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biortech.2026.135679.pdf
+doi:10.1016/j.biotechadv.2007.09.002	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2007.09.002.pdf
+doi:10.1016/j.biotechadv.2013.01.009	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2013.01.009.pdf
+doi:10.1016/j.biotechadv.2013.03.004	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.biotechadv.2013.03.004.pdf
+doi:10.1016/j.carbpol.2017.01.090	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.carbpol.2017.01.090.pdf
+doi:10.1016/j.cbpa.2013.03.036	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.cbpa.2013.03.036.pdf
+doi:10.1016/j.cels.2019.10.006	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.cels.2019.10.006.pdf
+doi:10.1016/j.cels.2020.01.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.cels.2020.01.005.pdf
+doi:10.1016/j.copbio.2009.04.002	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.copbio.2009.04.002.pdf
+doi:10.1016/j.copbio.2011.11.026	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.copbio.2011.11.026.pdf
+doi:10.1016/j.copbio.2014.09.004	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.copbio.2014.09.004.pdf
+doi:10.1016/j.enzmictec.2010.10.008	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2010.10.008.pdf
+doi:10.1016/j.enzmictec.2011.02.002	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2011.02.002.pdf
+doi:10.1016/j.enzmictec.2011.02.010	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2011.02.010.pdf
+doi:10.1016/j.enzmictec.2011.04.008	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2011.04.008.pdf
+doi:10.1016/j.enzmictec.2012.03.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2012.03.005.pdf
+doi:10.1016/j.enzmictec.2012.07.003	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2012.07.003.pdf
+doi:10.1016/j.enzmictec.2012.11.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2012.11.005.pdf
+doi:10.1016/j.enzmictec.2026.110838	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.enzmictec.2026.110838.pdf
+doi:10.1016/j.fgb.2024.103914	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.fgb.2024.103914.pdf
+doi:10.1016/j.fm.2023.104288	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.fm.2023.104288.pdf
+doi:10.1016/j.ijfoodmicro.2007.11.083	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ijfoodmicro.2007.11.083.pdf
+doi:10.1016/j.jbiosc.2009.03.019	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2009.03.019.pdf
+doi:10.1016/j.jbiosc.2010.02.003	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2010.02.003.pdf
+doi:10.1016/j.jbiosc.2011.12.015	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2011.12.015.pdf
+doi:10.1016/j.jbiosc.2012.02.029	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2012.02.029.pdf
+doi:10.1016/j.jbiosc.2013.05.027	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2013.05.027.pdf
+doi:10.1016/j.jbiosc.2013.05.037	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2013.05.037.pdf
+doi:10.1016/j.jbiosc.2014.04.016	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2014.04.016.pdf
+doi:10.1016/j.jbiosc.2014.05.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2014.05.012.pdf
+doi:10.1016/j.jbiosc.2015.09.006	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2015.09.006.pdf
+doi:10.1016/j.jbiosc.2015.10.011	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2015.10.011.pdf
+doi:10.1016/j.jbiosc.2015.10.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2015.10.012.pdf
+doi:10.1016/j.jbiosc.2015.10.013	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2015.10.013.pdf
+doi:10.1016/j.jbiosc.2016.04.007	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2016.04.007.pdf
+doi:10.1016/j.jbiosc.2016.04.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2016.04.012.pdf
+doi:10.1016/j.jbiosc.2017.01.010	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2017.01.010.pdf
+doi:10.1016/j.jbiosc.2017.04.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2017.04.005.pdf
+doi:10.1016/j.jbiosc.2017.04.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2017.04.012.pdf
+doi:10.1016/j.jbiosc.2019.03.009	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiosc.2019.03.009.pdf
+doi:10.1016/j.jbiotec.2004.01.017	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2004.01.017.pdf
+doi:10.1016/j.jbiotec.2007.04.019	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2007.04.019.pdf
+doi:10.1016/j.jbiotec.2007.05.010	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2007.05.010.pdf
+doi:10.1016/j.jbiotec.2010.02.009	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2010.02.009.pdf
+doi:10.1016/j.jbiotec.2010.06.006	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2010.06.006.pdf
+doi:10.1016/j.jbiotec.2011.06.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2011.06.005.pdf
+doi:10.1016/j.jbiotec.2012.01.022	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2012.01.022.pdf
+doi:10.1016/j.jbiotec.2012.12.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2012.12.012.pdf
+doi:10.1016/j.jbiotec.2013.12.019	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2013.12.019.pdf
+doi:10.1016/j.jbiotec.2014.07.445	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2014.07.445.pdf
+doi:10.1016/j.jbiotec.2016.04.041	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2016.04.041.pdf
+doi:10.1016/j.jbiotec.2016.05.028	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2016.05.028.pdf
+doi:10.1016/j.jbiotec.2016.07.004	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2016.07.004.pdf
+doi:10.1016/j.jbiotec.2019.03.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2019.03.012.pdf
+doi:10.1016/j.jbiotec.2019.08.009	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2019.08.009.pdf
+doi:10.1016/j.jbiotec.2020.06.017	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2020.06.017.pdf
+doi:10.1016/j.jbiotec.2021.03.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2021.03.012.pdf
+doi:10.1016/j.jbiotec.2022.09.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2022.09.012.pdf
+doi:10.1016/j.jbiotec.2023.03.012	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2023.03.012.pdf
+doi:10.1016/j.jbiotec.2024.07.014	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jbiotec.2024.07.014.pdf
+doi:10.1016/j.jchromb.2015.12.037	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jchromb.2015.12.037.pdf
+doi:10.1016/j.jprot.2016.08.020	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jprot.2016.08.020.pdf
+doi:10.1016/j.jprot.2019.103377	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.jprot.2019.103377.pdf
+doi:10.1016/j.mimet.2010.03.009	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.mimet.2010.03.009.pdf
+doi:10.1016/j.scitotenv.2022.157302	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.scitotenv.2022.157302.pdf
+doi:10.1016/j.wasman.2018.07.028	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.wasman.2018.07.028.pdf
+doi:10.1016/j.ymben.2005.09.007	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2005.09.007.pdf
+doi:10.1016/j.ymben.2010.11.003	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2010.11.003.pdf
+doi:10.1016/j.ymben.2011.02.004	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2011.02.004.pdf
+doi:10.1016/j.ymben.2011.08.004	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2011.08.004.pdf
+doi:10.1016/j.ymben.2011.09.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2011.09.005.pdf
+doi:10.1016/j.ymben.2011.12.001	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2011.12.001.pdf
+doi:10.1016/j.ymben.2012.04.001	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2012.04.001.pdf
+doi:10.1016/j.ymben.2012.11.008	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2012.11.008.pdf
+doi:10.1016/j.ymben.2014.03.006	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2014.03.006.pdf
+doi:10.1016/j.ymben.2014.07.007	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2014.07.007.pdf
+doi:10.1016/j.ymben.2015.03.014	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2015.03.014.pdf
+doi:10.1016/j.ymben.2015.10.005	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2015.10.005.pdf
+doi:10.1016/j.ymben.2017.02.006	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2017.02.006.pdf
+doi:10.1016/j.ymben.2017.07.003	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2017.07.003.pdf
+doi:10.1016/j.ymben.2017.10.001	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2017.10.001.pdf
+doi:10.1016/j.ymben.2019.04.007	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2019.04.007.pdf
+doi:10.1016/j.ymben.2019.08.015	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2019.08.015.pdf
+doi:10.1016/j.ymben.2020.01.004	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2020.01.004.pdf
+doi:10.1016/j.ymben.2020.04.002	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2020.04.002.pdf
+doi:10.1016/j.ymben.2020.06.003	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2020.06.003.pdf
+doi:10.1016/j.ymben.2023.06.009	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1016_j.ymben.2023.06.009.pdf
+doi:10.1016/s1389-1723_00_80087-0	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	no	10.1016_s1389-1723_00_80087-0.pdf
+doi:10.1016/s1567-1356_03_00146-6	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	no	10.1016_s1567-1356_03_00146-6.pdf
+doi:10.1021/acsami.7b09874	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1021_acsami.7b09874.pdf
+doi:10.1021/acssynbio.7b00409	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1021_acssynbio.7b00409.pdf
+doi:10.1073/pnas.1218447110	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1073_pnas.1218447110.pdf
+doi:10.1093/lambio_ovad077	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	no	10.1093_lambio_ovad077.pdf
+doi:10.1128/aem.00268-21	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1128_aem.00268-21.pdf
+doi:10.1128/aem.01160-09	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1128_aem.01160-09.pdf
+doi:10.1128/aem.01772-09	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1128_aem.01772-09.pdf
+doi:10.1128/aem.02068-21	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1128_aem.02068-21.pdf
+doi:10.1128/aem.02454-10	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.1128_aem.02454-10.pdf
+doi:10.2323/jgam.44.347	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.2323_jgam.44.347.pdf
+doi:10.4014/jmb.1705.05020	include	Owner read the PDF and kept it as in scope.	pdf_included/	kangkon	2026-09-22	yes	10.4014_jmb.1705.05020.pdf

@@ -1974,6 +1974,40 @@ CREATE INDEX screening_record_by_triage ON screening_record(family, triage_state
 CREATE INDEX screening_record_by_publication ON screening_record(publication_id);
 
 
+-- A curator's OWN include/exclude verdict, which `triage_state` above cannot hold.
+--
+-- The note at the head of this section says `triage_state` is "a deterministic function of
+-- query_families.yaml and the recorded rule in discovery.py", which is why it is Zone H and why
+-- anything else "must never overwrite `triage_state` here directly". A human who read the paper
+-- and rejected it is not a function of the query file, so writing the verdict there would be
+-- erased by the next discovery run and the papers would have to be read again.
+--
+-- Deleting the publication row is the other tempting answer and is worse. PLAN.md H.3: "an
+-- excluded paper is a decision, not an absence." A dropped row cannot say why it went, and the
+-- next discovery run re-adds it with no memory that anybody judged it -- which is precisely the
+-- work this table exists to preserve.
+--
+-- One row per publication, keyed on it: the CURRENT verdict. Its history lives in
+-- `curation_event`, as every other curator act's does.
+CREATE TABLE screening_decision (
+    publication_id  TEXT PRIMARY KEY REFERENCES publication(id),
+    decision        TEXT NOT NULL CHECK (decision IN ('include', 'exclude', 'borderline')),
+    -- Never NULL, for the same reason `screening_record.exclusion_reason` is never NULL on an
+    -- exclusion: a changed policy must be able to ask what it would now include.
+    reason          TEXT NOT NULL,
+    -- Where the verdict was read from, so it can be re-derived rather than retyped: a folder the
+    -- curator sorted PDFs into, a spreadsheet column, a session at the screen.
+    source          TEXT NOT NULL,
+    decided_by      TEXT NOT NULL,
+    decided_at      TEXT NOT NULL,
+    zone            TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
+    evidence        TEXT NOT NULL,
+    confidence      TEXT NOT NULL
+);
+
+CREATE INDEX screening_decision_by_decision ON screening_decision(decision);
+
+
 -- ---------------------------------------------------------------------------------------------
 -- 15. Extraction and curation
 --
