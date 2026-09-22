@@ -1,0 +1,13 @@
+{
+  "name": "fermdb-ui",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "scripts": {
+    "dev": "pnpm --filter @fermdb/web dev",
+    "build": "pnpm --filter @fermdb/web build",
+    "preview": "pnpm --filter @fermdb/web preview",
+    "typecheck": "pnpm --filter @fermdb/web typecheck",
+    "test": "pnpm --filter @fermdb/web test"
+  }
+}

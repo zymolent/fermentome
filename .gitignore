@@ -48,3 +48,6 @@ Thumbs.db
 
 # Generated review pages: a snapshot of the queue, regenerate rather than commit.
 review.html
+
+node_modules/
+apps/web/node_modules/

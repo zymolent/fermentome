@@ -109,6 +109,49 @@ reported yield ceiling — as **three separate columns**, never fused into one s
 feasible and unevidenced, or evidenced and low-yielding, and collapsing those into a single
 ranking would hide which of the three is carrying it.
 
+## The web interface
+
+```bash
+python -m pip install -e ".[web]"   # FastAPI + uvicorn, an optional extra
+pnpm install && pnpm build          # once, to build the client
+just ui                             # http://127.0.0.1:8000
+```
+
+Eleven pages over the query layer: Dashboard, Literature, Genomes, Annotations, Data,
+Transcripts, Networks, Evidence, Curation, Search, plus the publication / gene / route detail
+views. To develop against it, `just api` and `just web` in two terminals gives Vite on `:5173`
+with hot reload, proxying `/api` to the API on `:8000`.
+
+**It cannot write.** There is no POST, PUT, PATCH or DELETE anywhere in `fermdb.api`, the
+connection is opened `mode=ro` at the SQLite level, and a test asserts both. That is PLAN.md D.3's
+layering rule made structural rather than documented: promotion is recorded against a **named
+human** in the audit log, and a browser click is not a named human. The Curation page shows what
+is queued, the sentence each proposal rests on, and the exact `fermdb curate` command — you run it.
+
+What the interface is built to make visible is the *absence* as much as the content, because
+that is where this atlas's honesty lives:
+
+| the page says | rather than |
+|---|---|
+| 705 papers included and unreadable, remedy: acquisition | a corpus size |
+| 0 of 172 runs downloaded — accessions only | "172 RNA-seq runs" |
+| 0 of 6,400 routes pass the balance check | a route leaderboard |
+| `score_toxicity` never computed — not zero | a five-axis composite score |
+| 0 of 105 measurements reach a condition context | a best-titer ranking |
+| `mitochondrial_matrix` is read by two genetic codes | a compartment list |
+
+"Not recorded", "not applicable" and "unknown" render as three visually distinct states, and
+none of them looks like zero. Every value carries its zone badge (R reported / H harmonized /
+I inferred). Those are PLAN.md P.4 requirements, not styling: getting them wrong discards the
+value of everything underneath.
+
+To run it against a copy rather than the shared atlas — which is how it should be run against
+anything you are not prepared to have open while curating:
+
+```bash
+just ui-on /path/to/atlas-copy.sqlite3   # or set FERMDB_DB_FILE
+```
+
 ## The distinction that matters most
 
 Two different things are called "mitochondrial engineering", and conflating them would be the most

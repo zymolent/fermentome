@@ -47,6 +47,7 @@ from pathlib import Path
 from typing import Any, Final
 
 from . import curate
+from .api.cli import add_serve_subcommand
 from .config import Settings
 from .curate.queue import CurationError, Curator
 from .db import open_db
@@ -1173,6 +1174,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_atlas_subcommand(sub)
     add_query_subcommand(sub)
     add_db_subcommand(sub)
+    add_serve_subcommand(sub)
 
     p_extract = sub.add_parser(
         "extract", help="LLM extraction of one publication into a proposed Zone I row"

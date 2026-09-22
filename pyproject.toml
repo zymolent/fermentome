@@ -20,6 +20,9 @@ dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML"]
 # because it was previously undeclared and undiscoverable: the 2026-09-21 calibration found the
 # package simply absent, on a code path no run had ever reached.
 escalation = ["claude-agent-sdk>=0.1"]
+# The read-only web interface (`fermdb serve`, PLAN.md D.3). Optional because the atlas and
+# every CLI reader work without it; `fermdb serve` prints the install line when it is absent.
+web = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
 
 [project.scripts]
 fermdb = "fermdb.cli:main"
