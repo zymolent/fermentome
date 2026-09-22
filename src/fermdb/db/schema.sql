@@ -1999,6 +1999,11 @@ CREATE TABLE screening_decision (
     -- curator sorted PDFs into, a spreadsheet column, a session at the screen.
     source          TEXT NOT NULL,
     decided_by      TEXT NOT NULL,
+    -- A person who read the paper and a classifier that scored its title are not the same grade
+    -- of evidence, and must not be able to overwrite each other blind. Same argument
+    -- curation_event.actor_kind makes with its CHECK that accept/promote require a human.
+    decided_by_kind TEXT NOT NULL DEFAULT 'human'
+                    CHECK (decided_by_kind IN ('human', 'model')),
     decided_at      TEXT NOT NULL,
     zone            TEXT NOT NULL DEFAULT 'R' CHECK (zone = 'R'),
     evidence        TEXT NOT NULL,
@@ -2006,6 +2011,7 @@ CREATE TABLE screening_decision (
 );
 
 CREATE INDEX screening_decision_by_decision ON screening_decision(decision);
+CREATE INDEX screening_decision_by_kind ON screening_decision(decided_by_kind);
 
 
 -- ---------------------------------------------------------------------------------------------

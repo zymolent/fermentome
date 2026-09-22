@@ -18,7 +18,10 @@ from fermdb.literature.screening import (
     working_ids,
 )
 
-HEADER = "publication_id\tdecision\treason\tsource\tdecided_by\tdecided_at\tin_atlas\tpdf_file\n"
+HEADER = (
+    "publication_id\tdecision\treason\tsource\tdecided_by\tdecided_by_kind\t"
+    "decided_at\tin_atlas\tpdf_file\n"
+)
 
 
 def _file(tmp_path: Path, *rows: str) -> Path:
@@ -27,8 +30,13 @@ def _file(tmp_path: Path, *rows: str) -> Path:
     return path
 
 
-def _row(pub: str, decision: str = "exclude", reason: str = "read and rejected") -> str:
-    return f"{pub}\t{decision}\t{reason}\tpdf_excluded/\tkangkon\t2026-09-22\tyes\tx.pdf\n"
+def _row(
+    pub: str,
+    decision: str = "exclude",
+    reason: str = "read and rejected",
+    kind: str = "human",
+) -> str:
+    return f"{pub}\t{decision}\t{reason}\tpdf_excluded/\tkangkon\t{kind}\t2026-09-22\tyes\tx.pdf\n"
 
 
 @pytest.fixture
@@ -82,7 +90,7 @@ def test_a_decision_about_a_publication_the_atlas_lacks_is_skipped_not_invented(
     counts = install_decisions(
         atlas, load_decisions(_file(tmp_path, _row("doi:10.1/nowhere"), _row("doi:10.1/drop")))
     )
-    assert counts == {"written": 1, "no_such_publication": 1}
+    assert counts == {"written": 1, "no_such_publication": 1, "kept_human_verdict": 0}
     assert atlas.execute("SELECT count(*) FROM publication").fetchone()[0] == 3
 
 
@@ -151,3 +159,54 @@ def test_the_shipped_decisions_file_loads_and_matches_what_was_screened() -> Non
     # Every id is a DOI CURIE, lowercased -- the atlas's own key form, or nothing would match.
     assert all(d.publication_id.startswith("doi:") for d in decisions)
     assert all(d.publication_id == d.publication_id.lower() for d in decisions)
+
+
+def test_a_classifier_verdict_never_overwrites_one_a_person_reached(
+    atlas: sqlite3.Connection, tmp_path: Path
+) -> None:
+    """The defect this column was added for, before a classifier could commit it.
+
+    `install_decisions` upserted blind, which was fine while the only input was 582 PDFs somebody
+    had read -- and became a defect the moment a screening run over 1,606 papers was pointed at
+    the same table. A title score and an afternoon with the paper are not interchangeable.
+    """
+    install_decisions(atlas, load_decisions(_file(tmp_path, _row("doi:10.1/drop"))))
+    counts = install_decisions(
+        atlas,
+        load_decisions(
+            _file(tmp_path, _row("doi:10.1/drop", "include", "title looks relevant", "model"))
+        ),
+    )
+    assert counts["kept_human_verdict"] == 1
+    assert counts["written"] == 0
+    row = atlas.execute("SELECT decision, decided_by_kind FROM screening_decision").fetchone()
+    assert (row["decision"], row["decided_by_kind"]) == ("exclude", "human")
+
+
+def test_a_person_may_still_correct_a_classifier(atlas: sqlite3.Connection, tmp_path: Path) -> None:
+    """The guard is one-directional on purpose: correcting the model is why a person is there."""
+    install_decisions(atlas, load_decisions(_file(tmp_path, _row("doi:10.1/drop", kind="model"))))
+    counts = install_decisions(
+        atlas,
+        load_decisions(_file(tmp_path, _row("doi:10.1/drop", "include", "read it; in scope"))),
+    )
+    assert counts["written"] == 1
+    row = atlas.execute(
+        "SELECT decision, decided_by_kind, confidence FROM screening_decision"
+    ).fetchone()
+    assert (row["decision"], row["decided_by_kind"]) == ("include", "human")
+    # A read paper is checked; a scored title is a stored proposal.
+    assert row["confidence"] == "high"
+
+
+def test_a_model_verdict_is_stored_unverified(atlas: sqlite3.Connection, tmp_path: Path) -> None:
+    install_decisions(atlas, load_decisions(_file(tmp_path, _row("doi:10.1/drop", kind="model"))))
+    assert (
+        atlas.execute("SELECT confidence FROM screening_decision").fetchone()["confidence"]
+        == "unverified"
+    )
+
+
+def test_an_unknown_decider_kind_is_refused(tmp_path: Path) -> None:
+    with pytest.raises(ScreeningError, match="decided_by_kind"):
+        load_decisions(_file(tmp_path, _row("doi:10.1/drop", kind="robot")))

@@ -44,6 +44,7 @@ __all__ = [
 DECISIONS_FILE: Final[str] = "screening_decisions.tsv"
 
 _DECISIONS: Final[frozenset[str]] = frozenset({"include", "exclude", "borderline"})
+_KINDS: Final[frozenset[str]] = frozenset({"human", "model"})
 
 
 class ScreeningError(RuntimeError):
@@ -60,6 +61,10 @@ class ScreeningDecision:
     source: str
     decided_by: str
     decided_at: str
+    #: 'human' | 'model'. A person who opened the PDF and a classifier that scored the title are
+    #: not the same grade of evidence, and `install_decisions` refuses to let the second overwrite
+    #: the first. Defaults to 'human' because the first 582 verdicts were all read by hand.
+    decided_by_kind: str = "human"
     #: Whether the DOI matched a publication when the file was written. Kept as recorded rather
     #: than recomputed: it is a note about the corpus at that moment, not a live fact.
     in_atlas: str = ""
@@ -93,6 +98,9 @@ def load_decisions(path: Path) -> tuple[ScreeningDecision, ...]:
         if pub in seen:
             raise ScreeningError(f"row {index}: {pub} decided twice; one verdict per publication")
         seen.add(pub)
+        kind = (row.get("decided_by_kind") or "human").strip() or "human"
+        if kind not in _KINDS:
+            raise ScreeningError(f"row {index}: decided_by_kind {kind!r} not in {sorted(_KINDS)}")
         out.append(
             ScreeningDecision(
                 publication_id=pub,
@@ -101,6 +109,7 @@ def load_decisions(path: Path) -> tuple[ScreeningDecision, ...]:
                 source=(row.get("source") or "").strip(),
                 decided_by=(row.get("decided_by") or "").strip(),
                 decided_at=(row.get("decided_at") or "").strip(),
+                decided_by_kind=kind,
                 in_atlas=(row.get("in_atlas") or "").strip(),
                 pdf_file=(row.get("pdf_file") or "").strip(),
             )
@@ -116,31 +125,52 @@ def install_decisions(
     A decision whose publication the atlas does not hold is **skipped, not invented**: writing it
     would need a `publication` row, and manufacturing one from a filename would put a paper in the
     corpus on the strength of a PDF someone happened to save.
+
+    **A model verdict never overwrites a human one.** The first version of this function upserted
+    blind, which was fine while the only input was 582 PDFs somebody had read -- and became a
+    defect the moment a classifier was pointed at the same table, because a run over 1,606 papers
+    would have replaced those 582 without a word. A title-score and an afternoon spent reading the
+    paper are not interchangeable. The reverse direction is allowed: a person correcting a
+    classifier is the entire point of having a person. Same argument `curation_event.actor_kind`
+    already makes by CHECK-ing that accept and promote require a human.
     """
     stamp = (now or datetime.now(UTC)).astimezone(UTC).isoformat()
     known = {str(r[0]).lower() for r in conn.execute("SELECT id FROM publication")}
-    counts = {"written": 0, "no_such_publication": 0}
+    human_held = {
+        str(r[0]).lower()
+        for r in conn.execute(
+            "SELECT publication_id FROM screening_decision WHERE decided_by_kind = 'human'"
+        )
+    }
+    counts = {"written": 0, "no_such_publication": 0, "kept_human_verdict": 0}
     for item in decisions:
         if item.publication_id not in known:
             counts["no_such_publication"] += 1
             continue
+        if item.decided_by_kind == "model" and item.publication_id in human_held:
+            counts["kept_human_verdict"] += 1
+            continue
         conn.execute(
             "INSERT INTO screening_decision (publication_id, decision, reason, source, "
-            "decided_by, decided_at, zone, evidence, confidence) "
-            "VALUES (?,?,?,?,?,?, 'R', ?, 'high') "
+            "decided_by, decided_by_kind, decided_at, zone, evidence, confidence) "
+            "VALUES (?,?,?,?,?,?,?, 'R', ?, ?) "
             "ON CONFLICT(publication_id) DO UPDATE SET decision=excluded.decision, "
             "reason=excluded.reason, source=excluded.source, decided_by=excluded.decided_by, "
-            "decided_at=excluded.decided_at, evidence=excluded.evidence",
+            "decided_by_kind=excluded.decided_by_kind, decided_at=excluded.decided_at, "
+            "evidence=excluded.evidence, confidence=excluded.confidence",
             (
                 item.publication_id,
                 item.decision,
                 item.reason,
                 item.source,
                 item.decided_by or "unknown",
+                item.decided_by_kind,
                 item.decided_at or stamp,
                 f"curator verdict recorded from {item.source or 'the screening pass'}"
                 + (f" ({item.pdf_file})" if item.pdf_file else "")
                 + f"; installed from data/literature/{DECISIONS_FILE}",
+                # A read paper is checked; a scored title is a proposal that happens to be stored.
+                "high" if item.decided_by_kind == "human" else "unverified",
             ),
         )
         counts["written"] += 1

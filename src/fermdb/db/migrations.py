@@ -456,6 +456,30 @@ _V12_TO_V13: Final[Migration] = Migration(
     ),
 )
 
+#: Who made a screening verdict -- a person, or a model. Added the moment a classifier was about
+#: to write into the same table the owner's own reading had just filled.
+#:
+#: Without it `install_decisions` upserts blind, so a `fermlit` run over 1,606 papers would
+#: silently replace the 568 verdicts a person reached by opening the PDF. Those are not the same
+#: grade of evidence and must not be interchangeable, which is the identical argument
+#: `curation_event.actor_kind` already makes with its CHECK that accepting and promoting require
+#: actor_kind = 'human'. This is that rule, applied to screening.
+#:
+#: Existing rows default to 'human': all 568 came from folders the owner sorted by hand.
+_V13_TO_V14: Final[Migration] = Migration(
+    from_version=13,
+    to_version=14,
+    summary=(
+        "screening_decision.decided_by_kind -- so a classifier cannot overwrite a verdict a "
+        "person reached by reading the paper"
+    ),
+    statements=(
+        "ALTER TABLE screening_decision ADD COLUMN decided_by_kind TEXT NOT NULL "
+        "DEFAULT 'human' CHECK (decided_by_kind IN ('human', 'model'))",
+        "CREATE INDEX screening_decision_by_kind ON screening_decision(decided_by_kind)",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -466,6 +490,7 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V10_TO_V11,
     _V11_TO_V12,
     _V12_TO_V13,
+    _V13_TO_V14,
 )
 
 
