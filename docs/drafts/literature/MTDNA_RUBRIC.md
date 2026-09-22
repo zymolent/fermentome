@@ -22,18 +22,26 @@ that "an mtDNA insert behind a COX leader displaces that gene".
 
 ## It is systematic, and it is large
 
-Verdicts on the 2,990, grouped by the query family that found each paper:
+Verdicts on the 3,288, grouped by the query family that found each paper:
 
 | family | excluded | n |
 |---|---:|---:|
-| `mtdna_methods_yeast` | **96%** | 820 / 851 |
-| `mtdna_engineering_yeast` | **93%** | 554 / 595 |
-| `ethanol_mitochondria_yeast` | 54% | 174 / 325 |
-| `isobutanol_all` | 71% | 482 / 677 |
-| `ethanol_scerevisiae_prod_ferm_tol` | 21% | 148 / 705 |
-| `isobutanol_yeast` | 18% | 21 / 115 |
+| `mtdna_methods_yeast` | **96%** | 903 / 937 |
+| `mtdna_engineering_yeast` | **94%** | 634 / 678 |
+| `isobutanol_all` | 73% | 558 / 760 |
+| `ethanol_mitochondria_yeast` | 56% | 195 / 351 |
+| `isobutanol_production` | 38% | 116 / 309 |
+| `isobutanol_mitochondria` | 21% | 3 / 14 |
+| `ethanol_scerevisiae_prod_ferm_tol` | 21% | 153 / 734 |
+| `isobutanol_yeast` | 20% | 24 / 123 |
 
-Of the 1,474 mitochondrial-tier exclusions, **1,006 (68%) name a core mitochondrial or mtDNA term
+A paper found by several families is counted under each, so the column sums past 3,288. The two
+mtDNA families are the outliers by a distance, and `isobutanol_mitochondria` — 14 papers, the
+narrowest and most on-target query the project has — is excluded at 21%, the same rate as the
+general ethanol family. The rubric is not discriminating against mitochondria; it simply cannot
+see why they matter here.
+
+Of the 1,651 mitochondrial-tier exclusions, **1,124 (68%) name a core mitochondrial or mtDNA term
 in the title alone**. A random twelve of those:
 
 > Toward a Quadruplet Codon Mitochondrial Genetic Code · Homologous gene targeting by biolistic
