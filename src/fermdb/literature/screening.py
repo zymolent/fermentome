@@ -19,6 +19,33 @@ reached the database, because there was nowhere for it to go:
 So the verdicts live in `data/literature/screening_decisions.tsv` (the committed curation layer,
 keyed by DOI so it survives a rebuild) and load into `screening_decision` (Zone R). `working_ids`
 is then the only thing callers need: the publications that are actually in scope.
+
+## When two rubrics disagree, and why that is not a conflict
+
+There is one row per publication, and more than one screening rubric now produces verdicts for it.
+That looks like a collision and is not, because **the rubrics ask different questions**:
+
+* the `fermlit` rubric asks "is this about making ethanol, n-butanol or isobutanol with a
+  microorganism";
+* the mtDNA rubric (`docs/drafts/literature/MTDNA_RUBRIC.md`) asks "does this help someone engineer
+  the yeast mitochondrion or its genome".
+
+A biolistic transformation protocol is honestly `exclude` under the first and honestly `include`
+under the second, and neither is mistaken. So the composition rule is a **union on inclusion**: a
+paper is in the working set if *any* rubric includes it, and out only if *every* rubric that has
+looked at it excludes it. `working_ids` already implements exactly that, by dropping only rows
+whose current decision is `exclude` — install the rescue verdicts on top of the first pass and the
+rule falls out.
+
+Two consequences worth stating rather than discovering:
+
+* **`source` carries which question was answered**, and is the only thing that does. Reading
+  `decision` alone tells you a paper is in scope, not why, and "included because it enables mtDNA
+  engineering" is a different fact from "included because it reports a titer".
+* **The order of installation matters, and the loader does not enforce it.** A rescue file should
+  contain only verdicts that *changed to* `include` or `borderline`; a file that also carried
+  `exclude` rows would, installed second, overwrite first-pass inclusions and silently invert the
+  union. The guard against that is the file's contents, so a rescue export says so in its header.
 """
 
 from __future__ import annotations

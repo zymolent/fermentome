@@ -212,6 +212,37 @@ def test_an_unknown_decider_kind_is_refused(tmp_path: Path) -> None:
         load_decisions(_file(tmp_path, _row("doi:10.1/drop", kind="robot")))
 
 
+def test_a_second_rubric_rescuing_a_paper_puts_it_back_in_scope(
+    atlas: sqlite3.Connection, tmp_path: Path
+) -> None:
+    """Two rubrics asking different questions compose as a union on inclusion.
+
+    The fermlit rubric asks "is this about making alcohol with a microbe" and honestly excludes a
+    biolistic transformation protocol. The mtDNA rubric asks "does this help engineer the yeast
+    mitochondrion" and honestly includes it. Neither is mistaken, so a paper is in scope if ANY
+    rubric includes it, and out only if every rubric that looked at it excluded it.
+    """
+    install_decisions(
+        atlas,
+        load_decisions(
+            _file(tmp_path, _row("doi:10.1/drop", "exclude", "makes no alcohol", "model"))
+        ),
+    )
+    assert "doi:10.1/drop" not in working_ids(atlas)
+
+    install_decisions(
+        atlas,
+        load_decisions(
+            _file(tmp_path, _row("doi:10.1/drop", "include", "biolistic mtDNA delivery", "model"))
+        ),
+    )
+    assert "doi:10.1/drop" in working_ids(atlas)
+    # `source`/`reason` is the only record of WHICH question was answered; `decision` alone says
+    # a paper is in scope, never why.
+    row = atlas.execute("SELECT reason FROM screening_decision").fetchone()
+    assert "biolistic" in row["reason"]
+
+
 def test_publication_keys_reaches_a_paper_by_doi_and_by_pmid(atlas: sqlite3.Connection) -> None:
     """The join bug that cost 298 verdicts, pinned.
 
