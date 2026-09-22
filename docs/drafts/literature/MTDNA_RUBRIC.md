@@ -5,8 +5,8 @@
 
 ## What happened
 
-`fermlit`'s classifier had already screened 3,856 papers before any of today's work, and 2,990 of
-its verdicts apply to publications this atlas holds. Free, instant, and covering more than half
+`fermlit`'s classifier had already screened 3,856 papers before any of today's work, and **3,288**
+of its verdicts apply to publications this atlas holds. Free, instant, and covering more than half
 the corpus — so the obvious move was to install them.
 
 A twelve-row hand sample stopped that. Two were wrong in the same direction:
@@ -101,14 +101,21 @@ instinct, and it is where most of the value sits. The chloramphenicol-in-mouse-m
 about yeast and not about alcohol, and it is a direct precedent for putting a selectable marker
 into a mitochondrial genome.
 
-## What to do with the 2,990 meanwhile
+## What to do with the 3,288 meanwhile
 
 Split, not filtered:
 
-* `2026-09-22-fermlit-verdicts-safe.tsv` — **1,303** verdicts on publications with no
-  mitochondrial or mtDNA family. Installable as they stand; working corpus 4,762 → 4,145.
-* `2026-09-22-fermlit-verdicts.tsv` — the full 2,990, including the **1,687** withheld. Kept so
+* `2026-09-22-fermlit-verdicts-safe.tsv` — **1,413** verdicts on publications with no
+  mitochondrial or mtDNA family. Installable as they stand; working corpus 4,762 → 4,064.
+* `2026-09-22-fermlit-verdicts.tsv` — the full 3,288, including the **1,875** withheld. Kept so
   the withheld verdicts can be re-read rather than re-derived.
+
+The counts here were 2,990 / 1,303 / 1,687 in the first version of this document. They were short
+by 298 because the export joined fermdb to fermlit on DOI alone, and **300 of these publications
+carry a `pmid:` id and no DOI at all**. Every one of them was already in fermlit, matched by PMID,
+with a verdict computed. Found by chasing why a screening agent imported 1,308 rows against a gap
+measured at 1,606 — the agent was right and the measurement was short. The whole fermlit corpus now
+reconciles exactly: 3,288 importable + 568 the owner ruled by hand = 3,856.
 
 Both are model verdicts: `decided_by_kind = model`, confidence `unverified`, and the loader will
 not let them overwrite any of the 568 the owner reached by opening the PDF.
