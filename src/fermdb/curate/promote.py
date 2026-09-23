@@ -66,9 +66,12 @@ import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Final
 
 from ..config import Settings
+from ..db.vocabularies import read_tsv
 from ..extract.schemas import MISSING_CHOICES
 from .genotype import parse_genotype
 from .queue import CurationError, Curator, Task, get_task
@@ -1558,6 +1561,51 @@ PROMOTABLE_KINDS: Final[tuple[str, ...]] = tuple(PROMOTERS)
 # ---------------------------------------------------------------------------------- the action
 
 
+#: `data/vocabularies/quantity_kinds.tsv` is the source of truth for `measurement.quantity_kind`,
+#: and this is the gate that makes it one. The column is plain `TEXT NOT NULL` -- SQLite cannot
+#: add a CHECK to an existing column without rebuilding the table, and `db/migrations.py` may add
+#: and may not destroy -- so the vocabulary binds where values enter instead: the extraction
+#: schema offers it as a closed choice, and this refuses anything outside it on the way to a row.
+#:
+#: Measured on 2026-09-24, before either gate existed: 21 distinct values over 105 rows, 17 of
+#: them one-offs, several of them whole sentences. A sentence cannot be grouped by, cannot carry a
+#: unit rule, and never meets another row measuring the same thing.
+#:
+#: Read from the file rather than written here, because CONVENTIONS.md's rule is that adding a
+#: vocabulary value must not mean editing code. Cached because a promote run plans hundreds of
+#: tasks and the file does not change underneath one.
+@lru_cache(maxsize=4)
+def _quantity_kinds(vocabularies_dir: Path) -> frozenset[str]:
+    return frozenset(
+        row["quantity_kind"].strip()
+        for row in read_tsv(vocabularies_dir / "quantity_kinds.tsv")
+        if row.get("quantity_kind", "").strip()
+    )
+
+
+def _quantity_kind_blocker(plan: PromotionPlan, vocabularies_dir: Path) -> str | None:
+    """A blocker if the planned row's `quantity_kind` is outside the vocabulary, else None.
+
+    Refused by name rather than mapped onto the nearest term. The 17 drifted values in the atlas
+    are not typos of the 14 good ones -- they are sentences that name a control, a feeding
+    condition or an agar plate, and a mapping that dropped that detail would lose the only place
+    it is written down. What the curator does instead is say which kind it is and put the rest
+    where it belongs: the control in the record, the condition in the condition context.
+    """
+    kind = str(plan.row.get("quantity_kind") or "").strip()
+    if not kind:
+        return None
+    allowed = _quantity_kinds(vocabularies_dir)
+    if kind in allowed:
+        return None
+    return (
+        f"quantity_kind {kind!r} is not in data/vocabularies/quantity_kinds.tsv. "
+        "Choose one of the closed values, or 'unknown' if none fits -- a sentence in this "
+        "column cannot be grouped, compared or unit-checked. If the kind is genuinely new, "
+        "the vocabulary file is the thing to change, not this row."
+    )
+
+
 def plan_promotion(
     conn: sqlite3.Connection,
     task: Task,
@@ -1582,11 +1630,23 @@ def plan_promotion(
     if promoter is None:
         return PromotionPlan(task_id=task.id, record_kind=task.record_kind, target_table=None)
 
+    resolved = settings or Settings.load()
     base = promoter[0](conn, task, supplied)
+    vocabulary_blocker = _quantity_kind_blocker(base, resolved.path("vocabularies_dir"))
+    if vocabulary_blocker is not None:
+        base = PromotionPlan(
+            task_id=base.task_id,
+            record_kind=base.record_kind,
+            target_table=base.target_table,
+            row=base.row,
+            missing=base.missing,
+            blockers=base.blockers + (vocabulary_blocker,),
+            already=base.already,
+        )
     if not check_span or base.already is not None:
         return base
 
-    ok, detail = _verify_span(conn, settings or Settings.load(), task)
+    ok, detail = _verify_span(conn, resolved, task)
     if ok:
         return base
     return PromotionPlan(

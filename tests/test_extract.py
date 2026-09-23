@@ -742,6 +742,7 @@ def test_an_empty_vocabulary_is_refused_rather_than_widened() -> None:
             units=("g/L",),
             bases=("consumed",),
             modification_types=("knockout",),
+            quantity_kinds=("titer",),
             compartments=("cytosol",),
             compartment_strategies=("A_native_split",),
             condition_facets=("temperature_c",),

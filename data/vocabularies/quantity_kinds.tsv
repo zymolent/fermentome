@@ -1,0 +1,62 @@
+# quantity_kinds.tsv — controlled vocabulary for `measurement.quantity_kind` (PLAN.md C.6 and
+# I.3: "Production (titer, yield, productivity, specific productivity), physiology (growth rate,
+# biomass yield, substrate uptake, fermentation time, oxygen requirement) ... and tolerance").
+#
+# WHY THIS FILE EXISTS: the column had no vocabulary anywhere. `schema.sql` documented one in a
+# trailing comment ("titer | yield | productivity | growth_rate | ..."), the extraction FieldSpec
+# offered the same list as free prose, and the promoter checked only that the string was
+# non-empty. Measured on the live atlas on 2026-09-24, that produced **21 distinct values over
+# 105 rows**, of which 17 are one-offs and several are whole sentences:
+#
+#     isobutanol concentration on SC agar permitting growth
+#     percent_decrease_in_isobutanol_titer_upon_valine_feeding
+#     LC50 (approximate, growth reduced by slightly more than half)
+#
+# A sentence in this column is not a kind. Nothing can group by it, no unit rule can be attached
+# to it, and two rows measuring the same quantity under different sentences never meet.
+#
+# THIS FILE IS LOAD-BEARING, and the distinction it carries is ABSOLUTE vs RELATIVE. A titer is a
+# number about one culture. A fold_change is a number about a PAIR — it is meaningless without the
+# control it was computed against, and it cannot be converted into a titer, ranked against one, or
+# averaged with one. PLAN.md I.2's rule that comparisons happen only within a comparability class
+# is the same rule one level down: a relative measurement's class includes its control, so the
+# control has to be recoverable from the row. Where it is not, the row says what it measured and
+# refuses to say how much.
+#
+# WHAT THIS FILE DOES NOT DO: it does not add a CHECK to `measurement.quantity_kind`. SQLite
+# cannot add a constraint to an existing column without rebuilding the table, and
+# `db/migrations.py`'s rule is that a migration may add and backfill and may not destroy. So the
+# vocabulary binds at the two places a value actually enters — the extraction schema
+# (`extract/schemas.py`, which now offers this list as a closed choice) and the promoter
+# (`curate/promote.py`, which refuses a value outside it rather than storing it) — and
+# `query.drift` reports the rows already stored outside it. Remapping those is a curator's call
+# and is not performed by any of this.
+#
+# Columns:
+#   quantity_kind   the closed vocabulary value
+#   measure_class   absolute | relative | threshold — see the note column; this is the field that
+#                   decides whether a row is interpretable on its own
+#   description     what is measured
+#   unit_family     the natural unit family, for cross-checking against units.tsv
+#   note            what this kind may NOT be aggregated with, and why
+#   evidence, confidence
+#
+# Evidence honesty, following assay_types.tsv's pass: a row citing only another fermdb document
+# (PLAN.md, schema.sql, a stored value) is 'unverified' — citing an internal document is citing
+# memory with an extra hop. Nothing here has been checked against a source outside this repo, so
+# nothing here is 'high'.
+quantity_kind	measure_class	description	unit_family	note	evidence	confidence
+titer	absolute	Concentration of a product in the broth at a stated timepoint.	mass per volume (g/L, mg/L)	Interpretable alone. NOT comparable across condition contexts without the facets that differ being named (PLAN.md I.2); a shake-flask titer and a fed-batch titer are different numbers about different experiments.	PLAN.md I.3 "Production (titer, ...)"; 64 of the atlas's 105 rows already use this exact term	unverified
+yield	absolute	Product formed per substrate, as a ratio. Requires `basis` to say consumed or supplied.	mass per mass (g/g) or mol per mol	Interpretable alone ONLY with its basis: g/g-consumed and g/g-supplied are different numbers and papers report both without saying which, which is why `measurement.basis` forbids NULL for a yield. Subject to the theoretical ceiling check of S.3.	PLAN.md I.3; schema.sql's `basis` comment	unverified
+productivity	absolute	Product formed per unit volume per unit time, averaged over the run.	mass per volume per time (g/L/h)	NOT derivable from titer alone — it needs the fermentation time, and a titer reached in 24 h and in 120 h are the same titer and very different productivities.	PLAN.md I.3 "Production (... productivity, specific productivity)"	unverified
+specific_productivity	absolute	Product formed per unit biomass per unit time.	mass per mass per time (g/gDW/h)	NOT interconvertible with productivity: one is per volume, the other per cell mass, and they diverge exactly when biomass differs between strains — which is the usual case when comparing an engineered strain to its parent.	PLAN.md I.3	unverified
+growth_rate	absolute	Specific growth rate (mu) in the exponential phase.	per time (1/h)	A tolerance measurement reported as a growth rate at a stated stressor concentration is this kind PLUS an `assay_type` of growth_rate_in_x_percent; the stressor concentration belongs in the condition context, not in this column.	PLAN.md I.3 "physiology (growth rate, ...)"; assay_types.tsv	unverified
+biomass_yield	absolute	Biomass formed per substrate consumed.	mass per mass (gDW/g)	NOT the same as `yield`, which is product per substrate. A strain can gain biomass yield and lose product yield on the same substrate; collapsing the two terms would hide exactly that trade-off.	PLAN.md I.3 "physiology (... biomass yield ...)"	unverified
+substrate_uptake_rate	absolute	Rate at which the substrate is consumed.	mass per mass per time (g/gDW/h) or mass per volume per time	Interpretable alone. Pairs with `yield` to give productivity, but the atlas stores what the paper reported and derives nothing here.	PLAN.md I.3 "physiology (... substrate uptake ...)"	unverified
+fermentation_time	absolute	Duration of the run, or time to a stated endpoint.	time (h)	Not a performance measure on its own; it is the denominator that turns a titer into a productivity, and is stored so that conversion is possible rather than assumed.	PLAN.md I.3 "physiology (... fermentation time ...)"	unverified
+consumption	absolute	Total amount of substrate consumed over the run.	mass per volume (g/L) or mass (g)	Distinct from substrate_uptake_rate, which is per unit time and per unit biomass. A total and a rate are not the same quantity.	PLAN.md I.3; the schema.sql trailing comment lists "consumption"	unverified
+od	absolute	Optical density, as printed, at the wavelength the paper states.	dimensionless (OD600 and similar)	NOT a biomass measurement without the paper's own OD-to-gDW factor, which is strain- and instrument-specific. Stored as printed; converting it silently would invent a calibration.	The schema.sql trailing comment lists "od"; 1 stored row uses an OD-based value	unverified
+inhibitory_concentration	threshold	The stressor concentration at which a stated response occurs — IC50, MIC, LC50 and the "grew on agar up to X" readings.	mass per volume (g/L) or percent v/v	A THRESHOLD, not a performance number: it says where a response happens, not how much was produced. The response definition lives in `assay_type` and IC50 / MIC / LC50 are NOT interconvertible with one another (see assay_types.tsv). A row here without an assay_type is not comparable to any other row here.	assay_types.tsv (IC50, MIC); 3 stored rows are threshold readings written as prose	unverified
+fold_change	relative	A ratio of two measurements, engineered over control. Direction lives in the VALUE, not in the term.	dimensionless	MEANINGLESS WITHOUT ITS CONTROL, and the control must be recoverable from the row. NOT comparable with any absolute kind, never averaged with one, and never ranked against one: a 12-fold increase over a near-zero parent and a 1.2-fold increase over a strong one can describe the same titer. Deliberately ONE signed term rather than fold_increase / fold_decrease / fold_improvement — three terms for one quantity is how a vocabulary stops being able to group.	PLAN.md I.2's comparability rule read one level down; 11 stored rows say fold_increase and 4 more say some variant of it	unverified
+percent_change	relative	A percentage difference from a control, engineered over control. Direction lives in the VALUE.	percent	MEANINGLESS WITHOUT ITS CONTROL, exactly as fold_change is, and it is the same quantity under a different scaling — but the two are kept apart because converting between them silently changes what a value of "50" means. NOT comparable with any absolute kind. 8 stored rows use some prose variant of this and each names its control only inside the term itself, which is where this vocabulary's absence has cost the most.	PLAN.md I.2; the 8 stored prose variants	unverified
+unknown	absolute	The paper reports a number whose kind does not fit any row above.	as printed	The escape hatch, and it must stay available: a curator who cannot classify a number must be able to say so rather than choosing the nearest term. `units.tsv` carries the same escape for the same reason — a forced choice from a closed list is how a list gets silently wrong. A row marked unknown is excluded from every aggregation until it is classified.	units.tsv's 'unknown' precedent ("answer 'unknown' rather than converting into one that is")	unverified

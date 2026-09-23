@@ -165,6 +165,7 @@ class PayloadVocabulary:
     units: tuple[str, ...]
     bases: tuple[str, ...]
     modification_types: tuple[str, ...]
+    quantity_kinds: tuple[str, ...]
     compartments: tuple[str, ...]
     compartment_strategies: tuple[str, ...]
     condition_facets: tuple[str, ...]
@@ -175,6 +176,7 @@ class PayloadVocabulary:
             "units",
             "bases",
             "modification_types",
+            "quantity_kinds",
             "compartments",
             "compartment_strategies",
             "condition_facets",
@@ -211,6 +213,7 @@ def load_vocabulary(source: Settings | Path, conn: sqlite3.Connection) -> Payloa
         modification_types=_read_tsv_column(
             directory / "modification_types.tsv", "modification_type"
         ),
+        quantity_kinds=_read_tsv_column(directory / "quantity_kinds.tsv", "quantity_kind"),
         compartments=_read_tsv_column(directory / "compartments.tsv", "compartment"),
         compartment_strategies=strategies,
         condition_facets=_read_tsv_column(directory / "condition_facets.tsv", "field"),
@@ -445,8 +448,20 @@ def _measurement_fields(vocabulary: PayloadVocabulary) -> tuple[FieldSpec, ...]:
         ),
         FieldSpec(
             "quantity_kind",
-            _text(
-                "What was measured: titer, yield, productivity, growth_rate, consumption, od, ..."
+            # Was free prose with a trailing "...", and the "..." is where 17 of the atlas's 21
+            # stored values came from -- whole sentences like "isobutanol concentration on SC
+            # agar permitting growth". A closed choice with an explicit escape is the same shape
+            # `unit` already uses, and for the same reason: an open field does not get answered
+            # more accurately, it gets answered in prose.
+            _choice(
+                vocabulary.quantity_kinds,
+                description=(
+                    "What was measured, chosen from the list. A relative measurement "
+                    "(fold_change, percent_change) is only usable if the control it was computed "
+                    "against is named in the record, so say which control it was. If the paper's "
+                    "quantity is not in the list, answer 'unknown' rather than describing it in "
+                    "a sentence -- a sentence in this field cannot be grouped or compared."
+                ),
             ),
             required=True,
         ),
