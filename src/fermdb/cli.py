@@ -42,6 +42,7 @@ grows past this.
     python -m fermdb.cli curate stats
     python -m fermdb.cli export release --out ./release
     python -m fermdb.cli export release --out ./release --release v2026.1
+    python -m fermdb.cli mcp
 """
 
 from __future__ import annotations
@@ -121,6 +122,7 @@ from .llm import (
     ResultCache,
     build_provider,
 )
+from .mcp.cli import add_mcp_subcommand
 from .metabolic.cli import add_atlas_subcommand
 from .omics import add_omics_subcommand
 from .paths import PathsConfigError
@@ -1202,6 +1204,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_rebuild_subcommand(sub)
     add_serve_subcommand(sub)
     add_export_subcommand(sub)
+    add_mcp_subcommand(sub)
 
     p_extract = sub.add_parser(
         "extract", help="LLM extraction of one publication into a proposed Zone I row"
