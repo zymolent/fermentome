@@ -1,0 +1,61 @@
+##gff-version 3
+#!gff-spec-version 1.21
+#!processor fermdb tests/fixtures/genomics/protein_qc (synthetic)
+##sequence-region NC_TEST01.1 1 1892
+##sequence-region NC_TEST24.1 1 300
+##sequence-region NC_TEST90.1 1 243
+#
+# Every CDS here re-splices and translates to its own record in mini.clean.faa, so this corpus
+# scores 1.000 and the gate passes it. It exists so that a test of the PASS path is a test of
+# something, rather than of an empty corpus.
+#
+# Coverage, one shape per locus:
+#
+#   YTEST01W  single exon, forward, ATG start, terminal TAA
+#   YTEST02W  two exons; the second declares phase 1 because the first is 50 bases long, which
+#             is the case an implementation that ignores phase still gets right and one that
+#             trims the WRONG segment's phase gets wrong
+#   YTEST03C  minus strand -- the only shape where a splice-then-revcomp and a
+#             revcomp-then-splice give the same answer only if the segment order is right
+#   YTEST04W  starts TTG. Table 1 reads that as leucine; NCBI writes methionine. The
+#             initiator normalisation is what makes this a pass, and it is counted.
+#   Q0TEST1   on the mitochondrion, transl_table=3. Every threonine is written CTA and every
+#             tryptophan TGA, so under table 1 this ORF has eight internal stops and matches
+#             nothing. It is the reason this gate may not assume table 1.
+#
+# NC_TEST90.1 carries no gene here; it is annotated in mini.broken.gff3, where its region feature
+# states no genome= and its CDS is therefore refused rather than defaulted onto table 1.
+#
+NC_TEST01.1	fermdb	region	1	1892	.	+	.	ID=NC_TEST01.1:1..1892;Name=NC_TEST01.1;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+###
+NC_TEST24.1	fermdb	region	1	300	.	+	.	ID=NC_TEST24.1:1..300;Name=NC_TEST24.1;Is_circular=true;gbkey=Src;genome=mitochondrion;mol_type=genomic DNA
+###
+NC_TEST90.1	fermdb	region	1	243	.	+	.	ID=NC_TEST90.1:1..243;Name=NC_TEST90.1;gbkey=Src;mol_type=genomic DNA
+###
+NC_TEST01.1	fermdb	gene	121	267	.	+	.	ID=gene-YTEST01W;Name=YTEST01W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST01W
+NC_TEST01.1	fermdb	mRNA	121	267	.	+	.	ID=rna-YTEST01W;Parent=gene-YTEST01W;gbkey=mRNA;locus_tag=YTEST01W;product=test protein one
+NC_TEST01.1	fermdb	exon	121	267	.	+	.	ID=exon-YTEST01W-1;Parent=rna-YTEST01W;gbkey=mRNA;locus_tag=YTEST01W;product=test protein one
+NC_TEST01.1	fermdb	CDS	121	267	.	+	0	ID=cds-NP_TEST001.1;Parent=rna-YTEST01W;Name=NP_TEST001.1;gbkey=CDS;locus_tag=YTEST01W;product=test protein one;protein_id=NP_TEST001.1
+###
+NC_TEST01.1	fermdb	gene	365	554	.	+	.	ID=gene-YTEST02W;Name=YTEST02W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST02W
+NC_TEST01.1	fermdb	mRNA	365	554	.	+	.	ID=rna-YTEST02W;Parent=gene-YTEST02W;gbkey=mRNA;locus_tag=YTEST02W;product=test protein two
+NC_TEST01.1	fermdb	exon	365	414	.	+	.	ID=exon-YTEST02W-1;Parent=rna-YTEST02W;gbkey=mRNA;locus_tag=YTEST02W;product=test protein two
+NC_TEST01.1	fermdb	exon	461	554	.	+	.	ID=exon-YTEST02W-2;Parent=rna-YTEST02W;gbkey=mRNA;locus_tag=YTEST02W;product=test protein two
+NC_TEST01.1	fermdb	CDS	365	414	.	+	0	ID=cds-NP_TEST002.1;Parent=rna-YTEST02W;Name=NP_TEST002.1;gbkey=CDS;locus_tag=YTEST02W;product=test protein two;protein_id=NP_TEST002.1
+NC_TEST01.1	fermdb	CDS	461	554	.	+	1	ID=cds-NP_TEST002.1;Parent=rna-YTEST02W;Name=NP_TEST002.1;gbkey=CDS;locus_tag=YTEST02W;product=test protein two;protein_id=NP_TEST002.1
+###
+NC_TEST01.1	fermdb	gene	638	760	.	-	.	ID=gene-YTEST03C;Name=YTEST03C;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST03C
+NC_TEST01.1	fermdb	mRNA	638	760	.	-	.	ID=rna-YTEST03C;Parent=gene-YTEST03C;gbkey=mRNA;locus_tag=YTEST03C;product=test protein three
+NC_TEST01.1	fermdb	exon	638	760	.	-	.	ID=exon-YTEST03C-1;Parent=rna-YTEST03C;gbkey=mRNA;locus_tag=YTEST03C;product=test protein three
+NC_TEST01.1	fermdb	CDS	638	760	.	-	0	ID=cds-NP_TEST003.1;Parent=rna-YTEST03C;Name=NP_TEST003.1;gbkey=CDS;locus_tag=YTEST03C;product=test protein three;protein_id=NP_TEST003.1
+###
+NC_TEST01.1	fermdb	gene	822	944	.	+	.	ID=gene-YTEST04W;Name=YTEST04W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST04W
+NC_TEST01.1	fermdb	mRNA	822	944	.	+	.	ID=rna-YTEST04W;Parent=gene-YTEST04W;gbkey=mRNA;locus_tag=YTEST04W;product=test protein four%2C alternative start
+NC_TEST01.1	fermdb	exon	822	944	.	+	.	ID=exon-YTEST04W-1;Parent=rna-YTEST04W;gbkey=mRNA;locus_tag=YTEST04W;product=test protein four%2C alternative start
+NC_TEST01.1	fermdb	CDS	822	944	.	+	0	ID=cds-NP_TEST004.1;Parent=rna-YTEST04W;Name=NP_TEST004.1;gbkey=CDS;locus_tag=YTEST04W;product=test protein four%2C alternative start;protein_id=NP_TEST004.1
+###
+NC_TEST24.1	fermdb	gene	91	210	.	+	.	ID=gene-Q0TEST1;Name=Q0TEST1;gbkey=Gene;gene_biotype=protein_coding;locus_tag=Q0TEST1
+NC_TEST24.1	fermdb	mRNA	91	210	.	+	.	ID=rna-Q0TEST1;Parent=gene-Q0TEST1;gbkey=mRNA;locus_tag=Q0TEST1;product=test mitochondrial protein
+NC_TEST24.1	fermdb	exon	91	210	.	+	.	ID=exon-Q0TEST1-1;Parent=rna-Q0TEST1;gbkey=mRNA;locus_tag=Q0TEST1;product=test mitochondrial protein
+NC_TEST24.1	fermdb	CDS	91	210	.	+	0	ID=cds-NP_TEST024.1;Parent=rna-Q0TEST1;Name=NP_TEST024.1;gbkey=CDS;locus_tag=Q0TEST1;product=test mitochondrial protein;protein_id=NP_TEST024.1;transl_table=3
+###

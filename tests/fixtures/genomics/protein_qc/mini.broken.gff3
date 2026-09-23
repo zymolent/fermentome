@@ -1,0 +1,100 @@
+##gff-version 3
+#!gff-spec-version 1.21
+#!processor fermdb tests/fixtures/genomics/protein_qc (synthetic)
+##sequence-region NC_TEST01.1 1 1892
+##sequence-region NC_TEST24.1 1 300
+##sequence-region NC_TEST90.1 1 243
+#
+# The failure corpus. Nothing here is a mistake in the fixture: every locus is a named failure
+# mode the gate has to report rather than crash on or wave through. The genome it is read against
+# is the SAME mini.fna the clean corpus uses -- the errors are in this annotation and in
+# mini.broken.faa, which is how a real phase or coordinate error arrives.
+#
+#   YTEST01W  CDS start moved one base 3' of the truth. The classic off-by-one; it frameshifts
+#             the whole ORF.
+#   YTEST02W  correct coordinates, but the second CDS segment declares phase 0 where its own
+#             exon lengths say 1. The translation is still exact -- which is exactly why this
+#             has to be counted and printed: an internally inconsistent phase is invisible in
+#             the identity number.
+#   YTEST03C  minus-strand CDS with its 5' end (the higher coordinate) moved one base.
+#   YTEST04W  correct coordinates; mini.broken.faa holds a STALE record for it, differing at
+#             one residue. This is the shape a protein FASTA from a superseded annotation
+#             release has, and it is the only failure here that is not a coordinate fault.
+#   YTEST05W  an in-frame stop codon in the middle of the CDS.
+#   YTEST06W  one codon is NNN in the assembly; the protein record names the residue.
+#   YTEST07W  annotated with protein_id=NP_TEST007.1, which mini.broken.faa does not contain.
+#   YTEST09W  declares transl_table=11. fermdb.genetic_code implements 1 and 3; 11 is refused
+#             by name rather than silently read as 1 (it differs from 1 only in start codons,
+#             which is precisely why the silent version of this would never be noticed).
+#   YTEST10W  a TGA the protein record reads through as selenocysteine (U).
+#   YTEST08W  on NC_TEST90.1, whose region feature states no genome=. No table can be resolved,
+#             so it is refused.
+#   Q0TEST1   the mitochondrial ORF again, this time with NO transl_table attribute. It still
+#             has to be read under table 3, via its sequence's region genome=mitochondrion.
+#
+# mini.broken.faa additionally holds NP_TESTORPHAN.1, a protein record no CDS in this file
+# produces.
+#
+NC_TEST01.1	fermdb	region	1	1892	.	+	.	ID=NC_TEST01.1:1..1892;Name=NC_TEST01.1;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+###
+NC_TEST24.1	fermdb	region	1	300	.	+	.	ID=NC_TEST24.1:1..300;Name=NC_TEST24.1;Is_circular=true;gbkey=Src;genome=mitochondrion;mol_type=genomic DNA
+###
+NC_TEST90.1	fermdb	region	1	243	.	+	.	ID=NC_TEST90.1:1..243;Name=NC_TEST90.1;gbkey=Src;mol_type=genomic DNA
+###
+NC_TEST01.1	fermdb	gene	122	267	.	+	.	ID=gene-YTEST01W;Name=YTEST01W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST01W
+NC_TEST01.1	fermdb	mRNA	122	267	.	+	.	ID=rna-YTEST01W;Parent=gene-YTEST01W;gbkey=mRNA;locus_tag=YTEST01W;product=test protein one
+NC_TEST01.1	fermdb	exon	122	267	.	+	.	ID=exon-YTEST01W-1;Parent=rna-YTEST01W;gbkey=mRNA;locus_tag=YTEST01W;product=test protein one
+NC_TEST01.1	fermdb	CDS	122	267	.	+	0	ID=cds-NP_TEST001.1;Parent=rna-YTEST01W;Name=NP_TEST001.1;gbkey=CDS;locus_tag=YTEST01W;product=test protein one;protein_id=NP_TEST001.1
+###
+NC_TEST01.1	fermdb	gene	365	554	.	+	.	ID=gene-YTEST02W;Name=YTEST02W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST02W
+NC_TEST01.1	fermdb	mRNA	365	554	.	+	.	ID=rna-YTEST02W;Parent=gene-YTEST02W;gbkey=mRNA;locus_tag=YTEST02W;product=test protein two
+NC_TEST01.1	fermdb	exon	365	414	.	+	.	ID=exon-YTEST02W-1;Parent=rna-YTEST02W;gbkey=mRNA;locus_tag=YTEST02W;product=test protein two
+NC_TEST01.1	fermdb	exon	461	554	.	+	.	ID=exon-YTEST02W-2;Parent=rna-YTEST02W;gbkey=mRNA;locus_tag=YTEST02W;product=test protein two
+NC_TEST01.1	fermdb	CDS	365	414	.	+	0	ID=cds-NP_TEST002.1;Parent=rna-YTEST02W;Name=NP_TEST002.1;gbkey=CDS;locus_tag=YTEST02W;product=test protein two;protein_id=NP_TEST002.1
+NC_TEST01.1	fermdb	CDS	461	554	.	+	0	ID=cds-NP_TEST002.1;Parent=rna-YTEST02W;Name=NP_TEST002.1;gbkey=CDS;locus_tag=YTEST02W;product=test protein two;protein_id=NP_TEST002.1
+###
+NC_TEST01.1	fermdb	gene	638	759	.	-	.	ID=gene-YTEST03C;Name=YTEST03C;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST03C
+NC_TEST01.1	fermdb	mRNA	638	759	.	-	.	ID=rna-YTEST03C;Parent=gene-YTEST03C;gbkey=mRNA;locus_tag=YTEST03C;product=test protein three
+NC_TEST01.1	fermdb	exon	638	759	.	-	.	ID=exon-YTEST03C-1;Parent=rna-YTEST03C;gbkey=mRNA;locus_tag=YTEST03C;product=test protein three
+NC_TEST01.1	fermdb	CDS	638	759	.	-	0	ID=cds-NP_TEST003.1;Parent=rna-YTEST03C;Name=NP_TEST003.1;gbkey=CDS;locus_tag=YTEST03C;product=test protein three;protein_id=NP_TEST003.1
+###
+NC_TEST01.1	fermdb	gene	822	944	.	+	.	ID=gene-YTEST04W;Name=YTEST04W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST04W
+NC_TEST01.1	fermdb	mRNA	822	944	.	+	.	ID=rna-YTEST04W;Parent=gene-YTEST04W;gbkey=mRNA;locus_tag=YTEST04W;product=test protein four%2C alternative start
+NC_TEST01.1	fermdb	exon	822	944	.	+	.	ID=exon-YTEST04W-1;Parent=rna-YTEST04W;gbkey=mRNA;locus_tag=YTEST04W;product=test protein four%2C alternative start
+NC_TEST01.1	fermdb	CDS	822	944	.	+	0	ID=cds-NP_TEST004.1;Parent=rna-YTEST04W;Name=NP_TEST004.1;gbkey=CDS;locus_tag=YTEST04W;product=test protein four%2C alternative start;protein_id=NP_TEST004.1
+###
+NC_TEST01.1	fermdb	gene	1000	1122	.	+	.	ID=gene-YTEST05W;Name=YTEST05W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST05W
+NC_TEST01.1	fermdb	mRNA	1000	1122	.	+	.	ID=rna-YTEST05W;Parent=gene-YTEST05W;gbkey=mRNA;locus_tag=YTEST05W;product=test protein five
+NC_TEST01.1	fermdb	exon	1000	1122	.	+	.	ID=exon-YTEST05W-1;Parent=rna-YTEST05W;gbkey=mRNA;locus_tag=YTEST05W;product=test protein five
+NC_TEST01.1	fermdb	CDS	1000	1122	.	+	0	ID=cds-NP_TEST005.1;Parent=rna-YTEST05W;Name=NP_TEST005.1;gbkey=CDS;locus_tag=YTEST05W;product=test protein five;protein_id=NP_TEST005.1
+###
+NC_TEST01.1	fermdb	gene	1170	1292	.	+	.	ID=gene-YTEST06W;Name=YTEST06W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST06W
+NC_TEST01.1	fermdb	mRNA	1170	1292	.	+	.	ID=rna-YTEST06W;Parent=gene-YTEST06W;gbkey=mRNA;locus_tag=YTEST06W;product=test protein six
+NC_TEST01.1	fermdb	exon	1170	1292	.	+	.	ID=exon-YTEST06W-1;Parent=rna-YTEST06W;gbkey=mRNA;locus_tag=YTEST06W;product=test protein six
+NC_TEST01.1	fermdb	CDS	1170	1292	.	+	0	ID=cds-NP_TEST006.1;Parent=rna-YTEST06W;Name=NP_TEST006.1;gbkey=CDS;locus_tag=YTEST06W;product=test protein six;protein_id=NP_TEST006.1
+###
+NC_TEST01.1	fermdb	gene	1336	1458	.	+	.	ID=gene-YTEST07W;Name=YTEST07W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST07W
+NC_TEST01.1	fermdb	mRNA	1336	1458	.	+	.	ID=rna-YTEST07W;Parent=gene-YTEST07W;gbkey=mRNA;locus_tag=YTEST07W;product=test protein seven
+NC_TEST01.1	fermdb	exon	1336	1458	.	+	.	ID=exon-YTEST07W-1;Parent=rna-YTEST07W;gbkey=mRNA;locus_tag=YTEST07W;product=test protein seven
+NC_TEST01.1	fermdb	CDS	1336	1458	.	+	0	ID=cds-NP_TEST007.1;Parent=rna-YTEST07W;Name=NP_TEST007.1;gbkey=CDS;locus_tag=YTEST07W;product=test protein seven;protein_id=NP_TEST007.1
+###
+NC_TEST01.1	fermdb	gene	1496	1618	.	+	.	ID=gene-YTEST09W;Name=YTEST09W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST09W
+NC_TEST01.1	fermdb	mRNA	1496	1618	.	+	.	ID=rna-YTEST09W;Parent=gene-YTEST09W;gbkey=mRNA;locus_tag=YTEST09W;product=test protein nine
+NC_TEST01.1	fermdb	exon	1496	1618	.	+	.	ID=exon-YTEST09W-1;Parent=rna-YTEST09W;gbkey=mRNA;locus_tag=YTEST09W;product=test protein nine
+NC_TEST01.1	fermdb	CDS	1496	1618	.	+	0	ID=cds-NP_TEST009.1;Parent=rna-YTEST09W;Name=NP_TEST009.1;gbkey=CDS;locus_tag=YTEST09W;product=test protein nine;protein_id=NP_TEST009.1;transl_table=11
+###
+NC_TEST01.1	fermdb	gene	1650	1772	.	+	.	ID=gene-YTEST10W;Name=YTEST10W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST10W
+NC_TEST01.1	fermdb	mRNA	1650	1772	.	+	.	ID=rna-YTEST10W;Parent=gene-YTEST10W;gbkey=mRNA;locus_tag=YTEST10W;product=test selenoprotein ten
+NC_TEST01.1	fermdb	exon	1650	1772	.	+	.	ID=exon-YTEST10W-1;Parent=rna-YTEST10W;gbkey=mRNA;locus_tag=YTEST10W;product=test selenoprotein ten
+NC_TEST01.1	fermdb	CDS	1650	1772	.	+	0	ID=cds-NP_TEST010.1;Parent=rna-YTEST10W;Name=NP_TEST010.1;gbkey=CDS;locus_tag=YTEST10W;product=test selenoprotein ten;protein_id=NP_TEST010.1
+###
+NC_TEST90.1	fermdb	gene	61	183	.	+	.	ID=gene-YTEST08W;Name=YTEST08W;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YTEST08W
+NC_TEST90.1	fermdb	mRNA	61	183	.	+	.	ID=rna-YTEST08W;Parent=gene-YTEST08W;gbkey=mRNA;locus_tag=YTEST08W;product=test protein eight
+NC_TEST90.1	fermdb	exon	61	183	.	+	.	ID=exon-YTEST08W-1;Parent=rna-YTEST08W;gbkey=mRNA;locus_tag=YTEST08W;product=test protein eight
+NC_TEST90.1	fermdb	CDS	61	183	.	+	0	ID=cds-NP_TEST008.1;Parent=rna-YTEST08W;Name=NP_TEST008.1;gbkey=CDS;locus_tag=YTEST08W;product=test protein eight;protein_id=NP_TEST008.1
+###
+NC_TEST24.1	fermdb	gene	91	210	.	+	.	ID=gene-Q0TEST1;Name=Q0TEST1;gbkey=Gene;gene_biotype=protein_coding;locus_tag=Q0TEST1
+NC_TEST24.1	fermdb	mRNA	91	210	.	+	.	ID=rna-Q0TEST1;Parent=gene-Q0TEST1;gbkey=mRNA;locus_tag=Q0TEST1;product=test mitochondrial protein
+NC_TEST24.1	fermdb	exon	91	210	.	+	.	ID=exon-Q0TEST1-1;Parent=rna-Q0TEST1;gbkey=mRNA;locus_tag=Q0TEST1;product=test mitochondrial protein
+NC_TEST24.1	fermdb	CDS	91	210	.	+	0	ID=cds-NP_TEST024.1;Parent=rna-Q0TEST1;Name=NP_TEST024.1;gbkey=CDS;locus_tag=Q0TEST1;product=test mitochondrial protein;protein_id=NP_TEST024.1
+###

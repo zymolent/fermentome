@@ -1,4 +1,4 @@
-"""``fermdb genomics load-gff3`` -- put a whole RefSeq annotation into `gene`.
+"""``fermdb genomics load-gff3`` and ``fermdb genomics protein-qc``.
 
 Separate from `cli.py` the way `omics`, `atlas`, `query`, `db` and `serve` are, so the top-level
 parser gains only an import and one call.
@@ -21,6 +21,20 @@ have to type is cheaper than a table you have to unpick.
 nobody sees is a gene silently missing from the atlas, and a count of "3 skipped" tells you the
 number and not which three. The table truncates long lists and says so; `--json` is always
 complete.
+
+**`protein-qc` exits non-zero when it refuses, and has no flag that can talk it round.** It is the
+gate of PLAN.md E.3, which is worded as an action -- *"refuse the ingest below a threshold"* -- and
+a gate that prints a warning and exits 0 is a warning, not a gate. So the exit codes are three
+distinct things a script can branch on: `0` the corpus passed, `1` the corpus was read and
+**refused**, `2` the run never happened (a missing file, an unparsable GFF3, a bad `--genetic-code`
+spelling). Conflating 1 and 2 would let a typo in a path read as a clean genome.
+
+There is deliberately **no `--threshold`**. PLAN.md S.2 puts QC constants in one module, fixed
+before the data is seen and reviewed as a diff; a flag that relaxes one for a single run is the
+same rationalization S.2 names, with an audit trail no shorter than a shell history. The number
+lives in `protein_qc.MIN_PROTEIN_IDENTITY` and moving it is a reviewed change the owner signs off.
+`--json` still emits every count and every failure on a refused run, so a below-threshold corpus
+is completely inspectable without the gate having been softened to look at it.
 """
 
 from __future__ import annotations
@@ -32,10 +46,19 @@ from pathlib import Path
 
 from ..config import Settings
 from ..db import DatabaseError, open_db
+from ..genetic_code import TABLES
 from .gff3 import Gff3Error
 from .load_genes import GeneLoadError, GeneLoadReport, load_gff3
+from .protein_qc import MIN_PROTEIN_IDENTITY, run_protein_qc
+from .protein_qc import format_report as format_protein_qc_report
 
-__all__ = ["add_genomics_subcommand", "cmd_genomics_load_gff3", "format_report"]
+__all__ = [
+    "add_genomics_subcommand",
+    "cmd_genomics_load_gff3",
+    "cmd_genomics_protein_qc",
+    "format_report",
+    "parse_genetic_code_options",
+]
 
 #: How many skips and disagreements the human table prints before summarising the rest. A dry run
 #: over a whole genome can produce hundreds; a screen of them is a review, a thousand is a wall.
@@ -156,6 +179,79 @@ def cmd_genomics_load_gff3(args: argparse.Namespace) -> int:
     return 0
 
 
+def parse_genetic_code_options(options: list[str] | None) -> dict[str, int]:
+    """`["NC_001224.1=3"]` -> `{"NC_001224.1": 3}`.
+
+    Raises `ValueError` on anything it cannot read, including a table `fermdb.genetic_code` does
+    not implement. A mistyped seqid would otherwise resolve nothing and be indistinguishable in
+    the output from a sequence the annotation happened to cover on its own.
+    """
+    declared: dict[str, int] = {}
+    for option in options or []:
+        seqid, separator, table = option.partition("=")
+        if not separator or not seqid.strip():
+            raise ValueError(f"--genetic-code {option!r} is not SEQID=TABLE")
+        try:
+            table_id = int(table)
+        except ValueError as exc:
+            raise ValueError(f"--genetic-code {option!r}: {table!r} is not an integer") from exc
+        if table_id not in TABLES:
+            known = ", ".join(str(t) for t in sorted(TABLES))
+            raise ValueError(
+                f"--genetic-code {option!r}: fermdb.genetic_code implements tables {known}. "
+                "Adding another is a change to that module, not a flag on this one."
+            )
+        declared[seqid.strip()] = table_id
+    return declared
+
+
+def cmd_genomics_protein_qc(args: argparse.Namespace) -> int:
+    """Re-splice, translate and verify every CDS. Exit 1 if the corpus is refused."""
+    paths = {"gff3": Path(args.gff3), "genome": Path(args.genome), "proteins": Path(args.proteins)}
+    for label, path in paths.items():
+        if not path.is_file():
+            print(f"error: no such {label} file: {path}", file=sys.stderr)
+            return 2
+
+    try:
+        declared = parse_genetic_code_options(args.genetic_code)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    try:
+        report = run_protein_qc(
+            paths["gff3"],
+            paths["genome"],
+            paths["proteins"],
+            declared_tables=declared,
+        )
+    except (Gff3Error, OSError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    if args.json:
+        payload = report.as_json()
+        payload["source"] = {
+            "gff3": str(paths["gff3"]),
+            "genome": str(paths["genome"]),
+            "proteins": str(paths["proteins"]),
+            "declared_genetic_codes": declared,
+        }
+        json.dump(payload, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        # Still non-zero. `--json` chooses the output format, not the verdict; a caller that
+        # wanted the numbers and got exit 0 would have been told the corpus was fine.
+        return 0 if report.passed else 1
+
+    print(f"{'gff3':<12}{paths['gff3']}")
+    print(f"{'genome':<12}{paths['genome']}")
+    print(f"{'proteins':<12}{paths['proteins']}")
+    for line in format_protein_qc_report(report):
+        print(line)
+    return 0 if report.passed else 1
+
+
 def add_genomics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Register `fermdb genomics ...`."""
     parser = sub.add_parser(
@@ -218,3 +314,35 @@ def add_genomics_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentPar
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_load.set_defaults(func=cmd_genomics_load_gff3)
+
+    p_qc = genomics_sub.add_parser(
+        "protein-qc",
+        help="re-splice and translate every CDS; refuse the annotation below the identity gate",
+        description=(
+            "The protein QC gate of PLAN.md E.3. Re-splices every CDS in a GFF3 out of the "
+            f"genome FASTA, translates it under the genetic code resolved for its own sequence, "
+            f"and compares it to the protein FASTA. Exits 1 when fewer than "
+            f"{MIN_PROTEIN_IDENTITY:.1%} of CDS reproduce their protein record exactly. That "
+            "threshold is a reviewed constant in fermdb.genomics.protein_qc and there is no "
+            "flag for it (PLAN.md S.2). Reads three files and no database; writes nothing."
+        ),
+    )
+    p_qc.add_argument("--gff3", required=True, help="the annotation (.gff or .gff.gz)")
+    p_qc.add_argument("--genome", required=True, help="the genomic FASTA (.fna or .fna.gz)")
+    p_qc.add_argument("--proteins", required=True, help="the protein FASTA (.faa or .faa.gz)")
+    p_qc.add_argument(
+        "--genetic-code",
+        dest="genetic_code",
+        action="append",
+        metavar="SEQID=TABLE",
+        help=(
+            "state the NCBI table for one sequence, e.g. NC_001224.1=3. Repeatable. Used only "
+            "where the annotation states nothing itself; where it does, a disagreement is "
+            "reported and the annotation wins. Without this, a sequence the annotation says "
+            "nothing about is REFUSED rather than read under table 1"
+        ),
+    )
+    p_qc.add_argument(
+        "--json", action="store_true", help="emit every count and every failure, untruncated"
+    )
+    p_qc.set_defaults(func=cmd_genomics_protein_qc)
