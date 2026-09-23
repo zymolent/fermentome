@@ -13,7 +13,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML"]
+# `httpx2` is not a direct import anywhere in this tree -- it is what starlette's TestClient
+# imports under the hood, and tests/test_api.py and tests/test_genome_browser.py are written
+# against that client. starlette 1.6 tries `httpx2` first and falls back to `httpx`, so a
+# machine with either installed runs those tests and a clean checkout with neither errors at
+# collection. Pinned to the one starlette prefers so CI and a developer machine exercise the
+# same client rather than two.
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML", "httpx2>=2.13"]
 # The escalation tier (MODEL_ROUTING.md §7a). Optional rather than required: fermdb runs fully
 # without it — `agent-sdk` is one of four providers and the others need nothing — and the import
 # raises ProviderUnavailableError with the install line when it is missing. It is declared here
@@ -23,6 +29,14 @@ escalation = ["claude-agent-sdk>=0.1"]
 # The read-only web interface (`fermdb serve`, PLAN.md D.3). Optional because the atlas and
 # every CLI reader work without it; `fermdb serve` prints the install line when it is absent.
 web = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
+# scipy, for the statistics under src/fermdb/omics/ -- the moderated test, the Spearman in
+# group_cohesion, the quality gates. Every one of its four imports is deliberately lazy so the
+# modules load without it, which is why this went undeclared: nothing fails at import time,
+# only when a contrast or a quality gate is actually computed. Declared for the same reason
+# `escalation` above is -- an undeclared dependency is an undiscoverable one, and a clean
+# checkout hit it as 12 ModuleNotFoundError test failures the first time CI got far enough to
+# run the suite.
+omics = ["scipy>=1.11"]
 
 [project.scripts]
 fermdb = "fermdb.cli:main"
