@@ -1,0 +1,22 @@
+>NP_TEST001.1 test protein one [fermdb test organism]
+MSAKEVLNRTGFWHIDCPQYMEKLAVGSTRNDIFHWYPKLMSEQAVGT
+>NP_TEST002.1 test protein two [fermdb test organism]
+MKQWLTVGSAHYNDPCFRIEMKLAVTSGWQNHYDRPFICEMKLAVTS
+>NP_TEST003.1 test protein three [fermdb test organism]
+MTRGHWCYDNPLKIESAVFQMTRGHWCYDNPLKIESAVFQ
+>NP_TEST004.1 test protein four, alternative start [fermdb test organism]
+MGSTYVWDNQRHKFPLACEKMGSTYVWDNQRHKFPLACEI
+>NP_TEST005.1 test protein five, internal stop [fermdb test organism]
+MAVGKTRDNSFWYHIPLQCEMAVGKTRDNSFWYHIPLQCE
+>NP_TEST006.1 test protein six, ambiguity codon [fermdb test organism]
+MDEKRHNQSTYVWFLIPACGMDEKRHNQSTYVWFLIPACG
+>NP_TEST009.1 test protein nine, declared table 11 [fermdb test organism]
+MTYWNDQKRHSGAVLIPFCEMTYWNDQKRHSGAVLIPFCE
+>NP_TEST010.1 test selenoprotein ten [fermdb test organism]
+MKLNVGSTRDHYUFQIPACEMKLNVGSTRDHYWFQIPACE
+>NP_TEST008.1 test protein eight, undeclared genetic code [fermdb test organism]
+MSNQRHKDEWYFTVGALIPCMSNQRHKDEWYFTVGALIPC
+>NP_TEST024.1 test mitochondrial protein [fermdb test organism]
+MKTWNTWGTFTWYTKTWSTWQTWHTWRTWETWDTWNTWM
+>NP_TESTORPHAN.1 orphan test protein, produced by no CDS in mini.broken.gff3 [fermdb test organism]
+MQRSTVWYNDEKHGAILPFCMQRSTVWYNDEKHGAILPFC
