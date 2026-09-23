@@ -1,0 +1,53 @@
+# Two synthetic Zone R genes, added so the fixture atlas carries a case for the one derivation
+# rule in this project that is a real Zone R -> Zone H rebuild (PLAN.md T.3;
+# docs/reference/CONVENTIONS.md, "Code": "Every parser, query and derivation rule adds a case to
+# the fixture atlas"). `fermdb.rebuild.regenerators` reconstructs the two `gene_group` rows in
+# gene_group.yaml that carry `zone: H` from nothing but these two rows.
+#
+# The systematic names are invented (`FXA001W`, `FXA002C`) rather than borrowed from S288C. Every
+# other fixture file that names a real locus has to carry a note saying the name was recalled and
+# not looked up; an invented name cannot be mistaken for a checked one, and nothing here needs a
+# real locus to make its point.
+#
+# `evidence` is shaped exactly the way `fermdb.omics.genes.gene_rows` shapes it, because that
+# shape is an input to the rebuild: the clause after the bracketed fields is the source clause
+# that `gene_group.evidence` re-uses verbatim.
+#
+# FXA002C's `[product=...]` deliberately contains a semicolon. That is the regression case for
+# `fermdb.rebuild.regenerators.source_clause`: splitting the evidence on its first '; ' -- the
+# obvious implementation, and the first one written -- truncates the clause here and reports a
+# false diff. Without this row the bug is invisible in the fixture and waits for a genome.
+
+- id: YAA:GENE:fx-asm-1-fxa001w
+  organism_id: YAA:ORG:fx-scer
+  assembly_accession: FX_ASM_1
+  systematic_name: FXA001W
+  standard_name: FXA1
+  gene_group_id: YAA:GG:fxa001w
+  seqid: NC_FIXTURE01.1
+  biotype: protein_coding
+  locus_tag: FXA001W
+  description: synthetic fixture dehydrogenase
+  start_pos: 1000
+  end_pos: 2200
+  strand: 1
+  zone: R
+  evidence: "[locus_tag=FXA001W] [gene=FXA1] [db_xref=GeneID:none] [product=synthetic fixture dehydrogenase] on NC_FIXTURE01.1 (nuclear-encoded); synthetic test fixture transcript set, not a real observation"
+  confidence: low
+
+- id: YAA:GENE:fx-asm-1-fxa002c
+  organism_id: YAA:ORG:fx-scer
+  assembly_accession: FX_ASM_1
+  systematic_name: FXA002C
+  standard_name: FXA2
+  gene_group_id: YAA:GG:fxa002c
+  seqid: NC_FIXTURE01.1
+  biotype: protein_coding
+  locus_tag: FXA002C
+  description: "synthetic fixture decarboxylase; fixture variant"
+  start_pos: 4000
+  end_pos: 5100
+  strand: -1
+  zone: R
+  evidence: "[locus_tag=FXA002C] [gene=FXA2] [db_xref=GeneID:none] [product=synthetic fixture decarboxylase; fixture variant] on NC_FIXTURE01.1 (nuclear-encoded); synthetic test fixture transcript set, not a real observation"
+  confidence: low

@@ -39,7 +39,17 @@ TABLE_ORDER: tuple[str, ...] = (
     "product",
     "product_theoretical_yield",
     "publication",
+    # Literature discovery (schema.sql section 14). `search_run` before `screening_record`, which
+    # points at it twice (first_seen/last_seen); both after `publication`. They are here for the
+    # T.3 rebuild check -- `screening_record.triage_state` is the atlas's largest Zone H column
+    # and the fixture had no case for it.
+    "search_run",
+    "screening_record",
     "gene_group",
+    # After `gene_group`: `gene.gene_group_id` is a foreign key into it. The two carry the one
+    # derivation in this project that is a real Zone R -> Zone H rebuild, so the fixture holds
+    # both sides of it (CONVENTIONS.md, "Code").
+    "gene",
     "part",
     "pathway",
     "pathway_configuration",
