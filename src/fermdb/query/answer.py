@@ -30,6 +30,8 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
+from ..omics.quality import active_quarantine
+
 if TYPE_CHECKING:  # pragma: no cover - typing only, and avoids a metabolic <-> query import cycle
     from ..metabolic.transcript_support import RouteSupport
 
@@ -174,15 +176,28 @@ def _build_performance(conn: sqlite3.Connection) -> dict[str, str]:
     Titer preferred over yield only because this corpus's titers are stated and its yields are
     mostly derived; both are printed where both exist. A build with transcript evidence and no
     measurement prints nothing, which is the state the atlas was in until this row existed.
+
+    **A quarantined measurement is skipped, and that is PLAN.md S.3's `block_aggregation` being
+    a mechanism rather than a sentence.** This function is a summary -- one line per strain,
+    standing in for every measurement behind it -- so it is exactly what S.3 means by an
+    aggregation. A yield above the carbon ceiling that still got to be a strain's headline number
+    would be the atlas printing a figure its own check had already refused. The row is not
+    deleted and stays readable on its own; it stops speaking for the strain. Which measurements
+    are quarantined is decided where the flag was raised, never re-decided here --
+    `omics.quality.active_quarantine` is a plain lookup for that reason.
     """
     out: dict[str, str] = {}
-    for name, kind, value, unit in conn.execute(
-        "SELECT s.canonical_name, m.quantity_kind, m.value_as_reported, m.unit_as_reported "
+    rows = conn.execute(
+        "SELECT m.id, s.canonical_name, m.quantity_kind, m.value_as_reported, m.unit_as_reported "
         "FROM measurement m JOIN strain s ON s.id = m.strain_id "
         "WHERE m.product_id = 'YAA:PRODUCT:isobutanol' "
         "AND m.quantity_kind IN ('titer', 'yield') "
         "ORDER BY s.canonical_name, CASE m.quantity_kind WHEN 'titer' THEN 0 ELSE 1 END"
-    ):
+    ).fetchall()
+    quarantined = active_quarantine(conn, [str(row[0]) for row in rows], target_type="measurement")
+    for measurement_id, name, kind, value, unit in rows:
+        if str(measurement_id) in quarantined:
+            continue
         entry = f"{value:g} {unit}" if isinstance(value, (int, float)) else f"{value} {unit}"
         existing = out.get(str(name))
         out[str(name)] = f"{existing}; {kind} {entry}" if existing else f"{kind} {entry}"

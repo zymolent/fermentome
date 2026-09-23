@@ -27,13 +27,17 @@ import pytest
 
 from fermdb.db import open_db
 from fermdb.metabolic.bound_check import (
+    BOUND_CHECK_DETECTOR,
+    as_quality_flags,
     check_configurations,
     check_measurements,
     format_report,
     load_ceilings,
+    persist_verdicts,
     resolve_substrate,
     run_bound_check,
 )
+from fermdb.query.answer import _build_performance
 
 ISOBUTANOL = "YAA:PRODUCT:isobutanol"
 STRAIN = "YAA:STRAIN:test-host"
@@ -462,3 +466,95 @@ def test_an_empty_database_reports_zero_rather_than_raising(tmp_path: Path) -> N
         assert report.measurement_counts["flag"] == 0
     finally:
         connection.close()
+
+
+# ------------------------------------------------------------------- S.3 persistence and blocking
+
+
+def test_only_violations_become_flags(conn: sqlite3.Connection) -> None:
+    """A pass is not a doubt, and `the check could not run` is not a doubt about the row.
+
+    103 of the atlas's 105 measurements are `not_evaluable`, nearly all of them because no
+    substrate is recoverable. Emitting a flag for each would bury the real findings under a
+    hundred statements that the check did not run.
+    """
+    _measurement(conn, "YAA:MEAS:pass", value=0.35, evidence="substrate as reported: glucose")
+    _measurement(conn, "YAA:MEAS:none", value=0.35, evidence="no substrate here")
+    _measurement(conn, "YAA:MEAS:over", value=0.9, evidence="substrate as reported: glucose")
+    flags = as_quality_flags(run_bound_check(conn))
+    assert [flag.target_id for flag in flags] == ["YAA:MEAS:over"]
+
+
+def test_a_flag_carries_the_statistic_and_the_threshold_it_broke(conn: sqlite3.Connection) -> None:
+    _measurement(conn, "YAA:MEAS:over", value=0.9, evidence="substrate as reported: glucose")
+    (flag,) = as_quality_flags(run_bound_check(conn))
+    assert flag.target_type == "measurement"
+    assert flag.kind == "value_implausible"
+    # block_aggregation, in the column that carries it.
+    assert flag.severity == "quarantine"
+    assert flag.detector == BOUND_CHECK_DETECTOR
+    assert flag.statistic == 0.9
+    assert flag.threshold is not None and abs(flag.threshold - 0.411) < 1e-3
+    assert "glucose" in flag.rationale
+
+
+def test_persisting_writes_a_row_a_curator_can_act_on(conn: sqlite3.Connection) -> None:
+    _measurement(conn, "YAA:MEAS:over", value=0.9, evidence="substrate as reported: glucose")
+    written, respected = persist_verdicts(conn, run_bound_check(conn), raised_by="tester")
+    assert (written, respected) == (1, 0)
+    row = conn.execute(
+        "SELECT target_type, kind, severity, detector, statistic, threshold, status, zone "
+        "FROM data_quality_flag WHERE target_id = 'YAA:MEAS:over'"
+    ).fetchone()
+    assert row is not None
+    assert tuple(row)[:4] == (
+        "measurement",
+        "value_implausible",
+        "quarantine",
+        BOUND_CHECK_DETECTOR,
+    )
+    assert row[6] == "active"
+    assert row[7] == "I"
+
+
+def test_rerunning_updates_its_own_flag_instead_of_stacking_a_second(
+    conn: sqlite3.Connection,
+) -> None:
+    _measurement(conn, "YAA:MEAS:over", value=0.9, evidence="substrate as reported: glucose")
+    persist_verdicts(conn, run_bound_check(conn), raised_by="tester")
+    persist_verdicts(conn, run_bound_check(conn), raised_by="tester")
+    (count,) = conn.execute(
+        "SELECT COUNT(*) FROM data_quality_flag WHERE target_id = 'YAA:MEAS:over'"
+    ).fetchone()
+    assert count == 1
+
+
+def test_a_flag_a_person_has_cleared_is_not_reopened_by_a_rerun(conn: sqlite3.Connection) -> None:
+    """A decision about what the detector noticed outranks noticing it again."""
+    _measurement(conn, "YAA:MEAS:over", value=0.9, evidence="substrate as reported: glucose")
+    persist_verdicts(conn, run_bound_check(conn), raised_by="tester")
+    conn.execute(
+        "UPDATE data_quality_flag SET status = 'cleared', resolved_by = 'a curator', "
+        "resolved_reason = 'the paper states a cofed substrate' WHERE target_id = 'YAA:MEAS:over'"
+    )
+    conn.commit()
+    written, respected = persist_verdicts(conn, run_bound_check(conn), raised_by="tester")
+    assert (written, respected) == (0, 1)
+    (status,) = conn.execute(
+        "SELECT status FROM data_quality_flag WHERE target_id = 'YAA:MEAS:over'"
+    ).fetchone()
+    assert status == "cleared"
+
+
+def test_a_quarantined_measurement_stops_speaking_for_its_strain(conn: sqlite3.Connection) -> None:
+    """S.3's `block_aggregation`, end to end: raised by the check, honoured by the summary.
+
+    `_build_performance` is reached directly rather than through `assemble`, because assembling a
+    whole answer needs a route corpus and a transcript-support map that have nothing to do with
+    the property under test. This is the aggregation S.3 names -- one line standing in for every
+    measurement behind it -- and the flagged row must not be the line.
+    """
+    _measurement(conn, "YAA:MEAS:over", value=0.9, evidence="substrate as reported: glucose")
+    assert _build_performance(conn) != {}
+    persist_verdicts(conn, run_bound_check(conn), raised_by="tester")
+    assert _build_performance(conn) == {}

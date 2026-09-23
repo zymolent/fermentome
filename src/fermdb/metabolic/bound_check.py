@@ -16,11 +16,40 @@ re-ran it against the rows that made it through, and nothing ran it against
 ``validate_records`` never sees one. Phase 1b's acceptance clause is about configurations and the
 stored corpus, so the extraction gate does not satisfy it. This module is that gap closed.
 
-**Why it reports instead of writing.** S.3's action vocabulary is ``flag`` / ``block_aggregation``
-/ ``reject``, and the schema has nowhere to put any of them: there is no ``qc_flag`` table and no
-flag column on ``measurement``. Adding one is a migration, and a migration is not this module's to
-run. So the check computes the verdict and returns it; persisting it needs the schema gap closed
-first, and that is recorded in ``docs/drafts/phase1b/ACCEPTANCE.md`` rather than worked around.
+**Where the verdict is persisted, and why that took a second look.** The paragraph this replaces
+said the schema had nowhere to put an S.3 action — *"there is no ``qc_flag`` table and no flag
+column on ``measurement``"* — and concluded that persistence needed a migration. That was true
+when it was written and was false by the end of the same day: schema **v15** added
+``data_quality_flag``, *"a recorded, machine-readable doubt about a row"*, polymorphic over a
+target type that already includes ``measurement``, carrying ``detector``, ``statistic``,
+``threshold`` and ``rationale``, with a status only a person may move out of ``active``. That is
+this check's verdict, column for column. The two landed on 2026-09-22 in different sessions and
+crossed; nothing was missing, nothing was connected.
+
+So **no migration was needed** and none was written. :func:`as_quality_flags` maps a verdict onto
+a :class:`fermdb.omics.quality.QualityFlag` and ``python -m fermdb.metabolic.bound_check --write``
+persists it through the writer v15 already ships.
+
+**S.3's three actions against the column that carries them.** ``data_quality_flag.severity`` is
+``quarantine`` / ``warn``, and the mapping is not a translation layer but the same distinction
+under the older name:
+
+* ``flag`` -- visible, still stored, excludes nothing -> ``severity='warn'``;
+* ``block_aggregation`` -- usable alone, excluded from summaries -> ``severity='quarantine'``,
+  which is what :func:`fermdb.omics.quality.active_quarantine` reports and what
+  :func:`fermdb.query.answer` now consults before it picks a strain's best titer. A ceiling
+  violation is `block_aggregation` and therefore `quarantine`: the row stays readable and stops
+  being summarised, which is exactly S.3's sentence;
+* ``reject`` -- *not stored*, logged with a reason. It has **no row to point at**, so it cannot be
+  a flag on one, and it is not this module's action to take: rejection happens on the way in, at
+  :func:`fermdb.llm.validate._check_yield`, before a record becomes a row. A check over the
+  *stored* corpus can only ever flag or block, and saying so is more honest than adding a
+  ``reject`` enum value that nothing could ever write.
+
+**What is stored and what is derived.** Measurement verdicts are stored. Configuration verdicts
+are **not**: a configuration's verdict is a roll-up of its measurements', recomputed by
+:func:`check_configurations` on every read. Storing it would be storing a derived value that can
+silently disagree with the rows under it the moment one of them is re-flagged.
 
 **The substrate problem, which is the real finding.** The ceiling is keyed on
 ``(product_id, substrate)`` and ``measurement`` has no substrate column. ``condition_context``,
@@ -54,16 +83,21 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Final
 
+from ..omics.quality import QualityFlag, write_flags
+
 __all__ = [
+    "BOUND_CHECK_DETECTOR",
     "BoundCheckReport",
     "Ceiling",
     "ConfigurationVerdict",
     "MeasurementVerdict",
     "SubstrateResolution",
+    "as_quality_flags",
     "check_configurations",
     "check_measurements",
     "format_report",
     "load_ceilings",
+    "persist_verdicts",
     "resolve_substrate",
     "run_bound_check",
 ]
@@ -88,6 +122,12 @@ _PASS: Final[str] = "pass"
 _FLAG: Final[str] = "flag"
 _NOT_EVALUABLE: Final[str] = "not_evaluable"
 _REFUSED: Final[str] = "refused"
+
+#: The detector name written onto every flag this module raises. `module:rule`, matching the
+#: convention v15's schema comment gives (`'omics.quality:coherence'`). It is also the dedup key
+#: component that makes a re-run *update* its own flags instead of stacking a second copy beside
+#: them, so changing this string orphans every flag already raised under the old name.
+BOUND_CHECK_DETECTOR: Final[str] = "metabolic.bound_check:ceiling"
 
 _TASK_RE: Final[re.Pattern[str]] = re.compile(r"curation task (YAA:CTASK:[0-9a-f]+)")
 _SUBSTRATE_RE: Final[re.Pattern[str]] = re.compile(r"substrate as reported:\s*([^;(]+)")
@@ -564,6 +604,65 @@ def run_bound_check(conn: sqlite3.Connection) -> BoundCheckReport:
     )
 
 
+# -------------------------------------------------------------------------------- S.3 persistence
+
+
+def as_quality_flags(report: BoundCheckReport) -> tuple[QualityFlag, ...]:
+    """The violations, as `data_quality_flag` rows. Only violations: a pass is not a doubt.
+
+    ``kind`` is ``value_implausible`` -- v15's own gloss for it is *"the value is outside what the
+    system can produce"*, and a mass yield above the thermodynamic ceiling for its substrate is
+    the purest case of that the atlas has. It is **not** ``mislabel_suspected``: the ceiling says
+    the number cannot be right, not that the row belongs to a different strain.
+
+    ``statistic`` is the reported yield and ``threshold`` the ceiling it broke, so the pair a
+    curator needs to judge the flag sits on the flag rather than only in the prose beside it.
+
+    Rows that are ``not_evaluable`` raise nothing. This is the one that would be tempting to get
+    wrong: 103 of the 105 measurements in the atlas today cannot be evaluated at all, mostly
+    because no substrate is recoverable, and emitting a flag for each would bury two real findings
+    under a hundred statements that the check did not run. *"The check could not run"* is a gap in
+    the atlas, which `knowledge_gap` is for; it is not a doubt about the row.
+    """
+    flags: list[QualityFlag] = []
+    for verdict in report.violations:
+        ceiling = verdict.ceiling
+        substrate = verdict.substrate.substrate or "unknown"
+        flags.append(
+            QualityFlag(
+                target_type="measurement",
+                target_id=verdict.measurement_id,
+                kind="value_implausible",
+                # block_aggregation, in the column that carries it -- see the module docstring.
+                severity="quarantine",
+                detector=BOUND_CHECK_DETECTOR,
+                statistic=verdict.value,
+                threshold=ceiling,
+                rationale=(
+                    f"{verdict.value:g} {verdict.unit} exceeds the theoretical mass yield of "
+                    f"{ceiling:g} g/g for {verdict.product_id} from {substrate} "
+                    f"(substrate resolved via {verdict.substrate.route}). "
+                    "PLAN.md S.3: flagged and blocked from aggregation, never silently stored. "
+                    "A yield above the carbon ceiling is a claim about this paper's carbon "
+                    "balance, not a units error -- the 0.411 g/g figure agrees to five figures "
+                    "by two independent routes. Re-read the paper before clearing this."
+                ),
+            )
+        )
+    return tuple(flags)
+
+
+def persist_verdicts(
+    conn: sqlite3.Connection, report: BoundCheckReport, *, raised_by: str
+) -> tuple[int, int]:
+    """Write the violations as flags. Returns (written, left alone because already resolved).
+
+    ``raised_by`` is required and not defaulted. Every other writer in this repo names its actor,
+    and a flag whose origin is ``"someone"`` is a flag nobody can follow up.
+    """
+    return write_flags(conn, as_quality_flags(report), raised_by=raised_by, actor_kind="agent")
+
+
 def format_report(report: BoundCheckReport) -> str:
     """A plain-text rendering, so the check can be read as well as asserted against."""
     lines: list[str] = []
@@ -603,14 +702,41 @@ def format_report(report: BoundCheckReport) -> str:
 
 
 def _main() -> int:  # pragma: no cover - a convenience entry point, not part of the API
-    """``python -m fermdb.metabolic.bound_check`` against the configured database."""
+    """``python -m fermdb.metabolic.bound_check [--write --raised-by NAME]``.
+
+    Reporting is the default and writing is opt-in, which is the way round this repo does it
+    everywhere: a read never surprises anyone, and a run that raises flags against the shared
+    atlas should have been asked for in so many words.
+    """
+    import argparse
+
     from ..config import Settings
     from ..db import open_db
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="persist the violations as data_quality_flag rows (PLAN.md S.3 block_aggregation)",
+    )
+    parser.add_argument(
+        "--raised-by",
+        help="who is raising these flags. Required with --write; a flag nobody can follow up "
+        "is not a finding",
+    )
+    args = parser.parse_args()
+    if args.write and not args.raised_by:
+        parser.error("--write requires --raised-by")
 
     settings = Settings.load()
     conn = open_db(settings.db_file, create=False)
     try:
-        print(format_report(run_bound_check(conn)))
+        report = run_bound_check(conn)
+        print(format_report(report))
+        if args.write:
+            written, respected = persist_verdicts(conn, report, raised_by=str(args.raised_by))
+            conn.commit()
+            print(f"\nflags written: {written}; left alone because already resolved: {respected}")
     finally:
         conn.close()
     return 0
