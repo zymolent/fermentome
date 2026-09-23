@@ -15,8 +15,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      # `web` and not just `dev`, because mypy below is `strict = true` over `files = ["src"]`
+      # and that includes src/fermdb/api/, which imports fastapi. fastapi is an optional extra
+      # at runtime (`fermdb serve` prints the install line without it) but it is NOT optional
+      # for the type gate: absent, mypy reports import-not-found and then ~30 untyped-decorator
+      # errors, because every route decorator degrades to untyped. That made the gate pass on a
+      # developer machine with the extra installed and fail in a clean checkout without it --
+      # the same environment-dependent gate the claude_agent_sdk override in pyproject.toml
+      # exists to prevent, and the thing a type gate must never do. Installing the extra here
+      # fixes it in the direction that keeps the API module actually checked.
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,web]"
       - name: Lint with ruff
         run: ruff check .
       - name: Format check with ruff
