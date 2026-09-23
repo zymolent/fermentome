@@ -192,13 +192,19 @@ Configuration says *where* the tiers live; this says how to *move* them. One arc
 
 ```bash
 python ops/transfer.py export --dry-run      # what would be packed, and how big
-python ops/transfer.py export                # -> <exports_dir>/transfer/<UTC stamp>/
+python ops/transfer.py export                # -> exports/transfer/<UTC stamp>/, beside the code
 ```
 
-Measured on this machine: **1,816 files, 767 MB**, or 1,864 files and 1.8 GB with
-`--include-backups`. The `.bak` snapshots and the secrets file are both excluded by default —
-the second because it holds the NCBI key, and an archive carrying it must not be uploaded
-anywhere shared. Pass `--include-secrets` deliberately, or copy that one file by hand.
+Measured on this machine: **1,816 files, 767 MB on disk, 438 MB compressed**, or 1,864 files and
+1.8 GB with `--include-backups`. The `.bak` snapshots and the secrets file are both excluded by
+default — the second because it holds the NCBI key, and an archive carrying it must not be
+uploaded anywhere shared. Pass `--include-secrets` deliberately, or copy that one file by hand.
+
+`exports/` is the one derived artifact kept inside the tree rather than under `data_dir`, because
+an archive is carried by hand and is easier to find beside the code than on whichever drive the
+derived tier happens to live on. It is gitignored with a leading slash (`/exports/`), so the rule
+means this directory and not some future `src/.../exports/`. `--out` puts an archive somewhere
+else entirely — an external drive, say — without touching that default.
 
 On the other machine, restore against *its* resolved paths — set `FERMDB_DATA_DIR` or
 `env/paths.local.yaml` first, and the archive follows:
@@ -225,6 +231,29 @@ Three properties worth knowing, because they are why this exists rather than `zi
 
 `--into <dir>` redirects the data tier for a one-off restore; the source tier and the secrets file
 still go to their resolved locations, and the report prints all three before it does anything.
+
+### Stored paths are portable, in both directions
+
+Configuration is not the only place a path lives. `fulltext_asset.content_path`,
+`reference_genome_asset.file_path`, `reference_sequence.file_path` and `analysis_result.payload_ref`
+all hold path *text*, written by whichever machine ran the acquisition. Two functions in
+`fermdb.paths` keep that text readable on any of them:
+
+* `portable_path` is what every writer stores — forward slashes always, relative to `data_dir`
+  where it can be. `str(Path("fulltext") / "ab" / "x.pdf")` is backslash-separated on Windows, and
+  that same string on macOS or Linux is one filename containing backslashes, not three segments.
+* `resolve_stored_path` is what every reader calls. It accepts every form the atlas has ever held:
+  a portable relative path, a Windows-written relative one, a local absolute one, and an absolute
+  one naming *another machine's* `data_dir` — which it re-anchors to the longest tail that exists
+  under this machine's. When nothing matches it returns the recorded path unchanged, so the
+  caller's own error names what the database actually says rather than a guess.
+
+Nothing rewrites stored rows to achieve this. The tolerance is in the reader, which is the only
+version of the fix that leaves an audit trail intact.
+
+The remaining first-run step on a new machine is the schema. `open_db` never migrates: if the
+restored atlas is behind the build, it says so and stops. `fermdb db status` reports the gap and
+`fermdb db migrate` closes it, taking a timestamped backup first.
 
 ## The distinction that matters most
 

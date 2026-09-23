@@ -32,6 +32,7 @@ from fermdb.omics import (
 from fermdb.omics import geo as geo_mod
 from fermdb.omics import references as references_mod
 from fermdb.omics import sra as sra_mod
+from fermdb.paths import resolve_stored_path
 
 FIXTURES = Path(__file__).parent / "fixtures" / "omics"
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -707,7 +708,10 @@ def test_fetch_mitochondrial_reference_verifies_and_stores_both_files(tmp_path: 
         assert row["translation_verified"] == 1
         assert row["zone"] == "R"
         assert row["confidence"] == "high"
-        assert Path(str(row["file_path"])).is_file()
+        # `file_path` is stored portable (forward slashes, relative to the derived-tier root)
+        # rather than absolute, so the assertion is the round trip: what was written resolves
+        # back to the file that was written. See fermdb.paths.portable_path.
+        assert resolve_stored_path(str(row["file_path"]), data_dir=tmp_path.parent).is_file()
         assert row["encoding_genome"] == "mitochondrial"
 
 

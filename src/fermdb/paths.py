@@ -29,7 +29,7 @@ import os
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 TIERS: tuple[str, str, str] = ("repo", "derived", "source")
@@ -122,6 +122,77 @@ def translate_path_spelling(value: str, *, windows: bool = _IS_WINDOWS) -> str:
         drive, rest = match.group(1).lower(), match.group(2).replace("\\", "/")
         return f"/mnt/{drive}/{rest}"
     return value
+
+
+def portable_path(value: str | os.PathLike[str], *, relative_to: Path | None = None) -> str:
+    """The form a path takes when it is **stored** — a database column, a manifest, a TSV.
+
+    Configuration paths are handled above; this is the other half of the same problem, and the
+    half that bit. `fulltext_asset.content_path`, `reference_genome_asset.file_path` and
+    `analysis_result.payload_ref` all hold path text written by whichever machine ran the
+    acquisition, and read by whichever machine opens the atlas next. Two rules make those the
+    same machine as far as the reader is concerned:
+
+    * **Forward slashes, always.** ``str(Path("fulltext") / "ab" / "x.pdf")`` comes out as
+      ``fulltext\\ab\\x.pdf`` on Windows, and on macOS or Linux that whole string is a *single*
+      file whose name contains backslashes — not three segments. It is then simply not found.
+    * **Relative to `relative_to` when it can be**, because an absolute path records the machine
+      that wrote it rather than the file it points at, and the derived tier is relocatable by
+      design (`data_dir`, and `FERMDB_DATA_DIR` over it).
+
+    A value outside `relative_to` keeps its absolute form, separators normalised. Reading any of
+    this back is :func:`resolve_stored_path`, which is where the tolerance lives.
+    """
+    path = Path(os.fspath(value))
+    if relative_to is not None:
+        try:
+            return PurePosixPath(path.relative_to(relative_to)).as_posix()
+        except ValueError:
+            pass  # outside the root: keep it absolute rather than inventing ../../.. chains
+    return path.as_posix()
+
+
+def resolve_stored_path(value: str | os.PathLike[str], *, data_dir: Path) -> Path:
+    """One stored path value, resolved against **this** machine's `data_dir`.
+
+    The inverse of :func:`portable_path`, and deliberately tolerant of every form the atlas has
+    ever held, because rows written before that function existed are still in it and rewriting
+    stored data to suit a reader is the kind of retroactive edit this project does not do:
+
+    * ``fulltext/ab/x.pdf`` — relative and already portable: joined to `data_dir`.
+    * ``fulltext\\ab\\x.pdf`` — relative, written on Windows: separators normalised, then joined.
+    * ``/Users/you/fermdb-data/matrices/x.gz`` — absolute and local: returned as it is.
+    * ``C:\\Users\\them\\fermdb-data\\matrices\\x.gz`` — absolute, written on another machine and
+      meaningless here. Re-anchored: the **longest tail of it that exists under this machine's**
+      ``data_dir`` is the file it meant. Nothing else could be.
+
+    When no tail matches, the recorded path is returned unchanged rather than a guess, so the
+    caller's own "does not exist" error names what the database actually says.
+
+    This touches the filesystem — that is what "longest tail that exists" means — and is cheap:
+    at most one `exists()` per segment, only for a path that did not resolve directly.
+    """
+    text = os.fspath(value).strip().replace("\\", "/")
+    if not text:
+        raise ValueError("stored path is empty")
+    if not _is_rooted(text):
+        return data_dir.joinpath(*PurePosixPath(text).parts)
+
+    direct = Path(translate_path_spelling(text))
+    if direct.exists():
+        return direct
+    parts = PurePosixPath(text).parts
+    segments = [part for part in parts if part != "/" and not part.endswith(":")]
+    for start in range(len(segments)):
+        candidate = data_dir.joinpath(*segments[start:])
+        if candidate.exists():
+            return candidate
+    return direct
+
+
+def _is_rooted(text: str) -> bool:
+    """True for a value that names an absolute location, in either platform's spelling."""
+    return text.startswith("/") or bool(_WINDOWS_DRIVE_RE.match(text))
 
 
 def _normalize_spec(key: str, spec: object) -> tuple[str, str]:

@@ -22,6 +22,8 @@ from fermdb.paths import (
     _build_entries,
     _discover_paths_file,
     load_paths,
+    portable_path,
+    resolve_stored_path,
     translate_path_spelling,
 )
 
@@ -466,3 +468,78 @@ def test_cli_config_check_exit_codes(
     out = capsys.readouterr().out
     assert "MISSING" not in out
     assert "db_file" in out
+
+
+# ---------------------------------------------------------------- stored path values (portable)
+#
+# These pin the two failure modes a 2026-09-24 audit of the live atlas found, both of which are
+# silent-on-the-other-platform rather than loud: 1,429 `fulltext_asset.content_path` values stored
+# with backslash separators, and 51 absolute `C:\Users\...` values across `reference_sequence`,
+# `reference_genome_asset` and `analysis_result`. Neither raises on macOS or Linux; the first
+# makes a file "not found" and the second makes a contrast silently skipped.
+
+
+def test_portable_path_always_uses_forward_slashes() -> None:
+    assert portable_path(Path("fulltext") / "ab" / "x.pdf") == "fulltext/ab/x.pdf"
+
+
+def test_portable_path_is_relative_to_the_given_root() -> None:
+    root = Path("/srv/fermdb-data")
+    assert portable_path(root / "matrices" / "x.gz", relative_to=root) == "matrices/x.gz"
+
+
+def test_portable_path_keeps_a_path_outside_the_root_absolute() -> None:
+    """Rather than inventing a ../../.. chain that means nothing on the other machine."""
+    value = portable_path(Path("/elsewhere/x.gz"), relative_to=Path("/srv/fermdb-data"))
+    assert value in ("/elsewhere/x.gz", "C:/elsewhere/x.gz")
+    assert ".." not in value
+
+
+def test_resolve_stored_path_joins_a_relative_value(tmp_path: Path) -> None:
+    target = tmp_path / "fulltext" / "ab" / "x.pdf"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"%PDF-1.4")
+    assert resolve_stored_path("fulltext/ab/x.pdf", data_dir=tmp_path) == target
+
+
+def test_resolve_stored_path_reads_a_windows_written_relative_value(tmp_path: Path) -> None:
+    """The 1,429-row case: `str(Path(...))` on Windows, read on macOS."""
+    target = tmp_path / "fulltext" / "3a" / "3a85.xml"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"<article/>")
+    resolved = resolve_stored_path(r"fulltext\3a\3a85.xml", data_dir=tmp_path)
+    assert resolved == target
+    assert resolved.is_file()
+
+
+def test_resolve_stored_path_reanchors_a_foreign_absolute_value(tmp_path: Path) -> None:
+    """The 51-row case: an absolute path naming another machine's data_dir."""
+    target = tmp_path / "matrices" / "ecoli.counts.tsv.gz"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"\x1f\x8b")
+    stored = r"C:\Users\someone\fermdb-data\matrices\ecoli.counts.tsv.gz"
+    assert resolve_stored_path(stored, data_dir=tmp_path) == target
+
+
+def test_resolve_stored_path_prefers_the_longest_matching_tail(tmp_path: Path) -> None:
+    """Two files of the same name: the deeper match wins, so `quant/` cannot shadow `matrices/`."""
+    for relative in ("matrices/x.gz", "quant/matrices/x.gz"):
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"\x1f\x8b")
+    stored = r"D:\other\fermdb-data\quant\matrices\x.gz"
+    expected = tmp_path / "quant" / "matrices" / "x.gz"
+    assert resolve_stored_path(stored, data_dir=tmp_path) == expected
+
+
+def test_resolve_stored_path_returns_the_recorded_path_when_nothing_matches(tmp_path: Path) -> None:
+    """So the caller's own error names what the database says, not a fabricated local guess."""
+    stored = "C:/Users/someone/fermdb-data/matrices/absent.tsv.gz"
+    resolved = resolve_stored_path(stored, data_dir=tmp_path)
+    assert not resolved.exists()
+    assert "absent.tsv.gz" in resolved.as_posix()
+
+
+def test_resolve_stored_path_rejects_an_empty_value(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="empty"):
+        resolve_stored_path("   ", data_dir=tmp_path)

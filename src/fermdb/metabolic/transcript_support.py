@@ -50,6 +50,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final
 
+from ..paths import resolve_stored_path
+
 __all__ = [
     "RouteSupport",
     "StepSupport",
@@ -205,6 +207,7 @@ def contrast_tables(
     conn: sqlite3.Connection,
     *,
     symbols: Mapping[str, str],
+    data_dir: Path,
     cassette: Mapping[str, str] | None = None,
 ) -> dict[str, dict[str, tuple[float, float | None]]]:
     """Stored genotype contrasts -> {contrast id: {gene symbol: (log2FC, p_adjusted)}}.
@@ -212,6 +215,13 @@ def contrast_tables(
     Only contrasts whose payload is still on disk are read; a missing payload is skipped rather
     than treated as an empty result, because "the file is gone" and "the gene did not change" are
     different and only one of them is a finding.
+
+    `data_dir` is required rather than optional because of how that skip fails. `payload_ref`
+    holds whatever path the machine that computed the contrast wrote, and on any *other* machine
+    an absolute one names nothing — so every contrast would be skipped, and this function would
+    return `{}` without raising. The caller then reports zero transcript-backed routes, which
+    reads as a finding rather than as a path bug. `resolve_stored_path` re-anchors the recorded
+    path against this machine's derived tier, and needs that tier named.
     """
     tables: dict[str, dict[str, tuple[float, float | None]]] = {}
     by_systematic = {systematic: symbol for systematic, symbol in symbols.items()}
@@ -223,7 +233,7 @@ def contrast_tables(
     for analysis_id, payload_ref in conn.execute(
         "SELECT id, payload_ref FROM analysis_result WHERE kind = 'differential_expression'"
     ):
-        path = Path(str(payload_ref).split(" (")[0])
+        path = resolve_stored_path(str(payload_ref).split(" (")[0], data_dir=data_dir)
         if not path.is_file():
             continue
         table: dict[str, tuple[float, float | None]] = {}

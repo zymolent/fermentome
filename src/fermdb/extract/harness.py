@@ -63,6 +63,7 @@ from ..llm import (
     verify_span,
 )
 from ..llm.validate import EntityResolver, TheoreticalYields, UnitTable
+from ..paths import resolve_stored_path
 from .jats import JatsError, is_jats, jats_to_text
 from .pdf import PdfError, is_pdf, pdf_to_text
 from .schemas import (
@@ -1448,7 +1449,7 @@ def load_source_text(
     ).fetchone()
     if row is None:
         raise _no_source_text_error(conn, requested=publication_id, canonical=canonical)
-    path = settings.data_dir / str(row["content_path"])
+    path = resolve_stored_path(str(row["content_path"]), data_dir=settings.data_dir)
     if not path.is_file():
         raise SourceTextError(
             f"{canonical}: fulltext_asset points at {path}, which does not exist. The "

@@ -272,7 +272,13 @@ def main() -> int:
         for note in result.notes:
             print(f"   note: {note}")
         if args.apply:
-            store_contrast(conn, result, contrasts_dir=contrasts_dir, matrix_path=matrix)
+            store_contrast(
+                conn,
+                result,
+                contrasts_dir=contrasts_dir,
+                matrix_path=matrix,
+                data_dir=Path(settings.data_dir),
+            )
             stored += 1
 
     if args.apply:

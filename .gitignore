@@ -25,6 +25,13 @@ venv/
 # reviewed as diffs and must be tracked.
 env/paths.local.yaml
 env/secrets.local.env
+# Transfer archives written by ops/transfer.py. The one derived artifact that lives in the tree
+# on purpose: an export is carried to another machine by hand, and is easier to find beside the
+# code than under a data_dir that is usually on another drive. Anchored with a leading slash so
+# it means this directory and never some future src/.../exports/. Hundreds of MB per archive --
+# it must never be committed, and `git add -f` on one is always a mistake.
+/exports/
+
 # Derived artifacts, if any stray into the repo. Real derived data lives under
 # data_dir, outside the tree.
 *.sqlite

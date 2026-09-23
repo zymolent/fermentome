@@ -43,6 +43,7 @@ from typing import Any, Protocol
 from xml.etree import ElementTree
 
 from ..config import Settings
+from ..paths import portable_path
 
 __all__ = [
     "AcquisitionError",
@@ -765,7 +766,9 @@ def store_bytes_content_addressed(
     absolute.parent.mkdir(parents=True, exist_ok=True)
     if not absolute.exists():
         absolute.write_bytes(data)
-    return str(relative), checksum
+    # `portable_path`, not `str`: `str(Path("fulltext") / ...)` is backslash-separated on Windows,
+    # and that value is unreadable as a path on macOS or Linux. See fermdb.paths.
+    return portable_path(relative), checksum
 
 
 # ---------------------------------------------------------------------------------------------

@@ -104,7 +104,9 @@ def main() -> int:
     cassette: dict[str, str] = {}
     for study in CASSETTE_STUDIES:
         cassette.update(cassette_rows(matrix_for(Path(settings.data_dir), study)))
-    tables = contrast_tables(conn, symbols=symbols, cassette=cassette)
+    tables = contrast_tables(
+        conn, symbols=symbols, cassette=cassette, data_dir=Path(settings.data_dir)
+    )
     print(f"cassette rows available as evidence: {', '.join(sorted(cassette)) or '-'}")
     strain_map = contrast_strain_map(conn)
     print(f"{len(tables)} stored contrast(s) readable; {len(strain_map)} genotype contrast(s)")

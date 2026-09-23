@@ -1,6 +1,6 @@
 """Move the out-of-tree tiers between machines as one verifiable archive.
 
-    python ops/transfer.py export                      # -> exports/transfer/<stamp>/
+    python ops/transfer.py export                      # -> <repo>/exports/transfer/<stamp>/
     python ops/transfer.py import --archive <zip>      # reports; writes nothing
     python ops/transfer.py import --archive <zip> --apply
 
@@ -172,12 +172,18 @@ def cmd_export(args: argparse.Namespace) -> int:
         return 1
 
     stamp = _stamp()
-    default_root = settings.path("exports_dir") / "transfer"
+    # Repo-local, not `<data_dir>/exports`, at the owner's direction. A transfer archive is a
+    # thing a person picks up and carries, and it is easier to find beside the code than under a
+    # derived tier that is routinely on another drive. It is emphatically not repo content:
+    # `/exports/` is gitignored, and this is the one derived artifact that lives in the tree.
+    default_root = REPO / "exports" / "transfer"
     out_root = Path(args.out).expanduser() if args.out else default_root
     out_dir = out_root / stamp
     archive_path = out_dir / f"fermdb-transfer-{stamp}.zip"
 
-    # The archive lands inside data_dir by default, so the walker must never see it.
+    # Never pack an archive into an archive. The first entry covers wherever this run is writing,
+    # including an `--out` pointed inside data_dir; the second covers archives left by earlier
+    # runs, which defaulted to `<data_dir>/exports/transfer` before this one.
     skip = {out_root, settings.path("exports_dir") / "transfer"}
 
     plan: list[tuple[Path, str, Path]] = []  # (source, archive member, tier root)
@@ -397,7 +403,7 @@ def main(argv: list[str] | None = None) -> int:
     p_export.add_argument(
         "--out",
         help="directory to create the timestamped export folder in "
-        "(default: <exports_dir>/transfer)",
+        "(default: <repo>/exports/transfer, which is gitignored)",
     )
     p_export.add_argument(
         "--include-backups",

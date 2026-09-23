@@ -43,6 +43,7 @@ import yaml
 
 from .. import genetic_code
 from ..config import Settings
+from ..paths import portable_path
 from . import EUTILS_BASE, EutilsClient, OmicsFetchError
 
 #: Verified live against the NCBI Datasets API
@@ -355,6 +356,7 @@ def _reference_row(
     retrieved_at: str,
     translation_verified: bool,
     evidence: str,
+    data_dir: Path | None = None,
 ) -> dict[str, object]:
     slug = sequence_accession.lower().replace(".", "-").replace("_", "-")
     return {
@@ -364,7 +366,7 @@ def _reference_row(
         "assembly_accession": ASSEMBLY_ACCESSION,
         "sequence_accession": sequence_accession,
         "encoding_genome": encoding_genome,
-        "file_path": str(stored.path),
+        "file_path": portable_path(stored.path, relative_to=data_dir),
         "checksum_sha256": stored.checksum_sha256,
         "size_bytes": stored.size_bytes,
         "source_url": source_url,
@@ -410,6 +412,11 @@ def fetch_mitochondrial_reference(
             retrieved_at=retrieved_at,
             translation_verified=True,
             evidence=evidence,
+            # genomes_dir is ${data_dir}/genomes by configuration, so its parent is the
+            # derived-tier root the stored value is made relative to. If someone points
+            # genomes_dir somewhere else entirely, portable_path keeps the path absolute
+            # and resolve_stored_path re-anchors it on read -- wrong here is not fatal.
+            data_dir=genomes_dir.parent,
         ),
         _reference_row(
             kind="mitochondrial_annotation",
@@ -420,6 +427,11 @@ def fetch_mitochondrial_reference(
             retrieved_at=retrieved_at,
             translation_verified=True,
             evidence=evidence,
+            # genomes_dir is ${data_dir}/genomes by configuration, so its parent is the
+            # derived-tier root the stored value is made relative to. If someone points
+            # genomes_dir somewhere else entirely, portable_path keeps the path absolute
+            # and resolve_stored_path re-anchors it on read -- wrong here is not fatal.
+            data_dir=genomes_dir.parent,
         ),
     ]
 
@@ -459,6 +471,7 @@ def fetch_nuclear_reference(
                 retrieved_at=retrieved_at,
                 translation_verified=False,
                 evidence=evidence,
+                data_dir=genomes_dir.parent,
             )
         )
         rows.append(
@@ -471,6 +484,7 @@ def fetch_nuclear_reference(
                 retrieved_at=retrieved_at,
                 translation_verified=False,
                 evidence=evidence,
+                data_dir=genomes_dir.parent,
             )
         )
     return rows
@@ -774,6 +788,7 @@ def reference_genome_asset_row(
     reference_id: str,
     organism: str,
     retrieved_at: str,
+    data_dir: Path | None = None,
 ) -> dict[str, object]:
     """One `asset` as a `reference_genome_asset` table row, ready for a parameterized INSERT."""
     slug = asset.accession.lower().replace(".", "-").replace("_", "-")
@@ -783,7 +798,7 @@ def reference_genome_asset_row(
         "organism": organism,
         "sequence_accession": asset.accession,
         "kind": asset.kind,
-        "file_path": str(asset.stored.path),
+        "file_path": portable_path(asset.stored.path, relative_to=data_dir),
         "checksum_sha256": asset.stored.checksum_sha256,
         "size_bytes": asset.stored.size_bytes,
         "source_url": asset.source_url,

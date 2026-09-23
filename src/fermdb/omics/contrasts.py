@@ -66,6 +66,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
 
+from ..paths import portable_path
+
 __all__ = [
     "ContrastGroup",
     "ContrastResult",
@@ -846,6 +848,7 @@ def store_contrast(
     *,
     contrasts_dir: Path,
     matrix_path: Path,
+    data_dir: Path | None = None,
 ) -> tuple[str, str]:
     """Write the payload to disk and register the processing run and analysis result.
 
@@ -912,7 +915,8 @@ def store_contrast(
             analysis_id,
             run_id,
             "differential_expression",
-            f"{payload} ({len(result.genes)} genes; {result.tested_genes} tested; "
+            f"{portable_path(payload, relative_to=data_dir)} "
+            f"({len(result.genes)} genes; {result.tested_genes} tested; "
             f"{result.spec.reference.label} n={len(result.spec.units(result.spec.reference))} vs "
             f"{result.spec.treatment.label} n={len(result.spec.units(result.spec.treatment))}; "
             f"axis={result.spec.axis}; matrix={matrix_path.name})",
