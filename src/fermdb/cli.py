@@ -40,6 +40,8 @@ grows past this.
     python -m fermdb.cli curate accept --task YAA:CTASK:... --curator me --reason "checked"
     python -m fermdb.cli curate reject --task YAA:CTASK:... --curator me --reason "not in paper"
     python -m fermdb.cli curate stats
+    python -m fermdb.cli export release --out ./release
+    python -m fermdb.cli export release --out ./release --release v2026.1
 """
 
 from __future__ import annotations
@@ -58,6 +60,8 @@ from .config import Settings
 from .curate.queue import CurationError, Curator
 from .db import open_db
 from .db.cli import add_db_subcommand
+from .export.cli import add_export_subcommand
+from .export.release import ExportError
 from .extract import (
     DEFAULT_EXTRACTION_SECTIONS,
     RECORD_KINDS,
@@ -1183,6 +1187,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_query_subcommand(sub)
     add_db_subcommand(sub)
     add_serve_subcommand(sub)
+    add_export_subcommand(sub)
 
     p_extract = sub.add_parser(
         "extract", help="LLM extraction of one publication into a proposed Zone I row"
@@ -1426,6 +1431,10 @@ def main(argv: list[str] | None = None) -> int:
         CurationError,
         LlmError,
         ProviderError,
+        # An export that refuses to overwrite a non-empty directory, or that found a column
+        # colliding with the label namespace it injects, is a user-facing error with its own
+        # instruction attached -- not a traceback.
+        ExportError,
     ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
