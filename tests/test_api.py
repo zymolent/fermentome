@@ -429,7 +429,23 @@ def test_health_reports_which_atlas_is_served() -> None:
     assert body["writable_endpoints"] == 0
 
 
-def test_missing_row_is_a_404_not_an_empty_object() -> None:
+def test_missing_row_is_a_404_not_an_empty_object(tmp_path: Any, monkeypatch: Any) -> None:
+    """A temp atlas, because otherwise this asks the developer's machine rather than the code.
+
+    `api/deps.py` raises 503 from the `connection` dependency when nothing exists at the resolved
+    path, before any route function runs. Pointed at the ambient atlas this test therefore asserted
+    one of two different things depending on who ran it: a real 404 on a machine that happens to
+    have an atlas at the default location, and `503 == 404` on one that does not -- which is how it
+    passed here for months and went red the first time CI got far enough to run it.
+
+    An empty database at the current schema is the right fixture for the question: 404 is a claim
+    about a row that is absent, and every row is absent here, so nothing but the handler's
+    not-found path can produce it.
+    """
+    atlas = tmp_path / "atlas.sqlite3"
+    open_db(atlas).close()
+    monkeypatch.setenv("FERMDB_DB_FILE", str(atlas))
+
     client = _client()
     assert client.get("/api/annotations/genes/NO-SUCH-GENE").status_code == 404
     assert client.get("/api/networks/routes?order_by=nonsense").status_code == 422
