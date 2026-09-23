@@ -34,6 +34,9 @@ from fermdb.query import (
     transcripts,
 )
 from fermdb.query import (
+    lexical as lexical_query,
+)
+from fermdb.query import (
     search as search_query,
 )
 
@@ -63,6 +66,50 @@ def cross_search(
 ) -> dict[str, Any]:
     """Search several entity kinds at once, grouped by kind and never ranked across kinds."""
     return search_query.search(conn, q, limit=limit).as_json()
+
+
+@router.get("/search/lexical", tags=["atlas"])
+def lexical_search(
+    conn: Conn,
+    q: str = Query("", description="identifiers, gene or strain names, accessions, words"),
+    kind: str | None = None,
+    limit: int = Query(10, ge=1, le=50),
+) -> dict[str, Any]:
+    """PLAN.md O.1's lexical modality: FTS5, synonyms, and evidence-aware ranking.
+
+    `kind` is comma-separated (`kind=gene,strain`) rather than repeated, matching the other
+    readers here; an unknown kind is a 400, because a filter that quietly matches nothing looks
+    exactly like a search with no results.
+
+    503 rather than an empty result when the index has not been built. An empty list would be a
+    lie of exactly the kind this codebase spends its comments guarding against -- "no matches"
+    and "nobody has built the index" render identically and mean opposite things.
+    """
+    kinds = tuple(part.strip() for part in kind.split(",") if part.strip()) if kind else None
+    try:
+        return lexical_query.search_lexical(conn, q, kinds=kinds, limit=limit).as_json()
+    except lexical_query.IndexNotBuilt as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except lexical_query.LexicalError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/search/lexical/status", tags=["atlas"])
+def lexical_status(conn: Conn) -> dict[str, Any]:
+    """When the lexical index was built, what it covers, and what its synonym layer really is."""
+    report = lexical_query.index_status(conn)
+    if report is None:
+        # Probed on a throwaway in-memory database rather than on the request's connection: that
+        # one is opened `mode=ro`, and "this build has no FTS5" must not be confused with "this
+        # connection may not create tables". Same interpreter, same library, same answer.
+        return {
+            "built": False,
+            "fts5_available": lexical_query.fts5_available(),
+            "note": (
+                f"no lexical index in this database; build one with `{lexical_query.BUILD_COMMAND}`"
+            ),
+        }
+    return {"built": True, "fts5_available": True, **report.as_json()}
 
 
 # ---------------------------------------------------------------- literature

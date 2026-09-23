@@ -31,10 +31,15 @@ What is here:
   by hop back to a source and a curator, with each break named and located. The CI gate, and the
   one read here whose job is to fail.
 
-What is deliberately **not** here yet: graph traversal, lexical and semantic search (PLAN.md O.1
-lists four modalities; this package implements the first). They are additive and are listed as
-deferred in Q.5. Nothing above this package should be written in a way that assumes only one
-modality will ever exist.
+* :mod:`~fermdb.query.lexical` -- PLAN.md O.1's lexical modality: an FTS5 index over every
+  searchable entity, a synonym dictionary built from the alias tables, and a ranking in which
+  evidence level outranks textual fit. The index is derived and is built by
+  ``fermdb query index-build``, never by a migration.
+
+What is deliberately **not** here yet: graph traversal and semantic search (PLAN.md O.1 lists four
+modalities; this package implements the structured and the lexical ones). They are additive and
+are listed as deferred in Q.5. Nothing above this package should be written in a way that assumes
+only one modality will ever exist.
 """
 
 from __future__ import annotations
@@ -51,6 +56,16 @@ from .coverage import (
     read_coverage,
 )
 from .genes import AnnotationRead, GeneRead, ReactionRoleRead, list_genes, read_gene
+from .lexical import (
+    IndexReport,
+    LexicalError,
+    LexicalHit,
+    LexicalHits,
+    build_index,
+    fts5_available,
+    index_status,
+    search_lexical,
+)
 from .publications import (
     Finding,
     FullTextAvailability,
@@ -92,6 +107,14 @@ from .values import (
 
 __all__ = [
     "BREAK_KINDS",
+    "IndexReport",
+    "LexicalError",
+    "LexicalHit",
+    "LexicalHits",
+    "build_index",
+    "fts5_available",
+    "index_status",
+    "search_lexical",
     "DESTINATION_TABLE",
     "ENTITIES",
     "MAX_ROWS",

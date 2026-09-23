@@ -11,6 +11,13 @@ a full-text index: it will miss a paper that says "isobutanol tolerance" when as
 "tolerant", and it says so in `technique` rather than letting a caller assume recall it does not
 have. PLAN.md's semantic and hybrid retrieval layer is a later phase; this is the honest
 placeholder, and labelling it as one is what keeps it from being mistaken for the real thing.
+
+**The lexical modality now exists beside this one**, in `lexical.py`: an FTS5 index with a
+synonym dictionary built from the alias tables and a ranking in which evidence level outranks
+textual fit (O.1). It is not a drop-in replacement and this module is not deprecated, because the
+two answer different questions. This one is a substring scan that needs no index and finds
+`buta` inside `isobutanol`; that one is a token index that needs `fermdb query index-build`, can
+rank, and cannot match a fragment of a word. A UI wanting both is right to offer both.
 """
 
 from __future__ import annotations

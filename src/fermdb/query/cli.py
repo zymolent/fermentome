@@ -21,6 +21,16 @@ from ..config import Settings
 from ..db import open_db
 from .coverage import page_readiness, read_coverage
 from .genes import list_genes, read_gene
+from .lexical import (
+    BUILD_COMMAND,
+    KIND_LABELS,
+    IndexReport,
+    LexicalError,
+    build_index,
+    fts5_available,
+    index_status,
+    search_lexical,
+)
 from .pathways import list_pathways, read_pathway
 from .publications import corpus_shape, read_publication, search_publications
 from .review import ReviewPacket, review_packet, review_queue
@@ -423,6 +433,134 @@ def cmd_query_traceability(args: argparse.Namespace) -> int:
     return exit_code(walk, allow_empty=args.allow_empty)
 
 
+def _lexical_target(args: argparse.Namespace) -> Path:
+    """Which database the lexical commands touch, said out loud before anything is written.
+
+    `index-build` is the only command in this file that writes, and what it writes is a derived
+    artifact. The database is still the caller's choice and is never guessed at here: `--db`, or
+    the configured `db_file` (which `FERMDB_DB_FILE` overrides). Printed rather than assumed,
+    because "which atlas did that just rebuild" is not a question anyone should have to answer
+    from memory.
+    """
+    return Path(args.db) if args.db else Settings.load().db_file
+
+
+def cmd_query_index_build(args: argparse.Namespace) -> int:
+    """PLAN.md M.2's `index-build` pipeline, for the lexical half of it (O.1)."""
+    target = _lexical_target(args)
+
+    if args.status:
+        conn = open_db(target, create=False)
+        try:
+            report = index_status(conn)
+        finally:
+            conn.close()
+        if report is None:
+            print(f"{target}: no lexical index; build one with `{BUILD_COMMAND}`")
+            return 3
+        if args.json:
+            json.dump(report.as_json(), sys.stdout, indent=2)
+            sys.stdout.write("\n")
+            return 0
+        _print_index_report(report, target)
+        return 0
+
+    if not fts5_available():
+        print(
+            "this interpreter's sqlite3 was built without FTS5, so the lexical index cannot be "
+            "created. Nothing was written, and `fermdb query` keeps working on the substring "
+            "search -- which is a substring search, and is not silently substituted here.",
+            file=sys.stderr,
+        )
+        return 4
+
+    print(f"building the lexical index in {target}")
+    conn = open_db(target, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        report = build_index(conn)
+    finally:
+        conn.close()
+
+    if args.json:
+        json.dump(report.as_json(), sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+    _print_index_report(report, target)
+    return 0
+
+
+def _print_index_report(report: IndexReport, target: Path) -> None:
+    print(f"{report.documents} document(s) indexed in {target}, built {report.built_at}")
+    for kind, count in report.by_kind.items():
+        print(f"  {kind:<16}{count:>8}")
+    for kind, reason in report.skipped_kinds.items():
+        print(f"  {kind:<16}{'skipped':>8}  {reason}")
+    print()
+    print(
+        f"{report.graded_documents} of {report.documents} document(s) carry an evidence level; "
+        "the rest score 0 on the evidence term"
+    )
+    print()
+    print(f"synonym dictionary: {report.synonym_pairs} pair(s)")
+    for source in report.synonym_sources:
+        print(f"  {source.source:<16}{source.pairs:>6} pair(s) from {source.rows} row(s)")
+        print(f"                    {source.note}")
+    for note in report.notes:
+        print()
+        print(f"note: {note}")
+
+
+def cmd_query_lexical(args: argparse.Namespace) -> int:
+    """The lexical modality: ranked across kinds, with every term of the score shown."""
+    target = _lexical_target(args)
+    conn = open_db(target, create=False)
+    conn.execute("PRAGMA busy_timeout=60000")
+    try:
+        hits = search_lexical(
+            conn,
+            args.term,
+            kinds=tuple(args.kind) if args.kind else None,
+            limit=args.limit,
+        )
+    except LexicalError as exc:
+        print(str(exc), file=sys.stderr)
+        return 4
+    finally:
+        conn.close()
+
+    payload = hits.as_json()
+    if args.json:
+        json.dump(payload, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    if payload["synonyms_applied"]:
+        for word, expansions in payload["synonyms_applied"].items():
+            print(f"{word} also searched as: {', '.join(expansions)}")
+        print()
+
+    if not hits.hits:
+        print(f"nothing matched {hits.term!r}")
+        for caveat in payload["caveats"]:
+            print(f"  note: {caveat}")
+        return 0
+
+    print(f"{'score':>7}  {'kind':<12}{'evidence':<12}{'what':<44}contributions")
+    for hit in hits.hits:
+        parts = "  ".join(
+            f"{component.name} {component.contribution:+.2f}" for component in hit.components
+        )
+        print(
+            f"{hit.score:>7.3f}  {hit.kind:<12}{hit.evidence.display:<12}"
+            f"{hit.label[:42]:<44}{parts}"
+        )
+    print()
+    for caveat in payload["caveats"]:
+        print(f"note: {caveat}")
+    return 0
+
+
 def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     """Add ``fermdb query ...`` to an existing top-level subparsers action."""
     p_query = sub.add_parser(
@@ -532,3 +670,43 @@ def add_query_subcommand(sub: argparse._SubParsersAction[argparse.ArgumentParser
         "--json", action="store_true", help="emit the wire payload an API would return"
     )
     p_trace.set_defaults(func=cmd_query_traceability)
+
+    # PLAN.md M.2's `index-build`, and the modality it serves. A pipeline rather than a
+    # migration, because the index is derived: `schema.sql` never mentions it, and rebuilding it
+    # from scratch is always available.
+    p_index = query_sub.add_parser(
+        "index-build",
+        help="build the FTS5 lexical index and its synonym dictionary (M.2, O.1)",
+    )
+    p_index.add_argument(
+        "--db",
+        help="database to build the index in; defaults to the configured db_file, which "
+        "FERMDB_DB_FILE overrides. Always printed before anything is written",
+    )
+    p_index.add_argument(
+        "--status",
+        action="store_true",
+        help="report the last build instead of rebuilding; exits 3 if there is no index",
+    )
+    p_index.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_index.set_defaults(func=cmd_query_index_build)
+
+    p_lexical = query_sub.add_parser(
+        "lexical",
+        help="lexical search: FTS5, synonyms from the alias tables, evidence-aware ranking",
+    )
+    p_lexical.add_argument("term", help="identifiers, gene or strain names, accessions, words")
+    p_lexical.add_argument(
+        "--kind",
+        action="append",
+        choices=sorted(KIND_LABELS),
+        help="restrict to one kind; repeatable",
+    )
+    p_lexical.add_argument("--limit", type=int, default=10, help="how many hits to show")
+    p_lexical.add_argument("--db", help="database to search; defaults to the configured db_file")
+    p_lexical.add_argument(
+        "--json", action="store_true", help="emit the wire payload an API would return"
+    )
+    p_lexical.set_defaults(func=cmd_query_lexical)
