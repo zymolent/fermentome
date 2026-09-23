@@ -1,0 +1,80 @@
+# Four synthetic screening records: one per branch of the R.2 triage rule, plus the case the
+# rule is not allowed to touch. `fermdb.rebuild` re-runs `discovery._triage` over all four and
+# diffs `triage_state` and `exclusion_reason`.
+#
+# These rows exist to make the T.3 rebuild check able to fail on the fixture. Every string below
+# is an *output of recorded code*, not a description of one -- in particular the exclusion reason
+# is `discovery._triage`'s own wording, character for character, with the family name substituted.
+# Changing that wording in discovery.py without rebuilding these rows turns the check red, which
+# is the entire point: "a non-empty diff is either non-determinism or an undeclared input"
+# (PLAN.md T.3).
+#
+#   fx-iso-a      include_unless_excluded, isobutanol -> 'included'
+#   fx-eth-a      exclude_unless_admitted, no criterion -> 'excluded' + the stated reason
+#   fx-eth-b      exclude_unless_admitted, criterion E1 -> 'needs_full_text', candidate only
+#   fx-held-b     the same, but a curator has since accepted it and moved it to 'included'
+#
+# fx-held-b is the row the rebuild must NOT rewrite. `discovery.py` refreshes triage_state only
+# while `review_state` is still 'proposed'; past that, the state is a curator's verdict and not a
+# function of the query file, so the regenerator declines the row and says why. Without this case
+# the "declined" path in the harness is untested and the first curator acceptance in the real
+# atlas would be reported as 43 rebuild failures. (It would have been: the live atlas held
+# exactly 43 such rows on 2026-09-24.)
+
+- id: YAA:SCREEN:fx-iso-a
+  publication_id: "doi:10.9999/fixture-a"
+  family: fx_isobutanol_all
+  first_seen_run_id: YAA:SEARCHRUN:fx-isobutanol
+  last_seen_run_id: YAA:SEARCHRUN:fx-isobutanol
+  triage_state: included
+  product_tier: isobutanol
+  default_disposition: include_unless_excluded
+  doi: "10.9999/fixture-a"
+  title_normalized: fixture study a synthetic isobutanol titer report
+  review_state: proposed
+  zone: H
+
+- id: YAA:SCREEN:fx-eth-a
+  publication_id: "doi:10.9999/fixture-a"
+  family: fx_ethanol
+  first_seen_run_id: YAA:SEARCHRUN:fx-ethanol
+  last_seen_run_id: YAA:SEARCHRUN:fx-ethanol
+  triage_state: excluded
+  exclusion_reason: "ethanol family 'fx_ethanol' defaults to exclude-unless-admitted (PLAN.md R.2); this hit was retrieved by the family's plain term, not a criterion-tagged (E1-E4) sub-query, and has not been reviewed against the B.3 admission criteria"
+  product_tier: ethanol
+  default_disposition: exclude_unless_admitted
+  doi: "10.9999/fixture-a"
+  title_normalized: fixture study a synthetic isobutanol titer report
+  review_state: proposed
+  zone: H
+
+- id: YAA:SCREEN:fx-eth-b
+  publication_id: "doi:10.9999/fixture-b"
+  family: fx_ethanol
+  first_seen_run_id: YAA:SEARCHRUN:fx-ethanol
+  last_seen_run_id: YAA:SEARCHRUN:fx-ethanol
+  triage_state: needs_full_text
+  admitted_criterion: E1
+  product_tier: ethanol
+  default_disposition: exclude_unless_admitted
+  doi: "10.9999/fixture-b"
+  title_normalized: fixture study b synthetic isobutanol titer report
+  review_state: proposed
+  zone: H
+
+- id: YAA:SCREEN:fx-held-b
+  publication_id: "doi:10.9999/fixture-b"
+  family: fx_ethanol_curated
+  first_seen_run_id: YAA:SEARCHRUN:fx-ethanol-held
+  last_seen_run_id: YAA:SEARCHRUN:fx-ethanol-held
+  # 'included' where the rule would say 'needs_full_text'. A curator read the paper and confirmed
+  # it against E2; that is not something query_families.yaml can produce, and `review_state`
+  # below is what stops both discovery and this rebuild from overwriting it.
+  triage_state: included
+  admitted_criterion: E2
+  product_tier: ethanol
+  default_disposition: exclude_unless_admitted
+  doi: "10.9999/fixture-b"
+  title_normalized: fixture study b synthetic isobutanol titer report
+  review_state: accepted
+  zone: H

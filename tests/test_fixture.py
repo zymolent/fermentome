@@ -44,7 +44,14 @@ EXPECTED_COUNTS: dict[str, int] = {
     "product": 1,
     "product_theoretical_yield": 3,
     "publication": 2,
-    "gene_group": 5,
+    # One per query family in screening_record.yaml.
+    "search_run": 3,
+    # One per branch of the R.2 triage rule, plus the curator-held row the rule may not rewrite.
+    "screening_record": 4,
+    # Five hand-written Zone R groups, plus the two Zone H groups the T.3 rebuild check
+    # regenerates from the two `gene` rows below.
+    "gene_group": 7,
+    "gene": 2,
     "part": 7,
     "pathway": 1,
     "pathway_configuration": 1,
@@ -454,11 +461,20 @@ def test_long_tail_facets_carry_their_own_zone_and_state(loaded: sqlite3.Connect
 def test_a_recalled_identifier_is_unverified_rather_than_low(loaded: sqlite3.Connection) -> None:
     """'unverified' (asserted, never checked) is not 'low' (checked, weak).
 
-    The gene_group anchor ids were recalled from background knowledge and never looked up, which
-    is precisely the state the four-value vocabulary exists to name. Without it these rows would
-    have to claim they had been checked.
+    The hand-written gene_group anchor ids were recalled from background knowledge and never
+    looked up, which is precisely the state the four-value vocabulary exists to name. Without it
+    these rows would have to claim they had been checked.
+
+    Scoped to Zone R. The two Zone H groups added beside them carry 'high', and that is not an
+    exception to this rule but the other half of it: they were not asserted by anyone, they are
+    the stated output of `omics.genes.gene_group_rows` over the `gene` rows in the same fixture,
+    and the producing code's own argument for 'high' is that a verbatim locus_tag has nothing
+    left to verify. `zone` is what separates the two claims, so the query says so.
     """
-    confidences = {row["confidence"] for row in loaded.execute("SELECT confidence FROM gene_group")}
+    confidences = {
+        row["confidence"]
+        for row in loaded.execute("SELECT confidence FROM gene_group WHERE zone = 'R'")
+    }
     assert confidences == {"unverified"}
     evidence = loaded.execute(
         "SELECT evidence FROM gene_group WHERE id = 'YAA:GG:fx-ahas'"

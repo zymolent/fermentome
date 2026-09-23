@@ -58,3 +58,42 @@
   zone: R
   evidence: "synthetic test fixture, not a real observation; anchor_id recalled from background knowledge"
   confidence: unverified
+
+# ---------------------------------------------------------------------------------------------
+# Two Zone H anchor groups, and the only rows in this fixture that any code can rebuild.
+#
+# The five rows above are Zone R: they were written by hand, from recalled systematic names, and
+# nothing derives them. These two are Zone H in the sense CONVENTIONS.md means it -- they are
+# what `fermdb.omics.genes.gene_group_rows` produces from the matching `gene` rows in gene.yaml,
+# down to the evidence string, and `fermdb.rebuild` regenerates them and diffs.
+#
+# `evidence` reads "the S288C systematic name" for an invented name because that is the literal
+# template the producing code writes (it is a single-assembly loader and says so). Rewording it
+# here to suit the fixture would break the rebuild -- which is the fixture doing its job: the
+# text is an output of recorded code, not a caption.
+#
+# `confidence: high` likewise. Everywhere else in this fixture a hand-written row carries
+# 'unverified' or 'low' because it was asserted and never checked. These two are not asserted:
+# they are the stated output of a derivation whose input is the row above it, and the producing
+# code's own argument for 'high' is that "the anchor itself is a verbatim locus_tag, not a
+# recollection and not an orthology call". Writing 'low' here would make the rebuild red.
+
+- id: YAA:GG:fxa001w
+  anchor_namespace: sgd_systematic
+  anchor_id: FXA001W
+  standard_name: FXA1
+  scope: species
+  membership_method: anchor
+  zone: H
+  evidence: "anchored on the S288C systematic name FXA001W; synthetic test fixture transcript set, not a real observation"
+  confidence: high
+
+- id: YAA:GG:fxa002c
+  anchor_namespace: sgd_systematic
+  anchor_id: FXA002C
+  standard_name: FXA2
+  scope: species
+  membership_method: anchor
+  zone: H
+  evidence: "anchored on the S288C systematic name FXA002C; synthetic test fixture transcript set, not a real observation"
+  confidence: high

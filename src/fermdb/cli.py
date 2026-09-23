@@ -125,6 +125,7 @@ from .metabolic.cli import add_atlas_subcommand
 from .omics import add_omics_subcommand
 from .paths import PathsConfigError
 from .query.cli import add_query_subcommand
+from .rebuild.cli import add_rebuild_subcommand
 from .recode import RecodeError, check_compartment_safety, recode
 
 
@@ -1198,6 +1199,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_atlas_subcommand(sub)
     add_query_subcommand(sub)
     add_db_subcommand(sub)
+    add_rebuild_subcommand(sub)
     add_serve_subcommand(sub)
     add_export_subcommand(sub)
 

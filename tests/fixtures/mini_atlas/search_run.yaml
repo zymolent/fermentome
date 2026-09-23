@@ -1,0 +1,43 @@
+# Three synthetic search runs, one per query family used by screening_record.yaml.
+#
+# `search_run` carries no `zone` at all, and that is deliberate in schema.sql section 14: it
+# records that one E-utilities query was executed, which is a fact about a computation and not a
+# claim about biology. Same reasoning `processing_run` gives.
+#
+# These exist only to satisfy screening_record's `first_seen_run_id` / `last_seen_run_id` foreign
+# keys. `dry_run: 1` says plainly that no query was ever sent -- a fixture row claiming a real
+# esearch would be the one kind of synthetic row that could mislead a reader of
+# `fermdb query literature status`, which reads `hit_count` against query_families.yaml.
+
+- id: YAA:SEARCHRUN:fx-isobutanol
+  family: fx_isobutanol_all
+  db: pubmed
+  term: "(fixture isobutanol)"
+  started_at: "2026-01-01T00:00:00+00:00"
+  finished_at: "2026-01-01T00:00:01+00:00"
+  hit_count: 1
+  retrieved_count: 1
+  query_families_version: 1
+  dry_run: 1
+
+- id: YAA:SEARCHRUN:fx-ethanol
+  family: fx_ethanol
+  db: pubmed
+  term: "(fixture ethanol)"
+  started_at: "2026-01-01T00:00:00+00:00"
+  finished_at: "2026-01-01T00:00:01+00:00"
+  hit_count: 2
+  retrieved_count: 2
+  query_families_version: 1
+  dry_run: 1
+
+- id: YAA:SEARCHRUN:fx-ethanol-held
+  family: fx_ethanol_curated
+  db: pubmed
+  term: "(fixture ethanol curated)"
+  started_at: "2026-01-01T00:00:00+00:00"
+  finished_at: "2026-01-01T00:00:01+00:00"
+  hit_count: 1
+  retrieved_count: 1
+  query_families_version: 1
+  dry_run: 1
