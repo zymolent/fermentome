@@ -1,0 +1,38 @@
+# env/paths.local.yaml -- machine-specific path overrides.
+#
+# Copy this file to `env/paths.local.yaml` (drop the .example) and edit. That filename is
+# gitignored: it is where one machine differs from the shared, portable defaults in paths.yaml,
+# and it must never be committed. paths.yaml itself stays untouched.
+#
+# Overrides are applied key-by-key, not tier-by-tier, so a key you leave out keeps its paths.yaml
+# value. You almost always want exactly the two roots below and nothing else, because every other
+# derived/source key interpolates one of them and follows automatically.
+#
+# The same thing without a file, for a one-off run:
+#
+#     FERMDB_DATA_DIR=E:/fermdb-data python ops/answer.py
+#
+# Every key in paths.yaml has such a variable, FERMDB_<KEY, upper-cased>, and the environment wins
+# over this file. Both are applied BEFORE ${...} interpolation, which is what makes one line
+# enough: moving data_dir moves db_file, matrices_dir, quant_dir, genomes_dir, index_dir and
+# exports_dir with it -- and also the directories the code derives from data_dir directly rather
+# than naming them in paths.yaml: fulltext/, annotations/, contrasts/, llm-cache/, matrices_mito/
+# and matrices_transgene/.
+#
+# Windows (E:/fermdb-data) and WSL/POSIX (/mnt/e/fermdb-data) drive spellings are both accepted and
+# translated to whichever the running platform needs, so one file can serve both.
+#
+# `python -m fermdb.cli config` prints every resolved path with its origin -- default, file or
+# env -- which is how you check this file is being read at all rather than guessing.
+#
+# Credentials do not go here. They go in env/secrets.local.env, also gitignored.
+
+derived:
+  # The rebuildable tier: the atlas, the stored full texts, the genomes, the quantification
+  # matrices. The only tier fermdb ever creates on its own. Default: ~/fermdb-data
+  data_dir: "E:/fermdb-data"
+
+source:
+  # The read-only tier: downloads, FASTQ. Never written to, never auto-created.
+  # Default: ~/fermdb-source
+  source_root: "E:/fermdb-source"

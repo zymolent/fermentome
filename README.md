@@ -68,8 +68,7 @@ campaign under $25.
 
 Ethanol is in the atlas because isobutanol engineering needs it — principally because pyruvate
 decarboxylase is the sink that isobutanol must outcompete. It is not a second product of interest,
-and the admission test is explicit: *an ethanol record is admitted only if it answers a question
-the isobutanol program asks.*
+and the admission test is explicit: *an ethanol record is admitted only if it answers a question the isobutanol program asks.*
 
 ## Documents
 
@@ -151,6 +150,81 @@ anything you are not prepared to have open while curating:
 ```bash
 just ui-on /path/to/atlas-copy.sqlite3   # or set FERMDB_DB_FILE
 ```
+
+## Running it on a second machine
+
+The repository is one of three things this project needs, and the only one `git clone` brings. The
+other two are deliberately outside the tree: the derived data under `data_dir` — the atlas, the
+stored full texts, the genomes, the quantification matrices — and `env/secrets.local.env`.
+
+Neither has to sit where it sits here. Every key in `env/paths.yaml` is also an environment
+variable, `FERMDB_<KEY>` upper-cased, and the one that matters is the root:
+
+```bash
+FERMDB_DATA_DIR=E:/fermdb-data python ops/answer.py    # one run
+```
+
+To set it once for a machine instead, copy `env/paths.local.yaml.example` to
+`env/paths.local.yaml` — gitignored, overrides paths.yaml key by key — and edit `data_dir` there.
+
+One line is enough because the override is applied **before** `${...}` interpolation: moving
+`data_dir` moves `db_file`, `matrices_dir`, `quant_dir`, `genomes_dir`, `index_dir` and
+`exports_dir` with it, and also the directories the code derives from `data_dir` directly rather
+than naming them in paths.yaml — `fulltext/`, `annotations/`, `contrasts/`, `llm-cache/`,
+`matrices_mito/`, `matrices_transgene/`. Windows (`E:/x`) and WSL (`/mnt/e/x`) spellings are both
+accepted and translated per platform, so the same value serves either.
+
+```bash
+python -m fermdb.cli config
+```
+
+prints every resolved path with where its value came from — `default`, `file` or `env` — and
+whether it exists. Run it first on a new machine, and read the `exists` column, not just the
+values. `data_dir` is derived-tier, which is the one tier fermdb creates on its own, and
+`open_db` defaults to `create=True`: a mistyped root does not raise, it makes a fresh empty atlas
+at the wrong place and keeps going. `config` writes nothing, so it is the safe way to find that
+out first.
+
+### Carrying the data across: `ops/transfer.py`
+
+Configuration says *where* the tiers live; this says how to *move* them. One archive holds
+`data_dir`, `source_root` if it exists, and optionally `env/secrets.local.env`:
+
+```bash
+python ops/transfer.py export --dry-run      # what would be packed, and how big
+python ops/transfer.py export                # -> <exports_dir>/transfer/<UTC stamp>/
+```
+
+Measured on this machine: **1,816 files, 767 MB**, or 1,864 files and 1.8 GB with
+`--include-backups`. The `.bak` snapshots and the secrets file are both excluded by default —
+the second because it holds the NCBI key, and an archive carrying it must not be uploaded
+anywhere shared. Pass `--include-secrets` deliberately, or copy that one file by hand.
+
+On the other machine, restore against *its* resolved paths — set `FERMDB_DATA_DIR` or
+`env/paths.local.yaml` first, and the archive follows:
+
+```bash
+python ops/transfer.py import --archive fermdb-transfer-<stamp>.zip           # reports only
+python ops/transfer.py import --archive fermdb-transfer-<stamp>.zip --apply   # writes
+```
+
+Three properties worth knowing, because they are why this exists rather than `zip -r`:
+
+* **Databases are snapshotted, not copied.** The atlas runs in WAL mode, so a file-level copy can
+  leave committed transactions behind in the `-wal` sidecar. Every SQLite file — including the
+  `.bak` snapshots, detected by header rather than by extension — goes through
+  `sqlite3.Connection.backup` on a `mode=ro` connection, the same mechanism `just rebuild-check`
+  uses, and the sidecars are then skipped as redundant.
+* **Every member carries its sha256**, written into `MANIFEST.json` at export and re-checked on
+  restore. A corrupted transfer is reported as a checksum failure and a non-zero exit, not as an
+  atlas that happens to open.
+* **Import refuses by default, twice.** Nothing is written without `--apply`, and a file that
+  already exists is left alone unless `--overwrite` is also given — so restoring onto a populated
+  `data_dir` cannot silently replace a curated atlas with an older one. `env/secrets.local.env` is
+  never overwritten at all.
+
+`--into <dir>` redirects the data tier for a one-off restore; the source tier and the secrets file
+still go to their resolved locations, and the report prints all three before it does anything.
 
 ## The distinction that matters most
 
