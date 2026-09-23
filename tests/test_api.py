@@ -145,23 +145,54 @@ def conn() -> sqlite3.Connection:
 def test_no_endpoint_accepts_a_write() -> None:
     """PLAN.md D.3: the interface may not write to the domain. Enforced, not documented.
 
-    Every route is inspected rather than a sample, so a POST added later fails here instead of
-    shipping: a browser click must never be able to promote a proposal, because the audit log
-    records a named human as the actor.
-    """
-    fastapi = pytest.importorskip("fastapi")
-    assert fastapi  # the import is the point
+    A browser click must never promote a proposal, because the audit log records a *named human*
+    as the actor for every promotion.
 
+    **Read via the OpenAPI schema, not by walking `app.routes`.** The first version of this test
+    walked `app.routes` and was vacuous: FastAPI represents each `include_router` as one lazy
+    `_IncludedRouter` object carrying no `.path` and no `.methods`, so the walk saw six
+    routes -- four docs pages, `/api/health`, and the SPA fallback -- and none of the 34 real API
+    paths. It passed by inspecting nothing that mattered, which is the worst way for a safety
+    test to fail. `app.openapi()["paths"]` is the flattened, fully-resolved routing table, so it
+    cannot go quietly blind the same way.
+
+    `test_the_guard_can_actually_see_the_endpoints` below is the guard on the guard.
+    """
+    pytest.importorskip("fastapi")
     from fermdb.api.app import create_app
 
-    app = create_app()
-    offenders = [
-        (route.path, sorted(methods))
-        for route in app.routes
-        if (methods := getattr(route, "methods", set()) - {"HEAD", "OPTIONS"})
-        and not methods <= {"GET"}
-    ]
+    paths = create_app().openapi()["paths"]
+    offenders = sorted(
+        (path, method.upper())
+        for path, operations in paths.items()
+        for method in operations
+        if method.lower() not in {"get", "head", "options", "parameters"}
+    )
     assert offenders == [], f"non-GET endpoints exist: {offenders}"
+
+
+def test_the_guard_can_actually_see_the_endpoints() -> None:
+    """The write guard must be looking at the real surface, not at an empty list.
+
+    Without this, deleting every route would make the test above pass. It asserts the schema
+    contains the endpoints the interface is actually built from, so a future refactor that hides
+    them from introspection fails here rather than silently disarming the guard.
+    """
+    pytest.importorskip("fastapi")
+    from fermdb.api.app import create_app
+
+    paths = create_app().openapi()["paths"]
+
+    assert len(paths) >= 20, f"only {len(paths)} paths visible; the guard has gone blind"
+    for expected in (
+        "/api/atlas/coverage",
+        "/api/literature/overview",
+        "/api/genomes/overview",
+        "/api/networks/routes",
+        "/api/data/measurements",
+        "/api/curation/queue",
+    ):
+        assert expected in paths, f"{expected} is missing from the schema the guard reads"
 
 
 def test_select_builder_cannot_emit_a_write() -> None:
@@ -252,7 +283,38 @@ def test_study_rollup_separates_rnaseq_from_the_rest(conn: sqlite3.Connection) -
     study = overview["studies"][0]
     assert study["runs"] == 2
     assert study["expression_runs"] == 1
-    assert "none downloaded" in study["usable_note"]
+    # No matrices dir in this fixture, so nothing is quantified, and the note says so in those
+    # terms. It must not say "none downloaded": `acquisition_status` has no value meaning
+    # downloaded, so a count of it is always zero and would report a quantified corpus as empty.
+    assert "none of them quantified" in study["usable_note"]
+    assert study["quantified"] == 0
+
+
+def test_quantification_is_never_read_from_acquisition_status(
+    conn: sqlite3.Connection,
+) -> None:
+    """A regression test for a real bug: the status column cannot express "quantified".
+
+    `sra_run.acquisition_status` is CHECK-constrained to {discovered, condition_annotated,
+    queued, excluded}. An earlier version counted rows equal to `'downloaded'` -- a value the
+    constraint forbids -- so the count was structurally always zero and the Transcripts page
+    reported "none downloaded" for a corpus with 99 quantified samples on disk.
+    """
+    from fermdb.query.builder import Select
+    from fermdb.query.expression import ACQUISITION_STATES, QUANTIFICATION_STATES
+
+    stored = {
+        str(row["k"])
+        for row in Select("sra_run")
+        .columns("acquisition_status AS k", "COUNT(*) AS n")
+        .group_by("acquisition_status")
+        .page(conn)
+    }
+    assert stored <= ACQUISITION_STATES, "a status outside the documented CHECK vocabulary"
+    assert "downloaded" not in ACQUISITION_STATES
+    # Empty today. If a migration ever adds a real quantification state, this fails and points
+    # at the two places that then need updating.
+    assert frozenset() == QUANTIFICATION_STATES
 
 
 def test_study_with_no_rnaseq_says_so(conn: sqlite3.Connection) -> None:
@@ -371,3 +433,53 @@ def test_missing_row_is_a_404_not_an_empty_object() -> None:
     client = _client()
     assert client.get("/api/annotations/genes/NO-SUCH-GENE").status_code == 404
     assert client.get("/api/networks/routes?order_by=nonsense").status_code == 422
+
+
+def test_health_fails_on_a_schema_mismatch(tmp_path: Any, monkeypatch: Any) -> None:
+    """A health check that only stats the file cannot fail for the reason health checks exist.
+
+    This is a regression test for a real incident: the code moved to schema v17 while the atlas on
+    disk was still v16, every data endpoint raised `SchemaVersionError`, and `/api/health` kept
+    returning `ok: true` because it only asked whether the file was present. The UI therefore
+    rendered as healthy and empty. Presence is not usability, and only usability is worth asking.
+    """
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    from fermdb.api.app import create_app
+    from fermdb.db import SCHEMA_VERSION
+
+    stale = tmp_path / "stale.sqlite3"
+    conn = open_db(stale)
+    conn.execute(
+        "UPDATE meta SET value = ? WHERE key = 'schema_version'", (str(SCHEMA_VERSION - 1),)
+    )
+    conn.commit()
+    conn.close()
+
+    monkeypatch.setenv("FERMDB_DB_FILE", str(stale))
+    body = TestClient(create_app()).get("/api/health").json()
+
+    assert body["ok"] is False
+    assert body["schema_version"] == SCHEMA_VERSION - 1
+    assert body["expected_schema_version"] == SCHEMA_VERSION
+    # The message has to carry the way out, not just the diagnosis.
+    assert "fermdb db migrate" in body["error"]
+
+
+def test_health_is_ok_on_a_current_database(tmp_path: Any, monkeypatch: Any) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    from fermdb.api.app import create_app
+    from fermdb.db import SCHEMA_VERSION
+
+    fresh = tmp_path / "fresh.sqlite3"
+    open_db(fresh).close()
+
+    monkeypatch.setenv("FERMDB_DB_FILE", str(fresh))
+    body = TestClient(create_app()).get("/api/health").json()
+
+    assert body["ok"] is True
+    assert body["schema_version"] == SCHEMA_VERSION
+    assert "error" not in body

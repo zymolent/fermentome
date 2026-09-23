@@ -38,7 +38,7 @@ function Body() {
     case "genomes":
       return <GenomesPage />;
     case "annotations":
-      return <AnnotationsPage />;
+      return <AnnotationsPage route={route} />;
     case "gene":
       return <GenePage id={route.id} />;
     case "transcripts":

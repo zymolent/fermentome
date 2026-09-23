@@ -17,6 +17,7 @@ use this, and refusing to start because a frontend was never built would make th
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +27,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from fermdb.api.deps import atlas_path
+from fermdb.api.genes_routes import router as genes_router
 from fermdb.api.routes import router
+from fermdb.db import SCHEMA_VERSION, schema_version
 
 __all__ = ["create_app", "web_dist"]
 
@@ -49,9 +52,9 @@ def web_dist() -> Path:
 def create_app(*, dev_cors: bool = True) -> FastAPI:
     """Build the application."""
     app = FastAPI(
-        title="fermdb",
+        title="Fermentome",
         version="0.0.1",
-        summary="Read-only interface over the isobutanol strain-engineering atlas",
+        summary="Biochemical Atlas & Fermentation Products Database -- read-only interface",
         description=(
             "Every endpoint is a GET. Curation writes go through `fermdb curate` with a named "
             "human actor; there is deliberately no write path here (PLAN.md D.3)."
@@ -68,22 +71,57 @@ def create_app(*, dev_cors: bool = True) -> FastAPI:
         )
 
     app.include_router(router, prefix="/api")
+    app.include_router(genes_router, prefix="/api")
 
     @app.get("/api/health", tags=["atlas"])
     def health() -> dict[str, Any]:
-        """Whether the atlas file is reachable, and which one is being served.
+        """Whether the atlas is actually readable, and which one is being served.
 
-        Reports the path because the single most common confusion when running this is pointing
-        at a copy and reading it as the live atlas, or the reverse.
+        Reports the path because the commonest confusion when running this is pointing at a copy
+        and reading it as the live atlas, or the reverse.
+
+        **It opens the database.** An earlier version only called `path.exists()`, and that is a
+        health check that cannot fail for the reason a health check exists: when the code expected
+        schema v17 and the file on disk was v16, every real endpoint raised `SchemaVersionError`
+        while this one cheerfully returned `ok: true`. A file being present is not the same claim
+        as a file being usable, and only the second one is worth asking. So the connection is
+        opened, the schema version read, and a mismatch reported as `ok: false` with the command
+        that fixes it.
         """
         path = atlas_path()
-        return {
-            "ok": path.exists(),
+        payload: dict[str, Any] = {
+            "ok": False,
             "atlas": str(path),
             "exists": path.exists(),
             "size_bytes": path.stat().st_size if path.exists() else None,
             "writable_endpoints": 0,
         }
+        if not path.exists():
+            payload["error"] = f"no atlas at {path}"
+            return payload
+
+        try:
+            conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
+            try:
+                version = schema_version(conn)
+            finally:
+                conn.close()
+        except sqlite3.Error as error:
+            payload["error"] = f"cannot open the atlas: {error}"
+            return payload
+
+        payload["schema_version"] = version
+        payload["expected_schema_version"] = SCHEMA_VERSION
+        if version != SCHEMA_VERSION:
+            payload["error"] = (
+                f"atlas is at schema v{version}, this build expects v{SCHEMA_VERSION}. "
+                f"Migrate it with `fermdb db migrate` (it backs up first), or point "
+                f"FERMDB_DB_FILE at a database that is already at v{SCHEMA_VERSION}."
+            )
+            return payload
+
+        payload["ok"] = True
+        return payload
 
     dist = web_dist()
     if dist.is_dir():

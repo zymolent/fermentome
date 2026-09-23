@@ -1,0 +1,12 @@
+sce:YAL068C	CDS	I:complement(1807..2169)	PAU8; seripauperin PAU8
+sce:YAL005C	CDS	I:complement(139503..141431)	SSA1, YG100; Hsp70 family ATPase SSA1
+sce:YDR545W	CDS	IV:1526321..1531711	YRF1-1, YRF1; Y' element ATP-dependent helicase protein 1 copy 1
+sce:YER190W	CDS	V:571480..576525	YRF1-2, YRF1; Y' element ATP-dependent helicase protein 1 copy 2
+sce:YFL026W	CDS	VI:82580..83875	STE2; alpha-factor pheromone receptor STE2
+sce:YGR149W	CDS	VII:789031..790329	GPC1; glycerophosphocholine acyltransferase
+sce:YJR009C	CDS	X:complement(453683..454681)	TDH2, GLD2; glyceraldehyde-3-phosphate dehydrogenase (phosphorylating) TDH2
+sce:YKR103W	CDS	XI:653080..656736	NFT1; putative multidrug transporter NFT1
+sce:YLR355C	CDS	XII:complement(838066..839253)	ILV5; ketol-acid reductoisomerase
+sce:YMR303C	CDS	XIII:complement(873291..874337)	ADH2, ADR2; alcohol dehydrogenase ADH2
+sce:YOL086C	CDS	XV:complement(159548..160594)	ADH1, ADC1; alcohol dehydrogenase ADH1
+sce:YPL249C-A	CDS	XVI:complement(join(75699..75985,76224..76239))	RPL36B; ribosomal 60S subunit protein L36B

@@ -24,6 +24,12 @@ grows past this.
     python -m fermdb.cli omics load
     python -m fermdb.cli omics genes
     python -m fermdb.cli omics baseline --limit 15
+    python -m fermdb.cli genomics load-gff3 <file.gff.gz> --dry-run \
+        --assembly-accession GCF_000146045.2 \
+        --organism-id YAA:ORG:saccharomyces-cerevisiae-s288c
+    python -m fermdb.cli genomics load-gff3 <file.gff.gz> \
+        --assembly-accession GCF_000146045.2 \
+        --organism-id YAA:ORG:saccharomyces-cerevisiae-s288c
     python -m fermdb.cli atlas pathways
     python -m fermdb.cli atlas routes --limit 10 --write
     python -m fermdb.cli atlas explain E_mtdna
@@ -63,6 +69,7 @@ from .extract import (
     load_source_text,
 )
 from .genetic_code import AMBIGUOUS_CODONS, TABLE_1, TABLE_3
+from .genomics.cli import add_genomics_subcommand
 from .literature.discovery import FamilyRunResult, run_family
 from .literature.ethanol import (
     ADMISSIONS_FILE,
@@ -1171,6 +1178,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_mq_ingest.set_defaults(func=cmd_literature_manual_queue_ingest)
 
     add_omics_subcommand(sub)
+    add_genomics_subcommand(sub)
     add_atlas_subcommand(sub)
     add_query_subcommand(sub)
     add_db_subcommand(sub)

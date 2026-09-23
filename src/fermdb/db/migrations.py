@@ -537,6 +537,48 @@ _V15_TO_V16: Final[Migration] = Migration(
     ),
 )
 
+#: v16 -> v17. `gene` gains the columns a genome-scale gene model needs and had nowhere to put.
+#:
+#: `gene` was written for 36 hand-curated rows and it shows: it carries `start_pos` and `end_pos`
+#: and no column saying *of which sequence*. At 36 rows that is survivable, because every one of
+#: them is nameable and its chromosome is recoverable from the evidence sentence. At the ~6,600
+#: rows one RefSeq GFF3 produces it is not data at all -- "position 400,000" names sixteen places
+#: on S288C, no range filter can be expressed, and a mitochondrial gene (the thing this atlas is
+#: FOR) is indistinguishable from a nuclear one, because the accession is the only thing in a gene
+#: model that says which genome carries it and therefore which NCBI translation table it is read
+#: under.
+#:
+#: `biotype`, `locus_tag` and `description` come with it: a gene list that cannot say "protein
+#: coding only" makes 300 tRNAs and 6,000 ORFs one undifferentiated list, and the product string
+#: is the only human-readable thing on the row.
+#:
+#: Adds only. Every existing row keeps every value it had, and the four new columns arrive NULL --
+#: "never recorded", which is the truth for a row parsed from a transcript FASTA that this
+#: migration has not read (CONVENTIONS.md, "Missing values"). The bulk loader in
+#: src/fermdb/genomics/load_genes.py fills them, and it fills only what is NULL.
+_V16_TO_V17: Final[Migration] = Migration(
+    from_version=16,
+    to_version=17,
+    summary=(
+        "gene.seqid/biotype/locus_tag/description plus the two browse indexes -- 6,600 genes "
+        "with coordinates and no sequence accession cannot be located or filtered"
+    ),
+    statements=(
+        "ALTER TABLE gene ADD COLUMN seqid TEXT",
+        # No CHECK, on purpose, and the first load settled the argument: S288C alone emits
+        # thirteen gene_biotype values, five of them (misc_RNA, antisense_RNA, RNase_MRP_RNA,
+        # SRP_RNA, telomerase_RNA) outside the list this column was specified with. A CHECK from
+        # that list would have dropped 20 real genes without a word. See schema.sql's note.
+        "ALTER TABLE gene ADD COLUMN biotype TEXT",
+        "ALTER TABLE gene ADD COLUMN locus_tag TEXT",
+        "ALTER TABLE gene ADD COLUMN description TEXT",
+        # "genes on this chromosome, in order" and "genes overlapping this window".
+        "CREATE INDEX gene_by_position ON gene(assembly_accession, seqid, start_pos)",
+        # "protein-coding only", and the per-biotype counts beside it.
+        "CREATE INDEX gene_by_biotype ON gene(biotype)",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -550,6 +592,7 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V13_TO_V14,
     _V14_TO_V15,
     _V15_TO_V16,
+    _V16_TO_V17,
 )
 
 

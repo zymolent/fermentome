@@ -1,0 +1,114 @@
+##gff-version 3
+#!gff-spec-version 1.21
+#!processor NCBI annotwriter
+#!genome-build R64
+#!genome-build-accession NCBI_Assembly:GCF_000146045.2
+#!annotation-date 09/18/2024
+#!annotation-source SGD R64-5-1
+##sequence-region NC_001133.9 1 230218
+##species https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=559292
+#
+# A hand-assembled excerpt of GCF_000146045.2_R64_genomic.gff: 14 gene units chosen to cover
+# the shapes a loader has to survive, in NCBI annotwriter's own column layout, directive set
+# and attribute spelling.
+#
+# EVERY LOCUS HERE IS REAL, at its real coordinates, strand and gene_biotype. The three the
+# coordinate round-trip is asserted against -- BDH1, ECM31, GPD1 -- are among the 36 rows the
+# atlas held before any GFF3 was parsed, so they are an independent check on the 1-based
+# inclusive -> 0-based half-open conversion rather than a copy of this parser's own output.
+# An earlier draft of this file invented spans and gave Q0140 to a tRNA (Q0140 is VAR1); a
+# fixture that puts a real accession on the wrong gene is a trap for whoever reads it next.
+#
+# Deliberately illustrative rather than checked: the partial=true/start_range/end_range on
+# YAL068C, the gene_synonym lists, and every protein_id/transcript_id accession. Nothing
+# asserts on those, and they are here so the file parses like the real one. YAR061W's exon
+# also carries no product=, which the real file does supply -- kept that way on purpose, so
+# a gene whose annotation states no product at all has a case here.
+#
+# Coverage: minus strand (YAL068C, SNR161); mitochondrial (tP(UGG)Q, COX1, VAR1, 21S rRNA on
+# NC_001224.1); tRNA; pseudogene, as RefSeq writes it -- feature TYPE `pseudogene`, not
+# `gene`; an escaped comma in a product (BDH1's real '(R,R)-butanediol dehydrogenase');
+# multi-exon (EFB1 2 exons, COX1 3); Name != locus_tag (PAU8/YAL068C, COX1/Q0045,
+# VAR1/Q0140, TRN1/YNCA0002W); loci with no gene= at all, whose standard_name is therefore
+# NULL (YAL067W-A, tP(UGG)Q, YAR061W); and SNR18, which really does sit inside the EFB1
+# intron and so exercises the nested-gene path.
+NC_001133.9	RefSeq	region	1	230218	.	+	.	ID=NC_001133.9:1..230218;Dbxref=taxon:559292;Name=I;chromosome=I;gbkey=Src;genome=chromosome;mol_type=genomic DNA;strain=S288C
+###
+NC_001133.9	RefSeq	gene	1807	2169	.	-	.	ID=gene-YAL068C;Dbxref=GeneID:851229;Name=PAU8;end_range=2169,.;gbkey=Gene;gene=PAU8;gene_biotype=protein_coding;locus_tag=YAL068C;partial=true;start_range=.,1807
+NC_001133.9	RefSeq	mRNA	1807	2169	.	-	.	ID=rna-NM_001180043.1;Parent=gene-YAL068C;Dbxref=GeneID:851229,GenBank:NM_001180043.1;end_range=2169,.;gbkey=mRNA;gene=PAU8;locus_tag=YAL068C;partial=true;product=seripauperin PAU8;start_range=.,1807;transcript_id=NM_001180043.1
+NC_001133.9	RefSeq	exon	1807	2169	.	-	.	ID=exon-NM_001180043.1-1;Parent=rna-NM_001180043.1;gbkey=mRNA;gene=PAU8;locus_tag=YAL068C;product=seripauperin PAU8;transcript_id=NM_001180043.1
+NC_001133.9	RefSeq	CDS	1807	2169	.	-	0	ID=cds-NP_009342.1;Parent=rna-NM_001180043.1;Dbxref=GeneID:851229,GenBank:NP_009342.1;Name=NP_009342.1;gbkey=CDS;gene=PAU8;locus_tag=YAL068C;product=seripauperin PAU8;protein_id=NP_009342.1
+###
+NC_001133.9	RefSeq	gene	2480	2707	.	+	.	ID=gene-YAL067W-A;Dbxref=GeneID:1466426;Name=YAL067W-A;gbkey=Gene;gene_biotype=protein_coding;locus_tag=YAL067W-A
+NC_001133.9	RefSeq	mRNA	2480	2707	.	+	.	ID=rna-NM_001184582.1;Parent=gene-YAL067W-A;Dbxref=GeneID:1466426,GenBank:NM_001184582.1;gbkey=mRNA;locus_tag=YAL067W-A;product=uncharacterized protein;transcript_id=NM_001184582.1
+NC_001133.9	RefSeq	exon	2480	2707	.	+	.	ID=exon-NM_001184582.1-1;Parent=rna-NM_001184582.1;gbkey=mRNA;locus_tag=YAL067W-A;product=uncharacterized protein;transcript_id=NM_001184582.1
+NC_001133.9	RefSeq	CDS	2480	2707	.	+	0	ID=cds-NP_009343.1;Parent=rna-NM_001184582.1;Dbxref=GeneID:1466426,GenBank:NP_009343.1;Name=NP_009343.1;gbkey=CDS;locus_tag=YAL067W-A;product=uncharacterized protein;protein_id=NP_009343.1
+###
+NC_001133.9	RefSeq	gene	35155	36303	.	+	.	ID=gene-YAL060W;Dbxref=GeneID:851239,SGD:S000000058;Name=BDH1;gbkey=Gene;gene=BDH1;gene_biotype=protein_coding;gene_synonym=BDH;locus_tag=YAL060W
+NC_001133.9	RefSeq	mRNA	35155	36303	.	+	.	ID=rna-NM_001178173.1;Parent=gene-YAL060W;Dbxref=GeneID:851239,GenBank:NM_001178173.1;gbkey=mRNA;gene=BDH1;locus_tag=YAL060W;product=(R%2CR)-butanediol dehydrogenase;transcript_id=NM_001178173.1
+NC_001133.9	RefSeq	exon	35155	36303	.	+	.	ID=exon-NM_001178173.1-1;Parent=rna-NM_001178173.1;gbkey=mRNA;gene=BDH1;locus_tag=YAL060W;product=(R%2CR)-butanediol dehydrogenase;transcript_id=NM_001178173.1
+NC_001133.9	RefSeq	CDS	35155	36303	.	+	0	ID=cds-NP_009338.1;Parent=rna-NM_001178173.1;Dbxref=GeneID:851239,GenBank:NP_009338.1;Name=NP_009338.1;gbkey=CDS;gene=BDH1;locus_tag=YAL060W;product=(R%2CR)-butanediol dehydrogenase;protein_id=NP_009338.1
+###
+NC_001133.9	RefSeq	gene	139152	139254	.	+	.	ID=gene-YNCA0002W;Dbxref=GeneID:1466521;Name=TRN1;gbkey=Gene;gene=TRN1;gene_biotype=tRNA;locus_tag=YNCA0002W
+NC_001133.9	RefSeq	tRNA	139152	139254	.	+	.	ID=rna-YNCA0002W;Parent=gene-YNCA0002W;Dbxref=GeneID:1466521;anticodon=(pos:139186..139188);gbkey=tRNA;gene=TRN1;locus_tag=YNCA0002W;product=tRNA-Pro
+NC_001133.9	RefSeq	exon	139152	139254	.	+	.	ID=exon-YNCA0002W-1;Parent=rna-YNCA0002W;Dbxref=GeneID:1466521;anticodon=(pos:139186..139188);gbkey=tRNA;gene=TRN1;locus_tag=YNCA0002W;product=tRNA-Pro
+###
+NC_001133.9	RefSeq	gene	142174	143160	.	+	.	ID=gene-YAL003W;Dbxref=GeneID:851262,SGD:S000000003;Name=EFB1;gbkey=Gene;gene=EFB1;gene_biotype=protein_coding;gene_synonym=TEF5;locus_tag=YAL003W
+NC_001133.9	RefSeq	mRNA	142174	143160	.	+	.	ID=rna-NM_001178208.1;Parent=gene-YAL003W;Dbxref=GeneID:851262,GenBank:NM_001178208.1;gbkey=mRNA;gene=EFB1;locus_tag=YAL003W;product=translation elongation factor 1 subunit beta;transcript_id=NM_001178208.1
+NC_001133.9	RefSeq	exon	142174	142253	.	+	.	ID=exon-NM_001178208.1-1;Parent=rna-NM_001178208.1;gbkey=mRNA;gene=EFB1;locus_tag=YAL003W;product=translation elongation factor 1 subunit beta;transcript_id=NM_001178208.1
+NC_001133.9	RefSeq	exon	142620	143160	.	+	.	ID=exon-NM_001178208.1-2;Parent=rna-NM_001178208.1;gbkey=mRNA;gene=EFB1;locus_tag=YAL003W;product=translation elongation factor 1 subunit beta;transcript_id=NM_001178208.1
+NC_001133.9	RefSeq	CDS	142174	142253	.	+	0	ID=cds-NP_009398.1;Parent=rna-NM_001178208.1;Dbxref=GeneID:851262,GenBank:NP_009398.1;Name=NP_009398.1;gbkey=CDS;gene=EFB1;locus_tag=YAL003W;product=translation elongation factor 1 subunit beta;protein_id=NP_009398.1
+NC_001133.9	RefSeq	CDS	142620	143160	.	+	2	ID=cds-NP_009398.1;Parent=rna-NM_001178208.1;Dbxref=GeneID:851262,GenBank:NP_009398.1;Name=NP_009398.1;gbkey=CDS;gene=EFB1;locus_tag=YAL003W;product=translation elongation factor 1 subunit beta;protein_id=NP_009398.1
+###
+NC_001133.9	RefSeq	gene	142367	142468	.	+	.	ID=gene-YNCA0003W;Dbxref=GeneID:9164976;Name=SNR18;gbkey=Gene;gene=SNR18;gene_biotype=snoRNA;locus_tag=YNCA0003W
+NC_001133.9	RefSeq	snoRNA	142367	142468	.	+	.	ID=rna-YNCA0003W;Parent=gene-YNCA0003W;Dbxref=GeneID:9164976;gbkey=ncRNA;gene=SNR18;locus_tag=YNCA0003W;ncrna_class=snoRNA;product=SNR18
+NC_001133.9	RefSeq	exon	142367	142468	.	+	.	ID=exon-YNCA0003W-1;Parent=rna-YNCA0003W;Dbxref=GeneID:9164976;gbkey=ncRNA;gene=SNR18;locus_tag=YNCA0003W;ncrna_class=snoRNA;product=SNR18
+###
+NC_001133.9	RefSeq	pseudogene	218140	219145	.	+	.	ID=gene-YAR061W;Dbxref=GeneID:851284;Name=YAR061W;gbkey=Gene;gene_biotype=pseudogene;locus_tag=YAR061W;pseudo=true
+NC_001133.9	RefSeq	exon	218140	219145	.	+	.	ID=id-YAR061W;Parent=gene-YAR061W;Dbxref=GeneID:851284;gbkey=exon;locus_tag=YAR061W;pseudo=true
+###
+##sequence-region NC_001134.8 1 813184
+NC_001134.8	RefSeq	region	1	813184	.	+	.	ID=NC_001134.8:1..813184;Dbxref=taxon:559292;Name=II;chromosome=II;gbkey=Src;genome=chromosome;mol_type=genomic DNA;strain=S288C
+###
+NC_001134.8	RefSeq	gene	307185	307345	.	-	.	ID=gene-YNCB0009C;Dbxref=GeneID:9164937;Name=SNR161;gbkey=Gene;gene=SNR161;gene_biotype=snoRNA;locus_tag=YNCB0009C
+NC_001134.8	RefSeq	snoRNA	307185	307345	.	-	.	ID=rna-YNCB0009C;Parent=gene-YNCB0009C;Dbxref=GeneID:9164937;gbkey=ncRNA;gene=SNR161;locus_tag=YNCB0009C;ncrna_class=snoRNA;product=SNR161
+NC_001134.8	RefSeq	exon	307185	307345	.	-	.	ID=exon-YNCB0009C-1;Parent=rna-YNCB0009C;Dbxref=GeneID:9164937;gbkey=ncRNA;gene=SNR161;locus_tag=YNCB0009C;ncrna_class=snoRNA;product=SNR161
+###
+NC_001134.8	RefSeq	gene	583720	584658	.	+	.	ID=gene-YBR176W;Dbxref=GeneID:852474,SGD:S000000380;Name=ECM31;gbkey=Gene;gene=ECM31;gene_biotype=protein_coding;locus_tag=YBR176W
+NC_001134.8	RefSeq	mRNA	583720	584658	.	+	.	ID=rna-NM_001178528.1;Parent=gene-YBR176W;Dbxref=GeneID:852474,GenBank:NM_001178528.1;gbkey=mRNA;gene=ECM31;locus_tag=YBR176W;product=3-methyl-2-oxobutanoate hydroxymethyltransferase;transcript_id=NM_001178528.1
+NC_001134.8	RefSeq	exon	583720	584658	.	+	.	ID=exon-NM_001178528.1-1;Parent=rna-NM_001178528.1;gbkey=mRNA;gene=ECM31;locus_tag=YBR176W;product=3-methyl-2-oxobutanoate hydroxymethyltransferase;transcript_id=NM_001178528.1
+NC_001134.8	RefSeq	CDS	583720	584658	.	+	0	ID=cds-NP_009735.1;Parent=rna-NM_001178528.1;Dbxref=GeneID:852474,GenBank:NP_009735.1;Name=NP_009735.1;gbkey=CDS;gene=ECM31;locus_tag=YBR176W;product=3-methyl-2-oxobutanoate hydroxymethyltransferase;protein_id=NP_009735.1
+###
+##sequence-region NC_001136.10 1 1531933
+NC_001136.10	RefSeq	region	1	1531933	.	+	.	ID=NC_001136.10:1..1531933;Dbxref=taxon:559292;Name=IV;chromosome=IV;gbkey=Src;genome=chromosome;mol_type=genomic DNA;strain=S288C
+###
+NC_001136.10	RefSeq	gene	411825	413000	.	+	.	ID=gene-YDL022W;Dbxref=GeneID:851539,SGD:S000002180;Name=GPD1;gbkey=Gene;gene=GPD1;gene_biotype=protein_coding;gene_synonym=DAR1,HOR1,OSG1,OSR5;locus_tag=YDL022W
+NC_001136.10	RefSeq	mRNA	411825	413000	.	+	.	ID=rna-NM_001180075.1;Parent=gene-YDL022W;Dbxref=GeneID:851539,GenBank:NM_001180075.1;gbkey=mRNA;gene=GPD1;locus_tag=YDL022W;product=glycerol-3-phosphate dehydrogenase (NAD(+)) GPD1;transcript_id=NM_001180075.1
+NC_001136.10	RefSeq	exon	411825	413000	.	+	.	ID=exon-NM_001180075.1-1;Parent=rna-NM_001180075.1;gbkey=mRNA;gene=GPD1;locus_tag=YDL022W;product=glycerol-3-phosphate dehydrogenase (NAD(+)) GPD1;transcript_id=NM_001180075.1
+NC_001136.10	RefSeq	CDS	411825	413000	.	+	0	ID=cds-NP_010262.1;Parent=rna-NM_001180075.1;Dbxref=GeneID:851539,GenBank:NP_010262.1;Name=NP_010262.1;gbkey=CDS;gene=GPD1;locus_tag=YDL022W;product=glycerol-3-phosphate dehydrogenase (NAD(+)) GPD1;protein_id=NP_010262.1
+###
+##sequence-region NC_001224.1 1 85779
+NC_001224.1	RefSeq	region	1	85779	.	+	.	ID=NC_001224.1:1..85779;Dbxref=taxon:559292;Name=MT;gbkey=Src;genome=mitochondrion;mol_type=genomic DNA;strain=S288C
+###
+NC_001224.1	RefSeq	gene	731	802	.	+	.	ID=gene-tP(UGG)Q;Dbxref=GeneID:854607;Name=tP(UGG)Q;gbkey=Gene;gene_biotype=tRNA;locus_tag=tP(UGG)Q
+NC_001224.1	RefSeq	tRNA	731	802	.	+	.	ID=rna-tP(UGG)Q;Parent=gene-tP(UGG)Q;Dbxref=GeneID:854607;gbkey=tRNA;locus_tag=tP(UGG)Q;product=tRNA-Pro
+NC_001224.1	RefSeq	exon	731	802	.	+	.	ID=exon-tP(UGG)Q-1;Parent=rna-tP(UGG)Q;Dbxref=GeneID:854607;gbkey=tRNA;locus_tag=tP(UGG)Q;product=tRNA-Pro
+###
+NC_001224.1	RefSeq	gene	13818	26701	.	+	.	ID=gene-Q0045;Dbxref=GeneID:854598,SGD:S000007260;Name=COX1;gbkey=Gene;gene=COX1;gene_biotype=protein_coding;gene_synonym=OXI3;locus_tag=Q0045
+NC_001224.1	RefSeq	mRNA	13818	26701	.	+	.	ID=rna-Q0045;Parent=gene-Q0045;Dbxref=GeneID:854598,GenBank:NC_001224.1;gbkey=mRNA;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	exon	13818	13986	.	+	.	ID=exon-Q0045-1;Parent=rna-Q0045;gbkey=mRNA;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	exon	16435	16470	.	+	.	ID=exon-Q0045-2;Parent=rna-Q0045;gbkey=mRNA;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	exon	26229	26701	.	+	.	ID=exon-Q0045-3;Parent=rna-Q0045;gbkey=mRNA;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	CDS	13818	13986	.	+	0	ID=cds-NP_009305.1;Parent=rna-Q0045;Dbxref=GeneID:854598,GenBank:NP_009305.1;Name=NP_009305.1;gbkey=CDS;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;protein_id=NP_009305.1;transl_table=3
+NC_001224.1	RefSeq	CDS	16435	16470	.	+	0	ID=cds-NP_009305.1;Parent=rna-Q0045;Dbxref=GeneID:854598,GenBank:NP_009305.1;Name=NP_009305.1;gbkey=CDS;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;protein_id=NP_009305.1;transl_table=3
+NC_001224.1	RefSeq	CDS	26229	26701	.	+	0	ID=cds-NP_009305.1;Parent=rna-Q0045;Dbxref=GeneID:854598,GenBank:NP_009305.1;Name=NP_009305.1;gbkey=CDS;gene=COX1;locus_tag=Q0045;product=cytochrome c oxidase subunit 1;protein_id=NP_009305.1;transl_table=3
+###
+NC_001224.1	RefSeq	gene	48901	50097	.	+	.	ID=gene-Q0140;Dbxref=GeneID:854600,SGD:S000007275;Name=VAR1;gbkey=Gene;gene=VAR1;gene_biotype=protein_coding;locus_tag=Q0140
+NC_001224.1	RefSeq	mRNA	48901	50097	.	+	.	ID=rna-Q0140;Parent=gene-Q0140;Dbxref=GeneID:854600;gbkey=mRNA;gene=VAR1;locus_tag=Q0140;product=mitochondrial 37S ribosomal protein VAR1;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	exon	48901	50097	.	+	.	ID=exon-Q0140-1;Parent=rna-Q0140;gbkey=mRNA;gene=VAR1;locus_tag=Q0140;product=mitochondrial 37S ribosomal protein VAR1;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	CDS	48901	50097	.	+	0	ID=cds-NP_009314.1;Parent=rna-Q0140;Dbxref=GeneID:854600,GenBank:NP_009314.1;Name=NP_009314.1;gbkey=CDS;gene=VAR1;locus_tag=Q0140;product=mitochondrial 37S ribosomal protein VAR1;protein_id=NP_009314.1;transl_table=3
+###
+NC_001224.1	RefSeq	gene	58009	62447	.	+	.	ID=gene-Q0158;Dbxref=GeneID:854601,SGD:S000007288;Name=21S_RRNA;gbkey=Gene;gene=21S_RRNA;gene_biotype=rRNA;locus_tag=Q0158
+NC_001224.1	RefSeq	rRNA	58009	62447	.	+	.	ID=rna-Q0158;Parent=gene-Q0158;Dbxref=GeneID:854601;gbkey=rRNA;gene=21S_RRNA;locus_tag=Q0158;product=21S ribosomal RNA;transcript_id=NC_001224.1
+NC_001224.1	RefSeq	exon	58009	62447	.	+	.	ID=exon-Q0158-1;Parent=rna-Q0158;Dbxref=GeneID:854601;gbkey=rRNA;gene=21S_RRNA;locus_tag=Q0158;product=21S ribosomal RNA
+###

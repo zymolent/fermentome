@@ -139,11 +139,18 @@ const GROUPS: NavGroup[] = [
 export function Sidebar({ route }: { route: Route }) {
   return (
     <nav className="flex w-56 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
-      <div className="flex items-center gap-2 border-b border-zinc-800 px-4 py-4">
+      {/* The rail is 224px wide, so the full name -- "Fermentome — Biochemical Atlas &
+          Fermentation Products Database" -- cannot sit here without truncating to nonsense. The
+          subtitle carries the half that distinguishes it and `title` carries the whole thing for
+          a hover; the document <title> and the API docs carry it in full. */}
+      <div
+        className="flex items-center gap-2 border-b border-zinc-800 px-4 py-4"
+        title="Fermentome — Biochemical Atlas & Fermentation Products Database"
+      >
         <FlaskConical className="h-5 w-5 text-sky-400" />
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-zinc-100">fermdb</div>
-          <div className="truncate text-[11px] text-zinc-500">isobutanol atlas</div>
+          <div className="truncate text-sm font-semibold text-zinc-100">Fermentome</div>
+          <div className="truncate text-[11px] text-zinc-500">biochemical atlas</div>
         </div>
       </div>
 

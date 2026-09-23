@@ -99,7 +99,12 @@ def cmd_db_migrate(args: argparse.Namespace) -> int:
     print(f"  applied   {len(ran)} migration(s); database is at v{SCHEMA_VERSION}")
     print()
     print("New columns are NULL on existing rows, which is 'never assessed' rather than a value.")
-    print("Re-run the loader that owns them to backfill: `fermdb atlas pathways`.")
+    print(
+        "Re-run the loader that owns them to backfill. v17's columns "
+        "(gene.seqid, biotype, locus_tag, description) are owned by `fermdb genomics "
+        "load-gff3 <RefSeq GFF3> --assembly-accession ... --organism-id ...` -- run it with "
+        "--dry-run first; v6's pathway columns by `fermdb atlas pathways`."
+    )
     return 0
 
 

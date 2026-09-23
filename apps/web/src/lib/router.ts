@@ -13,7 +13,17 @@ export type Route =
   | { name: "literature"; q?: string; family?: string; readable?: boolean }
   | { name: "publication"; id: string }
   | { name: "genomes" }
-  | { name: "annotations" }
+  | {
+      name: "annotations";
+      q?: string;
+      seqid?: string;
+      biotype?: string;
+      assembly?: string;
+      source?: string;
+      strand?: string;
+      order?: string;
+      page?: number;
+    }
   | { name: "gene"; id: string }
   | { name: "transcripts"; study?: string }
   | { name: "networks" }
@@ -68,7 +78,17 @@ export function parseRoute(href: string): Route {
       if (parts[1] === "genes" && parts[2]) {
         return { name: "gene", id: decodeURIComponent(parts.slice(2).join("/")) };
       }
-      return { name: "annotations" };
+      return {
+        name: "annotations",
+        q: params.get("q") ?? undefined,
+        seqid: params.get("seqid") ?? undefined,
+        biotype: params.get("biotype") ?? undefined,
+        assembly: params.get("assembly") ?? undefined,
+        source: params.get("source") ?? undefined,
+        strand: params.get("strand") ?? undefined,
+        order: params.get("order") ?? undefined,
+        page: params.get("page") ? Number(params.get("page")) : undefined,
+      };
     case "transcripts":
       return { name: "transcripts", study: params.get("study") ?? undefined };
     case "networks":
@@ -108,8 +128,26 @@ export function hrefFor(route: Route): string {
       return `/literature/publications/${encodeURIComponent(route.id)}`;
     case "genomes":
       return "/genomes";
-    case "annotations":
-      return "/annotations";
+    case "annotations": {
+      // Every filter lives here rather than in component state, so a filtered view is a URL
+      // someone can bookmark, reload and send to a collaborator. A facet rail whose selection
+      // dies on refresh is a control, not a view.
+      const params = new URLSearchParams();
+      for (const [key, value] of [
+        ["q", route.q],
+        ["seqid", route.seqid],
+        ["biotype", route.biotype],
+        ["assembly", route.assembly],
+        ["source", route.source],
+        ["strand", route.strand],
+        ["order", route.order],
+        ["page", route.page && route.page > 1 ? String(route.page) : undefined],
+      ] as const) {
+        if (value) params.set(key, String(value));
+      }
+      const text = params.toString();
+      return `/annotations${text ? `?${text}` : ""}`;
+    }
     case "gene":
       return `/annotations/genes/${encodeURIComponent(route.id)}`;
     case "transcripts":

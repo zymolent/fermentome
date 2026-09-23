@@ -58,6 +58,31 @@ _PROJECTION: Final[re.Pattern[str]] = re.compile(
     re.IGNORECASE,
 )
 
+#: The identifier grammar, as a fragment, so the computed forms below cannot drift from it.
+_IDENT_SRC: Final[str] = r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?"
+
+#: Two computed projections, both closed forms over identifiers only and both requiring an alias.
+#:
+#: They exist because **ordering cannot be done in Python.** A page is the first N rows *of the
+#: ordered set*; sorting the rows that came back sorts the wrong ones, and the difference is
+#: invisible on page 1 and wrong on every page after it. So an ordering key the atlas does not
+#: store as a column has to be expressible here or the reader has to drop out to a raw
+#: ``conn.execute`` -- which is the exact leak this module exists to close.
+#:
+#: * ``a - b AS n`` -- a gene's length is ``end_pos - start_pos``; `gene` stores no length column.
+#: * ``COALESCE(a, b, ...) AS n`` -- a gene's display name is "standard name, else systematic
+#:   name, else id". Ordering on `standard_name` alone leads with the ~1000 unnamed ORFs, which
+#:   is not a name order any reader would recognise as one.
+#:
+#: Every operand is matched against the identifier grammar above, so nothing a caller supplies
+#: reaches the SQL as anything but a validated column name. Values still cannot appear here.
+_COMPUTED: Final[re.Pattern[str]] = re.compile(
+    rf"^(?:{_IDENT_SRC}\s*-\s*{_IDENT_SRC}"
+    rf"|COALESCE\(\s*{_IDENT_SRC}(?:\s*,\s*{_IDENT_SRC}){{1,3}}\s*\))"
+    rf"\s+AS\s+[A-Za-z_][A-Za-z0-9_]*$",
+    re.IGNORECASE,
+)
+
 #: Hard ceiling on a single page, so a caller that forgets to pass one cannot stream the atlas.
 MAX_ROWS: Final[int] = 5000
 
@@ -77,7 +102,7 @@ def _check_identifier(name: str, *, what: str) -> str:
 
 def _check_projection(expr: str) -> str:
     stripped = expr.strip()
-    if _IDENTIFIER.match(stripped) or _PROJECTION.match(stripped):
+    if _IDENTIFIER.match(stripped) or _PROJECTION.match(stripped) or _COMPUTED.match(stripped):
         return stripped
     # An aliased plain column: "s.name AS strain_name".
     parts = re.split(r"\s+AS\s+", stripped, flags=re.IGNORECASE)

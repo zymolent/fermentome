@@ -1,0 +1,25 @@
+!gaf-version: 2.2
+!date-generated: 20260922
+!generated-by: Saccharomyces Genome Database (SGD)
+!URL: https://www.yeastgenome.org/
+!Contact Email: sgd-helpdesk@lists.stanford.edu
+!Funding: NHGRI at US NIH, grant number U41-HG001315
+!
+SGD	S000003381	GPC1	acts_upstream_of_or_within	GO:0036151	PMID:30514764	IMP		P	Glycerophosphocholine acyltransferase (GPCAT)	YGR149W|glycerophosphocholine acyltransferase	protein	taxon:559292	20181220	SGD		UniProtKB:P48236
+SGD	S000003381	GPC1	acts_upstream_of_or_within	GO:0006656	PMID:30514764	IGI	SGD:S000005701	P	Glycerophosphocholine acyltransferase (GPCAT)	YGR149W|glycerophosphocholine acyltransferase	protein	taxon:559292	20181220	SGD		UniProtKB:P48236
+SGD	S000003381	GPC1	involved_in	GO:0006656	PMID:27758859	IDA		P	Glycerophosphocholine acyltransferase (GPCAT)	YGR149W|glycerophosphocholine acyltransferase	protein	taxon:559292	20161208	SGD		UniProtKB:P48236
+SGD	S000004347	ILV5	enables	GO:0004455	GO_REF:0000033	IBA	PANTHER:PTN000483120	F	Acetohydroxyacid reductoisomerase and mtDNA binding protein	YLR355C|ketol-acid reductoisomerase	protein	taxon:559292	20110331	GO_Central		UniProtKB:P06168
+SGD	S000005446	ADH1	is_active_in	GO:0005737	GO_REF:0000033	IBA	PANTHER:PTN008677163	C	Alcohol dehydrogenase	YOL086C|ADC1|alcohol dehydrogenase ADH1	protein	taxon:559292	20051214	GO_Central		UniProtKB:P00330
+SGD	S000004918	ADH2	is_active_in	GO:0005737	GO_REF:0000033	IBA	PANTHER:PTN008677163	C	Glucose-repressible alcohol dehydrogenase II	YMR303C|ADR2|alcohol dehydrogenase ADH2	protein	taxon:559292	20031028	GO_Central		UniProtKB:P00331
+SGD	S000000004	SSA1	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR013126	F	ATPase involved in protein folding and NLS-directed nuclear transport	YAL005C|YG100|Hsp70 family ATPase SSA1	protein	taxon:559292	20130827	InterPro		UniProtKB:P10591
+SGD	S000000004	SSA1	enables	GO:0016887	PMID:7737974	IDA		F	ATPase involved in protein folding and NLS-directed nuclear transport	YAL005C|YG100|Hsp70 family ATPase SSA1	protein	taxon:559292	20130827	SGD		UniProtKB:P10591
+SGD	S000001811	NFT1	enables	GO:0003674	GO_REF:0000015	ND		F	Putative transporter of the MRP subfamily	YKR103W|putative multidrug transporter NFT1	protein	taxon:559292	20200915	SGD		UniProtKB:P0CE68
+SGD	S000001868	STE2	part_of	GO:0038038	GO_REF:0000033	IBA	PANTHER:PTN001997318	C	Receptor for alpha-factor pheromone	YFL026W|alpha-factor pheromone receptor STE2	protein	taxon:559292	20220826	GO_Central		UniProtKB:D6VTK4
+SGD	S000006240	VMA13	part_of	GO:0000221	GO_REF:0000033	IBA	PANTHER:PTN000075631	C	Subunit H of the V1 peripheral membrane domain of V-ATPase	YPR036W|CLS11|H(+)-transporting V1 sector ATPase subunit H	protein	taxon:559292	20030716	GO_Central		UniProtKB:P41807
+SGD	S000006240	VMA13	NOT|involved_in	GO:0007042	GO_REF:0000033	IBA	PANTHER:PTN000075631	P	Subunit H of the V1 peripheral membrane domain of V-ATPase	YPR036W|CLS11|H(+)-transporting V1 sector ATPase subunit H	protein	taxon:559292	20030716	GO_Central		UniProtKB:P41807
+SGD	S000006240	VMA13	NOT|involved_in	GO:0007042	GO_REF:0000033	IBA	PANTHER:PTN000842151	P	Subunit H of the V1 peripheral membrane domain of V-ATPase	YPR036W|CLS11|H(+)-transporting V1 sector ATPase subunit H	protein	taxon:559292	20030716	GO_Central		UniProtKB:P41807
+SGD	S000377910	CPX-9181	involved_in	GO:0040029	PMID:26527276	BSR		P		SESAME metabolic enzyme complex|2.5.1.6|1.1.1.95|1.1.1.399|2.1.2.1|2.7.1.40|6.2.1.1	protein_complex	taxon:559292	20240908	ComplexPortal		
+!SYNTHETIC: the next line is the real YRF1-4 record with its systematic-name synonym and
+!SYNTHETIC: UniProt id removed and its symbol collapsed to the shared alias YRF1, so that the
+!SYNTHETIC: only identifier left is an ambiguous one. Everything else in this file is real.
+SGD	S000004458	YRF1	is_active_in	GO:0005737	GO_REF:0000033	IBA	MGI:MGI:1918836	C	Helicase encoded by the Y' element of subtelomeric regions	YRF1|Y' element ATP-dependent helicase protein 1 copy 4	protein	taxon:559292	20040324	GO_Central		

@@ -38,7 +38,26 @@ from fermdb.db import migrations as M
 # backfill touches and are deliberately never shape-compared -- see the note above them below, so
 # nobody later mistakes a stub for a record of what v5 declared.
 V5_TABLES = """
-CREATE TABLE gene (id TEXT PRIMARY KEY, standard_name TEXT, gene_group_id TEXT);
+-- `gene` was a three-column stub until v17, which is the first migration to touch it -- it adds
+-- four columns and two indexes, and one of those indexes names `assembly_accession` and
+-- `start_pos`, so a stub would not have survived the CREATE INDEX. It is now v5's real shape,
+-- verbatim, and it IS shape-compared (see the parametrize list below).
+CREATE TABLE gene (
+    id                  TEXT PRIMARY KEY,
+    organism_id         TEXT NOT NULL,
+    assembly_accession  TEXT NOT NULL,
+    systematic_name     TEXT,
+    standard_name       TEXT,
+    gene_group_id       TEXT,
+    start_pos           INTEGER,
+    end_pos             INTEGER,
+    strand              INTEGER CHECK (strand IN (-1, 0, 1)),
+    zone                TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence            TEXT NOT NULL,
+    confidence          TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    CHECK (start_pos IS NULL OR end_pos IS NULL OR end_pos > start_pos),
+    UNIQUE (assembly_accession, id)
+);
 CREATE TABLE gene_group (id TEXT PRIMARY KEY);
 CREATE TABLE metabolite (
     id         TEXT PRIMARY KEY,
@@ -203,7 +222,7 @@ def fresh() -> sqlite3.Connection:
 
 
 @pytest.mark.parametrize(
-    "table", ["reaction", "metabolite", "product", "measurement", "bottleneck"]
+    "table", ["reaction", "metabolite", "product", "measurement", "bottleneck", "gene"]
 )
 def test_migrated_tables_match_freshly_created_ones(fresh: sqlite3.Connection, table: str) -> None:
     """The invariant the whole module rests on: two routes, one schema."""
@@ -248,6 +267,63 @@ def test_the_new_indexes_match_too(fresh: sqlite3.Connection) -> None:
             created = {str(r["name"]) for r in fresh.execute(query, (table,))}
             assert migrated == created, table
             assert f"{table}_by_publication" in created
+    finally:
+        old.close()
+
+
+def test_v17_adds_the_gene_browse_indexes(fresh: sqlite3.Connection) -> None:
+    """v17's two indexes are the whole point of the column it adds; a missing one is silent."""
+    old = _v5()
+    try:
+        M.migrate(old)
+        query = "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='gene'"
+        migrated = {str(r["name"]) for r in old.execute(query)}
+        created = {str(r["name"]) for r in fresh.execute(query)}
+        assert migrated == created
+        assert {"gene_by_position", "gene_by_biotype"} <= created
+    finally:
+        old.close()
+
+
+def test_v17_leaves_the_curated_gene_rows_exactly_as_they_were() -> None:
+    """The 36 rows in the atlas carry a J.5 evidence chain. Adding columns must not disturb one.
+
+    Written against a row copied field for field out of the live atlas, because "existing rows
+    survive" is only a real claim if the row tested is the shape of a real one.
+    """
+    old = _v5()
+    curated = (
+        "YAA:GENE:gcf-000146045-2-ymr083w",
+        "YAA:ORG:saccharomyces-cerevisiae-s288c",
+        "GCF_000146045.2",
+        "YMR083W",
+        "ADH3",
+        "YAA:GG:ymr083w",
+        434787,
+        435915,
+        1,
+        "R",
+        "[locus_tag=YMR083W] [gene=ADH3] [db_xref=GeneID:855107] [product=alcohol dehydrogenase "
+        "ADH3] on NC_001145.3 (nuclear-encoded); RefSeq rna_from_genomic FASTA for assembly "
+        "GCF_000146045.2, parsed from s288c.transcripts.fna.gz (sha256 f783b29b)",
+        "high",
+    )
+    try:
+        old.execute(
+            "INSERT INTO gene (id, organism_id, assembly_accession, systematic_name, "
+            "standard_name, gene_group_id, start_pos, end_pos, strand, zone, evidence, "
+            "confidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            curated,
+        )
+        M.migrate(old)
+        row = old.execute(
+            "SELECT id, organism_id, assembly_accession, systematic_name, standard_name, "
+            "gene_group_id, start_pos, end_pos, strand, zone, evidence, confidence, "
+            "seqid, biotype, locus_tag, description FROM gene"
+        ).fetchone()
+        assert tuple(row)[:12] == curated
+        # NULL, not '' and not 'unknown': nobody looked, because this migration reads no GFF3.
+        assert tuple(row)[12:] == (None, None, None, None)
     finally:
         old.close()
 

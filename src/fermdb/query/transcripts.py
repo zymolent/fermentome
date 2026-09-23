@@ -4,8 +4,13 @@ A study inventory is easy to render and easy to mislead with. 172 runs across 15
 like a transcriptome atlas; it is not one, and the columns that say so are the ones this module
 puts first:
 
-* **`acquisition_status`** -- `discovered` means the accession is known, not that the reads are
-  on disk. A run the atlas has never downloaded cannot support any statement about expression.
+* **`acquisition_status` cannot say a run was quantified.** Its CHECK admits only `discovered`,
+  `condition_annotated`, `queued` and `excluded` -- none of which means "the reads were fetched
+  and counted". An earlier version of this module counted rows equal to `'downloaded'`, a value
+  the constraint forbids, so it reported "none downloaded" for a corpus with 99 quantified
+  samples sitting on disk. Quantification is recorded in the matrix header and nowhere else, so
+  `quantified_runs` is passed in from `fermdb.query.expression` and the status column is reported
+  as the triage state it actually is.
 * **`library_strategy`** -- 117 of these are RNA-Seq. The rest are amplicon, Tn-Seq and WGS runs
   that arrived with the same BioProjects, and averaging across them is a category error.
 * **`reference_match_quality`** -- `species_exact` means the reads were quantified against a
@@ -22,8 +27,10 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
+from fermdb.config import Settings
 from fermdb.query.builder import Page, Select
 from fermdb.query.values import Absence, Value, Zone
 
@@ -57,7 +64,9 @@ class StudyRead:
     title: Value[str]
     runs: int
     expression_runs: int
-    downloaded: int
+    #: Runs of this study that appear as a column in a quantified matrix. Passed in rather than
+    #: derived from `acquisition_status`, which has no value that can express it.
+    quantified: int
     excluded: int
     relevance_uncertain: int
     strain_matched: int
@@ -68,8 +77,10 @@ class StudyRead:
         """One sentence a reader can act on, rather than four numbers to combine themselves."""
         if self.expression_runs == 0:
             return "no RNA-Seq runs -- this study cannot support an expression statement"
-        if self.downloaded == 0:
-            return f"{self.expression_runs} RNA-Seq run(s), none downloaded -- accessions only"
+        if self.quantified == 0:
+            return (
+                f"{self.expression_runs} RNA-Seq run(s), none of them quantified -- accessions only"
+            )
         if self.strain_matched == 0:
             return (
                 f"{self.expression_runs} RNA-Seq run(s), quantified against another strain's "
@@ -86,7 +97,7 @@ class StudyRead:
             "title": self.title.as_json(),
             "runs": self.runs,
             "expression_runs": self.expression_runs,
-            "downloaded": self.downloaded,
+            "quantified": self.quantified,
             "excluded": self.excluded,
             "relevance_uncertain": self.relevance_uncertain,
             "strain_matched": self.strain_matched,
@@ -104,6 +115,9 @@ class TranscriptOverview:
     samples: int
     samples_with_context: int
     studies: tuple[StudyRead, ...]
+    #: Runs appearing as a column in a quantified matrix. Counted from the filesystem, because
+    #: `acquisition_status` has no value that can express it.
+    quantified_runs: int
     by_strategy: dict[str, int]
     by_acquisition_status: dict[str, int]
     by_reference_match: dict[str, int]
@@ -125,6 +139,13 @@ class TranscriptOverview:
             "expression_runs": self.expression_runs,
             "samples": self.samples,
             "samples_with_context": self.samples_with_context,
+            "quantified_runs": self.quantified_runs,
+            "quantification_note": (
+                "quantified runs are counted from the matrix headers, not from "
+                "`acquisition_status` -- that column's CHECK has no value meaning the reads were "
+                "fetched and counted, so it reads `discovered` even for a run with 99 columns of "
+                "TPMs behind it"
+            ),
             "samples_without_context": max(0, self.samples - self.samples_with_context),
             "context_note": (
                 "a sample with no condition context cannot enter a contrast: there is nothing "
@@ -192,11 +213,17 @@ def list_runs(
     )
 
 
-def _studies(conn: sqlite3.Connection) -> tuple[StudyRead, ...]:
+def _studies(
+    conn: sqlite3.Connection, quantified_runs: frozenset[str] = frozenset()
+) -> tuple[StudyRead, ...]:
     """Per-study rollups, built from the run rows rather than from a GROUP BY per metric.
 
     One pass over the runs and the counting happens here. Six correlated subqueries would be the
     obvious SQL and would also be six chances for the filters to drift apart.
+
+    ``quantified_runs`` comes from the matrix headers, because the database has no column that
+    can hold it. Defaulting to empty is safe in the honest direction: a caller that does not
+    supply it sees "none quantified", which understates rather than invents.
     """
     datasets = {
         str(row["accession"]): row
@@ -210,6 +237,7 @@ def _studies(conn: sqlite3.Connection) -> tuple[StudyRead, ...]:
     for row in (
         Select("sra_run")
         .columns(
+            "run_accession",
             "study_accession",
             "library_strategy",
             "acquisition_status",
@@ -243,7 +271,7 @@ def _studies(conn: sqlite3.Connection) -> tuple[StudyRead, ...]:
                 expression_runs=sum(
                     1 for r in rows if str(r["library_strategy"]) in EXPRESSION_STRATEGIES
                 ),
-                downloaded=sum(1 for r in rows if str(r["acquisition_status"]) == "downloaded"),
+                quantified=sum(1 for r in rows if str(r["run_accession"]) in quantified_runs),
                 excluded=sum(1 for r in rows if str(r["acquisition_status"]) == "excluded"),
                 relevance_uncertain=sum(1 for r in rows if r["relevance_uncertain"]),
                 strain_matched=sum(
@@ -255,16 +283,45 @@ def _studies(conn: sqlite3.Connection) -> tuple[StudyRead, ...]:
     return tuple(studies)
 
 
-def read_study(conn: sqlite3.Connection, study_accession: str) -> StudyRead | None:
+def quantified_runs(settings: Settings | None = None) -> frozenset[str]:
+    """Every run accession that appears as a column in some quantified matrix.
+
+    Read from the matrix headers because there is nowhere else it is written down:
+    `sra_run.acquisition_status` has no value meaning "quantified" (see the module docstring), so
+    a run's quantification state is a fact about the filesystem, not about a table.
+
+    A missing matrices directory yields the empty set rather than raising. This is a read for a
+    page that must still render when quantification has never been run.
+    """
+    from fermdb.query.expression import MATRIX_FILES, matrix_samples
+
+    settings = settings or Settings.load()
+    found: set[str] = set()
+    for filename in MATRIX_FILES.values():
+        path = Path(settings.matrices_dir) / filename
+        if path.exists():
+            found.update(matrix_samples(path))
+    return frozenset(found)
+
+
+def read_study(
+    conn: sqlite3.Connection,
+    study_accession: str,
+    *,
+    settings: Settings | None = None,
+) -> StudyRead | None:
     """One study's rollup, or None if no run carries that accession."""
-    for study in _studies(conn):
+    for study in _studies(conn, quantified_runs(settings)):
         if study.study_accession == study_accession:
             return study
     return None
 
 
-def read_overview(conn: sqlite3.Connection) -> TranscriptOverview:
+def read_overview(
+    conn: sqlite3.Connection, *, settings: Settings | None = None
+) -> TranscriptOverview:
     """The Transcripts page payload."""
+    quantified = quantified_runs(settings)
     return TranscriptOverview(
         datasets=_scalar_int(conn, Select("dataset").columns("COUNT(*) AS n")),
         runs=_scalar_int(conn, Select("sra_run").columns("COUNT(*) AS n")),
@@ -273,7 +330,8 @@ def read_overview(conn: sqlite3.Connection) -> TranscriptOverview:
             conn,
             Select("sample").columns("COUNT(*) AS n").where("condition_context_id IS NOT NULL"),
         ),
-        studies=_studies(conn),
+        studies=_studies(conn, quantified),
+        quantified_runs=len(quantified),
         by_strategy=_counts(conn, "sra_run", "library_strategy"),
         by_acquisition_status=_counts(conn, "sra_run", "acquisition_status"),
         by_reference_match=_counts(conn, "sra_run", "reference_match_quality"),

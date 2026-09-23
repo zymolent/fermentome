@@ -107,7 +107,7 @@ from typing import Final
 #:     Both columns are nullable and stay that way: a measurement derived from a deposited dataset
 #:     rather than from a paper is a legitimate row. NULL means "there is no publication", never
 #:     "the publication is in the evidence prose".
-SCHEMA_VERSION: Final[int] = 16
+SCHEMA_VERSION: Final[int] = 17
 
 #: Passed as `path` to open an ephemeral database, mainly in tests.
 IN_MEMORY: Final[str] = ":memory:"

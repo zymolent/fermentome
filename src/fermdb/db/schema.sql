@@ -405,6 +405,47 @@ CREATE TABLE gene (
     systematic_name     TEXT,
     standard_name       TEXT,
     gene_group_id       TEXT REFERENCES gene_group(id),
+    -- v17. The sequence the gene sits on -- 'NC_001133.9', 'NC_001224.1'. Until v17 `gene` had
+    -- start_pos and end_pos and no way to say *of what*, which is survivable at 36 curated rows
+    -- (every one of them nameable) and meaningless at 6,600: two genes at position 400,000 on
+    -- different chromosomes were indistinguishable, and no range filter could be written at all.
+    -- It is TEXT rather than a foreign key into `reference_sequence` because that table's `kind`
+    -- CHECK and `encoding_genome` foreign key are yeast-specific (see section 16's note) and a
+    -- bacterial replicon would misrepresent itself there; the accession is the join key that
+    -- works for every assembly in `reference_genome_asset`.
+    --
+    -- This is also the column that makes a mitochondrial gene identifiable at all. The genetic
+    -- code follows the encoding genome (see section 3), and the only thing in a gene model that
+    -- says which genome carries it is the accession it is on: NC_001224.1 is read under NCBI
+    -- table 3, every other S288C sequence under table 1.
+    seqid               TEXT,
+    -- v17. RefSeq's `gene_biotype`: protein_coding, tRNA, rRNA, ncRNA, snoRNA, snRNA, pseudogene,
+    -- transposable_element, ...
+    --
+    -- DELIBERATELY FREE TEXT, WITH NO CHECK. A CHECK here would have to enumerate every value
+    -- RefSeq emits across all five assemblies in `reference_genome_asset` -- two more yeast
+    -- genomes, E. coli K-12 and Z. mobilis. A CHECK that rejects a real gene loses that gene
+    -- silently at load time, which is strictly worse than a column that stores a value nobody
+    -- anticipated: the wrong value is visible and fixable, the missing row is not.
+    -- Observed on 2026-09-23 in GCF_000146045.2 (S288C, 6,477 genes), which is the only
+    -- one of the five whose GFF3 has been parsed: protein_coding 6021, tRNA 299, snoRNA 76,
+    -- ncRNA 22, pseudogene 18, rRNA 14, misc_RNA 10, antisense_RNA 7, snRNA 6, and one each
+    -- of RNase_MRP_RNA, RNase_P_RNA, SRP_RNA and telomerase_RNA. Five of those thirteen --
+    -- misc_RNA, antisense_RNA, RNase_MRP_RNA, SRP_RNA, telomerase_RNA -- are outside the
+    -- list this column was first specified with, so a CHECK written from that list would
+    -- have silently rejected 20 real genes on the first load. The other four assemblies in
+    -- `reference_genome_asset` (CEN.PK, Ethanol Red, E. coli K-12, Z. mobilis) have still
+    -- not been parsed, and two of them are bacterial. Narrowing this to a CHECK is a later
+    -- migration, written once all five sets are observed rather than recalled.
+    biotype             TEXT,
+    -- v17. The GFF3 `locus_tag`. Redundant with `systematic_name` for S288C, where the systematic
+    -- name IS the locus tag, and not redundant anywhere else: an assembly with no systematic
+    -- naming scheme still has locus tags, and the two must not be conflated by storing one in the
+    -- other's column.
+    locus_tag           TEXT,
+    -- v17. The product / note the annotation states -- 'alcohol dehydrogenase ADH3', 'tRNA-Ala'.
+    -- Zone R prose, never parsed in place.
+    description         TEXT,
     -- 0-based half-open [start_pos, end_pos). Length is end_pos - start_pos.
     start_pos           INTEGER,
     end_pos             INTEGER,
@@ -415,6 +456,18 @@ CREATE TABLE gene (
     CHECK (start_pos IS NULL OR end_pos IS NULL OR end_pos > start_pos),
     UNIQUE (assembly_accession, id)
 );
+
+-- v17. "The genes on this chromosome, in genomic order" and "the genes overlapping this window"
+-- -- the browse and range queries the genome viewer issues on every pane. The leading
+-- `assembly_accession` is not decoration: a gene id is meaningless without its assembly
+-- (CONVENTIONS.md, "Gene identity"), so every such query is already scoped to one, and a seqid
+-- alone is not unique across assemblies either.
+CREATE INDEX gene_by_position ON gene(assembly_accession, seqid, start_pos);
+
+-- v17. "protein-coding only", the default filter on every gene list, and the counts-per-biotype
+-- the summary pane shows. At 6,600 rows per assembly a scan is cheap; at five assemblies plus
+-- whatever phase 2 adds it stops being.
+CREATE INDEX gene_by_biotype ON gene(biotype);
 
 
 -- ---------------------------------------------------------------------------------------------

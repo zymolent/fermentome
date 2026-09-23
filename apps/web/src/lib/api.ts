@@ -323,6 +323,133 @@ export interface SearchHits {
   recall_caveat: string;
 }
 
+/**
+ * The gene browser's payloads.
+ *
+ * Note what is and is not a `Value` here. `annotation_count` is a plain number because a count
+ * is always known — zero annotations is a fact, not an absence. Everything the source may not
+ * have recorded, including the coordinates, is a `Value`, so a gene with no `start` renders as
+ * "not recorded" rather than as a gene at position 0.
+ */
+export interface GeneBrowserRow {
+  id: string;
+  display_name: string;
+  systematic_name: Value<string>;
+  standard_name: Value<string>;
+  locus_tag: Value<string>;
+  description: Value<string>;
+  assembly_accession: Value<string>;
+  seqid: Value<string>;
+  chromosome: Value<string>;
+  start: Value<number>;
+  end: Value<number>;
+  length: Value<number>;
+  strand: Value<string>;
+  biotype: Value<string>;
+  gene_group_id: Value<string>;
+  location: Value<string>;
+  annotation_count: number;
+}
+
+/**
+ * A page of genes, and the size of the answer it was cut from.
+ *
+ * `count` is this page. `total_matching` is the match. A header that renders `count` says
+ * "50 genes" when it means "the first 50 of 4,812", and there is no way for a reader to tell.
+ */
+export interface GeneBrowserPage extends Page<GeneBrowserRow> {
+  total_matching: number;
+  has_more: boolean;
+  ordered_by: string;
+  orderings: string[];
+  filters: Record<string, unknown>;
+  searched_columns: string[];
+  technique: string;
+  /** Filters the live schema could not serve, each with the migration that would unblock it. */
+  ignored_filters?: Record<string, string>;
+  missing_columns?: Record<string, string>;
+}
+
+export interface GeneFacetValue {
+  key: string;
+  label: string;
+  count: number;
+}
+
+/** A facet, or a stated reason there is no facet. An empty list renders those identically. */
+export interface GeneFacet {
+  key: string;
+  label: string;
+  available: boolean;
+  values: GeneFacetValue[];
+  blocked_reason?: string;
+}
+
+export interface GeneFacets {
+  facets: GeneFacet[];
+  /** Atlas-wide, deliberately NOT narrowed: they are the denominator a match is compared against. */
+  totals: Record<string, number>;
+  missing_columns: Record<string, string>;
+  narrowed_by: Record<string, unknown>;
+  counting: string;
+}
+
+export interface KaryotypeTrack {
+  seqid: string;
+  label: string;
+  ordinal: number;
+  kind: string;
+  length: number;
+  /** False when the length is only a lower bound from the genes seen on the sequence. */
+  length_is_reference: boolean;
+  gene_count: number;
+  bins: number[];
+  max_bin: number;
+}
+
+export interface KaryotypeRead {
+  available: boolean;
+  bin_width: number;
+  tracks: KaryotypeTrack[];
+  unplaced_genes: number;
+  truncated: boolean;
+  reference_assembly: string;
+  blocked_reason?: string;
+}
+
+export interface GenePosition {
+  gene_id: string;
+  seqid: Value<string>;
+  chromosome: Value<string>;
+  sequence_length: Value<number>;
+  start: Value<number>;
+  end: Value<number>;
+  length: Value<number>;
+  strand: Value<string>;
+  biotype: Value<string>;
+  locus_tag: Value<string>;
+  description: Value<string>;
+  location: Value<string>;
+  neighbours: GeneBrowserRow[];
+  neighbourhood_bases: number;
+  missing_columns: Record<string, string>;
+}
+
+export interface GeneBrowserParams {
+  /** Index signature so these compose with `qs()`, which takes a plain bag of scalars. */
+  [key: string]: string | number | boolean | undefined;
+  q?: string;
+  assembly?: string;
+  seqid?: string;
+  biotype?: string;
+  strand?: string;
+  has_coordinates?: boolean;
+  annotated_by?: string;
+  order_by?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -382,6 +509,19 @@ export const api = {
 
   genes: (limit = 200) => get<{ id: string; name: string }[]>(`/annotations/genes${qs({ limit })}`),
   gene: (id: string) => get<Record<string, unknown>>(`/annotations/genes/${encodeURIComponent(id)}`),
+
+  // The gene browser. `/genes/{id}` returns the same payload `/annotations/genes/{id}` does,
+  // including `absent_sections`, with a `position` block added — so the gene page gains
+  // coordinates without losing the statement about what the atlas cannot show.
+  geneBrowser: (params: GeneBrowserParams) => get<GeneBrowserPage>(`/genes${qs(params)}`),
+  geneFacets: (params: Omit<GeneBrowserParams, "order_by" | "limit" | "offset"> = {}) =>
+    get<GeneFacets>(`/genes/facets${qs(params)}`),
+  karyotype: (params: Omit<GeneBrowserParams, "seqid" | "order_by" | "limit" | "offset">) =>
+    get<KaryotypeRead>(`/genes/karyotype${qs(params)}`),
+  geneDetail: (id: string) =>
+    get<Record<string, unknown> & { position: GenePosition | null }>(
+      `/genes/${encodeURIComponent(id)}`,
+    ),
 
   transcripts: () => get<TranscriptOverview>("/transcripts/overview"),
   runs: (params: { study?: string; strategy?: string; limit?: number; offset?: number }) =>

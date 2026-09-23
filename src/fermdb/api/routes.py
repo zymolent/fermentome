@@ -21,6 +21,7 @@ from fermdb.api.deps import Conn
 from fermdb.config import Settings
 from fermdb.query import (
     coverage,
+    expression,
     genes,
     genomes,
     literature,
@@ -157,7 +158,7 @@ def annotations_gene(conn: Conn, gene_id: str) -> dict[str, Any]:
 @router.get("/transcripts/overview", tags=["transcripts"])
 def transcripts_overview(conn: Conn) -> dict[str, Any]:
     """Studies and runs, split by what each can actually support."""
-    return transcripts.read_overview(conn).as_json()
+    return transcripts.read_overview(conn, settings=Settings.load()).as_json()
 
 
 @router.get("/transcripts/runs", tags=["transcripts"])
@@ -183,7 +184,7 @@ def transcripts_runs(
 @router.get("/transcripts/studies/{study_accession}", tags=["transcripts"])
 def transcripts_study(conn: Conn, study_accession: str) -> dict[str, Any]:
     """One study's rollup."""
-    read = transcripts.read_study(conn, study_accession)
+    read = transcripts.read_study(conn, study_accession, settings=Settings.load())
     if read is None:
         raise HTTPException(status_code=404, detail=f"no study {study_accession!r}")
     return read.as_json()
@@ -333,3 +334,49 @@ def curation_queue(
     kind_list = tuple(k.strip() for k in kinds.split(",") if k.strip()) if kinds else None
     packets = review.review_queue(conn, limit=limit, kinds=kind_list, settings=Settings.load())
     return [packet.as_json() for packet in packets]
+
+
+# ---------------------------------------------------------------- expression
+
+
+@router.get("/expression/overview", tags=["transcripts"])
+def expression_overview(conn: Conn) -> dict[str, Any]:
+    """What has actually been quantified, and where that contradicts the run table.
+
+    The contradiction is the point. `sra_run.acquisition_status` reads `discovered` for every
+    run, which says nothing was downloaded; the matrices nevertheless hold 99 columns of real
+    TPMs. Both numbers are rendered, so the payload says outright which one to trust.
+    """
+    return expression.read_overview(conn, settings=Settings.load()).as_json()
+
+
+@router.get("/expression/genes/{systematic_name}", tags=["transcripts"])
+def expression_gene(
+    conn: Conn,
+    systematic_name: str,
+    slug: str = Query("s288c", description="which quantified matrix to read"),
+) -> dict[str, Any]:
+    """One gene's expression across every quantified sample.
+
+    404 means "not quantified", which is emphatically not "not expressed" -- the first is a
+    statement about this corpus and the second would be a claim about the organism. Returning an
+    empty profile would collapse them.
+    """
+    read = expression.read_gene_expression(
+        conn, systematic_name, slug=slug, settings=Settings.load()
+    )
+    if read is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"{systematic_name!r} has no row in the {slug!r} matrix. That means it was not "
+                "quantified, not that it is not expressed."
+            ),
+        )
+    return read.as_json()
+
+
+@router.get("/expression/contrasts", tags=["transcripts"])
+def expression_contrasts(conn: Conn) -> list[dict[str, Any]]:
+    """Every differential-expression result, with whether its file still exists on disk."""
+    return [contrast.as_json() for contrast in expression.list_contrasts(conn)]
