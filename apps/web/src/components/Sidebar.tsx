@@ -9,15 +9,19 @@
 
 import {
   Activity,
+  Beaker,
   BookOpen,
+  Columns2,
   ClipboardCheck,
   Database,
   Dna,
   FlaskConical,
   LayoutDashboard,
+  Microscope,
   Search,
   Share2,
   ShieldCheck,
+  TestTubes,
   Tags,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -56,6 +60,16 @@ const GROUPS: NavGroup[] = [
         matches: ["search"],
         title: "Substring search across publications, genes, strains, products and reactions",
       },
+      {
+        // Compare sits beside Search rather than under Measurements because it is a tool over
+        // the atlas, not a section of it -- and because its commonest answer is a refusal,
+        // which reads better as a question you asked than as a page you landed on.
+        label: "Compare",
+        icon: Columns2,
+        route: { name: "compare", kind: "strain", ids: [] },
+        matches: ["compare"],
+        title: "Two or more strains or experiments side by side, or a refusal with its reason",
+      },
     ],
   },
   {
@@ -93,6 +107,27 @@ const GROUPS: NavGroup[] = [
         route: { name: "data" },
         matches: ["data"],
         title: "Titers, yields and tolerances, with their comparability caveats",
+      },
+      {
+        label: "Strains",
+        icon: TestTubes,
+        route: { name: "strains" },
+        matches: ["strains", "strain"],
+        title: "Every strain, its lineage, genotype, modifications and phenotype by class",
+      },
+      {
+        label: "Products",
+        icon: Beaker,
+        route: { name: "products" },
+        matches: ["products", "product"],
+        title: "PLAN.md B.1's four tiers, and each product's class-faceted measurements",
+      },
+      {
+        label: "Experiments",
+        icon: Microscope,
+        route: { name: "experiments" },
+        matches: ["experiments", "experiment"],
+        title: "Designs and their condition context in full, with 'not recorded' visible",
       },
       {
         label: "Transcripts",

@@ -30,6 +30,13 @@ export type Route =
   | { name: "route"; id: string }
   | { name: "pathway"; id: string }
   | { name: "data"; kind?: string }
+  | { name: "strains"; q?: string; cls?: string }
+  | { name: "strain"; id: string }
+  | { name: "experiments"; q?: string }
+  | { name: "experiment"; id: string }
+  | { name: "products" }
+  | { name: "product"; id: string }
+  | { name: "compare"; kind: "strain" | "experiment"; ids: string[] }
   | { name: "evidence" }
   | { name: "curation" }
   | { name: "search"; q: string };
@@ -101,6 +108,27 @@ export function parseRoute(href: string): Route {
       return { name: "networks" };
     case "data":
       return { name: "data", kind: params.get("kind") ?? undefined };
+    case "strains":
+      if (parts[1]) return { name: "strain", id: decodeURIComponent(parts.slice(1).join("/")) };
+      return {
+        name: "strains",
+        q: params.get("q") ?? undefined,
+        cls: params.get("class") ?? undefined,
+      };
+    case "experiments":
+      if (parts[1]) return { name: "experiment", id: decodeURIComponent(parts.slice(1).join("/")) };
+      return { name: "experiments", q: params.get("q") ?? undefined };
+    case "products":
+      if (parts[1]) return { name: "product", id: decodeURIComponent(parts.slice(1).join("/")) };
+      return { name: "products" };
+    case "compare":
+      return {
+        name: "compare",
+        kind: params.get("kind") === "experiment" ? "experiment" : "strain",
+        // Repeated `id`, never a comma-joined string: an atlas identifier is
+        // `YAA:STRAIN:cen-pk113-7d`, and any separator you pick is one an id may one day carry.
+        ids: params.getAll("id"),
+      };
     case "evidence":
       return { name: "evidence" };
     case "curation":
@@ -160,6 +188,29 @@ export function hrefFor(route: Route): string {
       return `/networks/pathways/${encodeURIComponent(route.id)}`;
     case "data":
       return `/data${route.kind ? `?kind=${encodeURIComponent(route.kind)}` : ""}`;
+    case "strains": {
+      const params = new URLSearchParams();
+      if (route.q) params.set("q", route.q);
+      if (route.cls) params.set("class", route.cls);
+      const text = params.toString();
+      return `/strains${text ? `?${text}` : ""}`;
+    }
+    case "strain":
+      return `/strains/${encodeURIComponent(route.id)}`;
+    case "experiments":
+      return `/experiments${route.q ? `?q=${encodeURIComponent(route.q)}` : ""}`;
+    case "experiment":
+      return `/experiments/${encodeURIComponent(route.id)}`;
+    case "products":
+      return "/products";
+    case "product":
+      return `/products/${encodeURIComponent(route.id)}`;
+    case "compare": {
+      const params = new URLSearchParams();
+      params.set("kind", route.kind);
+      for (const id of route.ids) params.append("id", id);
+      return `/compare?${params.toString()}`;
+    }
     case "evidence":
       return "/evidence";
     case "curation":

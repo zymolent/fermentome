@@ -450,6 +450,307 @@ export interface GeneBrowserParams {
   offset?: number;
 }
 
+/* ------------------------------------------------------------------ the four entity pages
+ *
+ * The shapes below mirror `fermdb.query.{strains,experiments,products,compare}`. Two of them
+ * carry a field with no visual equivalent anywhere else in this client and both are load-bearing:
+ *
+ * - `ComparabilityClass.status` is three-valued, not a boolean. "classified", "provisional" and
+ *   "unclassified" are three different licences to compare, and collapsing them to
+ *   `is_classified` would let a provisional class -- one whose key is blind to a facet that has
+ *   no column -- pass as a real one.
+ * - `Comparison.verdict` is likewise three-valued, and `refuse` is a successful answer with a
+ *   200 beside it. PLAN.md I.2: refusal is the feature.
+ */
+
+export interface ContextFacet {
+  facet: string;
+  label: string;
+  value: Value<string | number>;
+  as_reported: Value<string>;
+  unit?: string;
+  is_class_defining: boolean;
+}
+
+export type ClassStatus = "classified" | "provisional" | "unclassified";
+
+export interface ComparabilityClass {
+  key: string;
+  label: string;
+  status: ClassStatus;
+  is_classified: boolean;
+  context_id: Value<string>;
+  facets: ContextFacet[];
+  blocked_by: string[];
+  blind_to: string[];
+  definition_source: string;
+}
+
+export interface ConditionContext {
+  id: string;
+  zone: Value<string>;
+  confidence: Value<string>;
+  completeness_score: Value<number>;
+  facets: ContextFacet[];
+  extra_facets: ContextFacet[];
+  recorded: number;
+  total_facets: number;
+  /** Keyed by absence kind. Never summed: the three are not one number. */
+  absent_by_kind: Record<string, number>;
+  unavailable_class_facets: Record<string, string>;
+  comparability_class: ComparabilityClass;
+}
+
+export interface StrainRow {
+  id: string;
+  canonical_name: string;
+  organism_id: Value<string>;
+  organism_name: Value<string>;
+  strain_class: Value<string>;
+  confidence: Value<string>;
+  zone: Value<string>;
+  measurements: number;
+  modifications: number;
+  samples: number;
+  has_genotype: boolean;
+  has_lineage: boolean;
+}
+
+export interface StrainListPage {
+  rows: StrainRow[];
+  count: number;
+  truncated: boolean;
+  limit?: number;
+  offset?: number;
+  /** Atlas-wide, deliberately NOT narrowed by the filters: it is the denominator. */
+  by_class: Record<string, number>;
+  total: number;
+}
+
+export interface Lineage {
+  parents: Record<string, unknown>[];
+  children: Record<string, unknown>[];
+  is_recorded: boolean;
+  rows_in_atlas: number;
+  note: string;
+}
+
+export interface Modification {
+  id: string;
+  type: string;
+  target_locus: Value<string>;
+  target_gene_group_id: Value<string>;
+  source_organism_id: Value<string>;
+  details: Value<string>;
+  publication_id: Value<string>;
+  zone: Value<string>;
+  confidence: Value<string>;
+  subtype: Record<string, unknown>;
+}
+
+export interface PhenotypeGroup {
+  class: ComparabilityClass;
+  measurements: MeasurementRow[];
+  count: number;
+  units: string[];
+  is_rankable: boolean;
+}
+
+export interface StrainDetail {
+  id: string;
+  canonical_name: string;
+  organism_id: Value<string>;
+  organism_name: Value<string>;
+  strain_class: Value<string>;
+  zone: Value<string>;
+  evidence: Value<string>;
+  confidence: Value<string>;
+  aliases: { alias: string; source: string; zone: string; confidence: string }[];
+  genotype: {
+    id: string;
+    as_reported: string;
+    parsed: Record<string, unknown> | null;
+    zone: string;
+    confidence: string;
+  }[];
+  lineage: Lineage;
+  modifications: Modification[];
+  phenotype: PhenotypeGroup[];
+  phenotype_truncated: boolean;
+  /** Raw `chassis_profile` columns: the number is present only where the state says so. */
+  tolerance: {
+    id: string;
+    name_as_reported: string;
+    isobutanol_tolerance_g_l: number | null;
+    isobutanol_tolerance_state: string | null;
+    tolerance_endpoint: string | null;
+    is_selected: number;
+  }[];
+  tolerance_note: string;
+  samples: Record<string, unknown>[];
+  transcriptome_note: string;
+  publications: string[];
+}
+
+export interface ExperimentRow {
+  id: string;
+  publication_id: Value<string>;
+  objective: Value<string>;
+  design_type: Value<string>;
+  zone: Value<string>;
+  confidence: Value<string>;
+  samples: number;
+  samples_with_context: number;
+  measurements: number;
+}
+
+export interface ExperimentDetail {
+  id: string;
+  publication_id: Value<string>;
+  publication_title: Value<string>;
+  objective: Value<string>;
+  design_type: Value<string>;
+  zone: Value<string>;
+  evidence: Value<string>;
+  confidence: Value<string>;
+  samples: {
+    id: string;
+    strain_id: string | null;
+    strain_name: string | null;
+    dataset_id: string | null;
+    condition_context_id: string | null;
+    time_h: number | null;
+    growth_phase: string | null;
+  }[];
+  samples_with_context: number;
+  contexts: ConditionContext[];
+  context_note: string;
+  datasets: Record<string, unknown>[];
+  analyses: Record<string, unknown>[];
+  measurements: MeasurementRow[];
+  measurements_truncated: boolean;
+  measurement_note: string;
+  quality_flags: { target_id: string; kind: string; severity: string; rationale: string | null }[];
+}
+
+export interface ProductRow {
+  id: string;
+  name: string;
+  tier: Value<string>;
+  canonical_unit: Value<string>;
+  measurements: number;
+  strains: number;
+  configurations: number;
+  theoretical_yields: number;
+}
+
+export interface ClassFacetedMeasurements {
+  class: ComparabilityClass;
+  measurements: MeasurementRow[];
+  count: number;
+  units: string[];
+  kinds: string[];
+  is_rankable: boolean;
+  /** Why no best is named in this class. Null only when one is. */
+  refusal_reason: string | null;
+  best: Record<string, MeasurementRow>;
+}
+
+export interface ProductDetail {
+  id: string;
+  name: string;
+  tier: Value<string>;
+  mw_g_mol: Value<number>;
+  formula: Value<string>;
+  inchikey: Value<string>;
+  chebi_id: Value<string>;
+  carbon_number: Value<number>;
+  canonical_unit: Value<string>;
+  zone: Value<string>;
+  confidence: Value<string>;
+  theoretical_yields: {
+    substrate: string;
+    g_per_g: Value<number>;
+    mol_per_mol: Value<number>;
+    stoichiometry: Value<string>;
+  }[];
+  pathways: { id: string; name: string; linked_directly: boolean; reactions: number }[];
+  pathway_note: string;
+  configurations: {
+    id: string;
+    name: string;
+    pathway_id: string | null;
+    compartment_strategy_id: string | null;
+    host_strain_id: string | null;
+    host_strain_name: string | null;
+    description: string | null;
+  }[];
+  classes: ClassFacetedMeasurements[];
+  measurements_truncated: boolean;
+  tolerance: {
+    id: string;
+    strain_id: string | null;
+    name_as_reported: string;
+    tolerance: Value<number>;
+    tolerance_endpoint: Value<string>;
+    is_selected: boolean;
+  }[];
+  tolerance_note: string;
+  strains: { id: string; canonical_name: string; strain_class: string | null }[];
+  leaderboard_refusal: string;
+}
+
+export interface FacetDifference {
+  facet: string;
+  label: string;
+  values: string[];
+  differs: boolean;
+  within_tolerance: boolean;
+  is_class_defining: boolean;
+  tolerance?: string;
+}
+
+export interface CompareSubject {
+  kind: string;
+  id: string;
+  label: string;
+  attributes: { label: string; value: Value<string> }[];
+  classes: ComparabilityClass[];
+  context: ConditionContext | null;
+  context_note: string;
+  measurements: MeasurementRow[];
+}
+
+export type Verdict = "comparable" | "warn" | "refuse";
+
+export interface Metric {
+  quantity_kind: string;
+  unit: string;
+  /** Positional against `Comparison.subjects`; a null is "this subject has no such number". */
+  values: (MeasurementRow | null)[];
+  is_controlled_kind: boolean;
+}
+
+export interface Comparison {
+  kind: string;
+  requested: string[];
+  subjects: CompareSubject[];
+  missing: string[];
+  verdict: Verdict;
+  reason: string;
+  warnings: string[];
+  differences: FacetDifference[];
+  differing_facets: string[];
+  metrics: Metric[];
+}
+
+export interface CompareCandidate {
+  id: string;
+  label: string;
+  detail: Value<string>;
+  weight: number;
+}
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -550,6 +851,28 @@ export const api = {
     limit?: number;
     offset?: number;
   }) => get<Page<MeasurementRow>>(`/data/measurements${qs(params)}`),
+
+  strains: (params: { q?: string; class?: string; limit?: number; offset?: number }) =>
+    get<StrainListPage>(`/strains${qs(params)}`),
+  strain: (id: string) => get<StrainDetail>(`/strains/${encodeURIComponent(id)}`),
+
+  experiments: (params: { q?: string; limit?: number; offset?: number }) =>
+    get<Page<ExperimentRow>>(`/experiments${qs(params)}`),
+  experiment: (id: string) => get<ExperimentDetail>(`/experiments/${encodeURIComponent(id)}`),
+
+  products: () => get<ProductRow[]>("/products"),
+  product: (id: string) => get<ProductDetail>(`/products/${encodeURIComponent(id)}`),
+
+  // `id` repeats rather than joining on a separator, because an atlas identifier contains
+  // colons and any separator chosen today is one an identifier may carry tomorrow.
+  compare: (kind: string, ids: string[]) => {
+    const params = new URLSearchParams();
+    params.set("kind", kind);
+    for (const id of ids) params.append("id", id);
+    return get<Comparison>(`/compare?${params.toString()}`);
+  },
+  compareCandidates: (kind: string) =>
+    get<CompareCandidate[]>(`/compare/candidates${qs({ kind })}`),
 
   assertions: () => get<Record<string, unknown>>("/evidence/assertions"),
   curationQueue: (limit = 10) => get<Record<string, unknown>[]>(`/curation/queue${qs({ limit })}`),

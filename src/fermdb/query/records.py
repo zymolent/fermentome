@@ -231,6 +231,7 @@ def list_measurements(
     *,
     product_id: str | None = None,
     strain_id: str | None = None,
+    experiment_id: str | None = None,
     quantity_kind: str | None = None,
     publication_id: str | None = None,
     limit: int = 50,
@@ -265,6 +266,8 @@ def list_measurements(
         select = select.where("product_id = ?", product_id)
     if strain_id:
         select = select.where("strain_id = ?", strain_id)
+    if experiment_id:
+        select = select.where("experiment_id = ?", experiment_id)
     if quantity_kind:
         select = select.where("quantity_kind = ?", quantity_kind)
     if publication_id:

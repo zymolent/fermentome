@@ -11,16 +11,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Sidebar } from "@/components/Sidebar";
 import { ErrorBox } from "@/components/ui";
 import { AnnotationsPage, GenePage } from "@/pages/AnnotationsPage";
+import { ComparePage } from "@/pages/ComparePage";
 import { CurationPage } from "@/pages/CurationPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { DataPage } from "@/pages/DataPage";
 import { EvidencePage } from "@/pages/EvidencePage";
+import { ExperimentPage, ExperimentsPage } from "@/pages/ExperimentPage";
 import { GenomesPage } from "@/pages/GenomesPage";
 import { LiteraturePage } from "@/pages/LiteraturePage";
 import { NetworksPage } from "@/pages/NetworksPage";
+import { ProductPage, ProductsPage } from "@/pages/ProductPage";
 import { PublicationPage } from "@/pages/PublicationPage";
 import { PathwayPage, RoutePage } from "@/pages/RoutePage";
 import { SearchPage } from "@/pages/SearchPage";
+import { StrainPage, StrainsPage } from "@/pages/StrainPage";
 import { TranscriptsPage } from "@/pages/TranscriptsPage";
 import { api } from "@/lib/api";
 import { useRoute } from "@/lib/router";
@@ -51,6 +55,20 @@ function Body() {
       return <PathwayPage id={route.id} />;
     case "data":
       return <DataPage route={route} />;
+    case "strains":
+      return <StrainsPage route={route} />;
+    case "strain":
+      return <StrainPage id={route.id} />;
+    case "experiments":
+      return <ExperimentsPage route={route} />;
+    case "experiment":
+      return <ExperimentPage id={route.id} />;
+    case "products":
+      return <ProductsPage />;
+    case "product":
+      return <ProductPage id={route.id} />;
+    case "compare":
+      return <ComparePage route={route} />;
     case "evidence":
       return <EvidencePage />;
     case "curation":
