@@ -20,6 +20,11 @@ What is here:
 * :mod:`~fermdb.query.builder` -- a read-only query builder. No writes, no interpolated values,
   and pages that report their own truncation.
 * :mod:`~fermdb.query.coverage` -- the Dashboard read, including why each empty table is empty.
+* :mod:`~fermdb.query.conditions` -- the condition context in full, and the comparability class
+  (PLAN.md K.4) computed from it. The Experiment page's brief and the Product/Compare pages'
+  refusal logic are the same read seen from two sides.
+* :mod:`~fermdb.query.strains`, :mod:`~fermdb.query.experiments`,
+  :mod:`~fermdb.query.products`, :mod:`~fermdb.query.compare` -- the four remaining P.2 pages.
 * :mod:`~fermdb.query.pathways` -- the Pathway read, with what the atlas cannot yet draw.
 * :mod:`~fermdb.query.review` -- one proposal with its re-resolved quote and what accepting
   it would write. The curation queue's read side.
@@ -45,6 +50,18 @@ only one modality will ever exist.
 from __future__ import annotations
 
 from .builder import MAX_ROWS, Page, QueryError, Select, count_of
+from .compare import Comparison, Subject
+from .conditions import (
+    CONTEXT_FACETS,
+    REQUIRED_MATCH,
+    ComparabilityClass,
+    ConditionContextRead,
+    ContextFacet,
+    FacetDifference,
+    class_of,
+    context_differences,
+    read_contexts,
+)
 from .coverage import (
     DESTINATION_TABLE,
     ENTITIES,
@@ -55,6 +72,7 @@ from .coverage import (
     page_readiness,
     read_coverage,
 )
+from .experiments import ExperimentRead, ExperimentRow, list_experiments, read_experiment
 from .genes import AnnotationRead, GeneRead, ReactionRoleRead, list_genes, read_gene
 from .lexical import (
     IndexReport,
@@ -65,6 +83,13 @@ from .lexical import (
     fts5_available,
     index_status,
     search_lexical,
+)
+from .products import (
+    ClassFacetedMeasurements,
+    ProductRead,
+    ProductRow,
+    list_products,
+    read_product,
 )
 from .publications import (
     Finding,
@@ -82,6 +107,15 @@ from .review import (
     SpanView,
     review_packet,
     review_queue,
+)
+from .strains import (
+    LineageRead,
+    ModificationRead,
+    PhenotypeGroup,
+    StrainRead,
+    StrainRow,
+    list_strains,
+    read_strain,
 )
 from .traceability import (
     BREAK_KINDS,
@@ -106,6 +140,33 @@ from .values import (
 )
 
 __all__ = [
+    "CONTEXT_FACETS",
+    "REQUIRED_MATCH",
+    "ClassFacetedMeasurements",
+    "ComparabilityClass",
+    "Comparison",
+    "ConditionContextRead",
+    "ContextFacet",
+    "ExperimentRead",
+    "ExperimentRow",
+    "FacetDifference",
+    "LineageRead",
+    "ModificationRead",
+    "PhenotypeGroup",
+    "ProductRead",
+    "ProductRow",
+    "StrainRead",
+    "StrainRow",
+    "Subject",
+    "class_of",
+    "context_differences",
+    "list_experiments",
+    "list_products",
+    "list_strains",
+    "read_contexts",
+    "read_experiment",
+    "read_product",
+    "read_strain",
     "BREAK_KINDS",
     "IndexReport",
     "LexicalError",

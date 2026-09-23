@@ -27,6 +27,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from fermdb.api.deps import atlas_path
+from fermdb.api.entity_routes import router as entity_router
 from fermdb.api.genes_routes import router as genes_router
 from fermdb.api.routes import router
 from fermdb.db import SCHEMA_VERSION, schema_version
@@ -72,6 +73,7 @@ def create_app(*, dev_cors: bool = True) -> FastAPI:
 
     app.include_router(router, prefix="/api")
     app.include_router(genes_router, prefix="/api")
+    app.include_router(entity_router, prefix="/api")
 
     @app.get("/api/health", tags=["atlas"])
     def health() -> dict[str, Any]:
