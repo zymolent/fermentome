@@ -579,6 +579,48 @@ _V16_TO_V17: Final[Migration] = Migration(
     ),
 )
 
+#: v17 -> v18. `modification` gains PLAN.md I.4's two missing columns.
+#:
+#: I.4 specifies `is_isolated_effect` and calls it "the field that keeps the engineering atlas
+#: honest": most published strains carry several modifications at once, so attributing the
+#: improvement to any single one is unjustified, and *"only a strain differing from its control by
+#: one change supports a single-gene assertion"*. The column did not exist, which meant the atlas
+#: had no way to tell a single-gene result from a combination one -- and I.4's first named query,
+#: *"all genetic modifications that increased isobutanol production in yeast"*, is required to
+#: carry "whether the effect was isolated" on every row it returns.
+#:
+#: `intent` comes with it for the same reason `biotype` came with `seqid` in v17: the column that
+#: makes a list filterable is part of the list being usable at all.
+#:
+#: **Both arrive NULL and both stay nullable.** NULL is "the paper does not say", which is the
+#: commonest state and is not the same as 0. A NOT NULL DEFAULT would assert something about every
+#: one of the 10 existing rows that nobody has read the papers to establish -- and in the
+#: `is_isolated_effect` case it would assert it in whichever direction the default picked.
+#: Adds only; every existing row keeps every value it had.
+#:
+#: What this migration deliberately does NOT add: a `strain_construction` table. I.4 asks for "one
+#: `strain_construction` linking parent to child" and `strain_lineage` already is exactly that --
+#: parent, child, step type, publication, zone, evidence, confidence, with a cycle guard. It holds
+#: 0 rows, which is a curation gap and not a schema one. A second table would have split one
+#: relationship across two.
+_V17_TO_V18: Final[Migration] = Migration(
+    from_version=17,
+    to_version=18,
+    summary=(
+        "modification.is_isolated_effect and .intent -- I.4's honesty field, without which a "
+        "combination strain's improvement is indistinguishable from a single gene's"
+    ),
+    statements=(
+        "ALTER TABLE modification ADD COLUMN is_isolated_effect INTEGER "
+        "CHECK (is_isolated_effect IN (0, 1))",
+        "ALTER TABLE modification ADD COLUMN intent TEXT "
+        "CHECK (intent IN ('increase_flux', 'remove_competition', 'improve_cofactor_balance', "
+        "'improve_tolerance', 'improve_transport', 'reduce_byproduct', 'other'))",
+        "CREATE INDEX modification_by_isolation ON modification(is_isolated_effect)",
+        "CREATE INDEX modification_by_intent ON modification(intent)",
+    ),
+)
+
 #: Every known migration, in order. A version with no entry has no path and is refused.
 MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V5_TO_V6,
@@ -593,6 +635,7 @@ MIGRATIONS: Final[tuple[Migration, ...]] = (
     _V14_TO_V15,
     _V15_TO_V16,
     _V16_TO_V17,
+    _V17_TO_V18,
 )
 
 

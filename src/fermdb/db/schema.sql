@@ -1113,12 +1113,38 @@ CREATE TABLE modification (
     source_organism_id TEXT REFERENCES organism(id),   -- for heterologous parts
     details            TEXT,
     publication_id     TEXT REFERENCES publication(id),
+    -- PLAN.md I.4: "the field that keeps the engineering atlas honest". Was this change made
+    -- alone, or alongside others in the same strain? Most published strains carry several at
+    -- once, so attributing the improvement to any single one is unjustified; only a strain
+    -- differing from its control by one change supports a single-gene assertion.
+    --
+    -- NULLABLE, and the NULL is the whole point. NULL is "the paper does not say", which is the
+    -- commonest state and is NOT the same as 0 ("made in combination"). A NOT NULL DEFAULT 0
+    -- would silently assert that every unread paper describes a combination strain, and a
+    -- DEFAULT 1 would manufacture single-gene assertions wholesale. CONVENTIONS.md, "Missing
+    -- values": not recorded is its own state.
+    --
+    -- It is NOT derivable from the modification rows this atlas happens to hold. Counting one
+    -- row for a strain and concluding "isolated" reads absence of evidence as evidence -- the
+    -- atlas holds 10 modifications against 109 strains, so nearly every strain would qualify.
+    -- See fermdb.curate.modifications, which reports the contradiction and refuses the inference.
+    is_isolated_effect INTEGER CHECK (is_isolated_effect IN (0, 1)),
+    -- PLAN.md I.4's `intent`: what the change was made to achieve, as the paper frames it. Also
+    -- nullable -- a paper that reports a deletion without saying why is ordinary.
+    intent             TEXT CHECK (intent IN ('increase_flux', 'remove_competition',
+                                              'improve_cofactor_balance', 'improve_tolerance',
+                                              'improve_transport', 'reduce_byproduct', 'other')),
     zone               TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
     evidence           TEXT NOT NULL,
     confidence         TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
     -- Needed as the target of the composite FK from the two subtype tables.
     UNIQUE (id, type)
 );
+
+-- "Which changes were made alone?" and "what was this strain's engineering intent?" are the two
+-- filters I.4's named queries open with, and both are unindexed scans without these.
+CREATE INDEX modification_by_isolation ON modification(is_isolated_effect);
+CREATE INDEX modification_by_intent ON modification(intent);
 
 -- A subtype row, not a fact of its own: it extends exactly one `modification` and inherits that
 -- row's zone, evidence and confidence. Repeating them here would let the two disagree.

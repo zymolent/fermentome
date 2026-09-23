@@ -684,6 +684,15 @@ def _plan_modification(
                 f"strain {strain_name!r} is not promoted yet (would be {_strain_id(strain_name)})"
             )
 
+    # PLAN.md I.4's honesty field. `supplied` carries 'yes'/'no' rather than 1/0 so that the
+    # absent case survives `cmd_curate_promote`'s `if v` filter -- 0 is falsy, and a curator who
+    # answered "no" must not have their answer silently dropped and re-read as "not recorded".
+    isolated_raw = str(supplied.get("is_isolated_effect") or "").strip()
+    isolated = {"yes": 1, "no": 0, "": None}.get(isolated_raw)
+    if isolated_raw and isolated is None:
+        blockers.append(f"--isolated-effect takes 'yes' or 'no', not {isolated_raw!r}")
+    intent = str(supplied.get("intent") or "").strip() or None
+
     row_id = f"YAA:MOD:{task.proposal_hash[:16]}"
     existing = conn.execute("SELECT id FROM modification WHERE id = ?", (row_id,)).fetchone()
     return PromotionPlan(
@@ -697,6 +706,11 @@ def _plan_modification(
             "target_locus": target,
             "details": _modification_details(payload, reported_type),
             "publication_id": task.publication_id,
+            # Both stay NULL unless a curator said otherwise. There is no inference available
+            # here worth making: whether a change was made alone is a fact about the paper's
+            # strain table, and the extraction payload holds one sentence about one change.
+            "is_isolated_effect": isolated,
+            "intent": intent,
         },
         missing=tuple(missing),
         blockers=tuple(blockers),
@@ -768,7 +782,8 @@ def _write_modification(
     before = conn.total_changes
     conn.execute(
         "INSERT INTO modification (id, strain_id, type, target_locus, details, publication_id, "
-        "zone, evidence, confidence) VALUES (?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
+        "is_isolated_effect, intent, zone, evidence, confidence) "
+        "VALUES (?,?,?,?,?,?,?,?,'R',?,?) ON CONFLICT(id) DO NOTHING",
         (
             plan.row["id"],
             plan.row["strain_id"],
@@ -776,6 +791,8 @@ def _write_modification(
             plan.row["target_locus"],
             plan.row["details"],
             plan.row["publication_id"],
+            plan.row.get("is_isolated_effect"),
+            plan.row.get("intent"),
             evidence,
             confidence,
         ),

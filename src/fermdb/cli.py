@@ -796,6 +796,14 @@ _RECORD_SCOPED: Final[Mapping[str, tuple[str, ...]]] = {
     "name": ("pathway_configurations",),
     "part_id": ("part_expression_records",),
     "outcome_measurement_id": ("part_expression_records",),
+    # Both are record-scoped, and `is_isolated_effect` is the one that would do real damage in
+    # bulk. Two modifications in the SAME paper routinely differ -- a strain carrying a deletion
+    # and an overexpression has neither made alone -- so one --isolated-effect stamped across a
+    # promote run would assert single-gene attribution for a whole combination strain. That is
+    # precisely the misattribution PLAN.md I.4 introduced the column to prevent, arriving through
+    # the column itself.
+    "is_isolated_effect": ("modifications",),
+    "intent": ("modifications",),
 }
 
 _FLAG_FOR: Final[Mapping[str, str]] = {
@@ -807,6 +815,8 @@ _FLAG_FOR: Final[Mapping[str, str]] = {
     "name": "--name",
     "part_id": "--part",
     "outcome_measurement_id": "--outcome-measurement",
+    "is_isolated_effect": "--isolated-effect",
+    "intent": "--intent",
 }
 
 
@@ -918,6 +928,8 @@ def cmd_curate_promote(args: argparse.Namespace) -> int:
             ("name", args.name),
             ("part_id", args.part_id),
             ("outcome_measurement_id", args.outcome_measurement_id),
+            ("is_isolated_effect", args.is_isolated_effect),
+            ("intent", args.intent),
         )
         if v
     }
@@ -1389,6 +1401,32 @@ def build_parser() -> argparse.ArgumentParser:
         dest="outcome_measurement_id",
         help="measurement id an expression record's outcome is recorded as (optional; a part can "
         "be demonstrated with no number behind it)",
+    )
+    # PLAN.md I.4's two curator-only columns on `modification`. Neither is in the extraction
+    # schema, and neither is guessed: `is_isolated_effect` is a claim about what the strain was
+    # compared against, which lives in the paper's strain table rather than in the sentence the
+    # modification was extracted from. Left unsaid, the column stays NULL -- "not recorded" --
+    # and `yes`/`no` rather than a store_true flag is what makes that third state expressible.
+    p_cu_promote.add_argument(
+        "--isolated-effect",
+        dest="is_isolated_effect",
+        choices=("yes", "no"),
+        help="was this modification the only change from its stated control? Omit when the "
+        "paper does not say -- NULL is 'not recorded' and is not the same as 'no'",
+    )
+    p_cu_promote.add_argument(
+        "--intent",
+        dest="intent",
+        choices=(
+            "increase_flux",
+            "remove_competition",
+            "improve_cofactor_balance",
+            "improve_tolerance",
+            "improve_transport",
+            "reduce_byproduct",
+            "other",
+        ),
+        help="what the change was made to achieve, as the paper frames it (optional)",
     )
     p_cu_promote.add_argument(
         "--dry-run", action="store_true", help="show what would be written and change nothing"

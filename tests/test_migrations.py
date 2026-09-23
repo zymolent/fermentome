@@ -192,6 +192,28 @@ CREATE TABLE analysis_result (
     zone              TEXT NOT NULL
 );
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+-- `modification` is untouched by every migration up to v17 and is v5's real shape verbatim,
+-- for the same reason `gene` is: v18 is the first migration to add a column to it, so a stub
+-- would not detect the drift this file exists to detect. It IS shape-compared.
+CREATE TABLE modification (
+    id                 TEXT PRIMARY KEY,
+    strain_id          TEXT,
+    type               TEXT NOT NULL
+                       CHECK (type IN ('deletion', 'overexpression', 'promoter_swap',
+                                       'point_mutation', 'heterologous_insertion',
+                                       'downregulation', 'localization_change', 'mtdna_edit',
+                                       'other')),
+    target_gene_group_id TEXT,
+    target_locus       TEXT,
+    source_organism_id TEXT,
+    details            TEXT,
+    publication_id     TEXT,
+    zone               TEXT NOT NULL CHECK (zone IN ('R', 'H', 'I')),
+    evidence           TEXT NOT NULL,
+    confidence         TEXT NOT NULL CHECK (confidence IN ('unverified', 'low', 'medium', 'high')),
+    UNIQUE (id, type)
+);
+
 INSERT INTO meta VALUES ('schema_version', '5');
 """
 
@@ -222,7 +244,8 @@ def fresh() -> sqlite3.Connection:
 
 
 @pytest.mark.parametrize(
-    "table", ["reaction", "metabolite", "product", "measurement", "bottleneck", "gene"]
+    "table",
+    ["reaction", "metabolite", "product", "measurement", "bottleneck", "gene", "modification"],
 )
 def test_migrated_tables_match_freshly_created_ones(fresh: sqlite3.Connection, table: str) -> None:
     """The invariant the whole module rests on: two routes, one schema."""
